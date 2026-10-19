@@ -166,10 +166,14 @@ const setEvent = (state, id, title, category, body, choices) => {
 };
 // Entries written by the current narrative edition are stamped so the edition
 // upgrade (narrative-edition.js) leaves their words alone. Only prose from
-// older saves lacks the stamp and is rewritten from its recorded facts.
+// older saves lacks the stamp and is rewritten from its recorded facts. The
+// few event ids with an authored current-edition rewrite stay unstamped so
+// that wording still applies.
+const EDITION_REWRITTEN_EVENTS = new Set(['person_died', 'home_displaced', 'households_displaced']);
 const addJournal = (state, title, text, tag = 'life', {literal=false,meta={}}={}) => {
   const format=literal?text=>String(text??''):text=>personalNames(state,text);
-  state.journal.push({ id: `entry-${state.journal.length + 1}`, day: state.day, age: state.age, title:format(title), text:format(text), tag,...meta,...(state.narrativeEdition===30?{narrativeEdition:30}:{}), ...(state.revision>=5?{generation:state.dynasty?.generation||1}:{}) });
+  const stamp=state.narrativeEdition===30&&!EDITION_REWRITTEN_EVENTS.has(meta?.eventId);
+  state.journal.push({ id: `entry-${state.journal.length + 1}`, day: state.day, age: state.age, title:format(title), text:format(text), tag,...meta,...(stamp?{narrativeEdition:30}:{}), ...(state.revision>=5?{generation:state.dynasty?.generation||1}:{}) });
 };
 const recordPlanGold = (state, before) => {
   if (!state.life?.plan) return;
