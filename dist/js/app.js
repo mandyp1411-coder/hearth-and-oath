@@ -128,6 +128,7 @@ import { travelPlanPreview, travelEncounterPerson } from './travel.js';
 import { getAudioSettings, setSoundEnabled, setSoundVolume, playUISound, setMusicEnabled, setMusicVolume, setAudioScene, audioSceneFor, unlockAudio } from './audio.js';
 import { renderCharacterCreator, captureCreatorDraft, randomizeCreatorDraft, defaultCreatorDraft, creatorStepTitles, selectCreatorPortrait, selectCreatorHeritage, rollCreatorName, toggleCreatorTrait, adjustCreatorAttribute, selectCreatorOrigin, normalizeCreatorDraft, randomizeCreatorPortrait, toggleCreatorLock, creatorDependencyChanges } from './creator.js';
 import { createSaveStore, createSaveCoordinator } from './saves.js';
+import { openSaveStorage } from './save-storage.js';
 import { createIronmanSession } from './ironman-session.js';
 import { isIronman, createIronmanMetadata } from './ironman.js';
 import { isIronmanStorageKey, IRONMAN_RECORD_PREFIX, IRONMAN_ENDED_PREFIX, validIronmanRunId } from './ironman-storage.js';
@@ -182,7 +183,11 @@ const sceneReturnReaders={services:settlementServices,people:nearbyContacts};
 let shopSession=null,mapLife=null,renderedModal=null;
 const mapCamera=installMapCamera(root,{zoom:zoomChart,home:()=>zoomChart('home'),cancelInspection:()=>clearTimeout(spatialClickTimer)});
 let screen = 'title', slotsMode = 'load', overwriteSlot = null, entryNotice = '';
-let storage; try { storage = globalThis.localStorage; } catch { storage = null; }
+// Saves live in IndexedDB (no localStorage quota) behind a synchronous facade;
+// localStorage remains the fallback. The module waits for it to load before
+// anything reads a save. The boot guard in index.html waits for the same.
+const storage = await openSaveStorage();
+if(storage?.onChange)storage.onChange(event=>window.dispatchEvent(new StorageEvent('storage',{key:event.key,oldValue:event.oldValue,newValue:event.newValue})));
 let displaySettings=readDisplay(storage);applyDisplay(displaySettings);
 const saveStore = createSaveStore(storage, migrateSave);
 let activeSlot = saveStore.active();

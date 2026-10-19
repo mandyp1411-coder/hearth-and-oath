@@ -83,14 +83,22 @@
             if (gameSource) fail();
           } catch { /* Unknown error sources must not replace the game. */ }
         }
-        function onReady() {
+        function settle() {
           if (state !== 'loading') return;
-          // Deferred modules have finished. A completed entry must have rendered,
-          // not left the placeholder behind. This also covers inline offline
-          // modules, which do not emit an external script load event.
+          // A completed entry must have rendered, not left the placeholder behind.
           if (root.querySelector('#boot-state')) { fail(); return; }
           state = 'ready';
           cleanup();
+        }
+        function onReady() {
+          if (state !== 'loading') return;
+          // Deferred modules have finished parsing. The entry opens its save
+          // database before rendering (a top-level await), so it may still be
+          // evaluating here: an external entry settles on its own load event,
+          // an inline offline entry on a deadline. A rendered page settles now.
+          if (!root.querySelector('#boot-state')) { settle(); return; }
+          if (entry.hasAttribute('src')) entry.addEventListener('load', settle);
+          else setTimeout(settle, 15000);
         }
         window.addEventListener('error', onError, true);
         document.addEventListener('DOMContentLoaded', onReady);

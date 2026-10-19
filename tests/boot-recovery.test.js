@@ -181,9 +181,25 @@ test('successful first render removes the placeholder naturally and detaches tem
 });
 
 test('deferred module completion without a first render cannot strand Loading', () => {
+  // The entry opens its save database before rendering (a top-level await),
+  // so DOMContentLoaded alone is not a verdict: the guard waits for the
+  // entry's own load event, and only a completed entry with no render fails.
   const boot = mountBoot();
   boot.emit(boot.document, 'DOMContentLoaded');
+  assert.equal(boot.failed(), false);
+  assert.match(boot.message(), /^Loading Hearth & Oath/);
+  boot.emit(boot.entry, 'load');
   assert.equal(boot.failed(), true);
+  assertClean(boot);
+});
+
+test('an entry that renders after DOMContentLoaded settles on its load event without a retry prompt', () => {
+  const boot = mountBoot();
+  boot.emit(boot.document, 'DOMContentLoaded');
+  boot.root.innerHTML = '<main id="title-screen">Ready</main>';
+  boot.emit(boot.entry, 'load');
+  assert.equal(boot.failed(), false);
+  assert.equal(boot.root.querySelector('#boot-retry'), null);
   assertClean(boot);
 });
 

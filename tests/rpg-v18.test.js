@@ -1,6 +1,7 @@
 import {syncCartography} from '../dist/js/cartography.js';
 import { atService } from './helpers/service-visit.mjs';
 import test from 'node:test';
+import { needsReferenceArt } from './helpers/reference-art.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -33,7 +34,7 @@ function finish(s,capture=false){let b=s.battle;for(let n=0;n<200&&!b.outcome;n+
 function command(s,id){
   s.cartography.interior=null;s.cartography.offsite=false;syncCartography(s);s=atService(s,id);const a=engine.getActions(s).find(a=>a.id===id);assert.ok(a,id+' offered');assert.ok(!a.disabledReason,a.disabledReason);const next=engine.chooseAction(s,id);assert.ok(engine.validateSave(next),id+' valid');return next;}
 
-test('all 384 enemy cells are real registered illustrations with truthful species bindings',()=>{
+test('all 384 enemy cells are real registered illustrations with truthful species bindings',{skip:needsReferenceArt},()=>{
   const hashes=new Set();assert.equal(Object.keys(FOE_ATLASES).length,6);
   for(const [group,atlas] of Object.entries(FOE_ATLASES)){const bytes=readFileSync(new URL('../dist/'+atlas.src.slice(2),import.meta.url)),reg=JSON.parse(readFileSync(new URL(`../reference-art/foes-v18/registration/${group}-00.json`,import.meta.url)));assert.equal(createHash('sha256').update(bytes).digest('hex'),reg.sha256);assert.equal(reg.cells.length,64);for(const cell of reg.cells){assert.ok(!hashes.has(cell.sha256));hashes.add(cell.sha256);assert.deepEqual(atlas.cells[cell.cell],cell.source);}}
   assert.equal(hashes.size,384);assert.equal(validEnemyIllustration({kind:'foe',species:'wisp',group:'spirits',cell:14}),false);assert.equal(validEnemyIllustration({kind:'foe',species:'fungus',group:'aberrations',cell:13}),false);

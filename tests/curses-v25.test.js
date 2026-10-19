@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { needsReferenceArt } from './helpers/reference-art.mjs';
 import assert from 'node:assert/strict';
 import { existsSync,readFileSync } from 'node:fs';
 import * as e from '../dist/js/engine.js';
@@ -23,7 +24,7 @@ async function adult(){if(!baseline){baseline=await createLifeAtAge({seed:'v25-r
 function reload(s){assert.ok(e.validateSave(s),s.notice);const r=e.migrateSave(JSON.parse(JSON.stringify(s)));assert.ok(r,'valid save reload');assert.deepEqual(r,s);return r;}
 const eventCtx=s=>({setEvent:(id,title,category,body,choices)=>{s.event={id,title,category,body,choices};},journal:()=>{},addEvidence:()=>{},endLife:cause=>{s.phase='retired';s.cause=cause;}});
 
-test('32 whole transformation atlases have exact native geometry, with no layered pieces',()=>{
+test('32 whole transformation atlases have exact native geometry, with no layered pieces',{skip:needsReferenceArt},()=>{
   let files=0;for(const race of ['human','elf','dwarf','halfling','orc','goblin','tiefling','beastfolk'])for(const presentation of ['masculine','feminine','androgynous']){
     const name=`art/curses/vampire-${race}-${presentation}.png`,bytes=readFileSync(new URL('../reference-art/curses-v23/'+name.split('/').pop(),import.meta.url));assert.equal(bytes.readUInt32BE(16),1254);assert.equal(bytes.readUInt32BE(20),1254);files++;
     for(const [column,lineage] of BLOOD_LINEAGES.entries())for(const [row,hunger] of [20,60,85,100].entries()){
