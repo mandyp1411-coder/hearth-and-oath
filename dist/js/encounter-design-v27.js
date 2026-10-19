@@ -1,0 +1,4385 @@
+// Authored content. Gameplay applies typed effects and saves decisions separately.
+export const ENCOUNTER_DESIGN_V27 = {
+  "schemaVersion": 27,
+  "status": "authored_design_asset_not_implemented_gameplay",
+  "species": [
+    {
+      "id": "wolf",
+      "name": "Briar wolf",
+      "role": "beast",
+      "pattern": "pack",
+      "signature": "Two wolves coordinate against the same exposed prey. The second pack strike loses its bonus when its partner is defeated or the prey guards.",
+      "weakness": "fire",
+      "resistances": [],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "mark_prey",
+            "target": "least_armored",
+            "status": "pack_mark",
+            "counter": "Defend to clear the prey mark."
+          },
+          {
+            "action": "pack_strike",
+            "target": "marked_prey",
+            "amount": 3,
+            "counter": "Defeat another pack member or guard the marked ally."
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "party_prey_mark",
+          "pack_member_bonus"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "blackgrove",
+          "bellwater",
+          "rainward"
+        ],
+        "terrains": [
+          "forest",
+          "grassland"
+        ],
+        "siteTypes": [
+          "forest",
+          "village"
+        ],
+        "requiredTags": [
+          "woodland"
+        ],
+        "descentThemes": [
+          "roots"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The wolf watches a companion rather than rushing you; another muzzle turns in the same direction."
+    },
+    {
+      "id": "boar",
+      "name": "Iron-tusk boar",
+      "role": "beast",
+      "pattern": "charger",
+      "signature": "A low, visible wind-up becomes an armor-piercing tusk rush. Guarding blunts the rush and leaves the boar weakened for one strike.",
+      "weakness": "ice",
+      "resistances": [],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "charge",
+            "target": "self",
+            "status": "charging",
+            "counter": "Guard or disrupt the wind-up."
+          },
+          {
+            "action": "charged_strike",
+            "target": "highest_armor",
+            "amount": 5,
+            "counter": "Guarding gives the boar 3 weakness afterward."
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "charged_attack",
+          "guard_counter_weakness"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "blackgrove",
+          "bellwater",
+          "rainward"
+        ],
+        "terrains": [
+          "forest",
+          "grassland"
+        ],
+        "siteTypes": [
+          "forest",
+          "village"
+        ],
+        "requiredTags": [
+          "woodland"
+        ],
+        "descentThemes": [
+          "roots"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "Its hooves scrape a straight furrow. The tusks are pointed at the heaviest armor."
+    },
+    {
+      "id": "rat",
+      "name": "Grave rat",
+      "role": "beast",
+      "pattern": "ambusher",
+      "signature": "A rat goes for the least healthy unguarded party member, leaving a small infected wound. It changes targets when a protector intervenes.",
+      "weakness": "fire",
+      "resistances": [],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "poisoning_strike",
+            "target": "most_injured",
+            "amount": 1,
+            "status": "poison_2_turns",
+            "counter": "Cleansing or an intercept prevents repeated attrition."
+          },
+          {
+            "action": "strike",
+            "target": "least_warded"
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "poison_status",
+          "status_cleansing"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "bellwater",
+          "rainward",
+          "ashplain"
+        ],
+        "terrains": [
+          "grassland",
+          "marsh"
+        ],
+        "siteTypes": [
+          "ruin",
+          "sanctuary"
+        ],
+        "requiredTags": [
+          "burial"
+        ],
+        "descentThemes": [
+          "ossuary"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "It noses the smell of an old wound and ignores the bright shield beside it."
+    },
+    {
+      "id": "leech",
+      "name": "Marsh leech",
+      "role": "beast",
+      "pattern": "leech",
+      "signature": "The leech attaches a tether after a bite and heals only from actual unabsorbed damage. Cleansing the tether prevents its next drain bonus.",
+      "weakness": "lightning",
+      "resistances": [],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "drain",
+            "target": "most_injured",
+            "amount": 1,
+            "status": "tether",
+            "counter": "A cleanse breaks the tether."
+          },
+          {
+            "action": "drain",
+            "target": "tethered",
+            "amount": 3,
+            "counter": "Ward the attached target or clear the tether."
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "bounded_tether",
+          "actual_damage_drain"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "rainward",
+          "bellwater"
+        ],
+        "terrains": [
+          "marsh",
+          "water"
+        ],
+        "siteTypes": [
+          "marsh",
+          "brook"
+        ],
+        "requiredTags": [
+          "wet_ground"
+        ],
+        "descentThemes": [
+          "roots",
+          "ossuary"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "Its body swells only where its mouth has found flesh. A pale cord remains at the wound."
+    },
+    {
+      "id": "spider",
+      "name": "Root spider",
+      "role": "beast",
+      "pattern": "hexer",
+      "signature": "Webbing penalizes the next strike rather than causing imaginary blood loss. A flame burns the web away before the spider lunges.",
+      "weakness": "fire",
+      "resistances": [],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "weakening_strike",
+            "target": "highest_agility",
+            "amount": 4,
+            "status": "webbed",
+            "counter": "Fire or cleansing removes the web."
+          },
+          {
+            "action": "strike",
+            "target": "webbed"
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "web_status",
+          "fire_clears_web"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "blackgrove",
+          "bellwater",
+          "rainward"
+        ],
+        "terrains": [
+          "forest",
+          "grassland"
+        ],
+        "siteTypes": [
+          "forest",
+          "village"
+        ],
+        "requiredTags": [
+          "woodland"
+        ],
+        "descentThemes": [
+          "roots"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "Silk tightens between the swiftest ally and the doorway."
+    },
+    {
+      "id": "bat",
+      "name": "Cave bat",
+      "role": "beast",
+      "pattern": "ambusher",
+      "signature": "The first flight slips through part of a ward, then an audible screech reveals an ordinary second strike. Inspecting cancels the opening ambush bonus.",
+      "weakness": "ice",
+      "resistances": [],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ambush",
+            "target": "largest_magic",
+            "amount": 3,
+            "counter": "Inspect before its first action or guard the caster."
+          },
+          {
+            "action": "strike",
+            "target": "largest_magic"
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "first_action_ambush",
+          "inspect_disarms_ambush"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "highstone",
+          "ashplain",
+          "blackgrove"
+        ],
+        "terrains": [
+          "mountain",
+          "forest"
+        ],
+        "siteTypes": [
+          "mountain",
+          "ruin"
+        ],
+        "requiredTags": [
+          "underground"
+        ],
+        "descentThemes": [
+          "roots",
+          "abyss"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The next flutter is behind the spellcaster; after the screech the flight path becomes visible."
+    },
+    {
+      "id": "bear",
+      "name": "Hollow bear",
+      "role": "beast",
+      "pattern": "charger",
+      "signature": "A bear shoves away a protector with a heavy paw before its next maul. The displaced guard can be restored by defending again.",
+      "weakness": "fire",
+      "resistances": [],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "guard_breaking_strike",
+            "target": "protector",
+            "amount": 2,
+            "counter": "Re-establish guard before the maul."
+          },
+          {
+            "action": "charged_strike",
+            "target": "most_injured",
+            "amount": 4,
+            "counter": "Ward the injured ally or intercept again."
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "protector_displacement",
+          "charged_attack"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "blackgrove",
+          "bellwater",
+          "rainward"
+        ],
+        "terrains": [
+          "forest",
+          "grassland"
+        ],
+        "siteTypes": [
+          "forest",
+          "village"
+        ],
+        "requiredTags": [
+          "woodland"
+        ],
+        "descentThemes": [
+          "roots"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The bear looks at the shield first and the wounded traveler second."
+    },
+    {
+      "id": "serpent",
+      "name": "Ash serpent",
+      "role": "beast",
+      "pattern": "barbed",
+      "signature": "Venom follows a narrow, armor-piercing bite; a second turn coils rather than attacking and gives the party time to cleanse.",
+      "weakness": "ice",
+      "resistances": [
+        "poison"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "poisoning_strike",
+            "target": "least_warded",
+            "amount": 2,
+            "status": "poison_2_turns",
+            "counter": "Ward or cleanse the bitten ally."
+          },
+          {
+            "action": "ward",
+            "target": "self",
+            "amount": 3,
+            "counter": "Use the coiling turn to recover."
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "poison_status",
+          "status_cleansing"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "ashplain",
+          "highstone"
+        ],
+        "terrains": [
+          "grassland",
+          "mountain"
+        ],
+        "siteTypes": [
+          "ruin",
+          "citadel"
+        ],
+        "requiredTags": [
+          "ash_or_furnace"
+        ],
+        "descentThemes": [
+          "abyss",
+          "tower"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The bright scales contract. A single bead gathers at one fang before the coil loosens."
+    },
+    {
+      "id": "skeleton",
+      "name": "Bone soldier",
+      "role": "undead",
+      "pattern": "striker",
+      "signature": "Its joints lose their brace after a marked physical hit. Break the brace to remove temporary armor before its otherwise ordinary cut.",
+      "weakness": "physical",
+      "resistances": [
+        "bleed",
+        "poison",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ward",
+            "target": "self",
+            "amount": 4,
+            "status": "bone_brace",
+            "counter": "A marked physical strike shatters the brace."
+          },
+          {
+            "action": "strike",
+            "target": "least_armored"
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "physical_breaks_bone_brace"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "bellwater",
+          "rainward",
+          "ashplain"
+        ],
+        "terrains": [
+          "grassland",
+          "marsh"
+        ],
+        "siteTypes": [
+          "ruin",
+          "sanctuary"
+        ],
+        "requiredTags": [
+          "burial"
+        ],
+        "descentThemes": [
+          "ossuary"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The sword bones lock into place with a dry click."
+    },
+    {
+      "id": "grave_knight",
+      "name": "Grave knight",
+      "role": "undead",
+      "pattern": "warder",
+      "signature": "The knight shields another corpse before challenging the strongest living attacker. Sacred damage breaks its courtesy ward.",
+      "weakness": "sacred",
+      "resistances": [
+        "bleed",
+        "poison"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ward",
+            "target": "most_injured_enemy",
+            "amount": 6,
+            "counter": "Sacred damage strips the courtesy ward."
+          },
+          {
+            "action": "strike",
+            "target": "highest_physical_power",
+            "amount": 2
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "target_highest_physical_power",
+          "sacred_breaks_ward"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "bellwater",
+          "rainward",
+          "ashplain"
+        ],
+        "terrains": [
+          "grassland",
+          "marsh"
+        ],
+        "siteTypes": [
+          "ruin",
+          "sanctuary"
+        ],
+        "requiredTags": [
+          "burial"
+        ],
+        "descentThemes": [
+          "ossuary"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "Its shield is held over another fallen soldier. The empty visor turns toward your strongest hand."
+    },
+    {
+      "id": "ghoul",
+      "name": "Hunger ghoul",
+      "role": "undead",
+      "pattern": "leech",
+      "signature": "The ghoul gets a drain bonus only against an already injured living target. At full party health it must make a weak, ordinary claw attack.",
+      "weakness": "fire",
+      "resistances": [
+        "bleed",
+        "poison"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "conditional_drain",
+            "target": "most_injured",
+            "amount": 3,
+            "counter": "Heal above half health or shield the injured target.",
+            "condition": "target_hp_below_half"
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "conditional_attack_plan",
+          "actual_damage_drain"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "bellwater",
+          "rainward",
+          "ashplain"
+        ],
+        "terrains": [
+          "grassland",
+          "marsh"
+        ],
+        "siteTypes": [
+          "ruin",
+          "sanctuary"
+        ],
+        "requiredTags": [
+          "burial"
+        ],
+        "descentThemes": [
+          "ossuary"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "It hesitates at healthy flesh and quickens when someone stumbles."
+    },
+    {
+      "id": "mummy",
+      "name": "Salt mummy",
+      "role": "undead",
+      "pattern": "ritualist",
+      "signature": "A salt-binding chant accumulates a seal; the following pulse weakens the whole party. Fire damages the wrapping and interrupts the accumulated seal.",
+      "weakness": "fire",
+      "resistances": [
+        "bleed",
+        "poison",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ritual",
+            "target": "self",
+            "amount": 1,
+            "status": "salt_seal",
+            "counter": "A fire hit interrupts the seal."
+          },
+          {
+            "action": "wave",
+            "target": "all_party",
+            "amount": -3,
+            "status": "weakened_2",
+            "counter": "Ward the party if the chant finishes."
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "interruptible_ritual",
+          "fire_ritual_interrupt"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "ashplain",
+          "highstone"
+        ],
+        "terrains": [
+          "grassland",
+          "mountain"
+        ],
+        "siteTypes": [
+          "ruin",
+          "citadel"
+        ],
+        "requiredTags": [
+          "ash_or_furnace"
+        ],
+        "descentThemes": [
+          "abyss",
+          "tower"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "Salt lifts from the wrappings into a circle. The circle is still open while it chants."
+    },
+    {
+      "id": "drowned",
+      "name": "Drowned revenant",
+      "role": "undead",
+      "pattern": "pack",
+      "signature": "Drowned crew mark an ally with river cold, then a shared undertow ignores part of armor. Defending prevents the marked ally from being pulled.",
+      "weakness": "lightning",
+      "resistances": [
+        "bleed",
+        "poison",
+        "burn"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "mark_prey",
+            "target": "largest_magic",
+            "status": "undertow_mark",
+            "counter": "Guard the marked ally."
+          },
+          {
+            "action": "pack_strike",
+            "target": "marked_prey",
+            "amount": 2,
+            "counter": "Defending breaks the undertow; defeating another drowned weakens it."
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "party_prey_mark",
+          "pack_member_bonus"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "saltreach"
+        ],
+        "terrains": [
+          "water",
+          "grassland"
+        ],
+        "siteTypes": [
+          "coast"
+        ],
+        "requiredTags": [
+          "saltwater"
+        ],
+        "descentThemes": [
+          "ossuary",
+          "abyss"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "Water rises around one pair of boots, against the direction of the tide."
+    },
+    {
+      "id": "bone_hound",
+      "name": "Bone hound",
+      "role": "undead",
+      "pattern": "ambusher",
+      "signature": "The hound remembers its last bitten target and pursues it until a defender draws it away. The pursuit bonus is limited to one repeated strike.",
+      "weakness": "physical",
+      "resistances": [
+        "bleed",
+        "poison",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "strike",
+            "target": "most_injured",
+            "status": "scent_target",
+            "counter": "A protector can interrupt its pursuit."
+          },
+          {
+            "action": "pursuit_strike",
+            "target": "last_target",
+            "amount": 3,
+            "counter": "Defend with another ally."
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "bounded_last_target",
+          "pursuit_bonus"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "bellwater",
+          "rainward",
+          "ashplain"
+        ],
+        "terrains": [
+          "grassland",
+          "marsh"
+        ],
+        "siteTypes": [
+          "ruin",
+          "sanctuary"
+        ],
+        "requiredTags": [
+          "burial"
+        ],
+        "descentThemes": [
+          "ossuary"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The empty nose stays fixed on the traveler it bit, even as another sword passes its skull."
+    },
+    {
+      "id": "acolyte",
+      "name": "Death acolyte",
+      "role": "undead",
+      "pattern": "ritualist",
+      "signature": "A death acolyte prepares a ward for its undead allies, then a sacred-inverted pulse. Disrupting its chant cancels the ward, not the identity of those allies.",
+      "weakness": "sacred",
+      "resistances": [
+        "bleed",
+        "poison"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ritual",
+            "target": "self",
+            "status": "grave_chant",
+            "counter": "Disrupt the chant."
+          },
+          {
+            "action": "ward",
+            "target": "all_enemy",
+            "amount": 4,
+            "counter": "Defeat or disrupt the acolyte before the ward spreads.",
+            "condition": "ritual_uninterrupted"
+          },
+          {
+            "action": "wave",
+            "target": "all_party",
+            "amount": -4
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "interruptible_ritual",
+          "conditional_attack_plan"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "bellwater",
+          "rainward",
+          "ashplain"
+        ],
+        "terrains": [
+          "grassland",
+          "marsh"
+        ],
+        "siteTypes": [
+          "ruin",
+          "sanctuary"
+        ],
+        "requiredTags": [
+          "burial"
+        ],
+        "descentThemes": [
+          "ossuary"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "It lifts an empty funeral cup. The other corpses stop moving while the words gather."
+    },
+    {
+      "id": "rotted_jailer",
+      "name": "Rotting jailer",
+      "role": "undead",
+      "pattern": "disruptor",
+      "signature": "The jailer rattles a chain to strip a protector of ward, then aims a weakening blow at that same shield bearer. Depleting its ward denies the chain bonus.",
+      "weakness": "physical",
+      "resistances": [
+        "bleed",
+        "poison",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "disrupt",
+            "target": "protector",
+            "amount": 4,
+            "status": "chain_target",
+            "counter": "Re-ward the protector or disrupt the jailer."
+          },
+          {
+            "action": "weakening_strike",
+            "target": "last_target",
+            "amount": 3
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "target_protector",
+          "bounded_last_target"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "rainward",
+          "ashplain",
+          "highstone"
+        ],
+        "terrains": [
+          "grassland",
+          "mountain",
+          "marsh"
+        ],
+        "siteTypes": [
+          "tower",
+          "citadel",
+          "camp"
+        ],
+        "requiredTags": [
+          "armed_post"
+        ],
+        "descentThemes": [
+          "tower"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "Its chain drags toward the raised shield, not the unarmed prisoner."
+    },
+    {
+      "id": "wraith",
+      "name": "Pale wraith",
+      "role": "spirit",
+      "pattern": "disruptor",
+      "signature": "A wraith thins the largest ward without a bodily hit, then pierces the exposed ally. Sacred light interrupts the two-turn pursuit.",
+      "weakness": "sacred",
+      "resistances": [
+        "bleed",
+        "poison",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "disrupt",
+            "target": "most_warded",
+            "amount": 6,
+            "status": "haunted_target",
+            "counter": "Sacred damage breaks the haunting."
+          },
+          {
+            "action": "strike",
+            "target": "last_target",
+            "amount": 2,
+            "counter": "Renew the ward or defend the haunted ally."
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "target_most_warded",
+          "bounded_last_target",
+          "sacred_clears_haunting"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "rainward",
+          "saltreach",
+          "highstone",
+          "blackgrove",
+          "ashplain",
+          "bellwater"
+        ],
+        "terrains": [
+          "forest",
+          "marsh",
+          "mountain",
+          "grassland",
+          "water"
+        ],
+        "siteTypes": [
+          "ruin",
+          "tower",
+          "sanctuary"
+        ],
+        "requiredTags": [
+          "haunting"
+        ],
+        "descentThemes": [
+          "ossuary",
+          "abyss"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "Its fingers pass through the brightest ward. It watches the space it has emptied."
+    },
+    {
+      "id": "wisp",
+      "name": "Bog wisp",
+      "role": "spirit",
+      "pattern": "leech",
+      "signature": "The wisp draws a small amount of MP from the richest reserve to feed its own ward; when no magic remains it makes only a weak light strike.",
+      "weakness": "physical",
+      "resistances": [
+        "bleed",
+        "poison",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "mana_drain",
+            "target": "largest_current_magic",
+            "amount": 3,
+            "counter": "Disrupt the wisp or spend the exposed reserve purposefully."
+          },
+          {
+            "action": "ward",
+            "target": "self",
+            "amount": 3,
+            "condition": "mana_was_drained"
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "mana_drain_bounded",
+          "conditional_attack_plan"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "rainward",
+          "bellwater"
+        ],
+        "terrains": [
+          "marsh",
+          "water"
+        ],
+        "siteTypes": [
+          "marsh",
+          "brook"
+        ],
+        "requiredTags": [
+          "wet_ground"
+        ],
+        "descentThemes": [
+          "roots",
+          "ossuary"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The marsh light brightens beside the fullest focus, while that focus goes dim."
+    },
+    {
+      "id": "shadow",
+      "name": "Shadow adept",
+      "role": "spirit",
+      "pattern": "ambusher",
+      "signature": "A shadow attacks an unwarded caster strongly, but gains no ambush bonus against even a small ward. Its next turn marks a new dim place.",
+      "weakness": "sacred",
+      "resistances": [
+        "bleed",
+        "poison"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ambush",
+            "target": "least_warded",
+            "amount": 4,
+            "counter": "Give the exposed ally any ward.",
+            "condition": "target_has_no_ward"
+          },
+          {
+            "action": "weakening_strike",
+            "target": "largest_magic",
+            "amount": 2
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "ward_gates_ambush_bonus"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "rainward",
+          "saltreach",
+          "highstone",
+          "blackgrove",
+          "ashplain",
+          "bellwater"
+        ],
+        "terrains": [
+          "forest",
+          "marsh",
+          "mountain",
+          "grassland",
+          "water"
+        ],
+        "siteTypes": [
+          "ruin",
+          "tower",
+          "sanctuary"
+        ],
+        "requiredTags": [
+          "haunting"
+        ],
+        "descentThemes": [
+          "ossuary",
+          "abyss"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "It gathers where a protective light has just gone out."
+    },
+    {
+      "id": "archivist",
+      "name": "Bound archivist",
+      "role": "spirit",
+      "pattern": "warder",
+      "signature": "The bound reader reinforces the enemy with the most missing health, then weakens the last party member who damaged it. It cannot protect a defeated ally.",
+      "weakness": "fire",
+      "resistances": [
+        "bleed",
+        "poison"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ward",
+            "target": "most_injured_enemy",
+            "amount": 7
+          },
+          {
+            "action": "weakening_strike",
+            "target": "last_attacker",
+            "amount": 4,
+            "counter": "Alternate attackers or cleanse the weakened hand."
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "bounded_last_attacker"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "bellwater",
+          "highstone",
+          "ashplain"
+        ],
+        "terrains": [
+          "grassland",
+          "mountain"
+        ],
+        "siteTypes": [
+          "ruin",
+          "tower",
+          "sanctuary"
+        ],
+        "requiredTags": [
+          "archive_or_ward"
+        ],
+        "descentThemes": [
+          "ossuary",
+          "tower"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "A page folds itself around the nearest broken shape. A margin names the hand that last struck the reader."
+    },
+    {
+      "id": "shade",
+      "name": "Funeral shade",
+      "role": "spirit",
+      "pattern": "hexer",
+      "signature": "Grief weighs on a different ally each cycle, giving a bounded fear penalty to its next damaging action. Restorative support clears it.",
+      "weakness": "sacred",
+      "resistances": [
+        "bleed",
+        "poison"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "fear_strike",
+            "target": "unafraid_party",
+            "amount": 3,
+            "status": "fear_next_strike",
+            "counter": "A cleansing or rallying ability steadies the target."
+          },
+          {
+            "action": "strike",
+            "target": "most_injured"
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "fear_status",
+          "status_cleansing"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "bellwater",
+          "rainward",
+          "ashplain"
+        ],
+        "terrains": [
+          "grassland",
+          "marsh"
+        ],
+        "siteTypes": [
+          "ruin",
+          "sanctuary"
+        ],
+        "requiredTags": [
+          "burial"
+        ],
+        "descentThemes": [
+          "ossuary"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "It wears the shape of someone the target cannot bring themself to strike."
+    },
+    {
+      "id": "seal",
+      "name": "Soul seal",
+      "role": "spirit",
+      "pattern": "ritualist",
+      "signature": "An immobile soul seal charges a visible pulse. Marks break one charge; it spends its action rebuilding rather than punishing a successful interruption.",
+      "weakness": "lightning",
+      "resistances": [
+        "bleed",
+        "poison",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ritual",
+            "target": "self",
+            "amount": 1,
+            "status": "seal_charge",
+            "counter": "A marked hit breaks the charge."
+          },
+          {
+            "action": "wave",
+            "target": "all_party",
+            "amount": -2,
+            "counter": "Cover the party if the circle closes.",
+            "condition": "ritual_uninterrupted"
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "interruptible_ritual",
+          "marked_ritual_interrupt"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "bellwater",
+          "highstone",
+          "ashplain"
+        ],
+        "terrains": [
+          "grassland",
+          "mountain"
+        ],
+        "siteTypes": [
+          "ruin",
+          "tower",
+          "sanctuary"
+        ],
+        "requiredTags": [
+          "archive_or_ward"
+        ],
+        "descentThemes": [
+          "ossuary",
+          "tower"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "One line of the ring brightens each time the seal hums; a broken line goes dark."
+    },
+    {
+      "id": "ember",
+      "name": "Living ember",
+      "role": "spirit",
+      "pattern": "barbed",
+      "signature": "The ember flares at an ally and scatters a small burn. Ice quenches that burn and prevents the next flare bonus; fire cannot leave it burning.",
+      "weakness": "ice",
+      "resistances": [
+        "bleed",
+        "poison",
+        "burn",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "burning_strike",
+            "target": "least_warded",
+            "amount": 2,
+            "status": "burn_2_turns",
+            "counter": "Ice or cleansing removes the fire."
+          },
+          {
+            "action": "strike",
+            "target": "most_injured",
+            "amount": 2,
+            "condition": "any_party_burning"
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "ice_quenches_burn",
+          "conditional_attack_plan"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "ashplain",
+          "highstone"
+        ],
+        "terrains": [
+          "grassland",
+          "mountain"
+        ],
+        "siteTypes": [
+          "ruin",
+          "citadel"
+        ],
+        "requiredTags": [
+          "ash_or_furnace"
+        ],
+        "descentThemes": [
+          "abyss",
+          "tower"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The coal inhales before it throws sparks. Its own surface never catches a second flame."
+    },
+    {
+      "id": "watcher",
+      "name": "Spectral watcher",
+      "role": "spirit",
+      "pattern": "sniper",
+      "signature": "A watcher announces the party member with the largest current MP, then a piercing stare. Moving the guard to that ally redirects the shot; spending MP can change its next selection.",
+      "weakness": "sacred",
+      "resistances": [
+        "bleed",
+        "poison",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "mark_prey",
+            "target": "largest_current_magic",
+            "status": "watched",
+            "counter": "Guard the watched ally."
+          },
+          {
+            "action": "precision_strike",
+            "target": "marked_prey",
+            "amount": 4
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "party_prey_mark",
+          "target_largest_current_magic"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "bellwater",
+          "highstone",
+          "ashplain"
+        ],
+        "terrains": [
+          "grassland",
+          "mountain"
+        ],
+        "siteTypes": [
+          "ruin",
+          "tower",
+          "sanctuary"
+        ],
+        "requiredTags": [
+          "archive_or_ward"
+        ],
+        "descentThemes": [
+          "ossuary",
+          "tower"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "Every painted eye turns toward one focus. The stare has not yet landed."
+    },
+    {
+      "id": "sentinel",
+      "name": "Stone sentinel",
+      "role": "construct",
+      "pattern": "charger",
+      "signature": "Stone plates close before a heavy blow. A blunt counter or lightning opens the plates and removes the charged bonus.",
+      "weakness": "physical",
+      "resistances": [
+        "bleed",
+        "poison",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ward",
+            "target": "self",
+            "amount": 5,
+            "status": "closed_plates",
+            "counter": "Blunt counters or lightning open the plates."
+          },
+          {
+            "action": "charged_strike",
+            "target": "highest_armor",
+            "amount": 4,
+            "condition": "plates_still_closed"
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "weapon_breaks_plate_charge",
+          "conditional_attack_plan"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "highstone",
+          "rainward",
+          "ashplain"
+        ],
+        "terrains": [
+          "mountain",
+          "grassland",
+          "marsh"
+        ],
+        "siteTypes": [
+          "ruin",
+          "tower",
+          "citadel"
+        ],
+        "requiredTags": [
+          "built_mechanism"
+        ],
+        "descentThemes": [
+          "tower",
+          "abyss"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The plates slide together over a hairline crack; grit falls from the raised fist."
+    },
+    {
+      "id": "golem",
+      "name": "Rune golem",
+      "role": "construct",
+      "pattern": "disruptor",
+      "signature": "A golem grounds an ally ward into its own body, gaining only the ward actually removed. Lightning overloads the stolen charge on its next action.",
+      "weakness": "lightning",
+      "resistances": [
+        "bleed",
+        "poison",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ward_siphon",
+            "target": "most_warded",
+            "amount": 5,
+            "counter": "Use lightning before its next strike."
+          },
+          {
+            "action": "strike",
+            "target": "most_injured",
+            "amount": 3,
+            "condition": "has_stolen_charge"
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "actual_ward_siphon",
+          "lightning_overload_charge"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "highstone",
+          "rainward",
+          "ashplain"
+        ],
+        "terrains": [
+          "mountain",
+          "grassland",
+          "marsh"
+        ],
+        "siteTypes": [
+          "ruin",
+          "tower",
+          "citadel"
+        ],
+        "requiredTags": [
+          "built_mechanism"
+        ],
+        "descentThemes": [
+          "tower",
+          "abyss"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "Blue runes reach toward the party ward; the golem brightens by exactly what that ward loses."
+    },
+    {
+      "id": "husk",
+      "name": "Iron husk",
+      "role": "construct",
+      "pattern": "striker",
+      "signature": "An iron husk retaliates once against a physical attacker who hits while its furnace brace is lit. Disruption extinguishes the brace before the next sweep.",
+      "weakness": "lightning",
+      "resistances": [
+        "bleed",
+        "poison",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ward",
+            "target": "self",
+            "amount": 4,
+            "status": "retaliation_brace",
+            "counter": "Disrupt before attacking physically."
+          },
+          {
+            "action": "wave",
+            "target": "all_party",
+            "amount": -4
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "bounded_retaliation_once",
+          "disruption_clears_brace"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "ashplain",
+          "highstone"
+        ],
+        "terrains": [
+          "grassland",
+          "mountain"
+        ],
+        "siteTypes": [
+          "ruin",
+          "citadel"
+        ],
+        "requiredTags": [
+          "ash_or_furnace"
+        ],
+        "descentThemes": [
+          "abyss",
+          "tower"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "A light appears behind the breastplate. Its sword arm moves with your approaching hand."
+    },
+    {
+      "id": "keeper",
+      "name": "Cistern keeper",
+      "role": "construct",
+      "pattern": "ritualist",
+      "signature": "The keeper changes between a pump ward, a broad sluice surge and an exposed heavy strike. Opening the valve during the charge reduces the surge.",
+      "weakness": "lightning",
+      "resistances": [
+        "bleed",
+        "poison",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ritual",
+            "target": "self",
+            "status": "sluice_charge",
+            "counter": "A marked or disrupting hit loosens the valve."
+          },
+          {
+            "action": "wave",
+            "target": "all_party",
+            "amount": -2,
+            "condition": "sluice_charge_intact"
+          },
+          {
+            "action": "strike",
+            "target": "most_injured",
+            "amount": 4
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "interruptible_ritual",
+          "marked_ritual_interrupt"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "rainward",
+          "bellwater"
+        ],
+        "terrains": [
+          "marsh",
+          "water"
+        ],
+        "siteTypes": [
+          "marsh",
+          "brook"
+        ],
+        "requiredTags": [
+          "wet_ground"
+        ],
+        "descentThemes": [
+          "roots",
+          "ossuary"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "A waterline climbs the keeper chest before its arms spread. The side valve still moves."
+    },
+    {
+      "id": "root",
+      "name": "Living root",
+      "role": "construct",
+      "pattern": "barbed",
+      "signature": "Roots lash the swiftest ally and leave entanglement, not bleeding. Fire interrupts the next lash; movement returns after cleansing or one action.",
+      "weakness": "fire",
+      "resistances": [
+        "bleed",
+        "poison",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "weakening_strike",
+            "target": "highest_agility",
+            "amount": 4,
+            "status": "entangled_next_action"
+          },
+          {
+            "action": "strike",
+            "target": "entangled",
+            "amount": 2,
+            "counter": "Fire or cleansing releases the roots."
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "bounded_entanglement",
+          "fire_clears_entanglement"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "blackgrove",
+          "bellwater",
+          "rainward"
+        ],
+        "terrains": [
+          "forest",
+          "grassland"
+        ],
+        "siteTypes": [
+          "forest",
+          "village"
+        ],
+        "requiredTags": [
+          "woodland"
+        ],
+        "descentThemes": [
+          "roots"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "A root rises under the quickest foot. Sap beads at the point where it can be burned through."
+    },
+    {
+      "id": "thornheart",
+      "name": "Thornheart",
+      "role": "construct",
+      "pattern": "healer",
+      "signature": "The wounded heart repairs itself only while a root ward remains. Fire and ward-breaking prevent one regeneration without erasing its other attacks.",
+      "weakness": "fire",
+      "resistances": [
+        "bleed",
+        "poison",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ward",
+            "target": "self",
+            "amount": 5,
+            "status": "root_ward"
+          },
+          {
+            "action": "heal",
+            "target": "self",
+            "amount": 6,
+            "counter": "Break or burn away the root ward.",
+            "condition": "root_ward_remains"
+          },
+          {
+            "action": "weakening_strike",
+            "target": "highest_physical_power",
+            "amount": 3
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "conditional_regeneration",
+          "fire_breaks_root_ward"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "blackgrove",
+          "bellwater",
+          "rainward"
+        ],
+        "terrains": [
+          "forest",
+          "grassland"
+        ],
+        "siteTypes": [
+          "forest",
+          "village"
+        ],
+        "requiredTags": [
+          "woodland"
+        ],
+        "descentThemes": [
+          "roots"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The thorns turn inward and fresh wood gathers behind the root ward."
+    },
+    {
+      "id": "sprout",
+      "name": "Living sprout",
+      "role": "construct",
+      "pattern": "healer",
+      "signature": "A sprout spends its own stored growth on the most injured allied plant. It heals a fixed amount twice per battle and afterward only wards.",
+      "weakness": "fire",
+      "resistances": [
+        "bleed",
+        "poison",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "heal",
+            "target": "most_injured_enemy",
+            "amount": 5,
+            "counter": "Defeat the sprout before its second gift.",
+            "condition": "growth_charges_remaining"
+          },
+          {
+            "action": "ward",
+            "target": "most_injured_enemy",
+            "amount": 3
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "bounded_heal_charges_2",
+          "target_same_biology"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "blackgrove",
+          "bellwater",
+          "rainward"
+        ],
+        "terrains": [
+          "forest",
+          "grassland"
+        ],
+        "siteTypes": [
+          "forest",
+          "village"
+        ],
+        "requiredTags": [
+          "woodland"
+        ],
+        "descentThemes": [
+          "roots"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "Two unopened buds glow on its stem. One withers when another plant mends."
+    },
+    {
+      "id": "guardian",
+      "name": "Covenant guardian",
+      "role": "construct",
+      "pattern": "ritualist",
+      "signature": "The guardian establishes an anchor charge, follows with a party pulse, then exposes a weak seam while resetting. Marks and wards matter on different turns.",
+      "weakness": "lightning",
+      "resistances": [
+        "bleed",
+        "poison",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ritual",
+            "target": "self",
+            "status": "anchor_charge",
+            "counter": "A marked hit interrupts the charge."
+          },
+          {
+            "action": "wave",
+            "target": "all_party",
+            "amount": -1,
+            "condition": "ritual_uninterrupted"
+          },
+          {
+            "action": "weakening_strike",
+            "target": "highest_physical_power",
+            "amount": 2
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "interruptible_ritual",
+          "marked_ritual_interrupt",
+          "temporary_exposed_seam"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "bellwater",
+          "highstone",
+          "ashplain"
+        ],
+        "terrains": [
+          "grassland",
+          "mountain"
+        ],
+        "siteTypes": [
+          "ruin",
+          "tower",
+          "sanctuary"
+        ],
+        "requiredTags": [
+          "archive_or_ward"
+        ],
+        "descentThemes": [
+          "ossuary",
+          "tower"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The anchor ring climbs from dim to white, then a seam opens across the guardian chest."
+    },
+    {
+      "id": "moth",
+      "name": "Moth horror",
+      "role": "aberration",
+      "pattern": "disruptor",
+      "signature": "Wing dust strips a little ward from every ally; the next wingbeat frightens only an ally left wholly unwarded. A small renewed ward prevents that fear.",
+      "weakness": "fire",
+      "resistances": [],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "disrupt",
+            "target": "all_party",
+            "amount": 2
+          },
+          {
+            "action": "fear_strike",
+            "target": "least_warded",
+            "amount": 3,
+            "condition": "target_has_no_ward"
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "multi_target_disruption",
+          "fear_status",
+          "ward_gates_fear"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "blackgrove",
+          "bellwater",
+          "rainward"
+        ],
+        "terrains": [
+          "forest",
+          "grassland"
+        ],
+        "siteTypes": [
+          "forest",
+          "village"
+        ],
+        "requiredTags": [
+          "woodland"
+        ],
+        "descentThemes": [
+          "roots"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "Pale powder settles on each ward. The moth folds its wings around the place left dark."
+    },
+    {
+      "id": "fungus",
+      "name": "Fungal horror",
+      "role": "aberration",
+      "pattern": "healer",
+      "signature": "The colony releases spores, then repairs a related growth from stored moisture. Fire dries its reserve and disables one heal; ordinary bodily poison does nothing.",
+      "weakness": "fire",
+      "resistances": [
+        "bleed",
+        "poison",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "poisoning_wave",
+            "target": "all_party",
+            "amount": 1,
+            "status": "poison_2_turns",
+            "counter": "Party cleansing clears the spores."
+          },
+          {
+            "action": "heal",
+            "target": "most_injured_enemy",
+            "amount": 5,
+            "condition": "moisture_reserve_intact"
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "poison_status",
+          "conditional_regeneration",
+          "fire_drains_growth_reserve"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "rainward",
+          "bellwater"
+        ],
+        "terrains": [
+          "marsh",
+          "water"
+        ],
+        "siteTypes": [
+          "marsh",
+          "brook"
+        ],
+        "requiredTags": [
+          "wet_ground"
+        ],
+        "descentThemes": [
+          "roots",
+          "ossuary"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The caps open inward before spores escape; water gathers beneath the next growing body."
+    },
+    {
+      "id": "eye",
+      "name": "Many-eyed horror",
+      "role": "aberration",
+      "pattern": "sniper",
+      "signature": "The eye chooses an ally with the greatest spell power, charges its pupil, then pierces armor. A physical hit on the opened pupil weakens that stare.",
+      "weakness": "physical",
+      "resistances": [],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "mark_prey",
+            "target": "highest_spell_power",
+            "status": "pupil_target",
+            "counter": "Guard the selected caster or hit the open pupil."
+          },
+          {
+            "action": "precision_strike",
+            "target": "marked_prey",
+            "amount": 5
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "party_prey_mark",
+          "target_spell_power",
+          "physical_interrupts_precision"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "saltreach"
+        ],
+        "terrains": [
+          "water",
+          "grassland"
+        ],
+        "siteTypes": [
+          "coast"
+        ],
+        "requiredTags": [
+          "saltwater"
+        ],
+        "descentThemes": [
+          "ossuary",
+          "abyss"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The pupil opens like a wound. It follows the strongest spell rather than the fullest reserve."
+    },
+    {
+      "id": "chimera",
+      "name": "Ash chimera",
+      "role": "aberration",
+      "pattern": "charger",
+      "signature": "Three throats alternate bite, venom and ward-crushing roar. Inspection identifies the next throat; weakening affects the active throat for one attack.",
+      "weakness": "lightning",
+      "resistances": [],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "strike",
+            "target": "highest_physical_power",
+            "amount": 2
+          },
+          {
+            "action": "poisoning_strike",
+            "target": "least_warded",
+            "amount": 2,
+            "status": "poison_2_turns"
+          },
+          {
+            "action": "disrupt",
+            "target": "all_party",
+            "amount": 3
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "poison_status",
+          "inspect_reveals_cycle"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "ashplain",
+          "highstone"
+        ],
+        "terrains": [
+          "grassland",
+          "mountain"
+        ],
+        "siteTypes": [
+          "ruin",
+          "citadel"
+        ],
+        "requiredTags": [
+          "ash_or_furnace"
+        ],
+        "descentThemes": [
+          "abyss",
+          "tower"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The biting head goes still as a second throat swells. The third holds a breath that rattles wards."
+    },
+    {
+      "id": "fiend",
+      "name": "Horned fiend",
+      "role": "aberration",
+      "pattern": "barbed",
+      "signature": "An ember-edged strike burns flesh, then a mocking gesture applies fear. Sacred attacks strip its borrowed ward; flame cannot leave it burning.",
+      "weakness": "sacred",
+      "resistances": [
+        "burn"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "burning_strike",
+            "target": "least_armored",
+            "amount": 2,
+            "status": "burn_2_turns"
+          },
+          {
+            "action": "fear_strike",
+            "target": "unafraid_party",
+            "amount": 4
+          },
+          {
+            "action": "ward",
+            "target": "self",
+            "amount": 5
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "fear_status",
+          "sacred_breaks_ward"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "ashplain",
+          "highstone"
+        ],
+        "terrains": [
+          "grassland",
+          "mountain"
+        ],
+        "siteTypes": [
+          "ruin",
+          "citadel"
+        ],
+        "requiredTags": [
+          "ash_or_furnace"
+        ],
+        "descentThemes": [
+          "abyss",
+          "tower"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The horned face smiles at the wound before pointing to the hand that trembles."
+    },
+    {
+      "id": "crawler",
+      "name": "Mawed crawler",
+      "role": "aberration",
+      "pattern": "ambusher",
+      "signature": "The crawler comes through the floor at the least armored ally and remembers that prey. A guarding ally breaks its second-bite bonus.",
+      "weakness": "ice",
+      "resistances": [
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ambush",
+            "target": "least_armored",
+            "amount": 4,
+            "status": "scent_target"
+          },
+          {
+            "action": "pursuit_strike",
+            "target": "last_target",
+            "amount": 3,
+            "counter": "Draw it away with a defender."
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "bounded_last_target",
+          "pursuit_bonus"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "highstone",
+          "ashplain",
+          "blackgrove"
+        ],
+        "terrains": [
+          "mountain",
+          "forest"
+        ],
+        "siteTypes": [
+          "mountain",
+          "ruin"
+        ],
+        "requiredTags": [
+          "underground"
+        ],
+        "descentThemes": [
+          "roots",
+          "abyss"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The nearest crack widens beneath soft leather, while the plated boots remain untouched."
+    },
+    {
+      "id": "eldritch_knight",
+      "name": "Eldritch knight",
+      "role": "aberration",
+      "pattern": "warder",
+      "signature": "The knight borrows ward from an ally to protect a marked challenge. A disruptor forces it into an ordinary strike; stolen ward is conserved.",
+      "weakness": "lightning",
+      "resistances": [
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ally_ward_transfer",
+            "target": "most_warded_enemy",
+            "amount": 4,
+            "counter": "Break the lender ward before the transfer."
+          },
+          {
+            "action": "precision_strike",
+            "target": "highest_physical_power",
+            "amount": 3
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "conserved_ally_ward_transfer"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "rainward",
+          "ashplain",
+          "highstone"
+        ],
+        "terrains": [
+          "grassland",
+          "mountain",
+          "marsh"
+        ],
+        "siteTypes": [
+          "tower",
+          "citadel",
+          "camp"
+        ],
+        "requiredTags": [
+          "armed_post"
+        ],
+        "descentThemes": [
+          "tower"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "Its armor changes shape to match the rune shining on another creature."
+    },
+    {
+      "id": "oracle",
+      "name": "Pale oracle",
+      "role": "aberration",
+      "pattern": "ritualist",
+      "signature": "The oracle predicts the next party attacker and raises a retaliatory ward against that one hand. A different attacker or a support turn invalidates the prediction.",
+      "weakness": "physical",
+      "resistances": [],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "predict",
+            "target": "next_party_actor",
+            "status": "predicted_actor",
+            "counter": "Use support or let another ally deal the next hit."
+          },
+          {
+            "action": "weakening_strike",
+            "target": "predicted_actor",
+            "amount": 5,
+            "condition": "prediction_still_true"
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "bounded_prediction",
+          "support_invalidates_prediction"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "bellwater",
+          "highstone",
+          "ashplain"
+        ],
+        "terrains": [
+          "grassland",
+          "mountain"
+        ],
+        "siteTypes": [
+          "ruin",
+          "tower",
+          "sanctuary"
+        ],
+        "requiredTags": [
+          "archive_or_ward"
+        ],
+        "descentThemes": [
+          "ossuary",
+          "tower"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "It mouths the name of the next hand in the turn order, then covers its own face."
+    },
+    {
+      "id": "captain",
+      "name": "Tower captain",
+      "role": "humanoid",
+      "pattern": "warder",
+      "signature": "The captain commands the living company to ward, then orders a focused volley. Eliminating the supporter reduces the volley; soldiers remain distinct capturable people where permitted.",
+      "weakness": "physical",
+      "resistances": [],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ward",
+            "target": "all_enemy",
+            "amount": 4
+          },
+          {
+            "action": "mark_prey",
+            "target": "most_injured",
+            "status": "volley_target"
+          },
+          {
+            "action": "pack_strike",
+            "target": "marked_prey",
+            "amount": 4
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "party_prey_mark",
+          "living_support_scales_volley"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "rainward",
+          "ashplain",
+          "highstone"
+        ],
+        "terrains": [
+          "grassland",
+          "mountain",
+          "marsh"
+        ],
+        "siteTypes": [
+          "tower",
+          "citadel",
+          "camp"
+        ],
+        "requiredTags": [
+          "armed_post"
+        ],
+        "descentThemes": [
+          "tower"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The captain raises two fingers for shields and points one sword at the volley target."
+    },
+    {
+      "id": "last_archivist",
+      "name": "The last archivist",
+      "role": "spirit",
+      "pattern": "disruptor",
+      "signature": "The last reader places a seal on the most recently used damaging technique; it suppresses that one technique for one round while other choices remain.",
+      "weakness": "fire",
+      "resistances": [
+        "bleed",
+        "poison"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "seal_last_technique",
+            "target": "last_attacker",
+            "status": "sealed_one_round",
+            "counter": "Use another technique or cleanse the seal."
+          },
+          {
+            "action": "ward",
+            "target": "self",
+            "amount": 8
+          },
+          {
+            "action": "wave",
+            "target": "all_party",
+            "amount": -3
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "bounded_last_technique",
+          "one_round_technique_seal"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "bellwater",
+          "highstone",
+          "ashplain"
+        ],
+        "terrains": [
+          "grassland",
+          "mountain"
+        ],
+        "siteTypes": [
+          "ruin",
+          "tower",
+          "sanctuary"
+        ],
+        "requiredTags": [
+          "archive_or_ward"
+        ],
+        "descentThemes": [
+          "ossuary",
+          "tower"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The final page repeats the name of the technique you just used; the other pages stay blank."
+    },
+    {
+      "id": "anchor_warden",
+      "name": "Anchor warden",
+      "role": "spirit",
+      "pattern": "charger",
+      "signature": "The warden charges a piercing strike at the most defended ally, then pulses weakness across the party. Breaking its charge causes it to spend the strike turn raising a smaller ward.",
+      "weakness": "lightning",
+      "resistances": [
+        "bleed",
+        "poison",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "charge",
+            "target": "self",
+            "status": "anchor_charge"
+          },
+          {
+            "action": "charged_strike",
+            "target": "highest_armor",
+            "amount": 6,
+            "counter": "Disrupt or guard the charged hit.",
+            "condition": "charge_intact"
+          },
+          {
+            "action": "wave",
+            "target": "all_party",
+            "amount": -3,
+            "status": "weakened_2"
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "charged_attack",
+          "interrupted_charge_fallback"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "bellwater",
+          "highstone",
+          "ashplain"
+        ],
+        "terrains": [
+          "grassland",
+          "mountain"
+        ],
+        "siteTypes": [
+          "ruin",
+          "tower",
+          "sanctuary"
+        ],
+        "requiredTags": [
+          "archive_or_ward"
+        ],
+        "descentThemes": [
+          "ossuary",
+          "tower"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "A white line connects the anchor to the heaviest shield. It flickers when the warden is disrupted."
+    },
+    {
+      "id": "thorn_sovereign",
+      "name": "Thorn sovereign",
+      "role": "construct",
+      "pattern": "healer",
+      "signature": "A sovereign shelters seedlings before healing itself. Destroying the seedlings ends its shared regeneration but raises one short, telegraphed grieving counterattack.",
+      "weakness": "fire",
+      "resistances": [
+        "bleed",
+        "poison",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ward",
+            "target": "lowest_health_enemy",
+            "amount": 6
+          },
+          {
+            "action": "heal",
+            "target": "self",
+            "amount": 8,
+            "condition": "living_sprout_ally"
+          },
+          {
+            "action": "wave",
+            "target": "all_party",
+            "amount": -2
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "target_same_biology",
+          "ally_death_once_phase"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "blackgrove",
+          "bellwater",
+          "rainward"
+        ],
+        "terrains": [
+          "forest",
+          "grassland"
+        ],
+        "siteTypes": [
+          "forest",
+          "village"
+        ],
+        "requiredTags": [
+          "woodland"
+        ],
+        "descentThemes": [
+          "roots"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The crown lowers over the smallest shoot. A deeper pulse answers from its own trunk."
+    },
+    {
+      "id": "hollow_king",
+      "name": "Hollow king",
+      "role": "undead",
+      "pattern": "ritualist",
+      "signature": "The king draws one tribute of ward from its retainers, then attacks through its crown. Interrupting the tribute or defeating retainers exposes an ordinary corpse.",
+      "weakness": "sacred",
+      "resistances": [
+        "bleed",
+        "poison"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ally_ward_transfer",
+            "target": "most_warded_enemy",
+            "amount": 6,
+            "status": "crown_charge"
+          },
+          {
+            "action": "precision_strike",
+            "target": "highest_physical_power",
+            "amount": 5,
+            "condition": "crown_charge"
+          },
+          {
+            "action": "ward",
+            "target": "all_enemy",
+            "amount": 3
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "conserved_ally_ward_transfer",
+          "conditional_attack_plan"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "ashplain",
+          "highstone"
+        ],
+        "terrains": [
+          "grassland",
+          "mountain"
+        ],
+        "siteTypes": [
+          "ruin",
+          "citadel"
+        ],
+        "requiredTags": [
+          "ash_or_furnace"
+        ],
+        "descentThemes": [
+          "abyss",
+          "tower"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "An empty crown brightens as a retainer turns grey; nothing is created without being taken."
+    },
+    {
+      "id": "death_cleric",
+      "name": "Death cleric",
+      "role": "undead",
+      "pattern": "leech",
+      "signature": "The cleric prepares an inverted blessing, then drains a living ally and distributes only actual drained health to its own injured companions. Sacred disruption breaks the prepared transfer.",
+      "weakness": "sacred",
+      "resistances": [
+        "bleed",
+        "poison"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ritual",
+            "target": "self",
+            "status": "inverted_blessing"
+          },
+          {
+            "action": "drain_and_share",
+            "target": "most_injured",
+            "amount": 3,
+            "counter": "Ward the intended victim or interrupt with sacred power.",
+            "condition": "ritual_uninterrupted"
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "interruptible_ritual",
+          "actual_damage_drain",
+          "conserved_drain_sharing"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "bellwater",
+          "rainward",
+          "ashplain"
+        ],
+        "terrains": [
+          "grassland",
+          "marsh"
+        ],
+        "siteTypes": [
+          "ruin",
+          "sanctuary"
+        ],
+        "requiredTags": [
+          "burial"
+        ],
+        "descentThemes": [
+          "ossuary"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "It sets an empty cup beside an injured corpse and looks toward a living pulse."
+    },
+    {
+      "id": "dragon",
+      "name": "Old dragon",
+      "role": "beast",
+      "pattern": "ritualist",
+      "signature": "The dragon takes a visible breath, then burns the party. Ice interrupts only an uncompleted breath; a guarded hit leaves an exposed throat for one party turn.",
+      "weakness": "ice",
+      "resistances": [
+        "burn",
+        "fear"
+      ],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "charge",
+            "target": "self",
+            "status": "breath_charge",
+            "counter": "Ice or disruption breaks the breath."
+          },
+          {
+            "action": "burning_wave",
+            "target": "all_party",
+            "amount": -1,
+            "status": "burn_2_turns",
+            "condition": "breath_charge_intact"
+          },
+          {
+            "action": "strike",
+            "target": "highest_armor",
+            "amount": 4
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "charged_attack",
+          "ice_interrupts_breath",
+          "temporary_exposed_throat"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "highstone",
+          "ashplain",
+          "blackgrove"
+        ],
+        "terrains": [
+          "mountain",
+          "forest"
+        ],
+        "siteTypes": [
+          "mountain",
+          "ruin"
+        ],
+        "requiredTags": [
+          "underground"
+        ],
+        "descentThemes": [
+          "roots",
+          "abyss"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "Its chest grows hot one rib at a time. The throat is open before fire arrives."
+    },
+    {
+      "id": "witch",
+      "name": "Mire witch",
+      "role": "humanoid",
+      "pattern": "ambusher",
+      "signature": "The witch sets a false likeness, takes cover behind it, then strikes a caster. Inspection strips the false ward; attacks against it never drain actual blood.",
+      "weakness": "physical",
+      "resistances": [],
+      "cadence": {
+        "cycle": [
+          {
+            "action": "ward",
+            "target": "self",
+            "amount": 7,
+            "status": "false_likeness",
+            "counter": "Inspect to discard the false likeness."
+          },
+          {
+            "action": "ambush",
+            "target": "largest_magic",
+            "amount": 5,
+            "condition": "false_likeness_intact"
+          }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": [
+          "inspect_dispels_false_ward",
+          "ward_gates_ambush_bonus"
+        ]
+      },
+      "context": {
+        "regionIds": [
+          "rainward",
+          "bellwater"
+        ],
+        "terrains": [
+          "marsh",
+          "water"
+        ],
+        "siteTypes": [
+          "marsh",
+          "brook"
+        ],
+        "requiredTags": [
+          "wet_ground"
+        ],
+        "descentThemes": [
+          "roots",
+          "ossuary"
+        ],
+        "contractTypes": [
+          "hunt",
+          "bounty",
+          "relic",
+          "escort"
+        ],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The reflected face mouths words before the real lips move. Only one figure disturbs the mud."
+    }
+  ],
+  "bosses": [
+    {
+      "id": "shut_gate_ferryman",
+      "name": "The Ferryman of Shut Gates",
+      "regionId": "rainward",
+      "family": "construct",
+      "speciesId": "keeper",
+      "pattern": "ritualist",
+      "mechanic": "The ferryman charges a sluice pulse over two actions. An exposed valve can be interrupted by a marked hit or disruptor; failure leaves the party defending against the pulse. Its ordinary heavy strike follows the spent pulse.",
+      "phase": {
+        "thresholdPct": 45,
+        "trigger": "once",
+        "change": "A damaged pump leaks: its ward shrinks by 3, but the next visible sluice pulse gains 2 damage. No extra action is granted.",
+        "telegraph": "The lantern goes out, yet the waterline keeps rising.",
+        "requires": [
+          "boss_once_hp_phase"
+        ]
+      },
+      "weakness": "lightning",
+      "biography": "A Rainward engineer built it to carry families across floodwater. During a siege the watch ordered it to shut the gates against arrivals, leaving the engineer's own household on the low bank. It still counts every empty boat as a failed rescue and opens the sluice whenever someone tries to pass without a passenger.",
+      "rumor": "The empty ferry returns heavier than it left. One old boatwoman says its lantern last went out while someone was still calling from the low bank.",
+      "noncombatApproaches": [
+        {
+          "id": "repair_pump",
+          "label": "Repair the pump and restart a rescue crossing",
+          "prerequisites": [
+            "Find the engineer winch in the side workshop",
+            "survival 6 or a trained craft companion"
+          ],
+          "costs": {
+            "days": 3,
+            "materials": {
+              "ore": 2,
+              "cloth": 1
+            }
+          },
+          "result": "The ferry opens a safe crossing; keep the pump plan as route proof.",
+          "consequence": "Local security rises; passage serves households before traders.",
+          "requires": [
+            "boss_side_clue",
+            "boss_attended_work",
+            "persistent_route_service"
+          ]
+        },
+        {
+          "id": "bring_passenger",
+          "label": "Carry a stranded named household over",
+          "prerequisites": [
+            "Meet the stranded household on the actual low bank",
+            "Provide a safe return plan"
+          ],
+          "costs": {
+            "days": 2,
+            "gold": 8
+          },
+          "result": "A completed rescue satisfies the ferryman current command.",
+          "consequence": "The ferryman permits your party through; it still refuses empty commercial crossings.",
+          "requires": [
+            "boss_named_rescue",
+            "boss_resolution_fact"
+          ]
+        },
+        {
+          "id": "sell_passage",
+          "label": "Buy the watch command and sell priority passage",
+          "prerequisites": [
+            "Recover the watch command token",
+            "persuasion 7"
+          ],
+          "costs": {
+            "days": 1,
+            "gold": 20
+          },
+          "result": "The mechanism accepts an exclusive toll concession.",
+          "consequence": "Receive bounded recurring toll income; poorer households lose access and a named grievance can follow.",
+          "requires": [
+            "boss_command_clue",
+            "boss_route_toll",
+            "boss_named_grievance"
+          ]
+        }
+      ],
+      "context": {
+        "regionIds": [
+          "rainward"
+        ],
+        "terrains": [
+          "marsh",
+          "water"
+        ],
+        "siteTypes": [
+          "brook",
+          "marsh"
+        ],
+        "requiredTags": [
+          "actual_crossing",
+          "built_mechanism"
+        ],
+        "dungeonFamilies": [
+          "cistern"
+        ]
+      },
+      "objective": "Restore, monopolize or disable the crossing; a battle victory grants access but does not restore rescue service.",
+      "requires": [
+        "interruptible_ritual",
+        "marked_ritual_interrupt",
+        "boss_scene_resolution"
+      ],
+      "presentation": "A complete existing-species portrait, with a stable saved boss identity. Named scene illustration is a later art task; do not relabel a different species portrait."
+    },
+    {
+      "id": "watch_that_never_ends",
+      "name": "The Watch That Never Ends",
+      "regionId": "rainward",
+      "family": "spirit",
+      "speciesId": "wraith",
+      "pattern": "disruptor",
+      "mechanic": "The watch points at the greatest party ward and removes up to 6, remembering only what it actually took. On its next action the stolen light becomes a piercing blow at the same ally. Sacred interruption discards that stolen charge.",
+      "phase": {
+        "thresholdPct": 50,
+        "trigger": "once",
+        "change": "Its lost patrol appears as an 8-point ward, not extra untargetable combatants. The next theft is announced a turn earlier.",
+        "telegraph": "Rain fills six empty helmets, and their lamps gather around the remaining watcher.",
+        "requires": [
+          "boss_once_hp_phase",
+          "boss_phase_ward"
+        ]
+      },
+      "weakness": "sacred",
+      "biography": "This was the last keeper at a signal tower the commander ordered dark. Their spouse reached the locked refuge door after the bell stopped. The watcher now takes lights from armored travelers, unable to bear seeing a lamp carried safely past the place where theirs failed.",
+      "rumor": "Travelers lose lamp oil beside the abandoned signal tower. A widower keeps a second wick burning there and says the wind sometimes speaks the old password.",
+      "noncombatApproaches": [
+        {
+          "id": "keep_watch",
+          "label": "Complete one night of the abandoned watch",
+          "prerequisites": [
+            "Recover the patrol password",
+            "Identify the surviving widower rather than an invented witness"
+          ],
+          "costs": {
+            "days": 1,
+            "materials": {
+              "cloth": 1
+            }
+          },
+          "result": "The widower lights the second wick and the watcher relinquishes its stolen lamps.",
+          "consequence": "The crossing gets a remembered night watch; the dead keeper is released, not recruited.",
+          "requires": [
+            "boss_named_contact",
+            "boss_night_vigil"
+          ]
+        },
+        {
+          "id": "return_lamps",
+          "label": "Return the seized household lanterns",
+          "prerequisites": [
+            "Find the lamp cache",
+            "Choose their actual households"
+          ],
+          "costs": {
+            "days": 2,
+            "gold": 6
+          },
+          "result": "A returning chain of lights leads the watcher home.",
+          "consequence": "Families remember the restitution; no stolen coin is kept.",
+          "requires": [
+            "boss_owned_relics",
+            "boss_named_restitution"
+          ]
+        },
+        {
+          "id": "bind_watch",
+          "label": "Bind the apparition to your own toll post",
+          "prerequisites": [
+            "arcana 8",
+            "Find the watcher true name"
+          ],
+          "costs": {
+            "days": 2,
+            "materials": {
+              "crystal": 2
+            }
+          },
+          "result": "A coerced ward protects your holding for a bounded season.",
+          "consequence": "Break an existing mercy oath; a named witness creates local evidence if present, and the ward ends unless renewed.",
+          "requires": [
+            "boss_true_name",
+            "boss_coerced_service",
+            "observed_offence"
+          ]
+        }
+      ],
+      "context": {
+        "regionIds": [
+          "rainward"
+        ],
+        "terrains": [
+          "marsh",
+          "grassland"
+        ],
+        "siteTypes": [
+          "tower",
+          "ruin"
+        ],
+        "requiredTags": [
+          "signal_tower"
+        ],
+        "dungeonFamilies": [
+          "watchtower"
+        ]
+      },
+      "objective": "Release, repay or bind the abandoned watch; victory recovers stolen light without establishing an ongoing service.",
+      "requires": [
+        "actual_ward_siphon",
+        "bounded_last_target",
+        "sacred_clears_haunting",
+        "boss_scene_resolution"
+      ],
+      "presentation": "A complete existing-species portrait, with a stable saved boss identity. Named scene illustration is a later art task; do not relabel a different species portrait."
+    },
+    {
+      "id": "captain_without_shore",
+      "name": "The Captain Without a Shore",
+      "regionId": "saltreach",
+      "family": "undead",
+      "speciesId": "drowned",
+      "pattern": "pack",
+      "mechanic": "The captain marks a caster with rising water and orders its drowned crew to pull that ally under. Defending breaks the mark; removing a crew member reduces the next undertow bonus. The captain cannot regenerate a destroyed crew.",
+      "phase": {
+        "thresholdPct": 40,
+        "trigger": "once",
+        "change": "A ship bell removes the captain's remaining ward and adds one final, visibly charged undertow pulse. Interrupting the bell cancels the pulse.",
+        "telegraph": "Its mouth opens around a dry bell; even the dead crew steps away.",
+        "requires": [
+          "boss_once_hp_phase",
+          "interruptible_ritual"
+        ]
+      },
+      "weakness": "lightning",
+      "biography": "A Saltreach privateer sold the captain's safe-harbor promise to two rival fleets. When both attacked, the captain scuttled the ship rather than surrender the youngest crew. It now returns with everyone it tried to save, demanding a berth from descendants who do not know which old promise they inherited.",
+      "rumor": "On the lowest tide an unregistered crew asks for a berth. An old rope-maker claims the ship sank deliberately, but has never seen who stood at its helm.",
+      "noncombatApproaches": [
+        {
+          "id": "lay_crew",
+          "label": "Find the lost shore and lay the crew to rest",
+          "prerequisites": [
+            "Recover the original crew song",
+            "Locate an actual coast burial landing"
+          ],
+          "costs": {
+            "days": 3,
+            "gold": 12
+          },
+          "result": "The captain brings the crew ashore for a final farewell.",
+          "consequence": "The night berth reopens; families can dispute the captain choice in later conversations.",
+          "requires": [
+            "boss_crew_song",
+            "boss_funeral_service"
+          ]
+        },
+        {
+          "id": "new_berth",
+          "label": "Give the returned ship a lawful night berth",
+          "prerequisites": [
+            "persuasion 8",
+            "Negotiate with the current harbor authority"
+          ],
+          "costs": {
+            "days": 3,
+            "gold": 25
+          },
+          "result": "The undead crew accepts limited night passage without taking living passengers.",
+          "consequence": "A named harbor agreement changes night trade, while regional corpse/curse law still applies.",
+          "requires": [
+            "boss_harbor_agreement",
+            "regional_law_check"
+          ]
+        },
+        {
+          "id": "smuggle_crew",
+          "label": "Hire the captain for forbidden crossings",
+          "prerequisites": [
+            "stealth 7",
+            "Offer a real protected cove"
+          ],
+          "costs": {
+            "days": 2,
+            "gold": 15
+          },
+          "result": "The ship provides one discreet passage contract.",
+          "consequence": "Earn smuggling opportunities and local pursuit if a witness identifies the cargo.",
+          "requires": [
+            "boss_illicit_route",
+            "cargo_provenance",
+            "observed_offence"
+          ]
+        }
+      ],
+      "context": {
+        "regionIds": [
+          "saltreach"
+        ],
+        "terrains": [
+          "water"
+        ],
+        "siteTypes": [
+          "coast"
+        ],
+        "requiredTags": [
+          "actual_harbor",
+          "saltwater"
+        ],
+        "descentThemes": [
+          "ossuary"
+        ]
+      },
+      "objective": "Resolve the crew berth, grant limited service or use a dangerous smuggling route; victory only clears the current harbor threat.",
+      "requires": [
+        "party_prey_mark",
+        "pack_member_bonus",
+        "boss_scene_resolution"
+      ],
+      "presentation": "A complete existing-species portrait, with a stable saved boss identity. Named scene illustration is a later art task; do not relabel a different species portrait."
+    },
+    {
+      "id": "glass_tide_witness",
+      "name": "The Glass-Tide Witness",
+      "regionId": "saltreach",
+      "family": "aberration",
+      "speciesId": "eye",
+      "pattern": "sniper",
+      "mechanic": "The many-eyed creature targets the party strongest spell, but opens a soft pupil while aiming. A physical strike through a marked pupil cancels its precision bonus. Magic still damages it normally and is never wholly invalidated.",
+      "phase": {
+        "thresholdPct": 50,
+        "trigger": "once",
+        "change": "Its glass shell cracks: gain one temporary 5-point ward from the fragments and alternate caster aim with a lower-power party pulse.",
+        "telegraph": "The sea-facing lens splits; smaller eyes turn toward every moving hand.",
+        "requires": [
+          "boss_once_hp_phase",
+          "alternating_phase_cycle"
+        ]
+      },
+      "weakness": "physical",
+      "biography": "A moon watcher raised it in a silver bowl to show their missing lover whatever shore they had reached. The lover returned old and almost blind; the watcher refused to let the reflection close. The witness keeps collecting faces, trying to find the one expression the watcher remembered before the years changed it.",
+      "rumor": "The tide shrine bowl shows visitors one summer younger. A fish seller says a returned sailor refuses to look into it, even though their own lover tended it for years.",
+      "noncombatApproaches": [
+        {
+          "id": "last_reflection",
+          "label": "Let the returned sailor choose a final reflection",
+          "prerequisites": [
+            "Meet the actual returned sailor",
+            "Recover the watcher's silver rim"
+          ],
+          "costs": {
+            "days": 2,
+            "gold": 8
+          },
+          "result": "A chosen farewell closes the collection of faces.",
+          "consequence": "The sailor remains an independent contact; no de-aging or involuntary sacrifice is claimed.",
+          "requires": [
+            "boss_named_contact",
+            "boss_chosen_farewell"
+          ]
+        },
+        {
+          "id": "redirect_lens",
+          "label": "Redirect its lens toward an empty tide chamber",
+          "prerequisites": [
+            "scholarship 7 and arcana 5",
+            "Survey the actual tide chamber"
+          ],
+          "costs": {
+            "days": 3,
+            "materials": {
+              "crystal": 2
+            }
+          },
+          "result": "The creature studies a repeating tide instead of living faces.",
+          "consequence": "The shrine gains a bounded forecasting service; the creature remains alive below it.",
+          "requires": [
+            "boss_geometry_clue",
+            "persistent_local_service"
+          ]
+        },
+        {
+          "id": "keep_eye",
+          "label": "Keep a lens for your own scrying",
+          "prerequisites": [
+            "arcana 8",
+            "Extract a complete lens after inspecting the shell"
+          ],
+          "costs": {
+            "days": 2,
+            "materials": {
+              "ore": 1
+            }
+          },
+          "result": "Gain a bounded scrying relic from the broken collection.",
+          "consequence": "Learn one regional lead; the returned sailor distrusts you and the relic cannot reveal private secrets without later evidence.",
+          "requires": [
+            "boss_unique_relic",
+            "bounded_knowledge_lead",
+            "boss_relationship_callback"
+          ]
+        }
+      ],
+      "context": {
+        "regionIds": [
+          "saltreach"
+        ],
+        "terrains": [
+          "water",
+          "grassland"
+        ],
+        "siteTypes": [
+          "coast",
+          "sanctuary"
+        ],
+        "requiredTags": [
+          "actual_tide_shrine"
+        ],
+        "descentThemes": [
+          "abyss"
+        ]
+      },
+      "objective": "Free the collected reflections, redirect their gaze or take a limited scrying relic; victory does not restore anyone youth.",
+      "requires": [
+        "party_prey_mark",
+        "target_spell_power",
+        "physical_interrupts_precision",
+        "boss_scene_resolution"
+      ],
+      "presentation": "A complete existing-species portrait, with a stable saved boss identity. Named scene illustration is a later art task; do not relabel a different species portrait."
+    },
+    {
+      "id": "unfinished_son",
+      "name": "The Unfinished Son",
+      "regionId": "highstone",
+      "family": "construct",
+      "speciesId": "golem",
+      "pattern": "charger",
+      "mechanic": "The casting closes its metal plates for a heavy blow, but the seam made by the missing arm is visible. A blunt counter or lightning removes the charged bonus. Its ward never exceeds the amount advertised.",
+      "phase": {
+        "thresholdPct": 45,
+        "trigger": "once",
+        "change": "The old furnace brace breaks. It loses 2 armor and gains 3 power on one announced last charge; later actions return to its ordinary cycle.",
+        "telegraph": "The unfinished arm falls away, exposing the casting seam.",
+        "requires": [
+          "boss_once_hp_phase",
+          "bounded_phase_attack_bonus"
+        ]
+      },
+      "weakness": "lightning",
+      "biography": "A Highstone smith cast a substitute for a son lost in the upper mine. They left one hand unfinished because the boy had always wanted to choose a trade of his own. The casting now guards the cold furnace, furious that each apprentice is sent into the same mountain before being allowed a different life.",
+      "rumor": "The furnace guard wears a child-sized glove over one enormous hand. An elderly apprentice says the maker never meant to finish that hand.",
+      "noncombatApproaches": [
+        {
+          "id": "finish_differently",
+          "label": "Give the unfinished hand a chosen purpose",
+          "prerequisites": [
+            "Recover the maker's small hammer",
+            "A craft companion or scholarship 7"
+          ],
+          "costs": {
+            "days": 3,
+            "materials": {
+              "ore": 3,
+              "wood": 1
+            }
+          },
+          "result": "Fit a rescue tool rather than a weapon; the casting helps maintain mine shelters.",
+          "consequence": "Improve a real pass safety service and preserve the son separate mortal history.",
+          "requires": [
+            "boss_owned_tool",
+            "boss_attended_work",
+            "persistent_route_service"
+          ]
+        },
+        {
+          "id": "close_shaft",
+          "label": "Close the unsafe shaft and move the apprentices",
+          "prerequisites": [
+            "Inspect the actual damaged shaft",
+            "persuasion 7 or local trust 20"
+          ],
+          "costs": {
+            "days": 3,
+            "gold": 20
+          },
+          "result": "The guard allows the furnace to relight after the apprentices move safely.",
+          "consequence": "Ore supply is reduced for one season; safety and apprentice relationships improve.",
+          "requires": [
+            "boss_site_hazard",
+            "bounded_trade_cause",
+            "boss_named_rescue"
+          ]
+        },
+        {
+          "id": "sell_guard",
+          "label": "Sell the casting to a war patron",
+          "prerequisites": [
+            "Meet the regional war patron",
+            "persuasion 8"
+          ],
+          "costs": {
+            "days": 2
+          },
+          "result": "The patron removes the casting and pays 60 gold.",
+          "consequence": "The furnace opens, but a named military beneficiary receives the guard; later war harm can return as a callback.",
+          "requires": [
+            "boss_named_patron",
+            "boss_finite_payment",
+            "boss_war_callback"
+          ]
+        }
+      ],
+      "context": {
+        "regionIds": [
+          "highstone"
+        ],
+        "terrains": [
+          "mountain"
+        ],
+        "siteTypes": [
+          "mountain",
+          "ruin"
+        ],
+        "requiredTags": [
+          "actual_mine",
+          "furnace"
+        ],
+        "descentThemes": [
+          "tower"
+        ]
+      },
+      "objective": "Change the casting purpose, make the mine safe or sell its power; combat defeat dismantles the current guard rather than resurrecting its maker's son.",
+      "requires": [
+        "charged_attack",
+        "weapon_breaks_plate_charge",
+        "boss_scene_resolution"
+      ],
+      "presentation": "A complete existing-species portrait, with a stable saved boss identity. Named scene illustration is a later art task; do not relabel a different species portrait."
+    },
+    {
+      "id": "furnace_widow",
+      "name": "The Furnace Widow",
+      "regionId": "highstone",
+      "family": "beast",
+      "speciesId": "dragon",
+      "pattern": "ritualist",
+      "mechanic": "The dragon visibly fills its chest before a fire breath. Ice or disruption cancels an unfinished breath; defending reduces the completed wave. After breathing, the throat remains exposed to one marked hit.",
+      "phase": {
+        "thresholdPct": 35,
+        "trigger": "once",
+        "change": "It curls around its last egg, gaining 6 ward and replacing alternate breaths with a narrower, stronger bite at the closest protector. The egg is scenery with explicit story stakes, not an untargetable damage source.",
+        "telegraph": "One wing closes around a stone-grey egg; the next inhale stops halfway.",
+        "requires": [
+          "boss_once_hp_phase",
+          "phase_target_protector"
+        ]
+      },
+      "weakness": "ice",
+      "biography": "Highstone furnace masters bought heat from the dragon's mate and failed to bring the final winter food. After the mate died, the widow nested in the warmth of their abandoned foundry with the last unhatched egg. It raids convoys because the mountain has too little prey left to feed both the nest and the households beneath it.",
+      "rumor": "Every stolen convoy loses meat but keeps its ore. A shepherd has heard a smaller heartbeat beneath the foundry roar.",
+      "noncombatApproaches": [
+        {
+          "id": "winter_feed",
+          "label": "Arrange a finite winter food covenant",
+          "prerequisites": [
+            "Survey remaining pasture",
+            "Find willing suppliers with actual stock"
+          ],
+          "costs": {
+            "days": 4,
+            "gold": 35,
+            "rations": 3
+          },
+          "result": "The widow stops raiding this route for one bounded season.",
+          "consequence": "Food stock falls; named suppliers and protected travelers remember the cost.",
+          "requires": [
+            "boss_food_stock",
+            "boss_attended_work",
+            "bounded_seasonal_truce"
+          ]
+        },
+        {
+          "id": "move_nest",
+          "label": "Prepare a warmer nest away from the convoy road",
+          "prerequisites": [
+            "survival 8 and scholarship 6",
+            "Find an actual sheltered mountain chamber"
+          ],
+          "costs": {
+            "days": 5,
+            "materials": {
+              "stone": 3,
+              "cloth": 2
+            }
+          },
+          "result": "The dragon moves the egg after verifying the new chamber warmth.",
+          "consequence": "Restore the route and gain no dragon mount or immortal army.",
+          "requires": [
+            "boss_habitat_survey",
+            "boss_attended_work",
+            "persistent_route_service"
+          ]
+        },
+        {
+          "id": "take_egg",
+          "label": "Steal the egg and bargain from concealment",
+          "prerequisites": [
+            "stealth 10",
+            "Learn the widow's sleeping interval"
+          ],
+          "costs": {
+            "days": 2
+          },
+          "result": "Gain the named egg as a dangerous unique property; the widow abandons trade raids to hunt for it.",
+          "consequence": "Open a lucrative patron sale or ransom, create pursuit tied to actual discovery, and strain compassionate traits.",
+          "requires": [
+            "boss_unique_property",
+            "boss_targeted_pursuit",
+            "boss_patron_sale"
+          ]
+        }
+      ],
+      "context": {
+        "regionIds": [
+          "highstone"
+        ],
+        "terrains": [
+          "mountain"
+        ],
+        "siteTypes": [
+          "mountain",
+          "ruin"
+        ],
+        "requiredTags": [
+          "furnace",
+          "sheltered_nest"
+        ],
+        "descentThemes": [
+          "abyss"
+        ]
+      },
+      "objective": "Feed, relocate, exploit or drive away the nest; battle victory clears a route without automatically killing or looting the egg.",
+      "requires": [
+        "charged_attack",
+        "ice_interrupts_breath",
+        "temporary_exposed_throat",
+        "boss_scene_resolution"
+      ],
+      "presentation": "A complete existing-species portrait, with a stable saved boss identity. Named scene illustration is a later art task; do not relabel a different species portrait."
+    },
+    {
+      "id": "mother_empty_nests",
+      "name": "The Mother of Empty Nests",
+      "regionId": "blackgrove",
+      "family": "construct",
+      "speciesId": "thorn_sovereign",
+      "pattern": "healer",
+      "mechanic": "The sovereign shelters a sprout before regenerating. A fire hit or broken root ward cancels one heal. Defeating the sprout ends shared regeneration and triggers one visibly announced grieving wave, never an infinite replacement.",
+      "phase": {
+        "thresholdPct": 50,
+        "trigger": "once",
+        "change": "Its abandoned nests fall open: reduce ward by 4 and allow a one-time thorn wave. Party wards and guard reduce that wave.",
+        "telegraph": "The crown parts and every empty nest tilts toward the party.",
+        "requires": [
+          "boss_once_hp_phase",
+          "bounded_phase_wave"
+        ]
+      },
+      "weakness": "fire",
+      "biography": "This Blackgrove guardian grew around the nests of creatures driven out by a timber contract. It learned the sound of hungry children and allowed refugees to gather deadwood. When a patron sold their children young birds as ornaments, the guardian closed the same path to everyone, including the households it once sheltered.",
+      "rumor": "The living gate opens for a child carrying an empty cage. A logger insists the guardian once let their family through.",
+      "noncombatApproaches": [
+        {
+          "id": "return_birds",
+          "label": "Return the surviving caged birds",
+          "prerequisites": [
+            "Trace the actual bird seller",
+            "Recover or buy surviving cages"
+          ],
+          "costs": {
+            "days": 3,
+            "gold": 18
+          },
+          "result": "The sovereign opens a narrow household path and keeps the deeper nesting ground closed.",
+          "consequence": "A named seller loses illicit stock; families gain a safe deadwood route.",
+          "requires": [
+            "boss_owned_animals",
+            "boss_named_trade",
+            "persistent_route_service"
+          ]
+        },
+        {
+          "id": "plant_buffer",
+          "label": "Build a shared deadwood and nesting boundary",
+          "prerequisites": [
+            "survival 7",
+            "Negotiate with the current logging households"
+          ],
+          "costs": {
+            "days": 4,
+            "materials": {
+              "wood": 2,
+              "cloth": 1
+            }
+          },
+          "result": "A marked gathering boundary lets households live without taking the remaining nests.",
+          "consequence": "Seasonal timber supply drops slightly; local safety improves.",
+          "requires": [
+            "boss_habitat_boundary",
+            "bounded_trade_cause"
+          ]
+        },
+        {
+          "id": "claim_wood",
+          "label": "Force the nesting ground into your timber holding",
+          "prerequisites": [
+            "Recognized or coerced holding nearby",
+            "Bring an actual logging patron"
+          ],
+          "costs": {
+            "days": 2
+          },
+          "result": "Receive a bounded timber concession after driving the guardian back.",
+          "consequence": "Profit through lost nesting habitat; named refugees and keepers can oppose the holding.",
+          "requires": [
+            "boss_holding_check",
+            "boss_named_patron",
+            "boss_habitat_loss"
+          ]
+        }
+      ],
+      "context": {
+        "regionIds": [
+          "blackgrove"
+        ],
+        "terrains": [
+          "forest"
+        ],
+        "siteTypes": [
+          "forest"
+        ],
+        "requiredTags": [
+          "nesting_ground",
+          "logging_edge"
+        ],
+        "dungeonFamilies": [
+          "root_caverns"
+        ]
+      },
+      "objective": "Restore a nesting bargain, reserve a limited route or profit from the grove loss; winning a fight alone does not replenish timber or birds.",
+      "requires": [
+        "conditional_regeneration",
+        "fire_breaks_root_ward",
+        "ally_death_once_phase",
+        "boss_scene_resolution"
+      ],
+      "presentation": "A complete existing-species portrait, with a stable saved boss identity. Named scene illustration is a later art task; do not relabel a different species portrait."
+    },
+    {
+      "id": "orchard_wife",
+      "name": "The Orchard Wife",
+      "regionId": "blackgrove",
+      "family": "bandit",
+      "speciesId": "witch",
+      "pattern": "ambusher",
+      "mechanic": "The witch wears a false likeness as a visible ward and strikes through the surviving illusion. Inspecting removes its false ward before the strike; ordinary ward and armor still protect her real body.",
+      "phase": {
+        "thresholdPct": 40,
+        "trigger": "once",
+        "change": "She abandons the likeness and uses one seeded orchard charm: a small fear wave, followed by ordinary weakening strikes. No new ancestry or portrait identity is assigned.",
+        "telegraph": "The young reflected face stays smiling while the real woman begins to weep.",
+        "requires": [
+          "boss_once_hp_phase",
+          "fear_status"
+        ]
+      },
+      "weakness": "physical",
+      "biography": "The Orchard Wife kept a lover alive through a winter by grafting their breath into trees. Years later the lover begged to leave, but she continued speaking to the orchard as though every bloom was an answer. Now she buys names from passing travelers, trying to find a person who will choose the old life willingly rather than be trapped in it.",
+      "rumor": "An orchard flowers on the coldest night, but its owner charges a visitor their childhood nickname. A former lover says the trees still answer in their voice.",
+      "noncombatApproaches": [
+        {
+          "id": "release_breath",
+          "label": "Help the former lover reclaim their own breath",
+          "prerequisites": [
+            "Find the living former lover",
+            "Learn which tree holds their chosen graft"
+          ],
+          "costs": {
+            "days": 3,
+            "materials": {
+              "cloth": 1,
+              "herbs": 2
+            }
+          },
+          "result": "The graft is released with the lover present; the orchard loses its unnatural winter bloom.",
+          "consequence": "The witch survives and can resent or later accept the loss; ordinary fruit returns by season.",
+          "requires": [
+            "boss_named_contact",
+            "boss_chosen_rite",
+            "boss_relationship_callback"
+          ]
+        },
+        {
+          "id": "new_trade",
+          "label": "Offer another source of winter heat",
+          "prerequisites": [
+            "Work with a forge priest or practiced craft companion",
+            "Bring a real warming material"
+          ],
+          "costs": {
+            "days": 4,
+            "materials": {
+              "ore": 2,
+              "wood": 2
+            }
+          },
+          "result": "A plain heated shelter replaces the need to purchase names.",
+          "consequence": "Maintain one household garden service, with periodic fuel costs and no compelled lover.",
+          "requires": [
+            "boss_attended_work",
+            "persistent_local_service"
+          ]
+        },
+        {
+          "id": "buy_names",
+          "label": "Buy the stored names for a private broker",
+          "prerequisites": [
+            "Meet the named broker",
+            "Decide which identified names are being transferred"
+          ],
+          "costs": {
+            "days": 2,
+            "gold": 20
+          },
+          "result": "Receive a finite payment of 55 gold and a broker contact.",
+          "consequence": "The affected named travelers may discover the sale; secrecy is determined by witnesses rather than automatic omniscience.",
+          "requires": [
+            "boss_named_broker",
+            "boss_secret_provenance",
+            "boss_named_grievance"
+          ]
+        }
+      ],
+      "context": {
+        "regionIds": [
+          "blackgrove"
+        ],
+        "terrains": [
+          "forest",
+          "grassland"
+        ],
+        "siteTypes": [
+          "forest",
+          "village"
+        ],
+        "requiredTags": [
+          "orchard",
+          "occupied_household"
+        ],
+        "descentThemes": [
+          "roots"
+        ]
+      },
+      "objective": "End, replace or exploit the orchard bargain; battle victory ends its immediate attack without deciding the lover's relationship.",
+      "requires": [
+        "inspect_dispels_false_ward",
+        "ward_gates_ambush_bonus",
+        "boss_scene_resolution"
+      ],
+      "presentation": "A complete existing-species portrait, with a stable saved boss identity. Named scene illustration is a later art task; do not relabel a different species portrait."
+    },
+    {
+      "id": "saltless_captain",
+      "name": "The Saltless Captain",
+      "regionId": "ashplain",
+      "family": "bandit",
+      "speciesId": "captain",
+      "pattern": "warder",
+      "mechanic": "The captain grants company ward, names a volley target and commands a coordinated strike. A surrendered or defeated supporter lowers the volley bonus; the captain cannot command a captive to act.",
+      "phase": {
+        "thresholdPct": 50,
+        "trigger": "once",
+        "change": "One frightened conscript publicly asks to surrender. Offer a real battle capture/surrender opportunity; refusing leaves the regular volley cycle. The captain gains no free attack from the scene.",
+        "telegraph": "A conscript lowers their weapon and looks toward the well instead of the banner.",
+        "requires": [
+          "boss_once_hp_phase",
+          "in_battle_surrender_offer"
+        ]
+      },
+      "weakness": "physical",
+      "biography": "An Ashplain border officer was promised water for families that sheltered the garrison. The supply caravan was diverted to a claimant's coronation, and the officer began charging every well for the lost shipment. Their company now controls water that once belonged to the very households they claim to protect.",
+      "rumor": "The well guards demand silver but carry empty salt sacks. One frightened soldier asks whether a caravan carrying drinking water ever reached the coronation.",
+      "noncombatApproaches": [
+        {
+          "id": "recover_water",
+          "label": "Recover the diverted water and bring it to the families",
+          "prerequisites": [
+            "Trace the actual coronation convoy",
+            "Complete a supply escort or negotiated return"
+          ],
+          "costs": {
+            "days": 3,
+            "rations": 2
+          },
+          "result": "The company lowers the levy after witnessing the water delivered.",
+          "consequence": "A bounded well service reopens; the captain must still face any existing named charges.",
+          "requires": [
+            "boss_supply_trace",
+            "boss_attended_escort",
+            "persistent_local_service"
+          ]
+        },
+        {
+          "id": "buy_deserters",
+          "label": "Pay willing conscripts to leave the company",
+          "prerequisites": [
+            "Meet the conscript speaker",
+            "persuasion 8 or documented wage arrears"
+          ],
+          "costs": {
+            "days": 2,
+            "gold": 24
+          },
+          "result": "The captain loses enough supporters to accept a limited surrender.",
+          "consequence": "Named soldiers leave independently; no permanent companion is granted without a later recruitment agreement.",
+          "requires": [
+            "boss_wage_clue",
+            "boss_named_surrender"
+          ]
+        },
+        {
+          "id": "take_levy",
+          "label": "Take over the well levy with the claimant's seal",
+          "prerequisites": [
+            "Meet the actual claimant",
+            "Choose a charter or coerced arrangement"
+          ],
+          "costs": {
+            "days": 2,
+            "gold": 30
+          },
+          "result": "Gain the water concession and finite initial income.",
+          "consequence": "Well prices rise, affected households remember the beneficiary, and regional law can respond to witnessed coercion.",
+          "requires": [
+            "boss_named_patron",
+            "boss_route_toll",
+            "observed_offence"
+          ]
+        }
+      ],
+      "context": {
+        "regionIds": [
+          "ashplain"
+        ],
+        "terrains": [
+          "grassland"
+        ],
+        "siteTypes": [
+          "citadel",
+          "camp",
+          "ruin"
+        ],
+        "requiredTags": [
+          "actual_well",
+          "armed_post"
+        ],
+        "descentThemes": [
+          "tower"
+        ]
+      },
+      "objective": "Return water, release the company, capture the captain or control the levy; killing the company is only one approach.",
+      "requires": [
+        "living_support_scales_volley",
+        "party_prey_mark",
+        "boss_scene_resolution"
+      ],
+      "presentation": "A complete existing-species portrait, with a stable saved boss identity. Named scene illustration is a later art task; do not relabel a different species portrait."
+    },
+    {
+      "id": "crown_beneath_ash",
+      "name": "The Crown Beneath the Ash",
+      "regionId": "ashplain",
+      "family": "undead",
+      "speciesId": "hollow_king",
+      "pattern": "ritualist",
+      "mechanic": "The king transfers existing retainer ward into its crown, then makes a charged regal strike. Interrupt the transfer, defeat the ward lender or strip the crown to reduce the strike. Health and ward are never invented from a dead retainer.",
+      "phase": {
+        "thresholdPct": 35,
+        "trigger": "once",
+        "change": "The crown exposes a broken family seal. The king makes one last announced party pulse, then loses its ability to take retainer ward.",
+        "telegraph": "The crown tilts and a small family sign appears beneath the royal metal.",
+        "requires": [
+          "boss_once_hp_phase",
+          "bounded_phase_wave"
+        ]
+      },
+      "weakness": "sacred",
+      "biography": "An Ashplain king ordered a refuge burned because its free hearth undermined his claimant fire. His own youngest child was hiding there with a lover from the defeated house. He rises whenever a new coronation beacon is lit, searching for a family he destroyed while insisting his kingdom must still be grateful.",
+      "rumor": "The returned crown turns away from children singing a refuge song. A charcoal seller says the same song was forbidden at the last living coronation.",
+      "noncombatApproaches": [
+        {
+          "id": "show_hearth",
+          "label": "Bring the lost refuge song and the child surviving token",
+          "prerequisites": [
+            "Find the actual refuge remains",
+            "Hear a surviving household account"
+          ],
+          "costs": {
+            "days": 3,
+            "materials": {
+              "cloth": 1
+            }
+          },
+          "result": "The king recognizes the loss and relinquishes its borrowed crown.",
+          "consequence": "The beacon can become a free hearth; descendants choose their own account of the old dynasty.",
+          "requires": [
+            "boss_surviving_account",
+            "boss_owned_token",
+            "boss_aftermath_hearth"
+          ]
+        },
+        {
+          "id": "end_claim",
+          "label": "End the returning coronation through a public rival settlement",
+          "prerequisites": [
+            "persuasion 9 and scholarship 7",
+            "Win actual current council support"
+          ],
+          "costs": {
+            "days": 4,
+            "gold": 20
+          },
+          "result": "A new political settlement stops the old beacon summons.",
+          "consequence": "A named living ruler gains legitimacy; neither ancestral guilt nor automatic loyalty is imposed on descendants.",
+          "requires": [
+            "boss_council_agreement",
+            "regional_legitimacy_fact"
+          ]
+        },
+        {
+          "id": "borrow_crown",
+          "label": "Use the crown to enforce your own claim",
+          "prerequisites": [
+            "arcana 9",
+            "Choose an actual holding to receive the claim"
+          ],
+          "costs": {
+            "days": 2,
+            "materials": {
+              "crystal": 2
+            }
+          },
+          "result": "Gain one bounded legitimacy or intimidation advantage in that holding.",
+          "consequence": "A coerced claimant benefits; mercy oath and remembered household losses can oppose the bargain.",
+          "requires": [
+            "boss_unique_relic",
+            "bounded_holding_advantage",
+            "observed_offence"
+          ]
+        }
+      ],
+      "context": {
+        "regionIds": [
+          "ashplain"
+        ],
+        "terrains": [
+          "grassland",
+          "mountain"
+        ],
+        "siteTypes": [
+          "citadel",
+          "ruin"
+        ],
+        "requiredTags": [
+          "coronation_beacon",
+          "burned_refuge"
+        ],
+        "descentThemes": [
+          "ossuary",
+          "abyss"
+        ]
+      },
+      "objective": "Resolve the king's loss, replace its political summons or exploit the crown; victory dismantles this returning claim, not every later war.",
+      "requires": [
+        "conserved_ally_ward_transfer",
+        "conditional_attack_plan",
+        "boss_scene_resolution"
+      ],
+      "presentation": "A complete existing-species portrait, with a stable saved boss identity. Named scene illustration is a later art task; do not relabel a different species portrait."
+    },
+    {
+      "id": "listener_drowned_door",
+      "name": "The Listener at the Drowned Door",
+      "regionId": "bellwater",
+      "family": "spirit",
+      "speciesId": "last_archivist",
+      "pattern": "disruptor",
+      "mechanic": "The listener seals only the last used damaging technique for one round; another attack, support move or cleanse remains available. It follows the seal with a protective ward, then a lower party pulse.",
+      "phase": {
+        "thresholdPct": 45,
+        "trigger": "once",
+        "change": "The lost room begins repeating the last technique twice. Keep the same one-round seal cap; increase ward by 4, then expose a seam when the repeat ends.",
+        "telegraph": "Two voices repeat one word, but neither can say anything new.",
+        "requires": [
+          "boss_once_hp_phase",
+          "bounded_repeat_seal",
+          "temporary_exposed_seam"
+        ]
+      },
+      "weakness": "fire",
+      "biography": "Before Bellwater changed its river course, a grandparent kept an evening story room beside the crossing school. The flood took the room while the grandparent was searching for a child who had already escaped. The listening spirit repeats the last words spoken at its drowned door, hoping the next voice will tell it what happened after the water.",
+      "rumor": "Below the crossing school a door repeats the last sentence spoken above it. A grown boat-builder refuses to finish the bedtime story they learned there.",
+      "noncombatApproaches": [
+        {
+          "id": "finish_story",
+          "label": "Bring the escaped child grown account",
+          "prerequisites": [
+            "Find the actual grown boat-builder",
+            "Recover the unfinished story object"
+          ],
+          "costs": {
+            "days": 2,
+            "gold": 6
+          },
+          "result": "The listener hears the survival it could not witness and lets the room fall silent.",
+          "consequence": "A named living person keeps their own history; the school gains the story without pretending the grandparent returned alive.",
+          "requires": [
+            "boss_named_contact",
+            "boss_story_object",
+            "boss_chosen_farewell"
+          ]
+        },
+        {
+          "id": "new_room",
+          "label": "Build an ordinary story room above the flood line",
+          "prerequisites": [
+            "Work with the crossing school",
+            "Bring actual supplies"
+          ],
+          "costs": {
+            "days": 4,
+            "materials": {
+              "wood": 3,
+              "cloth": 2
+            }
+          },
+          "result": "Children gather in a new room while the old spirit hears them through the open doorway.",
+          "consequence": "Gain a bounded school/community service with ongoing upkeep.",
+          "requires": [
+            "boss_attended_work",
+            "persistent_local_service"
+          ]
+        },
+        {
+          "id": "sell_echo",
+          "label": "Sell the repeating-door technique to an academy patron",
+          "prerequisites": [
+            "scholarship 8",
+            "Record the mechanism without claiming fresh testimony"
+          ],
+          "costs": {
+            "days": 2
+          },
+          "result": "A named patron buys the copied mechanism for 40 gold.",
+          "consequence": "The original listener remains unresolved; the boat-builder can resent the profitable copy.",
+          "requires": [
+            "boss_named_patron",
+            "boss_finite_payment",
+            "boss_relationship_callback"
+          ]
+        }
+      ],
+      "context": {
+        "regionIds": [
+          "bellwater"
+        ],
+        "terrains": [
+          "water",
+          "marsh"
+        ],
+        "siteTypes": [
+          "brook",
+          "ruin",
+          "sanctuary"
+        ],
+        "requiredTags": [
+          "drowned_school",
+          "actual_crossing"
+        ],
+        "dungeonFamilies": [
+          "buried_archive"
+        ]
+      },
+      "objective": "Complete a remembered story, build a living room or profit from an unresolved echo; victory gives access to the drowned room without a living witness.",
+      "requires": [
+        "bounded_last_technique",
+        "one_round_technique_seal",
+        "boss_scene_resolution"
+      ],
+      "presentation": "A complete existing-species portrait, with a stable saved boss identity. Named scene illustration is a later art task; do not relabel a different species portrait."
+    },
+    {
+      "id": "guest_would_not_leave",
+      "name": "The Guest Who Would Not Leave",
+      "regionId": "bellwater",
+      "family": "undead",
+      "speciesId": "death_cleric",
+      "pattern": "leech",
+      "mechanic": "The guest sets an empty cup for an injured undead ally, then drains a living party member to fill it. A ward reduces actual transferred health; sacred disruption breaks the cup before the transfer.",
+      "phase": {
+        "thresholdPct": 50,
+        "trigger": "once",
+        "change": "The guest turns the meal inward: its next transfer can heal itself only, with a 6-health cap. Subsequent turns return to the same advertised cycle.",
+        "telegraph": "The empty place at the table is suddenly its own.",
+        "requires": [
+          "boss_once_hp_phase",
+          "bounded_self_drain_phase"
+        ]
+      },
+      "weakness": "sacred",
+      "biography": "A Bellwater burial host refused to close the annual table after their daughter died far from the river. When every other guest aged and stopped returning, the host kept places for their bodies as well as their names. It now takes warmth from living visitors, convinced that an unfinished meal means no one has truly left.",
+      "rumor": "The burial feast serves cold food but leaves guests feverish. A ferryman says one cup at its table has never been touched, even by the dead.",
+      "noncombatApproaches": [
+        {
+          "id": "last_cup",
+          "label": "Bring the daughter's chosen last message and empty her cup",
+          "prerequisites": [
+            "Find a dated message through the actual ferry route",
+            "Hear its stated farewell without inventing a new voice"
+          ],
+          "costs": {
+            "days": 3,
+            "gold": 10
+          },
+          "result": "The host closes the meal and lets the dead guests leave.",
+          "consequence": "A normal yearly memorial remains, while no new feeding donor or resurrected companion is created.",
+          "requires": [
+            "boss_dated_message",
+            "boss_chosen_farewell"
+          ]
+        },
+        {
+          "id": "living_feast",
+          "label": "Replace the stolen warmth with a living household feast",
+          "prerequisites": [
+            "Gain willing household support",
+            "Use real food supplies"
+          ],
+          "costs": {
+            "days": 3,
+            "rations": 3,
+            "gold": 12
+          },
+          "result": "The host attends one bounded memorial without draining a living guest.",
+          "consequence": "Family stress falls modestly; the feast must not become an automatic eternal cure.",
+          "requires": [
+            "boss_food_stock",
+            "bounded_memorial_service"
+          ]
+        },
+        {
+          "id": "sell_cups",
+          "label": "Take the guest's cups for a predatory patron",
+          "prerequisites": [
+            "Meet a patron who values the cups",
+            "Choose whether the theft is concealed or witnessed"
+          ],
+          "costs": {
+            "days": 2
+          },
+          "result": "Receive 50 gold and a dangerous named relic lead.",
+          "consequence": "The feast disperses violently; surviving living guests can identify the theft and regional charges follow actual observation.",
+          "requires": [
+            "boss_owned_relics",
+            "boss_named_patron",
+            "observed_offence"
+          ]
+        }
+      ],
+      "context": {
+        "regionIds": [
+          "bellwater"
+        ],
+        "terrains": [
+          "water",
+          "grassland"
+        ],
+        "siteTypes": [
+          "sanctuary",
+          "village",
+          "ruin"
+        ],
+        "requiredTags": [
+          "burial_table",
+          "actual_ferry_route"
+        ],
+        "descentThemes": [
+          "ossuary"
+        ]
+      },
+      "objective": "Finish, replace or exploit the meal; combat victory ends the drain but does not automatically reconcile the surviving family.",
+      "requires": [
+        "interruptible_ritual",
+        "actual_damage_drain",
+        "conserved_drain_sharing",
+        "boss_scene_resolution"
+      ],
+      "presentation": "A complete existing-species portrait, with a stable saved boss identity. Named scene illustration is a later art task; do not relabel a different species portrait."
+    }
+  ],
+  "implementationAssumptions": {
+    "speciesIds": "Exact48 ENEMY_SPECIES row IDs from baseline enemies.js; no separate ENEMY_SPECIES_IDS export exists.",
+    "weaknessNormalization": "The asset uses sacred; the existing combat engine uses radiance. Normalize sacred to radiance at integration. physical is a new explicit category; it must not mean every old basic attack gets an unexplained bonus.",
+    "patterns": "Only requested pattern names are used. Species pattern is the base; personality modifies cadence/power without replacing species biology.",
+    "cadence": "cycle is ordered design data, not executable engine code. amount on damage actions is a bounded bonus/penalty relative to the encounter base power; ward/heal/drain amounts are absolute maxima. All conditional actions need explicit fallback to an ordinary strike or small ward.",
+    "targets": "Selector names such as largest_current_magic/last_attacker are proposed bounded hooks. Invalid/dead targets reselect a living legal target; no attack may act through a captured/dead enemy.",
+    "resistances": "Resistance here means the status is wholly rejected with clear feedback. Bleed/poison resistance is present on every currently bloodless species; fear depends on remaining personhood, while burn depends on material.",
+    "newStatuses": "poison,fear,prey marks,charge seals and technique seals require turn durations, cleansing, visible descriptions and saved-state validation. No permanent trait or attribute mutation.",
+    "bosses": "Twelve original named encounters, two per real region. Biography, rumor and solution text are authored assets only. Root must implement scene prerequisites, attended costs, named contacts, bounded services and consequences before displaying a playable promise.",
+    "geography": "requiredTags is proposed suitability metadata derived from actual terrain/site/services and remembered scene facts. It must not fabricate a coast, harbor, mine, shrine faith or living witness to satisfy a template. Missing settings require a different encounter or explicit copied-account presentation.",
+    "compatibility": "Snapshot the accepted encounter plan, phase state, identities and proof. Genuine old pending battles/quests retain their existing actors/turns/resources/actions. Never migrate a completed old encounter into a new unsatisfied objective.",
+    "portraitBindings": "Reuse only exact species art for this design pass. Distinct portrait cells alone are not counted as distinct tactical archetypes. Named art and age/curse variants remain separate production tasks."
+  }
+};

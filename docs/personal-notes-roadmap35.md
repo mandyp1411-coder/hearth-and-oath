@@ -1,0 +1,31 @@
+# Roadmap 35: Personal notes and the retained Journal archive
+
+## Bounded scope
+
+Personal reminders are now separate from earned events and learned discoveries. The current character may edit their own active reminders, archive them, and restore them. There is no permanent-delete operation. Each deliberate write changes only the selected personal note plus the ordinary action notice; it spends no time or resources and does not rewrite Journal events, quest receipts or lore. Original note dates never change. Editing preserves the exact submitted text, including casing, Unicode and newlines, after rejecting empty or over-2,000-character input.
+
+New notes use stable local IDs independent of their text or date, the actual dynasty activePersonId, and the current generation. Full view/review identity combines owner, generation and local ID, so an ancestor and heir may each have a note-1 without allowing the ancestor’s key to open the heir’s editor. Duplicate text and dates remain distinct. Reviews capture the original note fingerprint and note version; stale or replayed changes cannot overwrite a newer note. The shell scopes reviews to slot, seed, birth day and current owner, rejects detached forms, and clears reviews on cancellation or life changes. Escape and Cancel do not write. Existing pane-scroll and modal focus restoration are retained. Note controls and text wrap at small widths and honor the reading-size setting.
+
+## Compatibility and ownership
+
+Old day/text-only arrays remain valid and unchanged on read or migration. A generation-1 legacy note can be safely attributed to its current character. Its ID is derived from its unchanged array position until a deliberate change attaches bounded optional metadata. Other rows retain their exact properties and order. In a later-generation save, an unattributed legacy note stays read-only because day and ID shape cannot prove who wrote it. An heir never receives edit rights to an earlier character's note.
+
+The actual successor path creates a fresh birth game, then copies inherited records. It previously did not carry playerNotes at all. It now transfers the closed life’s notebook into that person’s existing dynasty history row as optional personalNotes (at most 100 notes), assigning metadata to safely attributable generation-1 legacy rows during the deliberate succession action while preserving every original text, day and array order. Each history note is validated against its exact owner/generation and that person’s endedDay. The heir starts with an empty current notebook. Earlier history remains unchanged, using the existing 200-record dynasty limit rather than an ever-growing global current-note allowance. Explicit archived status and ownership survive. Ownership uses recorded person IDs and history, not string parsing of IDs: a child record can contain its parent's generation in its ID while becoming the actual active person of a later generation.
+
+Each current life keeps the existing 100-note limit, including its own archived notes, and the 2,000-character text limit. Earlier owners’ notebooks do not consume that capacity. An optional legacyPlayerNotes pool preserves at most the original 100 genuinely unattributed old day/text-only notes. Later-generation ambiguous rows move there verbatim only on a deliberate note write or succession, never on read or migration; explicitly owned notes cannot be placed there. The pool is carried once, not recreated per generation. Archiving does not free that life’s capacity. Family records has a separate searchable/paged read-only view containing both historical and unattributed notes, including their saved archive status.
+
+## Full retained archive
+
+The former Your Life slice(0,120) presentation cutoff is removed. Every retained saved Journal record is reachable through 30-entry pages, including First and Last controls. Finished quest rows have independent 30-entry pages; the existing bounded family-origin archive remains fully available. Search runs over all retained records before paging and reports matched and saved counts. Personal notes have separate 20-entry pages and current/archived/family-record filters. All page, search and review state stays in memory, never in game saves. This does not claim to recover any record absent from an earlier save. Engine addJournal currently appends without pruning; this change does not alter retention.
+
+The place-display formatter now excludes textarea text and explicit verbatim personal-note content, preventing display capitalization from silently changing a note when it is reopened and saved. Input values were already protected as attributes. All user-controlled text remains HTML-escaped; ordinary displayed place headings still receive their existing capitalization.
+
+## Verification
+
+- Pure model, pagination, rendering and formatter tests: 12 passed in approximately 0.20 seconds before the serial engine lane, including three full 100-note generations followed by successful new-life capacity, same-local-ID owner isolation, bounded unknown legacy preservation, and historical date/owner validation.
+- Actual-engine, successor and handler tests are prepared in tests/personal-notes.test.js. They cover save round-trips, genuine public recorded-child succession with 100 parent notes and successful heir note creation, full retained archive traversal, exact edit text, Cancel/Escape, repeat confirms, detached submits, same-owner slot isolation, focus, pane scroll and navigation purity.
+- Handler tests are not browser geometry or screen-reader tests. Browser, build, standalone/offline parity and the release gate are intentionally not run by this implementation worker until the publisher assigns the serial lane. No publication was performed here.
+
+## Generic discovery producer compatibility
+
+The separate [inscription bridge record](personal-notes-inscription-bridge.md) documents the later cross-feature correction: generic maze reads and ID26 scholar reads keep their earned literal Journal proof even when an editable copy cannot fit. They must never rotate or evict existing personal notes. The bridge return contract, exact ID26 caller/test patch, explicit helper add/add resolution and scope-specific pure results are recorded there. Earlier engine results do not certify this later bridge.

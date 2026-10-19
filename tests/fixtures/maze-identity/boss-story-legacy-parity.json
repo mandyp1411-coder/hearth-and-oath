@@ -1,0 +1,461 @@
+{
+  "source": "Published v0.47.0 boss-stories-v27.js, captured before extraction",
+  "rows": [
+    {
+      "id": "init:rainward",
+      "hash": "0cdf1abdcfecb5bbf1c0577f4b0a9327ba2fc03c3ca7f21d76a7ad7e86d99b34"
+    },
+    {
+      "id": "offers:rainward:entry",
+      "hash": "cb1d5aa50c6932db41c7993b4b5a85675b14c9762ac66ec286c803662a040c08"
+    },
+    {
+      "id": "offers:rainward:crossing",
+      "hash": "cb1d5aa50c6932db41c7993b4b5a85675b14c9762ac66ec286c803662a040c08"
+    },
+    {
+      "id": "offers:rainward:ledger",
+      "hash": "564c34a5d8d8dabdfa04cc941e1002b65141a871898b2f6666db92d1e617d11d"
+    },
+    {
+      "id": "offers:rainward:stores",
+      "hash": "12503224d0aebc7ce8c939a1f316422213edcde8fa2484872383baf44b2312f8"
+    },
+    {
+      "id": "offers:rainward:guardian",
+      "hash": "ba3193539730612305cec259a2d49a76dc534c9af9b191b6ca6fad35c4aca550"
+    },
+    {
+      "id": "offers:rainward:last",
+      "hash": "739a62c86caa0017a51ab1589a6b56e8fcfe1a92d6018cb920c0f64bc19d46ae"
+    },
+    {
+      "id": "lead:shut_gate_ferryman:archive",
+      "hash": "fecab548aadf5920f5c158f122cf90ce0ffb0d94b3ef74063d0f28d5aed55830"
+    },
+    {
+      "id": "lead:shut_gate_ferryman:survey",
+      "hash": "aa501a9ba675364203a85cd482bb47cb1ab61f69f0d91919d81a74dad1b74748"
+    },
+    {
+      "id": "lead:shut_gate_ferryman:contact",
+      "hash": "a207ac159d4515d0df6636e404627ec97b9d87c2291fb4ebe817b9833bb2aec5"
+    },
+    {
+      "id": "resolve:shut_gate_ferryman:repair_pump",
+      "hash": "8b6e8ebaa3eabfe046c08fca8b3caa1db1b56abbf30836c9e333849a251ce8b4"
+    },
+    {
+      "id": "resolve:shut_gate_ferryman:bring_passenger",
+      "hash": "9c2eaeb093f0999fb2f3fc2acb7175ba38a274dc1de68bdc2c3500df673e66ac"
+    },
+    {
+      "id": "resolve:shut_gate_ferryman:sell_passage",
+      "hash": "c885db2ee7fa745d75e97100c481b4c286e49db8ae5379b2febe4489028a1e0d"
+    },
+    {
+      "id": "lead:watch_that_never_ends:archive",
+      "hash": "c79d1171237dedd3365530e42d4e88b8df4574adb8316df53287bc2537ddd226"
+    },
+    {
+      "id": "lead:watch_that_never_ends:survey",
+      "hash": "1e1288319f1b7e678d6a9d1616f5b8ab26eed471002cf5744499d40f99755fdb"
+    },
+    {
+      "id": "lead:watch_that_never_ends:contact",
+      "hash": "5593e88c6cfeb98e61f165694c9623c0f4a6205697fe611a26e4f33c98fa4ad9"
+    },
+    {
+      "id": "resolve:watch_that_never_ends:keep_watch",
+      "hash": "4a01a59ffe5501478ca80b0a8eb11f74f375a2d7ae598a4308be314021f4b464"
+    },
+    {
+      "id": "resolve:watch_that_never_ends:return_lamps",
+      "hash": "8be49057625bdff80579a1c7267fa8c9b90744c53c4de282fa90d996ecf64db3"
+    },
+    {
+      "id": "resolve:watch_that_never_ends:bind_watch",
+      "hash": "08e9b97a44233e3bd4d96e81491e069afefb5c195099b00e392e83e6fbd8017f"
+    },
+    {
+      "id": "init:saltreach",
+      "hash": "4b5f23271cf772e15374c5eaa4124f1bde46a8c384274b23c492a9258d6b1fd1"
+    },
+    {
+      "id": "offers:saltreach:entry",
+      "hash": "0185648749b590e4cf00c288c94248c8512c0a9920fbfa43d26754c315e87e75"
+    },
+    {
+      "id": "offers:saltreach:crossing",
+      "hash": "0185648749b590e4cf00c288c94248c8512c0a9920fbfa43d26754c315e87e75"
+    },
+    {
+      "id": "offers:saltreach:ledger",
+      "hash": "1e9b1c3639b1cc7724285a17b596898ba5765119982f84d63d5e721bbc311b70"
+    },
+    {
+      "id": "offers:saltreach:stores",
+      "hash": "8d95bf74111ba0023b72e236c960ec81da9eccfb74500f913e6617da90a884a1"
+    },
+    {
+      "id": "offers:saltreach:guardian",
+      "hash": "36f182dfe299b636b170d1b49fa6bd3a946b066073f4cec71cc467b27716a220"
+    },
+    {
+      "id": "offers:saltreach:last",
+      "hash": "7429c79899b0bb805942d3599f2c35b17d821ee5cdd78eede6efa3e77fa2f5d7"
+    },
+    {
+      "id": "lead:captain_without_shore:archive",
+      "hash": "c44abb74ad4fe0ebd6c5b3342ffbc8b398ca8a220ad43ef8e6f755b299725105"
+    },
+    {
+      "id": "lead:captain_without_shore:survey",
+      "hash": "eaf5350706749eddf15114a9ec7eb03c67d392780a0fbb5065e1c9e0f82deadd"
+    },
+    {
+      "id": "lead:captain_without_shore:contact",
+      "hash": "9296b87f8031e6f8a268eeb6533336bee1a0d66646d97bced0f26e1f3de4a84e"
+    },
+    {
+      "id": "resolve:captain_without_shore:lay_crew",
+      "hash": "15d676d3fb211228f2e531ff0e77b281800ee639727170637500e5f701c004f0"
+    },
+    {
+      "id": "resolve:captain_without_shore:new_berth",
+      "hash": "f01f0b607a5e70814b9a67197b9bedc58ed57c4daf19e1b696ee7746e4881a29"
+    },
+    {
+      "id": "resolve:captain_without_shore:smuggle_crew",
+      "hash": "06639bac6150556eac0b9b40a6d6359cdebcdc4a8e47911e0613d4c3a7e0c2e7"
+    },
+    {
+      "id": "lead:glass_tide_witness:archive",
+      "hash": "5b703cde92d5df550e50f8ace203044d8c6b2b106fc000832ff948fd1bddacf4"
+    },
+    {
+      "id": "lead:glass_tide_witness:survey",
+      "hash": "85de4f014e4c3a4a4029e17a13db0017e4f8b04f2a0500037d4d2a7a28de9271"
+    },
+    {
+      "id": "lead:glass_tide_witness:contact",
+      "hash": "bf86589df437276e776efa9a8ed4c9bcfeb2fa230a93572fadede0df0c06b78f"
+    },
+    {
+      "id": "resolve:glass_tide_witness:last_reflection",
+      "hash": "8355a994c5423d824f65667605b763a39f8c22de9e9b676b9f5436cff38e4785"
+    },
+    {
+      "id": "resolve:glass_tide_witness:redirect_lens",
+      "hash": "a3976e53c1dfed2602203f3391bdd967043427edbc84e1fe91f9393fab8e679d"
+    },
+    {
+      "id": "resolve:glass_tide_witness:keep_eye",
+      "hash": "139ec2e5e767c03a44ec16e41ae983d7097db81edd2419bd9fadb04fddd0f52a"
+    },
+    {
+      "id": "init:highstone",
+      "hash": "6bdfb9adab33660f28f8b73e642d2d063fc20d3b60fd77bf60122357693fcef7"
+    },
+    {
+      "id": "offers:highstone:entry",
+      "hash": "1b2c26e0618cbfb62c7f2a157bd98cab932704fa84e990f57300a796b04ea63f"
+    },
+    {
+      "id": "offers:highstone:crossing",
+      "hash": "1b2c26e0618cbfb62c7f2a157bd98cab932704fa84e990f57300a796b04ea63f"
+    },
+    {
+      "id": "offers:highstone:ledger",
+      "hash": "ec1c89eea0b8a892c0e8e87be7390e4323a18e2a0bb2fad50bcc5a0a82d37adb"
+    },
+    {
+      "id": "offers:highstone:stores",
+      "hash": "24bc05258c46ea5421efa931242ba22e576cbf0951f2eb37cdef0bb9913f7255"
+    },
+    {
+      "id": "offers:highstone:guardian",
+      "hash": "45bd374cf7e02875e1cc301fce44f5ce88ad1341da903a07ef9f78e79d017555"
+    },
+    {
+      "id": "offers:highstone:last",
+      "hash": "f5ab426854eb075f297631f01a9682915a7fcc0101090e88e03d74c7d976a7a2"
+    },
+    {
+      "id": "lead:unfinished_son:archive",
+      "hash": "c749fca970b2185156ad478c354893fb73ce23384ed16ab5376975e2ceb09430"
+    },
+    {
+      "id": "lead:unfinished_son:survey",
+      "hash": "e93b0b3fd6c7ecc82ab4f2475e0fbca3d07a4701c9922f6e5d71f6f000ec8e24"
+    },
+    {
+      "id": "lead:unfinished_son:contact",
+      "hash": "e97deeda2874f226dcb9e26ac20699c561c797b39b4f999ff7e5f116bf03b67e"
+    },
+    {
+      "id": "resolve:unfinished_son:finish_differently",
+      "hash": "b533fd2f0e26e93ac88b4b7f272250cbe253912c8d724a1e24973cf36c4a56fe"
+    },
+    {
+      "id": "resolve:unfinished_son:close_shaft",
+      "hash": "ce30a189b400fd0f2e7229010746dfa3d1493b469d23d275d9f804f91750e712"
+    },
+    {
+      "id": "resolve:unfinished_son:sell_guard",
+      "hash": "6cf949da6c6762d5f6a4baccb91ec94373429ad8fb9a181c4ab0296599a5b170"
+    },
+    {
+      "id": "lead:furnace_widow:archive",
+      "hash": "9650401f818d694873b04e0e63b5dcd05fd25315de3c07a6ff38a2ecaf02c821"
+    },
+    {
+      "id": "lead:furnace_widow:survey",
+      "hash": "d74e237f50bea526635dde81b96723759582b5a5d96fe57f5667ecc74657521c"
+    },
+    {
+      "id": "lead:furnace_widow:contact",
+      "hash": "5b2540da57f50206f5f985e85d0262615aba716a92a76653f7d0dadf46c532aa"
+    },
+    {
+      "id": "resolve:furnace_widow:winter_feed",
+      "hash": "308674d380742fe405d5f59c8bf085cac7191ac5b000b9e8cc326cd8ac0d38b0"
+    },
+    {
+      "id": "resolve:furnace_widow:move_nest",
+      "hash": "e0877f77513e9bca725f071e54f3d2fa17b51359818aae4130e3cebc492ef5d2"
+    },
+    {
+      "id": "resolve:furnace_widow:take_egg",
+      "hash": "c52ee014925dd319e4b1b2decbbd897b27c3b49bceefe7cd78e24d0e5c683068"
+    },
+    {
+      "id": "init:blackgrove",
+      "hash": "a866a758d09092ad7b5f5ed141f00bef3c1314b535605a5919c8a9ca3bb6f67f"
+    },
+    {
+      "id": "offers:blackgrove:entry",
+      "hash": "db6472fa8739870e13b78ebbaaa82866b793ec4fbe7cf18fbe83284ed4ce920c"
+    },
+    {
+      "id": "offers:blackgrove:crossing",
+      "hash": "db6472fa8739870e13b78ebbaaa82866b793ec4fbe7cf18fbe83284ed4ce920c"
+    },
+    {
+      "id": "offers:blackgrove:ledger",
+      "hash": "da29c3532c20c832cd9b92ecb105dd9a787031a475cb6d0eda2c030b5eb2e0be"
+    },
+    {
+      "id": "offers:blackgrove:stores",
+      "hash": "32833ae2a094d230da950fde881dbedf3b819b79c0594ecf7141ad6c9c1464c8"
+    },
+    {
+      "id": "offers:blackgrove:guardian",
+      "hash": "05d4fdf2cc55a759afa463229ce835af83d8f978118f55068980ec41ca4ba29c"
+    },
+    {
+      "id": "offers:blackgrove:last",
+      "hash": "ce956bd6bed9071d9fed9ba5a3ee143319322189dd98a99247c070f599242808"
+    },
+    {
+      "id": "lead:mother_empty_nests:archive",
+      "hash": "e883b57cd75d3c616fd4db7e8a4a32a53e5a110a390c5870fa1ecce5cc14748b"
+    },
+    {
+      "id": "lead:mother_empty_nests:survey",
+      "hash": "7af89bb506264c9b555527af7a5acc4e0821518b77ae92fea97645ad01573946"
+    },
+    {
+      "id": "lead:mother_empty_nests:contact",
+      "hash": "f59d3cd9d3d0682a8790f28e5fb9eed30cfd2bece1fb2bd08a96561705f16aec"
+    },
+    {
+      "id": "resolve:mother_empty_nests:return_birds",
+      "hash": "bdf9327e114dc1be4b2e839eef13e8e479b3859f037b7d6b138ba1519b0e5463"
+    },
+    {
+      "id": "resolve:mother_empty_nests:plant_buffer",
+      "hash": "afa8c15ad62a9a1e351b124b36e866174e0918b892de8ffd8612c47cd7bea0e2"
+    },
+    {
+      "id": "resolve:mother_empty_nests:claim_wood",
+      "hash": "e8c0ada7dcd41b09c9b788c64c66331c39757ef625c990b1a6e865079852089e"
+    },
+    {
+      "id": "lead:orchard_wife:archive",
+      "hash": "f9652909f147211654235abfb3e30c98d63525ca5ff749db9140f2d8bddb1569"
+    },
+    {
+      "id": "lead:orchard_wife:survey",
+      "hash": "94adc105667f5ac34a4faf992176f318f7e07d09d98d2f2e618417e41836fdcb"
+    },
+    {
+      "id": "lead:orchard_wife:contact",
+      "hash": "568d06326cd09d055f038e2ee422d603413f407fdb24b322b1586ed5220e5012"
+    },
+    {
+      "id": "resolve:orchard_wife:release_breath",
+      "hash": "91dca70b7a1cd1d64818aee0b42d699c2201d7aae071b52450f7879dad22379e"
+    },
+    {
+      "id": "resolve:orchard_wife:new_trade",
+      "hash": "4f202904d9c5da30c49c53047e8c65eaf568bc6ee5dd2767b743eda54b90ad11"
+    },
+    {
+      "id": "resolve:orchard_wife:buy_names",
+      "hash": "aef48a1759af7aec505faf074234666b320ddba15ac03bcfd1f0706f1d583e69"
+    },
+    {
+      "id": "init:ashplain",
+      "hash": "9df5977b92fb0a7e8006a5093abbd941f2c4c3784c8dec1613f65055c5f3a5fd"
+    },
+    {
+      "id": "offers:ashplain:entry",
+      "hash": "30d8fcb137de00c9fb13c3afb6352a4ac79201ffb9390f8ab142a90ed91db6d9"
+    },
+    {
+      "id": "offers:ashplain:crossing",
+      "hash": "30d8fcb137de00c9fb13c3afb6352a4ac79201ffb9390f8ab142a90ed91db6d9"
+    },
+    {
+      "id": "offers:ashplain:ledger",
+      "hash": "782db9f6169cafd1f31edb307c6a15db47c4946ba6b5e9804bd06122f23ba172"
+    },
+    {
+      "id": "offers:ashplain:stores",
+      "hash": "5d9ebbbe586313880ef5ef02ee8e2ac10610a120ca5243af4ca7a3a0464c615e"
+    },
+    {
+      "id": "offers:ashplain:guardian",
+      "hash": "58f00f44045119e52e54192bafeac479817811c3eb2ca793a4e6a1fd94f3f0b0"
+    },
+    {
+      "id": "offers:ashplain:last",
+      "hash": "d8c28e21df2e19fd061bcde3cd279c52f79262c1a4683631b76a323b99d1ab15"
+    },
+    {
+      "id": "lead:saltless_captain:archive",
+      "hash": "64a5929ae23dd99898b9dc510be6c4c01e72b99dcd8ec089db72625007173bf3"
+    },
+    {
+      "id": "lead:saltless_captain:survey",
+      "hash": "9521fb0972343712f3ccb6a3dc2254b5fa56c358219ae79ea3e8976886f48f23"
+    },
+    {
+      "id": "lead:saltless_captain:contact",
+      "hash": "f2cd55577953af28b9687a232eccf2b54dc5f5247dbd8a707ab65bf5caee2d54"
+    },
+    {
+      "id": "resolve:saltless_captain:recover_water",
+      "hash": "77c9c5f74312cb1f2e3ff23883ae4c96e0fdfda0af6b43fa08c03f3aa722602e"
+    },
+    {
+      "id": "resolve:saltless_captain:buy_deserters",
+      "hash": "f3a42a71fc6937d5561498bdc80e693e091fe19e6a51ad005b18527953bfd99a"
+    },
+    {
+      "id": "resolve:saltless_captain:take_levy",
+      "hash": "333d6b874ffb54d197d62994b5c7a7bba6a2e24290f28a84ca3bc76a2bd214bf"
+    },
+    {
+      "id": "lead:crown_beneath_ash:archive",
+      "hash": "8d9f62d0a38b57215df06d0b6ddcac0ba8fd478862b7e4aad26a98b5b65b5fe1"
+    },
+    {
+      "id": "lead:crown_beneath_ash:survey",
+      "hash": "4788681952e8ccf54f39739030b1911aeffa13e5548f5d27649f8352548648ee"
+    },
+    {
+      "id": "lead:crown_beneath_ash:contact",
+      "hash": "a3ec3fb79b59f544f4f097885efe3d9edb4d188bcb8ed79038b98122df8ea2ca"
+    },
+    {
+      "id": "resolve:crown_beneath_ash:show_hearth",
+      "hash": "a3b273f5c3f3ea23f4896faa52e3167bf994d61fa1c82034b48cb8d79b94e7e2"
+    },
+    {
+      "id": "resolve:crown_beneath_ash:end_claim",
+      "hash": "3c4f1b168e62a30c6b29a3219cc299fe3959f723ae281bb29d77b9c7d065e773"
+    },
+    {
+      "id": "resolve:crown_beneath_ash:borrow_crown",
+      "hash": "c8b584111294e38eafd1ed78ace111e5d48137b69072725b3225c98054478dc5"
+    },
+    {
+      "id": "init:bellwater",
+      "hash": "41cfb6a6fd91018552e6e7ab42e7516b1bcb819bd3ff7f070c2837f174152dd4"
+    },
+    {
+      "id": "offers:bellwater:entry",
+      "hash": "5d164a68318b1163889c3327a525dc110818141ebfc6d01b0588963364e2d640"
+    },
+    {
+      "id": "offers:bellwater:crossing",
+      "hash": "5d164a68318b1163889c3327a525dc110818141ebfc6d01b0588963364e2d640"
+    },
+    {
+      "id": "offers:bellwater:ledger",
+      "hash": "ec05b7f8b2984d64038eb86d55cd2565ca64e7425710c0356f9738a46a34ab94"
+    },
+    {
+      "id": "offers:bellwater:stores",
+      "hash": "26c505768809568d3eb4ff450164ce417a9cec71dce5a57ad16049d00e400e8a"
+    },
+    {
+      "id": "offers:bellwater:guardian",
+      "hash": "8edb046c932c13c5ca292b654dded24ac1c9c9f03d6c72d0c350f9803fd33af9"
+    },
+    {
+      "id": "offers:bellwater:last",
+      "hash": "19f0fd3682195c33ca1a8952218579e3cb3c5aa67580214ddcd2bdcf2a43b78f"
+    },
+    {
+      "id": "lead:listener_drowned_door:archive",
+      "hash": "ea1961c5e40ceec6d912926a834ae953a24a53e0a27c3913b0d34d7cc5593d85"
+    },
+    {
+      "id": "lead:listener_drowned_door:survey",
+      "hash": "b2675d8f667066a580916e67824d4f16a51e9f9d915f68d6215ac22e2c3396cb"
+    },
+    {
+      "id": "lead:listener_drowned_door:contact",
+      "hash": "69425269446a5af5aba3b29bc9f9004dbdf27dea722b86964381abb7cb45835d"
+    },
+    {
+      "id": "resolve:listener_drowned_door:finish_story",
+      "hash": "9e1b37aefda37dc932f40fa28577f74a220f78e9d5f277b5eae2ba9e21a98358"
+    },
+    {
+      "id": "resolve:listener_drowned_door:new_room",
+      "hash": "af51d829420bcff28aca5beda831fbd34cf2a53c6716750526121b27a5145436"
+    },
+    {
+      "id": "resolve:listener_drowned_door:sell_echo",
+      "hash": "f25d290e037378325b021582f47cfac563812008198d6c34d076b5fa04f0a6d4"
+    },
+    {
+      "id": "lead:guest_would_not_leave:archive",
+      "hash": "bb86e8353d8c4177eccb024d53c1b5ab6207055ac8086d9a9853416872103136"
+    },
+    {
+      "id": "lead:guest_would_not_leave:survey",
+      "hash": "0b3c92f276443f3536b69a55cc194e7d9eb9f717b692b24c52b0fcc88b4f8ced"
+    },
+    {
+      "id": "lead:guest_would_not_leave:contact",
+      "hash": "a057f8eb5c805f4b968bdfd71689a3b13adc9de57132ec83f535c70ab92e78fb"
+    },
+    {
+      "id": "resolve:guest_would_not_leave:last_cup",
+      "hash": "15ba9478842c22e60e3485f41998859d8b4c1569549fc12f51b10446fb4439f7"
+    },
+    {
+      "id": "resolve:guest_would_not_leave:living_feast",
+      "hash": "e7a4deaf72b2ff2e1c859ca67b76fe3683f606fb9d1b640dd084916557ca2195"
+    },
+    {
+      "id": "resolve:guest_would_not_leave:sell_cups",
+      "hash": "790738b8aafed91414c4ec562f1afe8477411a5145944c4230024223edea21a7"
+    }
+  ]
+}

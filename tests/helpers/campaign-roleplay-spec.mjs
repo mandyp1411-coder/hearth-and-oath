@@ -1,0 +1,2 @@
+// Shared parameters for the two original, independently played campaign lives.
+export const campaignSpec={id:'regression-citadel-maker',seed:'roleplay-citadel-maker',name:'The Citadel Smith',birthplace:'citadel',household:'poor',familySetup:'two_parents',birth:'courage',calling:'guardian',profession:'blacksmith',ending:'shatter',policy:{gate:'reinforce',prepare:'professional',final:'testimony'}};

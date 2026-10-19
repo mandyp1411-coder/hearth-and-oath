@@ -1,0 +1,27 @@
+// Stable display labels shared without importing the narrative runtime.
+export const PERSONAL_STORY_TITLES=Object.freeze({
+  "cracked_mark": "A Repair Gone Wrong",
+  "two_names": "The Shared Map",
+  "winter_commons": "The Village Garden",
+  "hearth_letter": "The Family’s Old Debt",
+  "night_door": "A Room for the Winter",
+  "own_key": "Teaching the Trade",
+  "buried_bell": "The Miners Below",
+  "water_second_face": "The Ferryman’s Last Crossing",
+  "hollow_mask": "The Watcher’s Release",
+  "moth_window": "The Guest at the Window",
+  "silverleaf_names": "The Remembering Tree",
+  "stone_last_note": "The Lost Mine Shift",
+  "ninth_hearth": "The Empty House",
+  "bannerless_oath": "The Soldier Without a Company",
+  "drain_lullaby": "A Child Below the Street",
+  "horns_candle": "The Shrine Visitor",
+  "road_four_tracks": "Travelers After Dark",
+  "moon_broken_roof": "Shelter Under the Moon",
+  "marriage_second_chair": "Making Room at Home",
+  "festival_hollow_lantern": "The Festival Workshop",
+  "deserter_unfinished_boot": "A Soldier Looking for Work",
+  "false_accusation_ash_coat": "An Unfair Accusation",
+  "child_other_road": "Your Child’s Own Road",
+  "curse_survivor_last_lamp": "Helping After a Frightening Night"
+});

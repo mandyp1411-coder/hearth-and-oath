@@ -1,0 +1,13 @@
+import { originView } from './family-origins.js';
+
+const command=(actions,ui,id,label)=>{const a=actions.find(a=>a.id===id);return a?ui.button(ui.e(label||a.label),'activity',id,'secondary small',Boolean(a.disabledReason))+(a.disabledReason?`<p class="disabled-reason">${ui.e(a.disabledReason)}</p>`:''):'';};
+export function renderOriginInvitation(s,actions,ui,{query=''}={}){
+ const v=originView(s);if(!v.offered||query&&![v.title,v.premise].join(' ').toLowerCase().includes(query.toLowerCase()))return '';
+ return `<details class="panel" data-family-origin-invitation data-disclosure="family-origin-invitation"><summary>${ui.e(v.title)} · ${v.declined?'Declined · never accepted':'Optional family invitation'}</summary><p>${ui.e(v.premise)}</p><p class="small-copy">Reading this invitation accepts nothing. No deadline, fee or promised reunion.</p><div class="quick-actions">${v.declined?command(actions,ui,'origin_reconsider'):command(actions,ui,'origin_accept','Begin this search')+command(actions,ui,'origin_decline','Decline invitation')}</div></details>`;
+}
+export function renderOriginArchive(s,ui,{query=''}={}){
+ const v=originView(s),r=v.run;if(!r||!['completed','stopped','left_unfinished'].includes(r.status)||query&&![v.title,...r.history.map(h=>h.text)].join(' ').toLowerCase().includes(query.toLowerCase()))return '';
+ const status=r.status==='stopped'?'Closed by choice':r.status==='left_unfinished'?'Left unfinished':r.ending==='uncertain_account'?'An honest uncertain account':'A surviving account heard';
+ return `<details class="panel" data-family-origin-archive><summary>${ui.e(v.title)} · ${ui.e(status)}</summary><p class="small-copy">Began at age ${r.acceptedAge} · day ${r.acceptedDay}. The family’s recorded availability was not changed by this search.</p>${r.history.map(h=>`<article class="remembered-entry"><small>Day ${h.day}</small><h3>${ui.e(h.title)}</h3><p>${ui.e(h.text).replaceAll('\n','<br>')}</p></article>`).join('')}<p class="small-copy">Evidence acquired: ${r.evidence.length}. Acquisition of a statement does not make its uncertain claims true.</p></details>`;
+}
+export function renderOriginActive(s,actions,ui){const v=originView(s),r=v.run;if(!r||!['active','paused'].includes(r.status))return '';return `<article class="panel" data-family-origin-active><h3>${ui.e(v.title)}</h3><p>${ui.e(v.anchor.body)}</p><p class="small-copy">${r.status==='paused'?'Paused. Your earlier people and evidence remain.':'The next search step is your choice. No deadline or promised reunion.'}</p><div class="quick-actions">${actions.filter(a=>a.id.startsWith('origin_')||a.id==='journal_track_family-origin').map(a=>command(actions,ui,a.id)).join('')}</div></article>`;}

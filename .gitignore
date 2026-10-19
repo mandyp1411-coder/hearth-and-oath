@@ -1,0 +1,11 @@
+node_modules/
+.DS_Store
+*.log
+coverage/
+.local/
+artifacts/
+out/
+dist/offline/game-*.part
+__pycache__/
+reference-art/aged-v57/input/
+reference-art/aged-v57/drafts/

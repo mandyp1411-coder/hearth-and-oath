@@ -1,0 +1,91 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import * as E from '../dist/js/engine.js';
+import {startRepertoireRehearsal,repertoireReason} from '../dist/js/repertoire.js';
+import {researchActions,applyResearchAction} from '../dist/js/research-runtime.js';
+import {personalNoteOwner,personalNoteRows,reviewPersonalNote} from '../dist/js/personal-notes.js';
+import {renderSimpleJournal} from '../dist/js/journal-ui-v30.js';
+import {mountApp} from './helpers/ui-surface.mjs';
+import {copy,valid,roundtrip,freshStory,act,pick,walk,acceptResearch,draft,pieceId,researchFinished,deadline,pauseDeadline,adultFamily,introduceFamily,childRecord,calendarYear,closedChapter,archiveVisit} from './helpers/story-life-fixtures.mjs';
+
+const withoutNotice=s=>({...s,notice:''});
+function rejected(s,id){const n=E.chooseAction(s,id);assert.deepEqual(withoutNotice(n),withoutNotice(s));return roundtrip(n);}
+
+test('research attendance blocks repertoire start/continue without locking a merely accepted research question',()=>{
+ let s=draft(acceptResearch(freshStory({home:true}))),id=pieceId(s);s=deadline(s);const day=s.day;s=act(s,'research_copy_axle_rubbing');assert.equal(s.day,day);assert.equal(s.researchPortfolio.project.remainingDays,1);s=pauseDeadline(s);
+ assert.equal(E.getLifeCommitment(s).kind,'research');assert.ok(E.getActions(s).every(a=>a.id.startsWith('research_')));const unlocked=copy(s);unlocked.researchPortfolio.project=null;const excluded=E.getActions(unlocked).filter(a=>!a.disabledReason&&/^(home_rest|fun_|people_hang_)/.test(a.id));assert.ok(excluded.length,'a real appended Home/Social action is available without the project');for(const row of excluded)rejected(s,row.id);assert.equal(repertoireReason(s),'Finish your current commitment first.');assert.equal(E.getActions(s).some(a=>a.id.startsWith('repertoire_')),false);
+ rejected(s,`repertoire_rehearse_${id}_solo`);rejected(s,'repertoire_continue');const detached=copy(s);assert.equal(startRepertoireRehearsal(detached,id,'solo').ok,false);assert.deepEqual(detached,s);
+ s=act(s,'research_cancel');assert.equal(s.researchPortfolio.activeRunId,s.researchPortfolio.runs[0].id);s=act(s,`repertoire_rehearse_${id}_solo`);assert.equal(s.day,day+1);assert.equal(s.repertoire.project,null);assert.equal(s.researchPortfolio.runs[0].copies.length,0);roundtrip(s);
+});
+
+test('repertoire attendance blocks research start/continue; a saved circuit alone does not block public copying',()=>{
+ let s=draft(acceptResearch(freshStory({home:true}))),id=pieceId(s);s=walk(s,'tavern');s=act(s,'repertoire_accept');s=walk(s,'homes');s=deadline(s);const day=s.day;s=act(s,`repertoire_rehearse_${id}_solo`);assert.equal(s.day,day);assert.equal(s.repertoire.project.remainingDays,1);s=pauseDeadline(s);
+ assert.equal(E.getLifeCommitment(s).kind,'repertoire');assert.deepEqual(researchActions(s),[]);rejected(s,'research_copy_axle_rubbing');rejected(s,'research_continue');const detached=copy(s);assert.equal(applyResearchAction(detached,'research_copy_axle_rubbing',{}),false);assert.deepEqual(detached,s);
+ s=act(s,'repertoire_cancel');assert.equal(s.repertoire.circuit.withdrawnDay,null);s=act(s,'research_copy_axle_rubbing');assert.equal(s.day,day+1);assert.equal(s.researchPortfolio.runs[0].copies.length,1);roundtrip(s);
+});
+
+test('combined validation rejects two valid but concurrent captured projects instead of sanitizing either into progress',()=>{
+ let base=draft(acceptResearch(freshStory({home:true}))),id=pieceId(base),a=deadline(copy(base));a=pauseDeadline(act(a,'research_copy_axle_rubbing'));let b=deadline(copy(base));b=pauseDeadline(act(b,`repertoire_rehearse_${id}_solo`));
+ const bad=copy(a);bad.repertoire=copy(b.repertoire);assert.equal(E.validateSave(bad),false);assert.equal(E.migrateSave(bad),null);assert.equal(a.researchPortfolio.project.completedDays,0);assert.equal(b.repertoire.project.completedDays,0);roundtrip(a);roundtrip(b);
+});
+
+test('adult-child clock receives only actual interrupted research/rehearsal attendance, never zero-day or repeated continuation',()=>{
+ let s=introduceFamily(adultFamily());s=draft(acceptResearch(s));const id=pieceId(s),day=s.day;assert.equal(childRecord(s).adultLife.eligibleDays,0);s=deadline(s);s=act(s,'research_copy_axle_rubbing');assert.equal(s.day,day);assert.equal(childRecord(s).adultLife.eligibleDays,0);s=pauseDeadline(s);s=act(s,'research_continue');assert.equal(s.day,day+1);assert.equal(childRecord(s).adultLife.eligibleDays,1);const before=copy(childRecord(s));s=rejected(s,'research_continue');assert.deepEqual(childRecord(s),before);
+ s=act(s,`repertoire_rehearse_${id}_solo`);assert.equal(s.day,day+2);assert.equal(childRecord(s).adultLife.eligibleDays,2);assert.equal(childRecord(s).adultLife.work.trainingDays,1);const final=copy(childRecord(s));s=rejected(s,'repertoire_continue');assert.deepEqual(childRecord(s),final);roundtrip(s);
+});
+
+test('public rendition once stays private; revision/privacy/deletion cannot rewrite frozen receipt or public Journal proof',()=>{
+ let s=draft(walk(freshStory({home:true}),'tavern')),id=pieceId(s);s=act(s,'repertoire_accept');s=act(s,`repertoire_rehearse_${id}_solo`);s=act(s,`repertoire_perform_${id}_solo_once`);assert.equal(s.repertoire.pieces[0].privacy,'private');const receipt=copy(s.repertoire.performances[0]),journal=copy(s.journal);
+ s=act(s,`repertoire_privacy_${id}_public`);s=act(s,`repertoire_revise_${id}_quiet`);assert.equal(s.repertoire.pieces[0].privacy,'private');assert.equal(s.repertoire.pieces[0].revision,receipt.piece.revision+1);assert.equal(s.repertoire.pieces[0].rehearsal,null);s=act(s,`repertoire_delete_${id}`);assert.deepEqual(s.repertoire.performances[0],receipt);assert.deepEqual(s.journal.slice(0,journal.length),journal);assert.equal(receipt.permission,'once');roundtrip(s);
+});
+
+test('public successor composes own livelihood/residence with closed100-note parent book but no research/manuscript authority',()=>{
+ let s=introduceFamily(adultFamily());s=calendarYear(s);const own=copy(childRecord(s).adultLife);assert.ok(own.residence);assert.equal(own.work.trainingDays,14);
+ const owner=personalNoteOwner(s);s.playerNotes=Array.from({length:100},(_,i)=>({day:s.day,text:`exact parent ${i} Ω\n\n<&>`,id:'note-'+(i+1),...owner,noteVersion:0,archived:i===0}));s=roundtrip(s);s=researchFinished(walk(s,'homes'),'self');s=draft(walk(s,'tavern'));s=act(s,`repertoire_rehearse_${pieceId(s)}_solo`);s=archiveVisit(s);const mazeHistory=copy(s.mazeBook.records),receipts=copy(s.mazeBook.expeditionReceipts);const notes=copy(s.playerNotes),book=copy(s.researchPortfolio),works=copy(s.repertoire),oldOwner=s.dynasty.activePersonId,oldJournal=copy(s.journal);s=act(s,'retire');assert.equal(s.event.id,'retirement');s=pick(s,'settle');assert.equal(s.phase,'retired');const parent=copy(s),heir=roundtrip(E.continueAsChild(s,'child-1'));assert.deepEqual(s,parent);
+ assert.equal(heir.dynasty.generation,s.dynasty.generation+1);assert.equal(heir.locationId,own.residence.locationId);assert.equal(heir.hero.profession,'Blacksmith');assert.equal(heir.careers.records.Blacksmith.workedDays,14);assert.equal(heir.careers.records.Blacksmith.paidWorkedDays,0);assert.equal(heir.careers.records.Blacksmith.earnedGold,0);
+ assert.deepEqual(heir.dynasty.history.find(h=>h.personId===oldOwner).personalNotes,notes);assert.deepEqual(heir.playerNotes,[]);assert.equal(reviewPersonalNote(heir,personalNoteRows(heir)[0].key),null);assert.equal(heir.researchPortfolio,undefined);assert.equal(heir.repertoire,undefined);assert.deepEqual(heir.mazeBook.records,mazeHistory);assert.deepEqual(heir.mazeBook.expeditionReceipts,receipts);assert.deepEqual(heir.journal.slice(0,oldJournal.length),oldJournal);assert.deepEqual(s.researchPortfolio,book);assert.deepEqual(s.repertoire,works);
+ const written=roundtrip(E.keepPlayerNote(heir,'a separate heir reminder'));assert.equal(written.playerNotes[0].ownerId,written.dynasty.activePersonId);assert.deepEqual(written.dynasty.history,heir.dynasty.history);
+});
+
+test('new story controls remain behind rehearsal isolation, with no real state or durable storage write',async t=>{
+ const s=draft(acceptResearch(freshStory({home:true}))),ui=await mountApp(t,{states:[s]});await ui.click('title-continue');await ui.click('place-open');await ui.click('place-area','homes');assert.ok(ui.root.querySelector('.research-shelf'));assert.ok(ui.root.querySelector('.repertoire-book'));await ui.click('menu');await ui.click('practice-open','protect_ally');const original=copy(ui.current()),values=JSON.stringify([...ui.values]),writes=[],set=ui.storage.setItem.bind(ui.storage);ui.storage.setItem=(key,value)=>{writes.push(key);return set(key,value);};
+ for(const id of ['research_copy_axle_rubbing',`repertoire_rehearse_${pieceId(s)}_solo`,'research_withdraw','repertoire_delete_'+pieceId(s)]){const button=ui.root.querySelector(`[data-op="activity"][data-id="${id}"]`);assert.ok(button?.isConnected,id);await ui.fire('click',button);}
+ assert.deepEqual(ui.current(),original);assert.equal(JSON.stringify([...ui.values]),values);assert.deepEqual(writes,[]);assert.ok(ui.root.querySelector('.practice-modal'));await ui.click('practice-close');roundtrip(ui.current());
+});
+
+test('interrupted two-day recital credits the child clock only for actual days and freezes its one receipt',()=>{
+ let s=introduceFamily(adultFamily());s=draft(walk(s,'tavern'));const id=pieceId(s);s=act(s,'repertoire_accept');s=act(s,`repertoire_rehearse_${id}_solo`);const before=copy(childRecord(s).adultLife),day=s.day,skills=copy(s.hero.skills),careers=copy(s.careers),joy=s.life.happiness;
+ s.obligations.push({id:'combined-recital-deadline',title:'An existing dated promise',description:'Controlled one-day boundary inside a two-day recital.',dueDay:s.day+4,resolved:false});s=valid(s);s=act(s,`repertoire_perform_${id}_solo_once`);assert.equal(s.day,day+1);assert.equal(s.repertoire.project.completedDays,1);assert.equal(s.repertoire.project.remainingDays,1);assert.equal(s.repertoire.performances.length,0);assert.equal(childRecord(s).adultLife.eligibleDays,before.eligibleDays+1);assert.equal(s.life.happiness,joy);s=roundtrip(pauseDeadline(s));s=act(s,'repertoire_continue');assert.equal(s.day,day+2);assert.equal(childRecord(s).adultLife.eligibleDays,before.eligibleDays+2);assert.equal(s.repertoire.performances.length,1);assert.deepEqual(s.hero.skills,skills);assert.deepEqual(s.careers,careers);const receipt=copy(s.repertoire.performances[0]);s=rejected(s,'repertoire_continue');assert.deepEqual(s.repertoire.performances[0],receipt);roundtrip(s);
+});
+
+test('actual Home research handlers postpone freely then complete once with exact literal proof and reload',async t=>{
+ const s=freshStory({home:true}),ui=await mountApp(t,{states:[s]});await ui.click('title-continue');await ui.click('place-open');await ui.click('place-area','homes');await ui.click('activity','research_offer_third_mark');assert.equal(ui.current().researchPortfolio,undefined);await ui.click('choice','later');assert.equal(ui.current().researchPortfolio.runs.length,0);assert.equal(ui.current().day,s.day);await ui.click('place-open');await ui.click('place-area','homes');await ui.click('activity','research_offer_third_mark');await ui.click('choice','accept');await ui.click('place-open');await ui.click('place-area','homes');
+ for(const id of ['axle_rubbing','repair_shares'])await ui.click('activity','research_copy_'+id);await ui.click('activity','research_compare');await ui.click('choice','compare');await ui.click('place-open');await ui.click('place-area','homes');await ui.click('activity','research_interpret');await ui.click('choice','shared_repair');await ui.click('place-open');await ui.click('place-area','homes');await ui.click('activity','research_conclude');await ui.click('choice','self');const completed=copy(ui.current());assert.equal(completed.day,s.day+3);assert.equal(completed.hero.skills.scholarship,s.hero.skills.scholarship+1);assert.deepEqual(completed.careers,s.careers);assert.equal(completed.researchPortfolio.runs[0].status,'completed');const row=completed.journal.filter(r=>r.tag==='research').at(-1);assert.equal(row.narrativeEdition,30);assert.match(row.text,/share of flour is not ownership/);
+ await ui.click('title-menu');await ui.click('title-continue');assert.deepEqual(ui.current(),completed);await ui.click('tab','journal');await ui.click('workspace-section','journal:archive');assert.ok(ui.root.querySelector('.research-archive'));assert.ok(ui.root.querySelector('.personal-note')===null,'earned folio is not a mutable personal-note card');roundtrip(ui.current());
+});
+
+for(const mode of ['copy','rehearsal','recital'])test(`actual terminal command closes a pending ${mode} without unperformed work or child-clock credit`,()=>{
+ let s=introduceFamily(adultFamily());s=draft(acceptResearch(s));const id=pieceId(s);if(mode==='recital'){s=walk(s,'tavern');s=act(s,'repertoire_accept');s=act(s,`repertoire_rehearse_${id}_solo`);}
+ // Controlled valid imminent-frenzy state, not a naturally played death or a
+ // forged terminal result. The public action and contain command do the work.
+ s.hero.hp=10;s.hero.condition.hunger=100;s.hero.condition.starvedDays=7;s.hero.condition.frenzyHandled=false;s=valid(s);const before=copy(s),command=mode==='copy'?'research_copy_axle_rubbing':mode==='rehearsal'?`repertoire_rehearse_${id}_solo`:`repertoire_perform_${id}_solo_once`;
+ s=act(s,command);assert.equal(s.day,before.day);assert.equal(s.event.id,'curse_frenzy');assert.equal(s.researchPortfolio.project?.completedDays??s.repertoire.project.completedDays,0);assert.equal(s.repertoire.performances.length,0);assert.deepEqual(childRecord(s),childRecord(before));s=pick(s,'contain');assert.equal(s.phase,'retired');assert.equal(s.hero.hp,0);assert.equal(s.researchPortfolio.project,null);assert.equal(s.researchPortfolio.pending,null);assert.equal(s.researchPortfolio.activeRunId,null);assert.equal(s.researchPortfolio.runs[0].status,'interrupted');assert.equal(s.researchPortfolio.runs[0].copies.length,0);assert.equal(s.repertoire.project,null);assert.equal(s.repertoire.pending,null);assert.equal(s.repertoire.performances.length,0);assert.deepEqual(childRecord(s).adultLife,childRecord(before).adultLife);assert.deepEqual(s.repertoire.pieces,before.repertoire.pieces,'no unearned readiness or changed existing rehearsal');assert.deepEqual(s.hero.skills,before.hero.skills);assert.deepEqual(s.careers,before.careers);assert.equal(s.life.happiness,before.life.happiness);s=roundtrip(s);const n=roundtrip(E.continueAsChild(s,'child-1'));assert.equal(n.dynasty.generation,s.dynasty.generation+1);assert.equal(n.researchPortfolio,undefined);assert.equal(n.repertoire,undefined);
+});
+
+test('Journal composition keeps research/expedition archives, public repertoire and editable owner notes with full pagination/search',()=>{
+ let s=researchFinished(freshStory({home:true}));s=draft(walk(s,'tavern'));const id=pieceId(s);s=act(s,'repertoire_accept');s=act(s,`repertoire_rehearse_${id}_solo`);s=act(s,`repertoire_perform_${id}_solo_once`);s=valid(E.keepPlayerNote(s,'private owner reminder Ω'));s=archiveVisit(s);
+ // Only the render cohort is lengthened, not gameplay history/rewards. Existing
+ // rows remain byte-identical; this directly guards the obsolete120-row cutoff.
+ const oldJournal=copy(s.journal);s.journal=[...Array.from({length:140},(_,i)=>({id:'render-fixture-'+i,day:1,age:0,generation:1,title:'Old render row '+i,text:'pagination sentinel '+i,tag:'life'})),...oldJournal];s=valid(s);const input=copy(s),e=x=>String(x??'').replaceAll('&','&amp;').replaceAll('<','&lt;'),ui={e,button:(label,op,id='',cls='',disabled=false)=>`<button data-op="${op}" data-id="${id}" ${disabled?'disabled':''}>${e(label)}</button>`,paragraphs:x=>`<p>${e(x)}</p>`,date:x=>String(x)};
+ const archive=renderSimpleJournal(s,[],{...ui,section:'archive'},{pages:{life:99}}),notes=renderSimpleJournal(s,[],{...ui,section:'notes'});assert.match(archive,/Research folios/);assert.match(archive,/Expedition receipts/);assert.match(archive,/data-journal-paging="life"/);assert.match(archive,/pagination sentinel 0/);assert.match(archive,/Old render row 0/);const rendition=renderSimpleJournal(s,[],{...ui,section:'notes'},{query:'A public rendition only'});assert.match(rendition,/A public rendition only; no manuscript copy was permitted/);assert.match(notes,/private owner reminder Ω/);assert.match(notes,/personal-note-edit/);assert.match(rendition,/Words:/);
+ const found=renderSimpleJournal(s,[],{...ui,section:'archive'},{query:'pagination sentinel 0'});assert.match(found,/pagination sentinel 0/);assert.doesNotMatch(found,/pagination sentinel 139/);assert.deepEqual(s,input);assert.deepEqual(s.journal.slice(-oldJournal.length),oldJournal);
+});
+
+for(const kind of ['research','repertoire'])test(`a genuine pending ${kind} recall blocks otherwise-available retirement without replacing the scene`,()=>{
+ let s=adultFamily();
+ if(kind==='research'){
+  s=researchFinished(s,'private');const recipient=s.researchPortfolio.runs[0].finalization.recipientId;s=draft(s);s=act(s,`repertoire_rehearse_${pieceId(s)}_solo`);s=walk(s,'archive');assert.ok(E.getActions(s).some(a=>a.id==='retire'&&!a.disabledReason));s=act(s,'talk_'+recipient);assert.equal(s.conversations.pending.nodeId,'research_recall');const pending=copy(s.conversations.pending),day=s.day;s=rejected(s,'retire');assert.deepEqual(s.conversations.pending,pending);s=valid(E.replyMessage(s,recipient,'leave'));assert.equal(s.day,day);assert.equal(s.phase,'adult');
+ }else{
+  s=draft(walk(s,'tavern'));const id=pieceId(s);s=act(s,'repertoire_accept');s=act(s,`repertoire_rehearse_${id}_solo`);s=act(s,`repertoire_perform_${id}_solo_once`);s=act(s,`repertoire_rehearse_${id}_solo`);assert.ok(E.getActions(s).some(a=>a.id==='retire'&&!a.disabledReason));const receipt=copy(s.repertoire.performances[0]);s=act(s,'repertoire_recall_'+receipt.listener.id);assert.equal(s.event.id,'repertoire_recall');const event=copy(s.event);s=rejected(s,'retire');assert.deepEqual(s.event,event);s=pick(s,'leave');assert.deepEqual(s.repertoire.performances[0],receipt);
+ }assert.ok(E.getActions(s).some(a=>a.id==='retire'&&!a.disabledReason));roundtrip(s);
+});

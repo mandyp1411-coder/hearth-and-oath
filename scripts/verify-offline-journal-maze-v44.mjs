@@ -1,0 +1,88 @@
+// Execute the exact standalone UI/module graph with synthetic saves and no network.
+// This is semantic handler verification, not browser geometry or physical touch.
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { gunzipSync } from 'node:zlib';
+import { createHash } from 'node:crypto';
+import { createContext, Script } from 'node:vm';
+import {fakeSurface, installOfflineDocument} from '../tests/helpers/ui-surface.mjs';
+import * as E from '../dist/js/engine.js';
+import { settlementServices } from '../dist/js/world-services.js';
+import { settlementWalkPath } from '../dist/js/exploration-ui.js';
+import { addCampingKit, campRecoveryView } from '../dist/js/travel-energy.js';
+import { mazeLayout } from '../dist/js/maze-v31.js';
+import { mazeMovementDescription, mazeMovementForecast } from '../dist/js/maze-rules.js';
+const root = new URL('../', import.meta.url), read = p => readFileSync(new URL(p, root));
+const e = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const manifest = JSON.parse(read('dist/offline/manifest.json')), version = JSON.parse(read('package.json')).version;
+let bytes = read('artifacts/hearth-and-oath.html');
+assert.equal(manifest.version, version); assert.equal(manifest.bytes, bytes.length);
+const sha256 = createHash('sha256').update(bytes).digest('hex'), partsHash = createHash('sha256');
+let total = 0;
+for (const p of manifest.parts) { const part = read('dist/offline/' + p.file); assert.equal(part.length, p.bytes); total += part.length; partsHash.update(part); }
+assert.equal(total, manifest.bytes); assert.equal(partsHash.digest('hex'), sha256);
+let html = installOfflineDocument(bytes.toString('utf8')); bytes = null; assert.ok(html.includes('v' + version));
+const code = html.match(/<script type="module">([\s\S]*?)<\/script>/)[1]; html = null;
+assert.doesNotMatch(code, /^import\s/m);
+const compiled = new Script(code, { filename: 'standalone-journal-maze-v44.js' }); globalThis.gc?.();
+const base = E.migrateSave(JSON.parse(gunzipSync(read('tests/fixtures/v30-explore-travel.json.gz'))).states.base);
+function walk(s, room) { for (const id of settlementWalkPath(s, room) || []) s = E.chooseAction(s, 'atlas_room_' + id); return s; }
+let journal = walk(structuredClone(base), settlementServices(base).find(r => r.kind === 'work').roomId);
+journal = E.chooseAction(journal, E.getActions(journal).find(a => a.id.startsWith('career_accept_') && !a.disabledReason).id);
+journal = E.chooseAction(journal, 'stories_open_cracked_mark'); journal = E.chooseEventOption(journal, 'enterprise');
+assert.equal(journal.stories.arcs[0].chapter, 1);
+// Controlled ready-age fixture. No elapsed year or earned-life balance claim.
+journal.stories.arcs[0].nextAge = journal.age; assert.ok(E.validateSave(journal));
+let maze = structuredClone(base); maze.adventuring.rations = 2;
+for (const p of maze.companions) { p.recruited = p.id === 'mira'; p.active = p.id === 'mira'; }
+maze = E.chooseAction(maze, 'adventure_descend'); assert.ok(maze.maze);
+addCampingKit(maze, 'bedroll'); maze.hero.hp = 10; maze.hero.mp = 0;
+const ally = maze.companions.find(p => p.id === 'mira'); ally.hp = 10; ally.mp = 0;
+assert.ok(E.validateSave(maze));
+const movement = structuredClone(maze); movement.hero.mp = 1; movement.maze.steps = 2; assert.ok(E.validateSave(movement));
+const ui = fakeSurface(), initial = [journal, maze, movement];
+ui.storage.setItem('hearth-and-oath:slots:v1', JSON.stringify({version:1,activeSlot:0,backups:{},slots:initial.map((state,id)=>({id,state,updatedAt:'2026-10-17T00:00:00Z'}))}));
+ui.storage.setItem('hearth-and-oath:life:v1', JSON.stringify(journal));
+const context = createContext({document:ui.document,localStorage:ui.storage,FormData:ui.FormData,window:{innerWidth:390,innerHeight:844,scrollTo(){},scrollBy(){}},requestAnimationFrame:cb=>{cb();return 1;},getComputedStyle:()=>({paddingLeft:'0',paddingTop:'0'}),setTimeout:()=>1,clearTimeout(){},Blob,URL,TextEncoder,TextDecoder,console,queueMicrotask,fetch(){throw Error('Network forbidden during standalone verification');}});
+new Script('globalThis.structuredClone=value=>JSON.parse(JSON.stringify(value));').runInContext(context);
+compiled.runInContext(context); globalThis.gc?.();
+await ui.click('title-continue'); await ui.click('tab','journal');
+const commission = journal.careers.active, storyId = journal.stories.arcs[0].id;
+assert.ok(ui.root.querySelector('[data-journal-commitments]'));
+assert.equal(ui.root.querySelectorAll('[data-commitment]').length,2);
+assert.ok(ui.root.querySelector('[data-commitment="commission:'+commission.id+'"]'));
+assert.match(ui.root.innerHTML,/2 ore, 1 wood/); assert.ok(ui.root.innerHTML.includes('Due day '+commission.dueDay));
+let expected = E.chooseAction(journal,'journal_pause_story:'+storyId);
+await ui.click('activity','journal_pause_story:'+storyId); assert.deepEqual(ui.current(),expected);
+assert.equal(ui.root.querySelector('[data-op="activity"][data-id="stories_open_'+storyId+'"]'),null);
+expected = E.chooseAction(expected,'journal_resume_story:'+storyId);
+await ui.click('activity','journal_resume_story:'+storyId); assert.deepEqual(ui.current(),expected);
+const free = ui.current(); await ui.click('quest-location',commission.locationId); assert.deepEqual(ui.current(),free);
+await ui.click('tab','journal'); await ui.click('activity-visit','work-'+commission.locationId);
+expected = E.visitService(expected,'work-'+commission.locationId); assert.deepEqual(ui.current(),expected);
+await ui.click('service-topic','commissions'); assert.ok(ui.root.querySelector('[data-op="activity"][data-id="career_make_standard"]'));
+await ui.click('tab','journal'); expected = E.chooseAction(expected,'stories_open_'+storyId);
+await ui.click('activity','stories_open_'+storyId); assert.deepEqual(ui.current(),expected); assert.equal(ui.current().event.id,'stories_chapter');
+expected = E.chooseEventOption(expected,'defer'); await ui.click('choice','defer'); assert.deepEqual(ui.current(),expected);
+assert.deepEqual(ui.lives()[1],maze); assert.deepEqual(ui.lives()[2],movement); globalThis.gc?.();
+async function load(id) { await ui.click('title-menu'); await ui.click('title-load'); await ui.click('slot-load',String(id)); globalThis.gc?.(); }
+await load(1); assert.ok(ui.root.querySelector('#maze-expedition-title')); assert.match(ui.root.innerHTML,/Expedition resources/);
+assert.equal((ui.root.innerHTML.match(/class="maze-cell /g)||[]).length,mazeLayout(ui.current().maze).cells.length);
+const before = ui.current(), quote = campRecoveryView(before,{party:true}), reserve = before.companions.find(p=>p.id==='orrin');
+for (const row of quote.travellers) assert.ok(ui.root.innerHTML.includes(e(row.name+': +'+row.hp+' Health, +'+row.mp+' Focus')));
+assert.match(ui.root.innerHTML,/does not revive downed or deceased/); assert.match(ui.root.innerHTML,/Stair exit:/);
+const campExpected = E.chooseAction(before,'maze_camp'); await ui.click('activity','maze_camp'); assert.deepEqual(ui.current(),campExpected);
+assert.equal(ui.current().day,before.day+1); assert.equal(ui.current().trail.kits[0].remaining,before.trail.kits[0].remaining-1);
+const campMaze=structuredClone(before.maze);campMaze.expeditionVisit.days.inside++;campMaze.expeditionVisit.used.kitNights++;
+assert.deepEqual(ui.current().maze,campMaze,'only the once-attended day and consumed kit night extend the account; all physical/fog/proof fields remain exact'); assert.deepEqual(ui.current().companions.find(p=>p.id==='orrin'),reserve);
+assert.ok(ui.current().journal.findLast(j=>j.title==='A Night beside the Trail').text.includes(ally.name+': +8 Health'));
+assert.ok(E.validateSave(ui.current())); globalThis.gc?.();
+await load(2); assert.match(ui.root.innerHTML,/1 Focus \(0 after walking\)/); assert.match(ui.root.innerHTML,/Next movement day in 4 walks/);
+assert.ok(ui.root.innerHTML.includes('aria-describedby="maze-controls maze-movement-cost"'));
+const to=mazeLayout(movement.maze).cells[0].doors[0], moveId='maze_step_'+to, moveExpected=E.chooseAction(movement,moveId);
+ui.root.querySelector('.maze-grid').focus(); await ui.key(to===1?'ArrowRight':'ArrowDown');
+assert.deepEqual(ui.current(),moveExpected); assert.equal(ui.current().maze.steps,3); assert.equal(ui.current().hero.mp,0); assert.equal(ui.current().day,movement.day);
+assert.ok(ui.root.innerHTML.includes(mazeMovementDescription(mazeMovementForecast(moveExpected))));
+assert.match(ui.root.innerHTML,/Next movement day in 3 walks/); assert.ok(E.validateSave(ui.current()));
+assert.deepEqual(ui.lives()[0],expected); assert.deepEqual(ui.lives()[1],campExpected); globalThis.gc?.();
+console.log(JSON.stringify({version,bytes:manifest.bytes,parts:manifest.parts.length,sha256,checks:['exact standalone part parity','embedded accepted commission and deduplicated obligation','embedded free targeted personal pause/resume','embedded free Find and real provider navigation','embedded real returning proposal with no acceptance on defer','embedded named active-party camp and exact online state parity','embedded once-only day/kit/upkeep and unchanged reserve/fog','embedded keyboard movement and pre-step Focus/day horizon','three independent slots preserved'],network:'forbidden',surface:'semantic DOM only; browser layout and physical touch not verified'},null,2));

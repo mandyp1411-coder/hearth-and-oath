@@ -1,0 +1,49 @@
+# Family, health and legacy life audit
+
+Six distinct characters were played from age zero to an actual closed life. They account for 377 original lived years, 1,616 baseline public operations and 1,739 replay operations. Five recorded children then continued as real second-generation characters in the same world. Replays and heirs are reported separately and do not inflate the count of distinct initial lives.
+
+The underlying family systems were useful but did not yet support enough roleplay. A family could be formed and an estate inherited, while most annual scenes ignored that family. Romantic promises could not be ended; adoptees silently copied the parent’s identity. Long play also found two save-breaking birthday/death bugs. These findings justified repairs and a small set of connected family choices, rather than adding more unrelated resource buttons.
+
+## Genuine played routes
+
+| Life | Starting circumstances | Actual route and choices | Final result |
+|---|---|---|---|
+| F01 Brindle Ironwake | Homeless, poor dwarf in a village | Free shelter; community literacy earned through six lessons and an examination; blacksmith work without a combat class; cottage; consensual courtship, pledge and marriage; one biological child and one adopted child; public and academy schooling, nurture and a named successor | Retired at 38. The chosen adopted child, Halwen Duskrest, continued with their own portrait, tastes, learned skills and academy certificate; the other child received a real cash share. |
+| F02 Elowen Lastlight | Poor orphan elf in a sanctuary | A real shelter guardian and deceased birth-parent records; free community lessons; scholar work; cottage; single-parent adoption without marriage; shrine schooling; curiosity and nurture | Retired at 42. Syl Sorrowcross continued with their actual shrine learning, their own tastes and the same family history. |
+| F03 Corin Saltledger | Noble human born in a city with two parents | Merchant career; declined one romance while keeping friendship; courtship and a deferred pledge; honest courtship ending; a chosen partnership, a stay discussion, then separation; later consensual partnership and marriage with another actual person; townhouse; no children | Retired at 70. No heir was fabricated. Earlier courtship, separation and family bereavements remained recorded. |
+| F04 Neris Mossward | Tradesfolk orc in a riverside hamlet with one parent | Healer work; a willing partnership; wedding preparations followed by waiting, then an actual vow; biological and adoptive children; public, shrine and academy education; three individually nurtured children | Retired at 45. Niall Ravenbury continued as the preferred actual child; sibling relationships and equal cash shares remained correct. This route found and now verifies care one day before a birthday. |
+| F05 Bram Fieldwatch | Tradesfolk halfling raised by two parents in a village | Farmer livelihood; actual marriage and a child; public schooling; named elder support and household memories; late-life illness, eight named bereavements and widowhood; memorial choices | Died from physical frailty at 92. Maud Morrowbury continued at their actual older age. The deceased spouse and relatives kept their real death dates and stopped aging. |
+| F06 Vesper Deepcoal | Poor homeless human born in a caravan camp | Free shelter and schooling; miner work; 80 actual three-day paid shifts to create sustained overwork; actual distress, anxiety and depression episodes; free support and physical care; single-parent adoption late in life; academy schooling; no adventuring class | Died from physical frailty at 90. Dagna Lanternward continued with recorded education and individual identity. Mental symptoms did not create crimes, force violence or determine the death cause. |
+
+Every resource, skill, child, relationship and calendar change in these routes came from a public game operation. No saves were hand-edited to create an outcome. Every transition checked save validation, nonnegative gold and immutability of the prior save. Unknown incidental decisions selected a visible offered option and were included in the complete trace.
+
+F01–F03 finished on the original playable baseline. F04–F06 initially exposed blocking bugs; their baseline journeys were completed after those narrow repairs. The final replay includes all integrated improvements. The different starts, decisions, chosen careers and endings are recorded in [family.json](family.json). Full offered event text, all choices and before/after snapshots are preserved in [family-actions.json.gz](family-actions.json.gz), including baseline and replay traces.
+
+## Repairs and connected changes
+
+- **Care and birthdays:** a real healer care choice on day 12,774 previously spent two days past an active birthday target of 12,775. The resulting save was invalid. Care now spends only the available actual day, charges the shown fee once and hands control to the waiting birthday. The untouched valid pre-care save is [family-care-boundary.json](../../tests/fixtures/family-care-boundary.json).
+- **Natural death during a year:** physical frailty correctly closed a miner’s life at 90, but annual progression then opened another birthday scene in that retired save. Birthday processing now stops after a real death.
+- **Annual family roleplay:** eligible adult birthdays can now offer seven kinds of actual-family situation: small children, school-age children, adolescents, adult children, shared household time, elders and widow remembrance. The choices use the people and ages present in that life. Actual child traits, skills and remembered learning grow; a conversation does not grant a parent’s skill or fabricate six attended school sessions.
+- **A relationship can end:** explicit courtship and partnership discussions offer end/stay choices. A separation records its date, preserves co-parent links, real children, property, secrets and earlier memories, and permits a later chosen relationship. It creates no crime or false bereavement. The actions are visible beside the relevant person in Relationships.
+- **Children have identities of their own:** new adoptees receive individual seeded portraits; all new children receive seeded tastes. These are present in lineage inspection and survive succession. Older saved identities are preserved.
+- **Ancestry and aging agree:** fresh elven, dwarven and halfling lineage records use appropriate lifespan ranges. Existing saved lifespans and death dates are unchanged. No import triggers a retroactive death.
+- **A hearth is usable wherever it exists:** household, marriage and child schooling now use the same surviving hearth/market settlement rules as careers. Harbor, caravan, fortress, sanctuary and observatory residents can maintain ordinary family lives.
+- **Guild recognition is clear:** early guild promotions retain their actual wage benefits, while their wording no longer claims technical mastery. New personal ambitions refer to guild recognition; past saved achievement wording remains intact.
+
+The final replay recorded 6, 8, 17, 9, 24 and 13 real annual family decisions respectively. The cases also cover biological and adoptive family links, staying childless, free and paid schooling, infant and adult nurture, preferred successors, divided inheritance, private and shared grief, death, retired living parents and deceased parents in a successor’s actual family.
+
+## What should come next
+
+1. **Let the social world renew itself.** Late-life peers can all die before the player does. Encounters should introduce new adults and make adult children genuine conversational actors. Silently reviving classmates would damage the history the game already preserves.
+2. **Give lessons different pressures.** Six actual school sessions are honest but similar. Teachers, exams, child-led route changes and disagreements should build on actual attendance, rather than awarding a qualification from a single emotional choice.
+3. **Develop visible romantic compatibility.** Bond thresholds currently determine most acceptance. Named values, disagreements, reconciliation and explicit boundaries can add texture without a hidden attractiveness score or rewriting an established consensual partnership.
+4. **Keep wealth meaningful through chosen commitments.** The new household budget improves the stakes, but established careers still produce substantial reserves. Dependent care, elective investments and business situations are better sinks than arbitrary confiscation or debt traps.
+5. **Add older-child adoption through real histories.** Adoption currently introduces a newborn and supports at most three children. An older child should enter with an actual age, appearance, memories, interests and education, not receive a retroactive childhood invented at succession.
+
+These six routes and targeted branch checks do not exhaust every possible generated combination. The report separates observed outcomes from future design suggestions.
+
+## Reproduce
+
+Run `node scripts/playtest-family.mjs`. Set `FAMILY_PROFILE=F01` through `F06` to run one profile, and `FAMILY_PLAYTEST_DIR` to preserve another output directory. Raw states, action traces and summaries are generated under `artifacts/playtest-family-replay` by default. `FAMILY_HEALTH_POLICY=continue` is an optional explicit incidental-care policy for comparison; it does not alter game rules.
+
+Relevant checks: `node --test tests/lineage.test.js tests/life.test.js`. The family-specific additions verify individual child identities, ancestry lifespans, consistent settlement access, real child learning, named relationship consequences, separation, later partnerships and rejection of forged relationship endings. Root integration checks exercise the genuine pre-birthday care fixture and terminal natural-death handling.

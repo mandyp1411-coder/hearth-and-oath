@@ -1,0 +1,34 @@
+{
+  "game": "Hearth & Oath",
+  "version": "0.59.0",
+  "sourceCommit": "6159b6b8c83cbb1b8ed004aa729f224f5487b666",
+  "siteVersion": 94,
+  "liveUrl": "https://hearth-and-oath-v1-a73f.nilled463.chatgpt.site",
+  "deploymentId": "appgdep_6ad57eb995148191bade3cbddbb503af",
+  "deploymentStatus": "succeeded",
+  "packagedAtUtc": "2026-10-19T02:28:34.266664+00:00",
+  "trackedSourceFiles": 5345,
+  "originalAuditPdfs": 7,
+  "snapshotPolicy": "Every tracked file from the published commit, byte-identical; additional handoff documents and supplied audit PDFs. No Git internals, credentials, caches, or generated duplicate build directories.",
+  "verification": {
+    "passedCases": 845,
+    "failedCases": 0,
+    "skippedCases": 0,
+    "completedTestFiles": 62,
+    "discoveredTestFiles": 254,
+    "fullRegressionStatus": "NOT RUN",
+    "immutableSourceStatus": "PASS",
+    "reason": "User explicitly requested immediate publication while the full run was in progress. It stopped at a clean boundary.",
+    "browserLayoutStatus": "NOT RUN",
+    "screenReaderStatus": "NOT RUN",
+    "report": "docs/release-v0590-validation.json",
+    "runtimeIdentity": {
+      "sha256": "d4e6213b8b58f484762c4686474a5b9c3c2c58e46dde1ef1ae89f0735e34e8ca",
+      "files": 1033
+    },
+    "verificationIdentity": {
+      "sha256": "2a88c123873fd7a146aa1a194d79d1a437888a7e5419499f4829d9d551302d53",
+      "files": 443
+    }
+  }
+}

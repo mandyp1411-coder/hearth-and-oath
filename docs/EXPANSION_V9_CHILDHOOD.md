@@ -1,0 +1,15 @@
+# Childhood stories in v0.9
+
+Birth content version 7 replaces the annual childhood triad with 37 authored base situations across infancy, early childhood, school age, older childhood, and adolescence. Nine additional chapters revisit birth keepsakes, a traded toy, a broken cup, a fox, a borrowed forbidden page, an altered attendance mark, household borrowing, an unanswered note, and the decision to leave home. A childhood uses nineteen birthday chapters and avoids repeating its base situations.
+
+The saved world seed, generation, and actual birth date choose the base stories. Earlier choices select the wording and available context of later chapters. Choices have distinct outcomes: covering for a friend, keeping an object, missing a lesson, joining an exclusive group, refusing a household expectation, sharing recognition, spending savings, pursuing a craft, or taking a private interest in a forbidden page. Relationships, happiness, stress, health, attributes and skills change where the incident warrants them. Learning something does not automatically enroll the player in school, award a class, or inform an institution of a secret.
+
+Version 7 adult birthdays also receive twenty rewritten civilian and condition scenes, plus seven family scene kinds. These editions retain the earlier templates' gameplay effects and available choices while replacing explanations of benefits with things people say and do. Actual contribution costs remain visible. Their chronicle entries describe the aftermath rather than repeating the menu's numerical rewards.
+
+Infancy belongs to the named caregiver. Orphaned and homeless births use the actual shelter guardian. The prose does not display predicted skill gains, relationship deltas, or a morality verdict. The chronicle records what happened, with later encounters carrying the evidence of earlier decisions.
+
+The saved birth scene owns the campaign's actual ash, bell, or root omen. Its fifth-year return revisits that same sign alongside the keepsake chosen by the caregiver. A descendant in a resolved covenant retains their own household memories without being assigned the parent's omen.
+
+Each new childhood scene stores its exact wording and effects until answered. Save validation checks the snapshot, authored effect envelope, bounded history, and one record per age. Existing version 4 and 6 pending birthdays retain their original outcomes; content version 7 begins after that choice. Successors start a new storybook rather than inheriting a parent's scenes.
+
+`tests/birth-v9.test.js` checks the 37 base scenes and their three branches, eight conditional callbacks, saved-scene stability, both old pending versions, sixteen adult chapters' exact gameplay parity against version 6, malformed saves, and twelve genuine public-engine birth-to-adulthood runs. Every offered childhood branch at each of those public checkpoints is validated, including save serialization and input immutability. This is childhood coverage, not a claim to have exhausted the full game's outcomes.

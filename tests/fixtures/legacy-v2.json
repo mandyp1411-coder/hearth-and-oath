@@ -1,0 +1,1582 @@
+{
+  "source": "Genuine v0.2 public engine journeys captured before v0.3 rebuild on 2026-10-11; no new timeline/campaign/conversation fields.",
+  "states": {
+    "adult": {
+      "version": 1,
+      "revision": 2,
+      "difficulty": "balanced",
+      "seed": "genuine-v02-capture",
+      "phase": "adult",
+      "day": 5,
+      "age": 18,
+      "hero": {
+        "name": "Legacy Selene",
+        "origin": "village",
+        "household": "poor",
+        "path": "mage",
+        "specialization": null,
+        "profession": "Herbalist",
+        "appearance": {
+          "ancestry": "elf",
+          "skin": "warm",
+          "hair": "silver",
+          "hairStyle": "braided",
+          "eyes": "violet",
+          "face": "soft",
+          "build": "average",
+          "outfit": "scholar",
+          "outfitColor": "forest",
+          "accessory": "none",
+          "scar": "none",
+          "tattoo": "none"
+        },
+        "temperament": "curious",
+        "belief": "ancestors",
+        "pronouns": "she/her",
+        "ambition": "Protect the place I call home",
+        "level": 1,
+        "exp": 8,
+        "hp": 56,
+        "maxHp": 56,
+        "mp": 37,
+        "maxMp": 37,
+        "gold": 63,
+        "attributes": {
+          "strength": 3,
+          "agility": 3,
+          "vitality": 4,
+          "intellect": 7,
+          "willpower": 4,
+          "presence": 4
+        },
+        "skills": {
+          "weapons": 0,
+          "defense": 0,
+          "arcana": 2,
+          "devotion": 1,
+          "stealth": 0,
+          "survival": 3,
+          "scholarship": 2,
+          "persuasion": 1
+        },
+        "condition": null,
+        "potions": 2
+      },
+      "locationId": "home",
+      "world": {
+        "name": "The Bellweather Downs",
+        "crisis": "Ashfall fever",
+        "locations": [
+          {
+            "id": "home",
+            "name": "Mossbell",
+            "type": "village",
+            "travelDays": 1,
+            "safety": 5,
+            "necromancyLaw": "forbidden",
+            "description": "A small settlement of hearth fires, kitchen gardens, and familiar faces. Ashfall fever has reached its households; the old shrine is still a place to seek help. Public necromantic practice is prohibited. Authorities require a witness or evidence before opening an investigation."
+          },
+          {
+            "id": "city",
+            "name": "Larkspire",
+            "type": "city",
+            "travelDays": 3,
+            "safety": 4,
+            "necromancyLaw": "forbidden",
+            "description": "The region’s busy city gathers an academy, a guild market, and a sworn order behind its stone walls. Fever wards are filling, and scholars disagree over the cause. Public necromantic practice is prohibited. Authorities require a witness or evidence before opening an investigation."
+          },
+          {
+            "id": "brook",
+            "name": "Fernbridge",
+            "type": "village",
+            "travelDays": 2,
+            "safety": 4,
+            "necromancyLaw": "forbidden",
+            "description": "A riverside village where millers, ferrymen, and herbalists trade news. Families are sheltering travelers fleeing Ashfall fever. Public necromantic practice is prohibited. Authorities require a witness or evidence before opening an investigation."
+          },
+          {
+            "id": "forest",
+            "name": "The Copperwood",
+            "type": "forest",
+            "travelDays": 2,
+            "safety": 2,
+            "necromancyLaw": "regulated",
+            "description": "Old trails connect both villages beneath a canopy of moss and copper leaves. Healing herbs grow here, alongside hungry beasts and abandoned camps. The nearest settlement’s law governs witnessed acts."
+          },
+          {
+            "id": "ruin",
+            "name": "The Broken Sanctuary",
+            "type": "ruin",
+            "travelDays": 4,
+            "safety": 1,
+            "necromancyLaw": "regulated",
+            "description": "An abandoned sanctuary beyond the forest holds sealed research and the memories of its former keepers. Licensed expeditions may study its ancestral records; disturbing remains without consent invites scrutiny."
+          }
+        ],
+        "laws": "Local councils set their own rules. In Larkspire, necromancy is forbidden; in Mossbell, it is forbidden; in Fernbridge, it is forbidden. Authorities act on witnesses, reports, and discovered evidence. Willing ancestral contact, grave theft, and unwilling soul binding are treated as different acts.",
+        "culture": "Families honor willing ancestors with named memorials; a person’s consent matters beyond death.",
+        "festival": {
+          "name": "The Hearthlight Gathering",
+          "day": 130,
+          "tradition": "Families share a public meal and leave a place for absent friends."
+        },
+        "rumors": [
+          "The academy in Larkspire is seeking careful field observers, not only wealthy students.",
+          "A moonwise ranger near The Copperwood can teach a refuge ritual without demanding allegiance.",
+          "Discreet physicians preserve ancestral knowledge despite the ban."
+        ],
+        "roads": [
+          {
+            "from": "home",
+            "to": "city"
+          },
+          {
+            "from": "home",
+            "to": "brook"
+          },
+          {
+            "from": "home",
+            "to": "forest"
+          },
+          {
+            "from": "brook",
+            "to": "forest"
+          },
+          {
+            "from": "forest",
+            "to": "ruin"
+          }
+        ],
+        "mentors": [
+          {
+            "id": "mentor-paladin",
+            "name": "Dame Mara Alder",
+            "locationId": "city",
+            "specialization": "paladin",
+            "available": true,
+            "description": "A sworn protector offers training and an initiation founded on a visible oath of mercy and protection."
+          },
+          {
+            "id": "mentor-necromancer",
+            "name": "Archivist Iona",
+            "locationId": "city",
+            "specialization": "necromancer",
+            "available": true,
+            "description": "A physician quietly teaches consensual ancestral rites and points promising students toward the ruined archive."
+          },
+          {
+            "id": "mentor-assassin",
+            "name": "The Grey Finch",
+            "locationId": "city",
+            "specialization": "assassin",
+            "available": true,
+            "description": "A discreet contact offers a test of stealth and judgment, with the terms disclosed before accepting."
+          }
+        ],
+        "routes": {
+          "paladin": {
+            "mentorId": "mentor-paladin",
+            "locationIds": [
+              "city",
+              "ruin"
+            ]
+          },
+          "necromancer": {
+            "mentorId": "mentor-necromancer",
+            "locationIds": [
+              "city",
+              "ruin"
+            ]
+          },
+          "assassin": {
+            "mentorId": "mentor-assassin",
+            "locationIds": [
+              "city",
+              "ruin"
+            ]
+          }
+        }
+      },
+      "companions": [
+        {
+          "id": "mira",
+          "name": "Mira",
+          "role": "warrior",
+          "goal": "Earn a place in the Lantern Order without abandoning old friends.",
+          "values": [
+            "Protect the vulnerable",
+            "Never bind an unwilling soul"
+          ],
+          "relationship": 27,
+          "memories": [
+            "At seven, you spoke up when I was falsely accused."
+          ],
+          "recruited": false,
+          "active": false,
+          "hp": 58,
+          "maxHp": 58,
+          "mp": 22,
+          "maxMp": 22,
+          "agility": 5,
+          "baseAge": 18,
+          "age": 18
+        },
+        {
+          "id": "orrin",
+          "name": "Orrin",
+          "role": "mage",
+          "goal": "Find a remedy for the fever and keep his family safe.",
+          "values": [
+            "Consent matters",
+            "Knowledge should heal"
+          ],
+          "relationship": 0,
+          "memories": [],
+          "recruited": false,
+          "active": false,
+          "hp": 43,
+          "maxHp": 43,
+          "mp": 38,
+          "maxMp": 38,
+          "agility": 4,
+          "baseAge": 22,
+          "age": 22
+        },
+        {
+          "id": "kest",
+          "name": "Kest",
+          "role": "rogue",
+          "goal": "Make the western road safe enough to visit a missing sibling.",
+          "values": [
+            "Keep your word",
+            "Do not prey on desperate families"
+          ],
+          "relationship": 0,
+          "memories": [],
+          "recruited": false,
+          "active": false,
+          "hp": 48,
+          "maxHp": 48,
+          "mp": 24,
+          "maxMp": 24,
+          "agility": 8,
+          "baseAge": 19,
+          "age": 19
+        }
+      ],
+      "factions": {
+        "villagers": 0,
+        "academy": 0,
+        "order": 0,
+        "underworld": 0
+      },
+      "legal": {
+        "wanted": false,
+        "evidence": 0,
+        "description": "No local charges or known evidence.",
+        "incidents": []
+      },
+      "flags": {
+        "childhoodStage": 3,
+        "actionsTaken": 2,
+        "education": 0,
+        "clinicShifts": 0,
+        "training": 0,
+        "roadSafe": false,
+        "travelByNight": false,
+        "plagueStage": 0,
+        "childhoodFriend": true,
+        "apprenticeship": true,
+        "ancestralMentor": true,
+        "herbs": 1
+      },
+      "obligations": [],
+      "event": null,
+      "journal": [
+        {
+          "id": "entry-1",
+          "day": 0,
+          "age": 7,
+          "title": "A life begins",
+          "text": "Born in Mossbell, Legacy Selene grows up in a struggling household. The regional crisis is Ashfall fever. Your ambition: Protect the place I call home.",
+          "tag": "origin"
+        },
+        {
+          "id": "entry-2",
+          "day": 0,
+          "age": 7,
+          "title": "A friendship at the wellside",
+          "text": "At seven, you spoke up when I was falsely accused.",
+          "tag": "childhood"
+        },
+        {
+          "id": "entry-3",
+          "day": 0,
+          "age": 12,
+          "title": "An education earned",
+          "text": "An apprenticeship taught practical skills and offered a way to earn a living.",
+          "tag": "childhood"
+        },
+        {
+          "id": "entry-4",
+          "day": 0,
+          "age": 17,
+          "title": "A teacher’s question",
+          "text": "You asked what the prohibition protected. A discreet teacher remembers the question.",
+          "tag": "childhood"
+        },
+        {
+          "id": "entry-5",
+          "day": 0,
+          "age": 18,
+          "title": "Eighteen, and a life to make",
+          "text": "Your adult life begins in Mossbell. Work, learn, make time for people, and choose what to become. Mira can join you in any settlement. Your combat path is mage; your ambition is “Protect the place I call home.”",
+          "tag": "milestone"
+        },
+        {
+          "id": "entry-6",
+          "day": 3,
+          "age": 18,
+          "title": "A living earned",
+          "text": "Three days of herbalist work earned 23 gold. Work at Mossbell keeps you part of the community.",
+          "tag": "livelihood"
+        },
+        {
+          "id": "entry-7",
+          "day": 5,
+          "age": 18,
+          "title": "A person, not a role",
+          "text": "Avel Thorne remembers an unhurried conversation. Their bond with you is now 45.",
+          "tag": "life"
+        }
+      ],
+      "battle": null,
+      "notice": "Avel Thorne remembers an unhurried conversation. Their bond with you is now 45.",
+      "chronicle": null,
+      "equipment": {
+        "owned": [
+          "starter_staff",
+          "travel_cloak"
+        ],
+        "equipped": {
+          "weapon": "starter_staff",
+          "armor": "travel_cloak",
+          "trinket": null
+        },
+        "materials": {
+          "ore": 0,
+          "cloth": 0
+        }
+      },
+      "life": {
+        "focus": "livelihood",
+        "lifestyle": "frugal",
+        "happiness": 63,
+        "stress": 18,
+        "health": 80,
+        "career": {
+          "rank": 0,
+          "experience": 2
+        },
+        "home": {
+          "tier": "lodgings"
+        },
+        "people": [
+          {
+            "id": "kin",
+            "name": "Wren Brindle",
+            "role": "relative",
+            "baseAge": 43,
+            "age": 43,
+            "relation": "family",
+            "disposition": "kind",
+            "bond": 55,
+            "memories": [],
+            "knownFacts": []
+          },
+          {
+            "id": "fellow",
+            "name": "Avel Thorne",
+            "role": "friend",
+            "baseAge": 19,
+            "age": 19,
+            "relation": "friend",
+            "disposition": "kind",
+            "bond": 45,
+            "memories": [
+              "At age 18, you made time to listen to my own worries and hopes."
+            ],
+            "knownFacts": []
+          },
+          {
+            "id": "rival",
+            "name": "Tamsin Hearth",
+            "role": "rival",
+            "baseAge": 21,
+            "age": 21,
+            "relation": "rival",
+            "disposition": "driven",
+            "bond": 18,
+            "memories": [],
+            "knownFacts": []
+          },
+          {
+            "id": "river",
+            "name": "Elowen Brindle",
+            "role": "suitor",
+            "baseAge": 22,
+            "age": 22,
+            "relation": "acquaintance",
+            "disposition": "reserved",
+            "bond": 30,
+            "memories": [],
+            "knownFacts": []
+          }
+        ],
+        "partnerId": null,
+        "courtshipId": null,
+        "children": [],
+        "goals": [],
+        "achievements": [],
+        "yearHistory": [],
+        "eventHistory": [],
+        "yearlyDecisions": [],
+        "pendingEvent": null,
+        "householdSupport": false,
+        "plan": null
+      }
+    },
+    "annualPlan": {
+      "version": 1,
+      "revision": 2,
+      "difficulty": "balanced",
+      "seed": "genuine-v02-capture",
+      "phase": "adult",
+      "day": 35,
+      "age": 18,
+      "hero": {
+        "name": "Legacy Selene",
+        "origin": "village",
+        "household": "poor",
+        "path": "mage",
+        "specialization": null,
+        "profession": "Herbalist",
+        "appearance": {
+          "ancestry": "elf",
+          "skin": "warm",
+          "hair": "silver",
+          "hairStyle": "braided",
+          "eyes": "violet",
+          "face": "soft",
+          "build": "average",
+          "outfit": "scholar",
+          "outfitColor": "forest",
+          "accessory": "none",
+          "scar": "none",
+          "tattoo": "none"
+        },
+        "temperament": "curious",
+        "belief": "ancestors",
+        "pronouns": "she/her",
+        "ambition": "Protect the place I call home",
+        "level": 1,
+        "exp": 8,
+        "hp": 56,
+        "maxHp": 56,
+        "mp": 37,
+        "maxMp": 37,
+        "gold": 71,
+        "attributes": {
+          "strength": 3,
+          "agility": 3,
+          "vitality": 4,
+          "intellect": 7,
+          "willpower": 4,
+          "presence": 4
+        },
+        "skills": {
+          "weapons": 0,
+          "defense": 0,
+          "arcana": 3,
+          "devotion": 1,
+          "stealth": 0,
+          "survival": 3,
+          "scholarship": 3,
+          "persuasion": 1
+        },
+        "condition": null,
+        "potions": 2
+      },
+      "locationId": "home",
+      "world": {
+        "name": "The Bellweather Downs",
+        "crisis": "Ashfall fever",
+        "locations": [
+          {
+            "id": "home",
+            "name": "Mossbell",
+            "type": "village",
+            "travelDays": 1,
+            "safety": 5,
+            "necromancyLaw": "forbidden",
+            "description": "A small settlement of hearth fires, kitchen gardens, and familiar faces. Ashfall fever has reached its households; the old shrine is still a place to seek help. Public necromantic practice is prohibited. Authorities require a witness or evidence before opening an investigation."
+          },
+          {
+            "id": "city",
+            "name": "Larkspire",
+            "type": "city",
+            "travelDays": 3,
+            "safety": 4,
+            "necromancyLaw": "forbidden",
+            "description": "The region’s busy city gathers an academy, a guild market, and a sworn order behind its stone walls. Fever wards are filling, and scholars disagree over the cause. Public necromantic practice is prohibited. Authorities require a witness or evidence before opening an investigation."
+          },
+          {
+            "id": "brook",
+            "name": "Fernbridge",
+            "type": "village",
+            "travelDays": 2,
+            "safety": 4,
+            "necromancyLaw": "forbidden",
+            "description": "A riverside village where millers, ferrymen, and herbalists trade news. Families are sheltering travelers fleeing Ashfall fever. Public necromantic practice is prohibited. Authorities require a witness or evidence before opening an investigation."
+          },
+          {
+            "id": "forest",
+            "name": "The Copperwood",
+            "type": "forest",
+            "travelDays": 2,
+            "safety": 2,
+            "necromancyLaw": "regulated",
+            "description": "Old trails connect both villages beneath a canopy of moss and copper leaves. Healing herbs grow here, alongside hungry beasts and abandoned camps. The nearest settlement’s law governs witnessed acts."
+          },
+          {
+            "id": "ruin",
+            "name": "The Broken Sanctuary",
+            "type": "ruin",
+            "travelDays": 4,
+            "safety": 1,
+            "necromancyLaw": "regulated",
+            "description": "An abandoned sanctuary beyond the forest holds sealed research and the memories of its former keepers. Licensed expeditions may study its ancestral records; disturbing remains without consent invites scrutiny."
+          }
+        ],
+        "laws": "Local councils set their own rules. In Larkspire, necromancy is forbidden; in Mossbell, it is forbidden; in Fernbridge, it is forbidden. Authorities act on witnesses, reports, and discovered evidence. Willing ancestral contact, grave theft, and unwilling soul binding are treated as different acts.",
+        "culture": "Families honor willing ancestors with named memorials; a person’s consent matters beyond death.",
+        "festival": {
+          "name": "The Hearthlight Gathering",
+          "day": 130,
+          "tradition": "Families share a public meal and leave a place for absent friends."
+        },
+        "rumors": [
+          "The academy in Larkspire is seeking careful field observers, not only wealthy students.",
+          "A moonwise ranger near The Copperwood can teach a refuge ritual without demanding allegiance.",
+          "Discreet physicians preserve ancestral knowledge despite the ban."
+        ],
+        "roads": [
+          {
+            "from": "home",
+            "to": "city"
+          },
+          {
+            "from": "home",
+            "to": "brook"
+          },
+          {
+            "from": "home",
+            "to": "forest"
+          },
+          {
+            "from": "brook",
+            "to": "forest"
+          },
+          {
+            "from": "forest",
+            "to": "ruin"
+          }
+        ],
+        "mentors": [
+          {
+            "id": "mentor-paladin",
+            "name": "Dame Mara Alder",
+            "locationId": "city",
+            "specialization": "paladin",
+            "available": true,
+            "description": "A sworn protector offers training and an initiation founded on a visible oath of mercy and protection."
+          },
+          {
+            "id": "mentor-necromancer",
+            "name": "Archivist Iona",
+            "locationId": "city",
+            "specialization": "necromancer",
+            "available": true,
+            "description": "A physician quietly teaches consensual ancestral rites and points promising students toward the ruined archive."
+          },
+          {
+            "id": "mentor-assassin",
+            "name": "The Grey Finch",
+            "locationId": "city",
+            "specialization": "assassin",
+            "available": true,
+            "description": "A discreet contact offers a test of stealth and judgment, with the terms disclosed before accepting."
+          }
+        ],
+        "routes": {
+          "paladin": {
+            "mentorId": "mentor-paladin",
+            "locationIds": [
+              "city",
+              "ruin"
+            ]
+          },
+          "necromancer": {
+            "mentorId": "mentor-necromancer",
+            "locationIds": [
+              "city",
+              "ruin"
+            ]
+          },
+          "assassin": {
+            "mentorId": "mentor-assassin",
+            "locationIds": [
+              "city",
+              "ruin"
+            ]
+          }
+        }
+      },
+      "companions": [
+        {
+          "id": "mira",
+          "name": "Mira",
+          "role": "warrior",
+          "goal": "Earn a place in the Lantern Order without abandoning old friends.",
+          "values": [
+            "Protect the vulnerable",
+            "Never bind an unwilling soul"
+          ],
+          "relationship": 27,
+          "memories": [
+            "At seven, you spoke up when I was falsely accused."
+          ],
+          "recruited": false,
+          "active": false,
+          "hp": 58,
+          "maxHp": 58,
+          "mp": 22,
+          "maxMp": 22,
+          "agility": 5,
+          "baseAge": 18,
+          "age": 18
+        },
+        {
+          "id": "orrin",
+          "name": "Orrin",
+          "role": "mage",
+          "goal": "Find a remedy for the fever and keep his family safe.",
+          "values": [
+            "Consent matters",
+            "Knowledge should heal"
+          ],
+          "relationship": 0,
+          "memories": [],
+          "recruited": false,
+          "active": false,
+          "hp": 43,
+          "maxHp": 43,
+          "mp": 38,
+          "maxMp": 38,
+          "agility": 4,
+          "baseAge": 22,
+          "age": 22
+        },
+        {
+          "id": "kest",
+          "name": "Kest",
+          "role": "rogue",
+          "goal": "Make the western road safe enough to visit a missing sibling.",
+          "values": [
+            "Keep your word",
+            "Do not prey on desperate families"
+          ],
+          "relationship": 0,
+          "memories": [],
+          "recruited": false,
+          "active": false,
+          "hp": 48,
+          "maxHp": 48,
+          "mp": 24,
+          "maxMp": 24,
+          "agility": 8,
+          "baseAge": 19,
+          "age": 19
+        }
+      ],
+      "factions": {
+        "villagers": 0,
+        "academy": 0,
+        "order": 0,
+        "underworld": 0
+      },
+      "legal": {
+        "wanted": false,
+        "evidence": 0,
+        "description": "No local charges or known evidence.",
+        "incidents": []
+      },
+      "flags": {
+        "childhoodStage": 3,
+        "actionsTaken": 3,
+        "education": 1,
+        "clinicShifts": 0,
+        "training": 0,
+        "roadSafe": false,
+        "travelByNight": false,
+        "plagueStage": 1,
+        "childhoodFriend": true,
+        "apprenticeship": true,
+        "ancestralMentor": true,
+        "herbs": 1
+      },
+      "obligations": [
+        {
+          "id": "plague_return",
+          "title": "Answer your hometown’s plea",
+          "dueDay": 65,
+          "description": "Visit the fever clinic or bring a remedy to Mossbell.",
+          "resolved": false
+        }
+      ],
+      "event": {
+        "id": "plague_letter",
+        "title": "A letter from home",
+        "category": "The Ashfall story",
+        "body": "Mira brings a letter from Mossbell. Ashfall fever has reached the wellside houses. The official remedy eases the pain but does not stop the illness. “You have learned things we haven’t,” your teacher writes. “Will you come?” There is a clinic at home, and the academy in Larkspire knows the old records.",
+        "choices": [
+          {
+            "id": "promise",
+            "label": "Promise to help",
+            "description": "Gain village trust. The promise is due within 30 days; the crisis remains playable if you are late."
+          },
+          {
+            "id": "questions",
+            "label": "Ask what has already been tried",
+            "description": "Gain scholarship. Learn that the old burial ground and a spring upstream may be connected."
+          },
+          {
+            "id": "later",
+            "label": "Say you need time",
+            "description": "You keep your other commitments. Mira remembers your honesty, but the letter remains in your journal."
+          }
+        ]
+      },
+      "journal": [
+        {
+          "id": "entry-1",
+          "day": 0,
+          "age": 7,
+          "title": "A life begins",
+          "text": "Born in Mossbell, Legacy Selene grows up in a struggling household. The regional crisis is Ashfall fever. Your ambition: Protect the place I call home.",
+          "tag": "origin"
+        },
+        {
+          "id": "entry-2",
+          "day": 0,
+          "age": 7,
+          "title": "A friendship at the wellside",
+          "text": "At seven, you spoke up when I was falsely accused.",
+          "tag": "childhood"
+        },
+        {
+          "id": "entry-3",
+          "day": 0,
+          "age": 12,
+          "title": "An education earned",
+          "text": "An apprenticeship taught practical skills and offered a way to earn a living.",
+          "tag": "childhood"
+        },
+        {
+          "id": "entry-4",
+          "day": 0,
+          "age": 17,
+          "title": "A teacher’s question",
+          "text": "You asked what the prohibition protected. A discreet teacher remembers the question.",
+          "tag": "childhood"
+        },
+        {
+          "id": "entry-5",
+          "day": 0,
+          "age": 18,
+          "title": "Eighteen, and a life to make",
+          "text": "Your adult life begins in Mossbell. Work, learn, make time for people, and choose what to become. Mira can join you in any settlement. Your combat path is mage; your ambition is “Protect the place I call home.”",
+          "tag": "milestone"
+        },
+        {
+          "id": "entry-6",
+          "day": 3,
+          "age": 18,
+          "title": "A living earned",
+          "text": "Three days of herbalist work earned 23 gold. Work at Mossbell keeps you part of the community.",
+          "tag": "livelihood"
+        },
+        {
+          "id": "entry-7",
+          "day": 5,
+          "age": 18,
+          "title": "A person, not a role",
+          "text": "Avel Thorne remembers an unhurried conversation. Their bond with you is now 45.",
+          "tag": "life"
+        },
+        {
+          "id": "entry-8",
+          "day": 5,
+          "age": 18,
+          "title": "A year with intention",
+          "text": "You chose follow your curiosity and a humble hearth. 360 days until age 19. Forecast includes housing upkeep and lessons. Optional purchases, event choices, and time spent on other activities change the outcome.",
+          "tag": "yearbook"
+        }
+      ],
+      "battle": null,
+      "notice": "",
+      "chronicle": null,
+      "equipment": {
+        "owned": [
+          "starter_staff",
+          "travel_cloak"
+        ],
+        "equipped": {
+          "weapon": "starter_staff",
+          "armor": "travel_cloak",
+          "trinket": null
+        },
+        "materials": {
+          "ore": 0,
+          "cloth": 0
+        }
+      },
+      "life": {
+        "focus": "education",
+        "lifestyle": "frugal",
+        "happiness": 65,
+        "stress": 20,
+        "health": 80,
+        "career": {
+          "rank": 0,
+          "experience": 2
+        },
+        "home": {
+          "tier": "lodgings"
+        },
+        "people": [
+          {
+            "id": "kin",
+            "name": "Wren Brindle",
+            "role": "relative",
+            "baseAge": 43,
+            "age": 43,
+            "relation": "family",
+            "disposition": "kind",
+            "bond": 55,
+            "memories": [],
+            "knownFacts": []
+          },
+          {
+            "id": "fellow",
+            "name": "Avel Thorne",
+            "role": "friend",
+            "baseAge": 19,
+            "age": 19,
+            "relation": "friend",
+            "disposition": "kind",
+            "bond": 45,
+            "memories": [
+              "At age 18, you made time to listen to my own worries and hopes."
+            ],
+            "knownFacts": []
+          },
+          {
+            "id": "rival",
+            "name": "Tamsin Hearth",
+            "role": "rival",
+            "baseAge": 21,
+            "age": 21,
+            "relation": "rival",
+            "disposition": "driven",
+            "bond": 18,
+            "memories": [],
+            "knownFacts": []
+          },
+          {
+            "id": "river",
+            "name": "Elowen Brindle",
+            "role": "suitor",
+            "baseAge": 22,
+            "age": 22,
+            "relation": "acquaintance",
+            "disposition": "reserved",
+            "bond": 30,
+            "memories": [],
+            "knownFacts": []
+          }
+        ],
+        "partnerId": null,
+        "courtshipId": null,
+        "children": [],
+        "goals": [],
+        "achievements": [],
+        "yearHistory": [],
+        "eventHistory": [],
+        "yearlyDecisions": [],
+        "pendingEvent": null,
+        "householdSupport": false,
+        "plan": {
+          "id": "plan-5",
+          "startDay": 5,
+          "targetDay": 365,
+          "focus": "education",
+          "lifestyle": "frugal",
+          "nextDecisionDay": 95,
+          "income": 22,
+          "expenses": 14,
+          "steps": 1,
+          "decisions": [],
+          "earnedAccrual": 22.19178082191781,
+          "expenseAccrual": 14.794520547945206,
+          "incomePaid": 22,
+          "expensesPaid": 14,
+          "pausedReason": ""
+        }
+      }
+    },
+    "midbattle": {
+      "version": 1,
+      "revision": 2,
+      "difficulty": "balanced",
+      "seed": "genuine-v02-capture",
+      "phase": "adult",
+      "day": 10,
+      "age": 18,
+      "hero": {
+        "name": "Legacy Selene",
+        "origin": "village",
+        "household": "poor",
+        "path": "mage",
+        "specialization": null,
+        "profession": "Herbalist",
+        "appearance": {
+          "ancestry": "elf",
+          "skin": "warm",
+          "hair": "silver",
+          "hairStyle": "braided",
+          "eyes": "violet",
+          "face": "soft",
+          "build": "average",
+          "outfit": "scholar",
+          "outfitColor": "forest",
+          "accessory": "none",
+          "scar": "none",
+          "tattoo": "none"
+        },
+        "temperament": "curious",
+        "belief": "ancestors",
+        "pronouns": "she/her",
+        "ambition": "Protect the place I call home",
+        "level": 1,
+        "exp": 8,
+        "hp": 56,
+        "maxHp": 56,
+        "mp": 37,
+        "maxMp": 37,
+        "gold": 63,
+        "attributes": {
+          "strength": 3,
+          "agility": 3,
+          "vitality": 4,
+          "intellect": 7,
+          "willpower": 4,
+          "presence": 4
+        },
+        "skills": {
+          "weapons": 0,
+          "defense": 0,
+          "arcana": 2,
+          "devotion": 1,
+          "stealth": 0,
+          "survival": 3,
+          "scholarship": 2,
+          "persuasion": 1
+        },
+        "condition": null,
+        "potions": 2
+      },
+      "locationId": "forest",
+      "world": {
+        "name": "The Bellweather Downs",
+        "crisis": "Ashfall fever",
+        "locations": [
+          {
+            "id": "home",
+            "name": "Mossbell",
+            "type": "village",
+            "travelDays": 1,
+            "safety": 5,
+            "necromancyLaw": "forbidden",
+            "description": "A small settlement of hearth fires, kitchen gardens, and familiar faces. Ashfall fever has reached its households; the old shrine is still a place to seek help. Public necromantic practice is prohibited. Authorities require a witness or evidence before opening an investigation."
+          },
+          {
+            "id": "city",
+            "name": "Larkspire",
+            "type": "city",
+            "travelDays": 3,
+            "safety": 4,
+            "necromancyLaw": "forbidden",
+            "description": "The region’s busy city gathers an academy, a guild market, and a sworn order behind its stone walls. Fever wards are filling, and scholars disagree over the cause. Public necromantic practice is prohibited. Authorities require a witness or evidence before opening an investigation."
+          },
+          {
+            "id": "brook",
+            "name": "Fernbridge",
+            "type": "village",
+            "travelDays": 2,
+            "safety": 4,
+            "necromancyLaw": "forbidden",
+            "description": "A riverside village where millers, ferrymen, and herbalists trade news. Families are sheltering travelers fleeing Ashfall fever. Public necromantic practice is prohibited. Authorities require a witness or evidence before opening an investigation."
+          },
+          {
+            "id": "forest",
+            "name": "The Copperwood",
+            "type": "forest",
+            "travelDays": 2,
+            "safety": 2,
+            "necromancyLaw": "regulated",
+            "description": "Old trails connect both villages beneath a canopy of moss and copper leaves. Healing herbs grow here, alongside hungry beasts and abandoned camps. The nearest settlement’s law governs witnessed acts."
+          },
+          {
+            "id": "ruin",
+            "name": "The Broken Sanctuary",
+            "type": "ruin",
+            "travelDays": 4,
+            "safety": 1,
+            "necromancyLaw": "regulated",
+            "description": "An abandoned sanctuary beyond the forest holds sealed research and the memories of its former keepers. Licensed expeditions may study its ancestral records; disturbing remains without consent invites scrutiny."
+          }
+        ],
+        "laws": "Local councils set their own rules. In Larkspire, necromancy is forbidden; in Mossbell, it is forbidden; in Fernbridge, it is forbidden. Authorities act on witnesses, reports, and discovered evidence. Willing ancestral contact, grave theft, and unwilling soul binding are treated as different acts.",
+        "culture": "Families honor willing ancestors with named memorials; a person’s consent matters beyond death.",
+        "festival": {
+          "name": "The Hearthlight Gathering",
+          "day": 130,
+          "tradition": "Families share a public meal and leave a place for absent friends."
+        },
+        "rumors": [
+          "The academy in Larkspire is seeking careful field observers, not only wealthy students.",
+          "A moonwise ranger near The Copperwood can teach a refuge ritual without demanding allegiance.",
+          "Discreet physicians preserve ancestral knowledge despite the ban."
+        ],
+        "roads": [
+          {
+            "from": "home",
+            "to": "city"
+          },
+          {
+            "from": "home",
+            "to": "brook"
+          },
+          {
+            "from": "home",
+            "to": "forest"
+          },
+          {
+            "from": "brook",
+            "to": "forest"
+          },
+          {
+            "from": "forest",
+            "to": "ruin"
+          }
+        ],
+        "mentors": [
+          {
+            "id": "mentor-paladin",
+            "name": "Dame Mara Alder",
+            "locationId": "city",
+            "specialization": "paladin",
+            "available": true,
+            "description": "A sworn protector offers training and an initiation founded on a visible oath of mercy and protection."
+          },
+          {
+            "id": "mentor-necromancer",
+            "name": "Archivist Iona",
+            "locationId": "city",
+            "specialization": "necromancer",
+            "available": true,
+            "description": "A physician quietly teaches consensual ancestral rites and points promising students toward the ruined archive."
+          },
+          {
+            "id": "mentor-assassin",
+            "name": "The Grey Finch",
+            "locationId": "city",
+            "specialization": "assassin",
+            "available": true,
+            "description": "A discreet contact offers a test of stealth and judgment, with the terms disclosed before accepting."
+          }
+        ],
+        "routes": {
+          "paladin": {
+            "mentorId": "mentor-paladin",
+            "locationIds": [
+              "city",
+              "ruin"
+            ]
+          },
+          "necromancer": {
+            "mentorId": "mentor-necromancer",
+            "locationIds": [
+              "city",
+              "ruin"
+            ]
+          },
+          "assassin": {
+            "mentorId": "mentor-assassin",
+            "locationIds": [
+              "city",
+              "ruin"
+            ]
+          }
+        }
+      },
+      "companions": [
+        {
+          "id": "mira",
+          "name": "Mira",
+          "role": "warrior",
+          "goal": "Earn a place in the Lantern Order without abandoning old friends.",
+          "values": [
+            "Protect the vulnerable",
+            "Never bind an unwilling soul"
+          ],
+          "relationship": 28,
+          "memories": [
+            "At seven, you spoke up when I was falsely accused.",
+            "You honestly said you needed time before promising aid."
+          ],
+          "recruited": false,
+          "active": false,
+          "hp": 58,
+          "maxHp": 58,
+          "mp": 22,
+          "maxMp": 22,
+          "agility": 5,
+          "baseAge": 18,
+          "age": 18
+        },
+        {
+          "id": "orrin",
+          "name": "Orrin",
+          "role": "mage",
+          "goal": "Find a remedy for the fever and keep his family safe.",
+          "values": [
+            "Consent matters",
+            "Knowledge should heal"
+          ],
+          "relationship": 0,
+          "memories": [],
+          "recruited": false,
+          "active": false,
+          "hp": 43,
+          "maxHp": 43,
+          "mp": 38,
+          "maxMp": 38,
+          "agility": 4,
+          "baseAge": 22,
+          "age": 22
+        },
+        {
+          "id": "kest",
+          "name": "Kest",
+          "role": "rogue",
+          "goal": "Make the western road safe enough to visit a missing sibling.",
+          "values": [
+            "Keep your word",
+            "Do not prey on desperate families"
+          ],
+          "relationship": 0,
+          "memories": [],
+          "recruited": false,
+          "active": false,
+          "hp": 48,
+          "maxHp": 48,
+          "mp": 24,
+          "maxMp": 24,
+          "agility": 8,
+          "baseAge": 19,
+          "age": 19
+        }
+      ],
+      "factions": {
+        "villagers": 0,
+        "academy": 0,
+        "order": 0,
+        "underworld": 0
+      },
+      "legal": {
+        "wanted": false,
+        "evidence": 0,
+        "description": "No local charges or known evidence.",
+        "incidents": []
+      },
+      "flags": {
+        "childhoodStage": 3,
+        "actionsTaken": 4,
+        "education": 0,
+        "clinicShifts": 0,
+        "training": 0,
+        "roadSafe": false,
+        "travelByNight": false,
+        "plagueStage": 1,
+        "childhoodFriend": true,
+        "apprenticeship": true,
+        "ancestralMentor": true,
+        "herbs": 1,
+        "battlesStarted": 1
+      },
+      "obligations": [
+        {
+          "id": "plague_return",
+          "title": "Answer your hometown’s plea",
+          "dueDay": 37,
+          "description": "Visit the fever clinic or bring a remedy to Mossbell.",
+          "resolved": false
+        }
+      ],
+      "event": null,
+      "journal": [
+        {
+          "id": "entry-1",
+          "day": 0,
+          "age": 7,
+          "title": "A life begins",
+          "text": "Born in Mossbell, Legacy Selene grows up in a struggling household. The regional crisis is Ashfall fever. Your ambition: Protect the place I call home.",
+          "tag": "origin"
+        },
+        {
+          "id": "entry-2",
+          "day": 0,
+          "age": 7,
+          "title": "A friendship at the wellside",
+          "text": "At seven, you spoke up when I was falsely accused.",
+          "tag": "childhood"
+        },
+        {
+          "id": "entry-3",
+          "day": 0,
+          "age": 12,
+          "title": "An education earned",
+          "text": "An apprenticeship taught practical skills and offered a way to earn a living.",
+          "tag": "childhood"
+        },
+        {
+          "id": "entry-4",
+          "day": 0,
+          "age": 17,
+          "title": "A teacher’s question",
+          "text": "You asked what the prohibition protected. A discreet teacher remembers the question.",
+          "tag": "childhood"
+        },
+        {
+          "id": "entry-5",
+          "day": 0,
+          "age": 18,
+          "title": "Eighteen, and a life to make",
+          "text": "Your adult life begins in Mossbell. Work, learn, make time for people, and choose what to become. Mira can join you in any settlement. Your combat path is mage; your ambition is “Protect the place I call home.”",
+          "tag": "milestone"
+        },
+        {
+          "id": "entry-6",
+          "day": 3,
+          "age": 18,
+          "title": "A living earned",
+          "text": "Three days of herbalist work earned 23 gold. Work at Mossbell keeps you part of the community.",
+          "tag": "livelihood"
+        },
+        {
+          "id": "entry-7",
+          "day": 5,
+          "age": 18,
+          "title": "A person, not a role",
+          "text": "Avel Thorne remembers an unhurried conversation. Their bond with you is now 45.",
+          "tag": "life"
+        },
+        {
+          "id": "entry-8",
+          "day": 7,
+          "age": 18,
+          "title": "A road taken",
+          "text": "2 days from Mossbell brings you to The Copperwood.",
+          "tag": "travel"
+        },
+        {
+          "id": "entry-9",
+          "day": 7,
+          "age": 18,
+          "title": "A plea from the village",
+          "text": "Consult the academy in Larkspire, or help at a settlement clinic. Your hometown’s plea is in the journal.",
+          "tag": "story"
+        }
+      ],
+      "battle": {
+        "encounterId": "forest",
+        "title": "Trouble on the forest road",
+        "actors": [
+          {
+            "id": "hero",
+            "name": "Legacy Selene",
+            "side": "party",
+            "role": "mage",
+            "path": "mage",
+            "specialization": null,
+            "hp": 41,
+            "maxHp": 56,
+            "mp": 32,
+            "maxMp": 37,
+            "agility": 3,
+            "armor": 1,
+            "gear": {
+              "attack": 0,
+              "armor": 1,
+              "magic": 1,
+              "agility": 0
+            },
+            "equipment": {
+              "weapon": "starter_staff",
+              "armor": "travel_cloak",
+              "trinket": null
+            },
+            "attributes": {
+              "strength": 3,
+              "agility": 3,
+              "vitality": 4,
+              "intellect": 7,
+              "willpower": 4,
+              "presence": 4
+            },
+            "skills": {
+              "weapons": 0,
+              "defense": 0,
+              "arcana": 2,
+              "devotion": 1,
+              "stealth": 0,
+              "survival": 3,
+              "scholarship": 2,
+              "persuasion": 1
+            },
+            "condition": null,
+            "oathBroken": false,
+            "defending": false,
+            "status": {
+              "ward": 0
+            }
+          },
+          {
+            "name": "Briar wolf",
+            "role": "beast",
+            "hp": 3,
+            "attackPower": 6,
+            "agility": 5,
+            "armor": 0,
+            "id": "enemy-1",
+            "side": "enemy",
+            "maxHp": 22,
+            "mp": 0,
+            "maxMp": 0,
+            "defending": false,
+            "status": {},
+            "intent": "Attacks the most injured ally; a defender can draw the attack."
+          },
+          {
+            "name": "Road trapper",
+            "role": "skirmisher",
+            "hp": 18,
+            "attackPower": 5,
+            "agility": 4,
+            "armor": 0,
+            "id": "enemy-2",
+            "side": "enemy",
+            "maxHp": 18,
+            "mp": 0,
+            "maxMp": 0,
+            "defending": false,
+            "status": {},
+            "intent": "Attacks the most injured ally; a defender can draw the attack. Every other round, it weakens the target’s next strike.",
+            "trait": "snare"
+          }
+        ],
+        "turnOrder": [
+          "enemy-1",
+          "enemy-2",
+          "hero"
+        ],
+        "variant": 1,
+        "currentActorId": "hero",
+        "round": 2,
+        "log": [
+          "The danger is visible. Defend to draw attacks and reduce damage; retreat is always available.",
+          "Formation 2; balanced danger. Marks add damage; wards absorb hits; feints weaken attacks; bleeding can be cleansed.",
+          "Briar wolf hits Legacy Selene for 5.",
+          "Road trapper hits Legacy Selene for 4.",
+          "Road trapper's snare weakens Legacy Selene's next strike by 2.",
+          "Legacy Selene uses Arc bolt.",
+          "Legacy Selene hits Briar wolf for 19.",
+          "Round 2.",
+          "Legacy Selene's ward absorbs 3 damage.",
+          "Briar wolf hits Legacy Selene for 2.",
+          "Road trapper hits Legacy Selene for 4."
+        ],
+        "potions": 2,
+        "outcome": null,
+        "rewards": {
+          "gold": 18,
+          "exp": 24
+        },
+        "potionsUsed": 0,
+        "instanceId": "battle-genuine-v02-capture-1"
+      },
+      "notice": "",
+      "chronicle": null,
+      "equipment": {
+        "owned": [
+          "starter_staff",
+          "travel_cloak"
+        ],
+        "equipped": {
+          "weapon": "starter_staff",
+          "armor": "travel_cloak",
+          "trinket": null
+        },
+        "materials": {
+          "ore": 0,
+          "cloth": 0
+        }
+      },
+      "life": {
+        "focus": "livelihood",
+        "lifestyle": "frugal",
+        "happiness": 63,
+        "stress": 18,
+        "health": 80,
+        "career": {
+          "rank": 0,
+          "experience": 2
+        },
+        "home": {
+          "tier": "lodgings"
+        },
+        "people": [
+          {
+            "id": "kin",
+            "name": "Wren Brindle",
+            "role": "relative",
+            "baseAge": 43,
+            "age": 43,
+            "relation": "family",
+            "disposition": "kind",
+            "bond": 55,
+            "memories": [],
+            "knownFacts": []
+          },
+          {
+            "id": "fellow",
+            "name": "Avel Thorne",
+            "role": "friend",
+            "baseAge": 19,
+            "age": 19,
+            "relation": "friend",
+            "disposition": "kind",
+            "bond": 45,
+            "memories": [
+              "At age 18, you made time to listen to my own worries and hopes."
+            ],
+            "knownFacts": []
+          },
+          {
+            "id": "rival",
+            "name": "Tamsin Hearth",
+            "role": "rival",
+            "baseAge": 21,
+            "age": 21,
+            "relation": "rival",
+            "disposition": "driven",
+            "bond": 18,
+            "memories": [],
+            "knownFacts": []
+          },
+          {
+            "id": "river",
+            "name": "Elowen Brindle",
+            "role": "suitor",
+            "baseAge": 22,
+            "age": 22,
+            "relation": "acquaintance",
+            "disposition": "reserved",
+            "bond": 30,
+            "memories": [],
+            "knownFacts": []
+          }
+        ],
+        "partnerId": null,
+        "courtshipId": null,
+        "children": [],
+        "goals": [],
+        "achievements": [],
+        "yearHistory": [],
+        "eventHistory": [],
+        "yearlyDecisions": [],
+        "pendingEvent": null,
+        "householdSupport": false,
+        "plan": null
+      }
+    }
+  },
+  "expectations": {
+    "annualContinuation": {
+      "choices": [
+        {
+          "event": "plague_letter",
+          "choice": "later"
+        },
+        {
+          "event": "annual_deadline_review",
+          "choice": "continue"
+        },
+        {
+          "event": "life_herbalist_grove",
+          "choice": "teach"
+        },
+        {
+          "event": "life_grove_return",
+          "choice": "mentor"
+        },
+        {
+          "event": "life_ancestor_chair",
+          "choice": "stories"
+        },
+        {
+          "event": "life_birthday",
+          "choice": "people"
+        }
+      ],
+      "day": 365,
+      "age": 19,
+      "gold": 152,
+      "yearHistory": [
+        {
+          "id": "year-365",
+          "age": 19,
+          "day": 365,
+          "focus": "education",
+          "income": 266,
+          "expenses": 177,
+          "title": "The year you turned 19",
+          "summary": "13 periods of education; earned 266 gold and spent 177 on living costs and decisions. The last moonroot patch: Show the grove to the village gardeners. What returned in spring: Teach the apprentice to care for it. An empty chair at supper: Invite everyone to share remembered stories."
+        }
+      ],
+      "scholarship": 15
+    }
+  }
+}

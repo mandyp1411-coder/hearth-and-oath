@@ -1,0 +1,3279 @@
+{
+  "schemaVersion": 1,
+  "matrixHash": "ade7472893dff80b5f0b41c1ab904dcb99b9ff2c1b4139f7ff89e569a0bf3233",
+  "notRun": [],
+  "fixtures": [
+    {
+      "id": "weapon-low",
+      "evidenceClass": "action-earned",
+      "root": 0,
+      "stateHash": "ab7b71775a32e2eed6ea824b6ea3b7140639bdd70215d5887816fa141e4845d3",
+      "setup": {
+        "rootDays": 55,
+        "extensionDays": 52,
+        "extensionGoldDelta": 6,
+        "transitions": 41
+      },
+      "actual": {
+        "seed": "balance-earned-bard-a",
+        "difficulty": "balanced",
+        "day": 6677,
+        "age": 18,
+        "locationId": "city",
+        "hero": {
+          "calling": "ranger",
+          "path": "rogue",
+          "traits": [
+            "compassionate",
+            "curious",
+            "brave"
+          ],
+          "level": 2,
+          "exp": 59,
+          "hp": 66,
+          "maxHp": 66,
+          "mp": 36,
+          "maxMp": 36,
+          "gold": 88,
+          "potions": 0,
+          "attributes": {
+            "strength": 4,
+            "agility": 12,
+            "vitality": 6,
+            "intellect": 6,
+            "willpower": 8,
+            "presence": 7
+          },
+          "skills": {
+            "weapons": 2,
+            "defense": 0,
+            "arcana": 1,
+            "devotion": 0,
+            "stealth": 2,
+            "survival": 24,
+            "scholarship": 8,
+            "persuasion": 12
+          }
+        },
+        "learnedCallings": [
+          "bard",
+          "ranger"
+        ],
+        "trainedTechniques": [
+          "second_wind"
+        ],
+        "equipped": {
+          "weapon": "iron_sword",
+          "offhand": null,
+          "head": null,
+          "armor": null,
+          "hands": null,
+          "feet": null,
+          "cloak": null,
+          "belt": null,
+          "trinket": null,
+          "ring": null
+        },
+        "ownedGear": [
+          "iron_sword"
+        ],
+        "companions": [
+          {
+            "id": "mira",
+            "active": true,
+            "hp": 58,
+            "maxHp": 58,
+            "mp": 22,
+            "maxMp": 22,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "orrin",
+            "active": true,
+            "hp": 43,
+            "maxHp": 43,
+            "mp": 38,
+            "maxMp": 38,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "kest",
+            "active": true,
+            "hp": 48,
+            "maxHp": 48,
+            "mp": 24,
+            "maxMp": 24,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          }
+        ],
+        "supplies": {
+          "rations": 0,
+          "potions": 0,
+          "kitNights": 0,
+          "kits": []
+        },
+        "livingCosts": {
+          "startedDay": 0,
+          "lastDay": 6677,
+          "accruedUnits": 12840,
+          "billedGold": 29,
+          "paidGold": 29,
+          "supportedGold": 0,
+          "lastJournalYear": 18,
+          "focusDays": {
+            "livelihood": 30,
+            "education": 0,
+            "relationships": 0,
+            "adventure": 0,
+            "rest": 0
+          },
+          "history": [
+            {
+              "day": 6577,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6581,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6584,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6586,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6589,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6599,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6604,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6607,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6617,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6619,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6622,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6632,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6634,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6648,
+              "due": 4,
+              "paid": 4,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6651,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6654,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6657,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6659,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            }
+          ]
+        },
+        "maze": null
+      }
+    },
+    {
+      "id": "weapon-boundary-3",
+      "evidenceClass": "action-earned",
+      "root": 0,
+      "stateHash": "46c9c104525d30e2a41436cdbb7c3f50f83717d06ab80ef46b0644d1d104eb8b",
+      "setup": {
+        "rootDays": 55,
+        "extensionDays": 63,
+        "extensionGoldDelta": -16,
+        "transitions": 45
+      },
+      "actual": {
+        "seed": "balance-earned-bard-a",
+        "difficulty": "balanced",
+        "day": 6688,
+        "age": 18,
+        "locationId": "city",
+        "hero": {
+          "calling": "ranger",
+          "path": "rogue",
+          "traits": [
+            "compassionate",
+            "curious",
+            "brave"
+          ],
+          "level": 3,
+          "exp": 5,
+          "hp": 70,
+          "maxHp": 70,
+          "mp": 38,
+          "maxMp": 38,
+          "gold": 66,
+          "potions": 0,
+          "attributes": {
+            "strength": 4,
+            "agility": 12,
+            "vitality": 6,
+            "intellect": 6,
+            "willpower": 8,
+            "presence": 7
+          },
+          "skills": {
+            "weapons": 2,
+            "defense": 0,
+            "arcana": 1,
+            "devotion": 0,
+            "stealth": 5,
+            "survival": 24,
+            "scholarship": 8,
+            "persuasion": 12
+          }
+        },
+        "learnedCallings": [
+          "bard",
+          "ranger"
+        ],
+        "trainedTechniques": [
+          "second_wind"
+        ],
+        "equipped": {
+          "weapon": "iron_sword",
+          "offhand": null,
+          "head": null,
+          "armor": null,
+          "hands": null,
+          "feet": null,
+          "cloak": null,
+          "belt": null,
+          "trinket": null,
+          "ring": null
+        },
+        "ownedGear": [
+          "iron_sword"
+        ],
+        "companions": [
+          {
+            "id": "mira",
+            "active": true,
+            "hp": 58,
+            "maxHp": 58,
+            "mp": 22,
+            "maxMp": 22,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "orrin",
+            "active": true,
+            "hp": 43,
+            "maxHp": 43,
+            "mp": 38,
+            "maxMp": 38,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "kest",
+            "active": true,
+            "hp": 48,
+            "maxHp": 48,
+            "mp": 24,
+            "maxMp": 24,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          }
+        ],
+        "supplies": {
+          "rations": 0,
+          "potions": 0,
+          "kitNights": 0,
+          "kits": []
+        },
+        "livingCosts": {
+          "startedDay": 0,
+          "lastDay": 6688,
+          "accruedUnits": 14160,
+          "billedGold": 29,
+          "paidGold": 29,
+          "supportedGold": 0,
+          "lastJournalYear": 18,
+          "focusDays": {
+            "livelihood": 30,
+            "education": 0,
+            "relationships": 0,
+            "adventure": 0,
+            "rest": 0
+          },
+          "history": [
+            {
+              "day": 6577,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6581,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6584,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6586,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6589,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6599,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6604,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6607,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6617,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6619,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6622,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6632,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6634,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6648,
+              "due": 4,
+              "paid": 4,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6651,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6654,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6657,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6659,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            }
+          ]
+        },
+        "maze": null
+      }
+    },
+    {
+      "id": "weapon-mid",
+      "evidenceClass": "action-earned",
+      "root": 0,
+      "stateHash": "8bec7e034bbe416ca924c1cbb5b9bfe425fbe8b90e40f4c2d11dde6a17049086",
+      "setup": {
+        "rootDays": 55,
+        "extensionDays": 101,
+        "extensionGoldDelta": -44,
+        "transitions": 58
+      },
+      "actual": {
+        "seed": "balance-earned-bard-a",
+        "difficulty": "balanced",
+        "day": 6726,
+        "age": 18,
+        "locationId": "city",
+        "hero": {
+          "calling": "ranger",
+          "path": "rogue",
+          "traits": [
+            "compassionate",
+            "curious",
+            "brave"
+          ],
+          "level": 4,
+          "exp": 6,
+          "hp": 74,
+          "maxHp": 74,
+          "mp": 40,
+          "maxMp": 40,
+          "gold": 38,
+          "potions": 0,
+          "attributes": {
+            "strength": 4,
+            "agility": 12,
+            "vitality": 6,
+            "intellect": 6,
+            "willpower": 8,
+            "presence": 7
+          },
+          "skills": {
+            "weapons": 2,
+            "defense": 0,
+            "arcana": 1,
+            "devotion": 0,
+            "stealth": 15,
+            "survival": 24,
+            "scholarship": 8,
+            "persuasion": 12
+          }
+        },
+        "learnedCallings": [
+          "bard",
+          "ranger"
+        ],
+        "trainedTechniques": [
+          "second_wind"
+        ],
+        "equipped": {
+          "weapon": "iron_sword",
+          "offhand": null,
+          "head": null,
+          "armor": null,
+          "hands": null,
+          "feet": null,
+          "cloak": null,
+          "belt": null,
+          "trinket": null,
+          "ring": null
+        },
+        "ownedGear": [
+          "iron_sword"
+        ],
+        "companions": [
+          {
+            "id": "mira",
+            "active": true,
+            "hp": 58,
+            "maxHp": 58,
+            "mp": 22,
+            "maxMp": 22,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "orrin",
+            "active": true,
+            "hp": 43,
+            "maxHp": 43,
+            "mp": 38,
+            "maxMp": 38,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "kest",
+            "active": true,
+            "hp": 48,
+            "maxHp": 48,
+            "mp": 24,
+            "maxMp": 24,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          }
+        ],
+        "supplies": {
+          "rations": 0,
+          "potions": 0,
+          "kitNights": 0,
+          "kits": []
+        },
+        "livingCosts": {
+          "startedDay": 0,
+          "lastDay": 6726,
+          "accruedUnits": 18720,
+          "billedGold": 29,
+          "paidGold": 29,
+          "supportedGold": 0,
+          "lastJournalYear": 18,
+          "focusDays": {
+            "livelihood": 30,
+            "education": 0,
+            "relationships": 0,
+            "adventure": 0,
+            "rest": 0
+          },
+          "history": [
+            {
+              "day": 6577,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6581,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6584,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6586,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6589,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6599,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6604,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6607,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6617,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6619,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6622,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6632,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6634,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6648,
+              "due": 4,
+              "paid": 4,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6651,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6654,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6657,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6659,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            }
+          ]
+        },
+        "maze": null
+      }
+    },
+    {
+      "id": "weapon-boundary-5",
+      "evidenceClass": "action-earned",
+      "root": 0,
+      "stateHash": "cc988feb796524445b8f9e7e73bdf875ed089c06eba54339e7194483351b6fb9",
+      "setup": {
+        "rootDays": 55,
+        "extensionDays": 151,
+        "extensionGoldDelta": -48,
+        "transitions": 75
+      },
+      "actual": {
+        "seed": "balance-earned-bard-a",
+        "difficulty": "balanced",
+        "day": 6776,
+        "age": 18,
+        "locationId": "city",
+        "hero": {
+          "calling": "ranger",
+          "path": "rogue",
+          "traits": [
+            "compassionate",
+            "curious",
+            "brave"
+          ],
+          "level": 5,
+          "exp": 2,
+          "hp": 78,
+          "maxHp": 78,
+          "mp": 42,
+          "maxMp": 42,
+          "gold": 34,
+          "potions": 0,
+          "attributes": {
+            "strength": 4,
+            "agility": 12,
+            "vitality": 6,
+            "intellect": 6,
+            "willpower": 8,
+            "presence": 7
+          },
+          "skills": {
+            "weapons": 2,
+            "defense": 0,
+            "arcana": 1,
+            "devotion": 0,
+            "stealth": 27,
+            "survival": 24,
+            "scholarship": 8,
+            "persuasion": 12
+          }
+        },
+        "learnedCallings": [
+          "bard",
+          "ranger"
+        ],
+        "trainedTechniques": [
+          "second_wind"
+        ],
+        "equipped": {
+          "weapon": "iron_sword",
+          "offhand": null,
+          "head": null,
+          "armor": null,
+          "hands": null,
+          "feet": null,
+          "cloak": null,
+          "belt": null,
+          "trinket": null,
+          "ring": null
+        },
+        "ownedGear": [
+          "iron_sword"
+        ],
+        "companions": [
+          {
+            "id": "mira",
+            "active": true,
+            "hp": 58,
+            "maxHp": 58,
+            "mp": 22,
+            "maxMp": 22,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "orrin",
+            "active": true,
+            "hp": 43,
+            "maxHp": 43,
+            "mp": 38,
+            "maxMp": 38,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "kest",
+            "active": true,
+            "hp": 48,
+            "maxHp": 48,
+            "mp": 24,
+            "maxMp": 24,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          }
+        ],
+        "supplies": {
+          "rations": 0,
+          "potions": 0,
+          "kitNights": 0,
+          "kits": []
+        },
+        "livingCosts": {
+          "startedDay": 0,
+          "lastDay": 6776,
+          "accruedUnits": 24720,
+          "billedGold": 29,
+          "paidGold": 29,
+          "supportedGold": 0,
+          "lastJournalYear": 18,
+          "focusDays": {
+            "livelihood": 30,
+            "education": 0,
+            "relationships": 0,
+            "adventure": 0,
+            "rest": 0
+          },
+          "history": [
+            {
+              "day": 6577,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6581,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6584,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6586,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6589,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6599,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6604,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6607,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6617,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6619,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6622,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6632,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6634,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6648,
+              "due": 4,
+              "paid": 4,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6651,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6654,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6657,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6659,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            }
+          ]
+        },
+        "maze": null
+      }
+    },
+    {
+      "id": "caster-low",
+      "evidenceClass": "action-earned",
+      "root": 0,
+      "stateHash": "4ac7c2f9414ddd41a8c6a3a638afe2a98fe21b1e9b01c2da7714090227ba421a",
+      "setup": {
+        "rootDays": 55,
+        "extensionDays": 108,
+        "extensionGoldDelta": 0,
+        "transitions": 90
+      },
+      "actual": {
+        "seed": "balance-earned-bard-a",
+        "difficulty": "balanced",
+        "day": 6733,
+        "age": 18,
+        "locationId": "city",
+        "hero": {
+          "calling": "elementalist",
+          "path": "mage",
+          "traits": [
+            "compassionate",
+            "curious",
+            "brave"
+          ],
+          "level": 2,
+          "exp": 83,
+          "hp": 66,
+          "maxHp": 66,
+          "mp": 36,
+          "maxMp": 36,
+          "gold": 82,
+          "potions": 0,
+          "attributes": {
+            "strength": 4,
+            "agility": 12,
+            "vitality": 6,
+            "intellect": 6,
+            "willpower": 8,
+            "presence": 7
+          },
+          "skills": {
+            "weapons": 1,
+            "defense": 0,
+            "arcana": 5,
+            "devotion": 0,
+            "stealth": 1,
+            "survival": 24,
+            "scholarship": 8,
+            "persuasion": 12
+          }
+        },
+        "learnedCallings": [
+          "bard",
+          "elementalist"
+        ],
+        "trainedTechniques": [
+          "second_wind"
+        ],
+        "equipped": {
+          "weapon": "ash_staff",
+          "offhand": null,
+          "head": null,
+          "armor": null,
+          "hands": null,
+          "feet": null,
+          "cloak": null,
+          "belt": null,
+          "trinket": null,
+          "ring": null
+        },
+        "ownedGear": [
+          "ash_staff"
+        ],
+        "companions": [
+          {
+            "id": "mira",
+            "active": true,
+            "hp": 58,
+            "maxHp": 58,
+            "mp": 22,
+            "maxMp": 22,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "orrin",
+            "active": true,
+            "hp": 43,
+            "maxHp": 43,
+            "mp": 38,
+            "maxMp": 38,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "kest",
+            "active": true,
+            "hp": 48,
+            "maxHp": 48,
+            "mp": 24,
+            "maxMp": 24,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          }
+        ],
+        "supplies": {
+          "rations": 0,
+          "potions": 0,
+          "kitNights": 0,
+          "kits": []
+        },
+        "livingCosts": {
+          "startedDay": 0,
+          "lastDay": 6733,
+          "accruedUnits": 19560,
+          "billedGold": 46,
+          "paidGold": 46,
+          "supportedGold": 0,
+          "lastJournalYear": 18,
+          "focusDays": {
+            "livelihood": 30,
+            "education": 0,
+            "relationships": 0,
+            "adventure": 0,
+            "rest": 0
+          },
+          "history": [
+            {
+              "day": 6577,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6581,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6584,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6586,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6589,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6599,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6604,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6607,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6617,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6619,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6622,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6632,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6634,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6640,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6645,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6647,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6652,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6654,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6658,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6681,
+              "due": 8,
+              "paid": 8,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6685,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6688,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6690,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6693,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6695,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6698,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6701,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6706,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6708,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6711,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            }
+          ]
+        },
+        "maze": null
+      }
+    },
+    {
+      "id": "caster-mid",
+      "evidenceClass": "action-earned",
+      "root": 0,
+      "stateHash": "2480ffd133e7636bcdd1e2cdc24cd7f36db8998e6fc18c179820d1ae6dd6946b",
+      "setup": {
+        "rootDays": 55,
+        "extensionDays": 149,
+        "extensionGoldDelta": -58,
+        "transitions": 104
+      },
+      "actual": {
+        "seed": "balance-earned-bard-a",
+        "difficulty": "balanced",
+        "day": 6774,
+        "age": 18,
+        "locationId": "city",
+        "hero": {
+          "calling": "elementalist",
+          "path": "mage",
+          "traits": [
+            "compassionate",
+            "curious",
+            "brave"
+          ],
+          "level": 4,
+          "exp": 10,
+          "hp": 74,
+          "maxHp": 74,
+          "mp": 40,
+          "maxMp": 40,
+          "gold": 24,
+          "potions": 0,
+          "attributes": {
+            "strength": 4,
+            "agility": 12,
+            "vitality": 6,
+            "intellect": 6,
+            "willpower": 8,
+            "presence": 7
+          },
+          "skills": {
+            "weapons": 1,
+            "defense": 0,
+            "arcana": 17,
+            "devotion": 0,
+            "stealth": 1,
+            "survival": 24,
+            "scholarship": 8,
+            "persuasion": 12
+          }
+        },
+        "learnedCallings": [
+          "bard",
+          "elementalist"
+        ],
+        "trainedTechniques": [
+          "second_wind"
+        ],
+        "equipped": {
+          "weapon": "ash_staff",
+          "offhand": null,
+          "head": null,
+          "armor": null,
+          "hands": null,
+          "feet": null,
+          "cloak": null,
+          "belt": null,
+          "trinket": null,
+          "ring": null
+        },
+        "ownedGear": [
+          "ash_staff"
+        ],
+        "companions": [
+          {
+            "id": "mira",
+            "active": true,
+            "hp": 58,
+            "maxHp": 58,
+            "mp": 22,
+            "maxMp": 22,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "orrin",
+            "active": true,
+            "hp": 43,
+            "maxHp": 43,
+            "mp": 38,
+            "maxMp": 38,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "kest",
+            "active": true,
+            "hp": 48,
+            "maxHp": 48,
+            "mp": 24,
+            "maxMp": 24,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          }
+        ],
+        "supplies": {
+          "rations": 0,
+          "potions": 0,
+          "kitNights": 0,
+          "kits": []
+        },
+        "livingCosts": {
+          "startedDay": 0,
+          "lastDay": 6774,
+          "accruedUnits": 24480,
+          "billedGold": 46,
+          "paidGold": 46,
+          "supportedGold": 0,
+          "lastJournalYear": 18,
+          "focusDays": {
+            "livelihood": 30,
+            "education": 0,
+            "relationships": 0,
+            "adventure": 0,
+            "rest": 0
+          },
+          "history": [
+            {
+              "day": 6577,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6581,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6584,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6586,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6589,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6599,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6604,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6607,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6617,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6619,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6622,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6632,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6634,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6640,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6645,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6647,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6652,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6654,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6658,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6681,
+              "due": 8,
+              "paid": 8,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6685,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6688,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6690,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6693,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6695,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6698,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6701,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6706,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6708,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6711,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            }
+          ]
+        },
+        "maze": null
+      }
+    },
+    {
+      "id": "defender-low",
+      "evidenceClass": "action-earned",
+      "root": 0,
+      "stateHash": "ea1b65e10436bfc247ad4db71b6f560cd258671bd41934cdd472a27b0c4d4043",
+      "setup": {
+        "rootDays": 55,
+        "extensionDays": 41,
+        "extensionGoldDelta": 28,
+        "transitions": 25
+      },
+      "actual": {
+        "seed": "balance-earned-bard-a",
+        "difficulty": "balanced",
+        "day": 6666,
+        "age": 18,
+        "locationId": "city",
+        "hero": {
+          "calling": "guardian",
+          "path": "warrior",
+          "traits": [
+            "compassionate",
+            "curious",
+            "brave"
+          ],
+          "level": 2,
+          "exp": 75,
+          "hp": 66,
+          "maxHp": 66,
+          "mp": 36,
+          "maxMp": 36,
+          "gold": 110,
+          "potions": 0,
+          "attributes": {
+            "strength": 4,
+            "agility": 12,
+            "vitality": 6,
+            "intellect": 6,
+            "willpower": 8,
+            "presence": 7
+          },
+          "skills": {
+            "weapons": 3,
+            "defense": 3,
+            "arcana": 1,
+            "devotion": 0,
+            "stealth": 1,
+            "survival": 24,
+            "scholarship": 8,
+            "persuasion": 12
+          }
+        },
+        "learnedCallings": [
+          "bard",
+          "guardian"
+        ],
+        "trainedTechniques": [
+          "second_wind"
+        ],
+        "equipped": {
+          "weapon": null,
+          "offhand": null,
+          "head": null,
+          "armor": "leather_armor",
+          "hands": null,
+          "feet": null,
+          "cloak": null,
+          "belt": null,
+          "trinket": null,
+          "ring": null
+        },
+        "ownedGear": [
+          "leather_armor"
+        ],
+        "companions": [
+          {
+            "id": "mira",
+            "active": true,
+            "hp": 58,
+            "maxHp": 58,
+            "mp": 22,
+            "maxMp": 22,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "orrin",
+            "active": true,
+            "hp": 43,
+            "maxHp": 43,
+            "mp": 38,
+            "maxMp": 38,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "kest",
+            "active": true,
+            "hp": 48,
+            "maxHp": 48,
+            "mp": 24,
+            "maxMp": 24,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          }
+        ],
+        "supplies": {
+          "rations": 0,
+          "potions": 0,
+          "kitNights": 0,
+          "kits": []
+        },
+        "livingCosts": {
+          "startedDay": 0,
+          "lastDay": 6666,
+          "accruedUnits": 11520,
+          "billedGold": 17,
+          "paidGold": 17,
+          "supportedGold": 0,
+          "lastJournalYear": 18,
+          "focusDays": {
+            "livelihood": 30,
+            "education": 0,
+            "relationships": 0,
+            "adventure": 0,
+            "rest": 0
+          },
+          "history": [
+            {
+              "day": 6577,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6581,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6584,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6586,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6589,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6599,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6604,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6607,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6617,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6619,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6622,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            }
+          ]
+        },
+        "maze": null
+      }
+    },
+    {
+      "id": "defender-mid",
+      "evidenceClass": "action-earned",
+      "root": 0,
+      "stateHash": "4f31a693bf23ca6575db1171301b30bf261730a118e6903882c23c392901825b",
+      "setup": {
+        "rootDays": 55,
+        "extensionDays": 82,
+        "extensionGoldDelta": -54,
+        "transitions": 39
+      },
+      "actual": {
+        "seed": "balance-earned-bard-a",
+        "difficulty": "balanced",
+        "day": 6707,
+        "age": 18,
+        "locationId": "city",
+        "hero": {
+          "calling": "guardian",
+          "path": "warrior",
+          "traits": [
+            "compassionate",
+            "curious",
+            "brave"
+          ],
+          "level": 4,
+          "exp": 6,
+          "hp": 74,
+          "maxHp": 74,
+          "mp": 40,
+          "maxMp": 40,
+          "gold": 28,
+          "potions": 0,
+          "attributes": {
+            "strength": 4,
+            "agility": 12,
+            "vitality": 6,
+            "intellect": 6,
+            "willpower": 8,
+            "presence": 7
+          },
+          "skills": {
+            "weapons": 16,
+            "defense": 16,
+            "arcana": 1,
+            "devotion": 0,
+            "stealth": 1,
+            "survival": 24,
+            "scholarship": 8,
+            "persuasion": 12
+          }
+        },
+        "learnedCallings": [
+          "bard",
+          "guardian"
+        ],
+        "trainedTechniques": [
+          "second_wind"
+        ],
+        "equipped": {
+          "weapon": null,
+          "offhand": null,
+          "head": null,
+          "armor": "leather_armor",
+          "hands": null,
+          "feet": null,
+          "cloak": null,
+          "belt": null,
+          "trinket": null,
+          "ring": null
+        },
+        "ownedGear": [
+          "leather_armor"
+        ],
+        "companions": [
+          {
+            "id": "mira",
+            "active": true,
+            "hp": 58,
+            "maxHp": 58,
+            "mp": 22,
+            "maxMp": 22,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "orrin",
+            "active": true,
+            "hp": 43,
+            "maxHp": 43,
+            "mp": 38,
+            "maxMp": 38,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "kest",
+            "active": true,
+            "hp": 48,
+            "maxHp": 48,
+            "mp": 24,
+            "maxMp": 24,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          }
+        ],
+        "supplies": {
+          "rations": 0,
+          "potions": 0,
+          "kitNights": 0,
+          "kits": []
+        },
+        "livingCosts": {
+          "startedDay": 0,
+          "lastDay": 6707,
+          "accruedUnits": 16440,
+          "billedGold": 17,
+          "paidGold": 17,
+          "supportedGold": 0,
+          "lastJournalYear": 18,
+          "focusDays": {
+            "livelihood": 30,
+            "education": 0,
+            "relationships": 0,
+            "adventure": 0,
+            "rest": 0
+          },
+          "history": [
+            {
+              "day": 6577,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6581,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6584,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6586,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6589,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6599,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6604,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6607,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6617,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6619,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6622,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            }
+          ]
+        },
+        "maze": null
+      }
+    },
+    {
+      "id": "support-low",
+      "evidenceClass": "action-earned",
+      "root": 0,
+      "stateHash": "41c07d3aa460a291f278d47d9aa940878bf4fc0b38f9da3e1eb3c56282bd44b4",
+      "setup": {
+        "rootDays": 55,
+        "extensionDays": 14,
+        "extensionGoldDelta": 5,
+        "transitions": 11
+      },
+      "actual": {
+        "seed": "balance-earned-bard-a",
+        "difficulty": "balanced",
+        "day": 6639,
+        "age": 18,
+        "locationId": "city",
+        "hero": {
+          "calling": "bard",
+          "path": "rogue",
+          "traits": [
+            "compassionate",
+            "curious",
+            "brave"
+          ],
+          "level": 2,
+          "exp": 23,
+          "hp": 66,
+          "maxHp": 66,
+          "mp": 36,
+          "maxMp": 36,
+          "gold": 87,
+          "potions": 0,
+          "attributes": {
+            "strength": 4,
+            "agility": 12,
+            "vitality": 6,
+            "intellect": 6,
+            "willpower": 8,
+            "presence": 7
+          },
+          "skills": {
+            "weapons": 1,
+            "defense": 0,
+            "arcana": 1,
+            "devotion": 0,
+            "stealth": 1,
+            "survival": 24,
+            "scholarship": 8,
+            "persuasion": 12
+          }
+        },
+        "learnedCallings": [
+          "bard"
+        ],
+        "trainedTechniques": [
+          "second_wind"
+        ],
+        "equipped": {
+          "weapon": "ash_staff",
+          "offhand": null,
+          "head": null,
+          "armor": null,
+          "hands": null,
+          "feet": null,
+          "cloak": null,
+          "belt": null,
+          "trinket": null,
+          "ring": null
+        },
+        "ownedGear": [
+          "ash_staff"
+        ],
+        "companions": [
+          {
+            "id": "mira",
+            "active": true,
+            "hp": 58,
+            "maxHp": 58,
+            "mp": 22,
+            "maxMp": 22,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "orrin",
+            "active": true,
+            "hp": 43,
+            "maxHp": 43,
+            "mp": 38,
+            "maxMp": 38,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "kest",
+            "active": true,
+            "hp": 48,
+            "maxHp": 48,
+            "mp": 24,
+            "maxMp": 24,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          }
+        ],
+        "supplies": {
+          "rations": 0,
+          "potions": 0,
+          "kitNights": 0,
+          "kits": []
+        },
+        "livingCosts": {
+          "startedDay": 0,
+          "lastDay": 6639,
+          "accruedUnits": 8280,
+          "billedGold": 17,
+          "paidGold": 17,
+          "supportedGold": 0,
+          "lastJournalYear": 18,
+          "focusDays": {
+            "livelihood": 30,
+            "education": 0,
+            "relationships": 0,
+            "adventure": 0,
+            "rest": 0
+          },
+          "history": [
+            {
+              "day": 6577,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6581,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6584,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6586,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6589,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6599,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6604,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6607,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6617,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6619,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6622,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            }
+          ]
+        },
+        "maze": null
+      }
+    },
+    {
+      "id": "support-mid",
+      "evidenceClass": "action-earned",
+      "root": 0,
+      "stateHash": "825d02a7c15df30e561116dafd14d12659fb4cd815a5a5b3892c7f95cff82c39",
+      "setup": {
+        "rootDays": 55,
+        "extensionDays": 70,
+        "extensionGoldDelta": -59,
+        "transitions": 30
+      },
+      "actual": {
+        "seed": "balance-earned-bard-a",
+        "difficulty": "balanced",
+        "day": 6695,
+        "age": 18,
+        "locationId": "city",
+        "hero": {
+          "calling": "bard",
+          "path": "rogue",
+          "traits": [
+            "compassionate",
+            "curious",
+            "brave"
+          ],
+          "level": 4,
+          "exp": 6,
+          "hp": 74,
+          "maxHp": 74,
+          "mp": 40,
+          "maxMp": 40,
+          "gold": 23,
+          "potions": 0,
+          "attributes": {
+            "strength": 4,
+            "agility": 12,
+            "vitality": 6,
+            "intellect": 6,
+            "willpower": 8,
+            "presence": 7
+          },
+          "skills": {
+            "weapons": 1,
+            "defense": 0,
+            "arcana": 1,
+            "devotion": 0,
+            "stealth": 17,
+            "survival": 24,
+            "scholarship": 8,
+            "persuasion": 12
+          }
+        },
+        "learnedCallings": [
+          "bard"
+        ],
+        "trainedTechniques": [
+          "second_wind"
+        ],
+        "equipped": {
+          "weapon": "ash_staff",
+          "offhand": null,
+          "head": null,
+          "armor": null,
+          "hands": null,
+          "feet": null,
+          "cloak": null,
+          "belt": null,
+          "trinket": null,
+          "ring": null
+        },
+        "ownedGear": [
+          "ash_staff"
+        ],
+        "companions": [
+          {
+            "id": "mira",
+            "active": true,
+            "hp": 58,
+            "maxHp": 58,
+            "mp": 22,
+            "maxMp": 22,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "orrin",
+            "active": true,
+            "hp": 43,
+            "maxHp": 43,
+            "mp": 38,
+            "maxMp": 38,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "kest",
+            "active": true,
+            "hp": 48,
+            "maxHp": 48,
+            "mp": 24,
+            "maxMp": 24,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          }
+        ],
+        "supplies": {
+          "rations": 0,
+          "potions": 0,
+          "kitNights": 0,
+          "kits": []
+        },
+        "livingCosts": {
+          "startedDay": 0,
+          "lastDay": 6695,
+          "accruedUnits": 15000,
+          "billedGold": 17,
+          "paidGold": 17,
+          "supportedGold": 0,
+          "lastJournalYear": 18,
+          "focusDays": {
+            "livelihood": 30,
+            "education": 0,
+            "relationships": 0,
+            "adventure": 0,
+            "rest": 0
+          },
+          "history": [
+            {
+              "day": 6577,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6581,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6584,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6586,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6589,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6599,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6604,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6607,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6617,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6619,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6622,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            }
+          ]
+        },
+        "maze": null
+      }
+    },
+    {
+      "id": "support-traits-1",
+      "evidenceClass": "action-earned",
+      "root": 1,
+      "stateHash": "c25eb460a324f6c7dcea7886256447debdafaebaf156c12ac9b8147fa803aaaf",
+      "setup": {
+        "rootDays": 97,
+        "extensionDays": 0,
+        "extensionGoldDelta": 0,
+        "transitions": 3
+      },
+      "actual": {
+        "seed": "balance-earned-bard-b",
+        "difficulty": "balanced",
+        "day": 6667,
+        "age": 18,
+        "locationId": "city",
+        "hero": {
+          "calling": "bard",
+          "path": "rogue",
+          "traits": [
+            "patient",
+            "diligent",
+            "honest"
+          ],
+          "level": 2,
+          "exp": 7,
+          "hp": 66,
+          "maxHp": 66,
+          "mp": 33,
+          "maxMp": 33,
+          "gold": 68,
+          "potions": 0,
+          "attributes": {
+            "strength": 5,
+            "agility": 6,
+            "vitality": 6,
+            "intellect": 5,
+            "willpower": 6,
+            "presence": 4
+          },
+          "skills": {
+            "weapons": 1,
+            "defense": 0,
+            "arcana": 0,
+            "devotion": 2,
+            "stealth": 1,
+            "survival": 26,
+            "scholarship": 2,
+            "persuasion": 16
+          }
+        },
+        "learnedCallings": [
+          "bard"
+        ],
+        "trainedTechniques": [
+          "second_wind"
+        ],
+        "equipped": {
+          "weapon": null,
+          "offhand": null,
+          "head": null,
+          "armor": null,
+          "hands": null,
+          "feet": null,
+          "cloak": null,
+          "belt": null,
+          "trinket": null,
+          "ring": null
+        },
+        "ownedGear": [],
+        "companions": [
+          {
+            "id": "mira",
+            "active": true,
+            "hp": 58,
+            "maxHp": 58,
+            "mp": 22,
+            "maxMp": 22,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "orrin",
+            "active": true,
+            "hp": 43,
+            "maxHp": 43,
+            "mp": 38,
+            "maxMp": 38,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "kest",
+            "active": true,
+            "hp": 48,
+            "maxHp": 48,
+            "mp": 24,
+            "maxMp": 24,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          }
+        ],
+        "supplies": {
+          "rations": 0,
+          "potions": 0,
+          "kitNights": 0,
+          "kits": []
+        },
+        "livingCosts": {
+          "startedDay": 0,
+          "lastDay": 6667,
+          "accruedUnits": 11640,
+          "billedGold": 30,
+          "paidGold": 30,
+          "supportedGold": 0,
+          "lastJournalYear": 18,
+          "focusDays": {
+            "livelihood": 29,
+            "education": 0,
+            "relationships": 0,
+            "adventure": 0,
+            "rest": 0
+          },
+          "history": [
+            {
+              "day": 6577,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6580,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6583,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6586,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6591,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6594,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6603,
+              "due": 3,
+              "paid": 3,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6605,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6608,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6611,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6614,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6616,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6619,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6623,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6642,
+              "due": 6,
+              "paid": 6,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6644,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6648,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6650,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6653,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6656,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6659,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6664,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            }
+          ]
+        },
+        "maze": null
+      }
+    },
+    {
+      "id": "support-traits-2",
+      "evidenceClass": "action-earned",
+      "root": 2,
+      "stateHash": "b64ffda924ff2a6ac0dba408ec2a2f147d0f2ee0d000ef876a1169483e5b635c",
+      "setup": {
+        "rootDays": 41,
+        "extensionDays": 0,
+        "extensionGoldDelta": 0,
+        "transitions": 3
+      },
+      "actual": {
+        "seed": "balance-earned-bard-c",
+        "difficulty": "balanced",
+        "day": 6611,
+        "age": 18,
+        "locationId": "city",
+        "hero": {
+          "calling": "bard",
+          "path": "rogue",
+          "traits": [
+            "cautious",
+            "stoic",
+            "content"
+          ],
+          "level": 1,
+          "exp": 28,
+          "hp": 65,
+          "maxHp": 65,
+          "mp": 31,
+          "maxMp": 31,
+          "gold": 195,
+          "potions": 0,
+          "attributes": {
+            "strength": 3,
+            "agility": 9,
+            "vitality": 7,
+            "intellect": 5,
+            "willpower": 8,
+            "presence": 6
+          },
+          "skills": {
+            "weapons": 1,
+            "defense": 1,
+            "arcana": 0,
+            "devotion": 0,
+            "stealth": 2,
+            "survival": 26,
+            "scholarship": 14,
+            "persuasion": 30
+          }
+        },
+        "learnedCallings": [
+          "bard"
+        ],
+        "trainedTechniques": [
+          "second_wind"
+        ],
+        "equipped": {
+          "weapon": null,
+          "offhand": null,
+          "head": null,
+          "armor": null,
+          "hands": null,
+          "feet": null,
+          "cloak": null,
+          "belt": null,
+          "trinket": null,
+          "ring": null
+        },
+        "ownedGear": [],
+        "companions": [
+          {
+            "id": "mira",
+            "active": true,
+            "hp": 58,
+            "maxHp": 58,
+            "mp": 22,
+            "maxMp": 22,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "orrin",
+            "active": true,
+            "hp": 43,
+            "maxHp": 43,
+            "mp": 38,
+            "maxMp": 38,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          },
+          {
+            "id": "kest",
+            "active": true,
+            "hp": 48,
+            "maxHp": 48,
+            "mp": 24,
+            "maxMp": 24,
+            "combatExperience": 0,
+            "status": "available",
+            "techniques": []
+          }
+        ],
+        "supplies": {
+          "rations": 0,
+          "potions": 0,
+          "kitNights": 0,
+          "kits": []
+        },
+        "livingCosts": {
+          "startedDay": 0,
+          "lastDay": 6611,
+          "accruedUnits": 4920,
+          "billedGold": 12,
+          "paidGold": 12,
+          "supportedGold": 0,
+          "lastJournalYear": 18,
+          "focusDays": {
+            "livelihood": 24,
+            "education": 0,
+            "relationships": 0,
+            "adventure": 0,
+            "rest": 0
+          },
+          "history": [
+            {
+              "day": 6583,
+              "due": 4,
+              "paid": 4,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6586,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6589,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6596,
+              "due": 2,
+              "paid": 2,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6599,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6601,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6605,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            },
+            {
+              "day": 6608,
+              "due": 1,
+              "paid": 1,
+              "support": 0,
+              "focus": "livelihood",
+              "lifestyle": "frugal"
+            }
+          ]
+        },
+        "maze": null
+      }
+    }
+  ]
+}

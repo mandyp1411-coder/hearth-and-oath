@@ -1,0 +1,72 @@
+import {assertCapturedMigration} from './helpers/migration-mechanics.mjs';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import * as engine from '../dist/js/engine.js';
+
+test('an optional remembered afternoon waits for the promised civic work after its birthday interruption',()=>{
+  const original=JSON.parse(readFileSync(new URL('./fixtures/v8-community-before-birthday.json',import.meta.url),'utf8'));
+  const s=engine.migrateSave(original);
+  // A queued social memory is isolated test setup; the construction checkpoint
+  // and all its days, resources and commitments come from genuine gameplay.
+  s.pastimes.callbacks.push({id:'priority-check',kind:'supper',actorIds:[],createdDay:s.day,dueDay:s.day+1,pick:'invite',resolved:false});
+  assert.ok(engine.validateSave(s));
+  const paused=engine.chooseAction(s,'community_stage');
+  assert.ok(paused.event.id.startsWith('birth_'));
+  const answered=engine.chooseEventOption(paused,'care');
+  assert.equal(answered.event,null,'an optional afternoon cannot displace the remaining committed work');
+  assert.ok(engine.getLifeCommitment(answered));
+  const completed=engine.chooseAction(answered,'community_continue');
+  assert.equal(engine.getLifeCommitment(completed),null);
+  assert.equal(completed.event?.id,'pastime_callback','the remembered afternoon returns after the commitment completes');
+  assert.ok(engine.validateSave(completed));
+});
+
+test('genuinely played construction crosses a birthday, keeps its quotation and resumes only its remaining days',()=>{
+  const original=JSON.parse(readFileSync(new URL('./fixtures/v8-community-before-birthday.json',import.meta.url),'utf8'));
+  const untouched=structuredClone(original),stage=original.community.project.stages[0];
+  assert.ok(engine.validateSave(original));
+  assert.equal(engine.getLifeCommitment(original),null,'a proposal between milestones leaves room for ordinary life');
+  const offered=engine.getActions(original).find(a=>a.id==='community_stage');
+  assert.ok(offered&&!offered.disabledReason,'bounded construction can begin before a birthday');
+  const paused=engine.chooseAction(original,offered.id);
+  assert.deepEqual(original,untouched);
+  assert.ok(engine.validateSave(paused));
+  assert.equal(paused.event.id,'birth_adult_year');
+  assert.equal(paused.age,original.age+1);
+  const commitment=engine.getLifeCommitment(paused);
+  assert.equal(commitment.totalDays,stage.days);
+  assert.equal(commitment.completedDays,paused.day-original.day);
+  assert.equal(commitment.remainingDays,stage.days-(paused.day-original.day));
+  assert.equal(paused.community.project.paidGold,stage.cost);
+  for(const [material,n] of Object.entries(stage.materials))assert.equal(original.equipment.materials[material]-paused.equipment.materials[material],n);
+  assert.equal(original.hero.gold-paused.hero.gold,stage.cost+paused.householdBudget.paidGold-original.householdBudget.paidGold);
+  const roundTrip=engine.migrateSave(JSON.parse(JSON.stringify(paused)));
+  const existing=structuredClone(roundTrip);
+  delete existing.characterDialogueVersion;
+  delete existing.cartography;delete existing.realm;delete existing.justice;delete existing.adventuring;delete existing.social;delete existing.pastimes;delete existing.stories;delete existing.rpg;delete existing.timeline.nextContentVersion;
+  assertCapturedMigration(paused,roundTrip);
+  assert.equal(roundTrip.rpg.rosterVersion,0,'old three-person circles remain unchanged');
+  assert.equal(roundTrip.rpg.project,null,'migration invents no new attended work');
+  assert.ok(roundTrip.cartography.sites[roundTrip.locationId].kind==='Visited');
+  assert.equal(roundTrip.timeline.nextContentVersion,7,'the waiting older birthday resolves before the new stories begin');
+  assert.equal(roundTrip.social.startedDay,paused.day);
+  assert.equal(roundTrip.pastimes.startedDay,paused.day);
+  assert.deepEqual(roundTrip.social.history,[],'migration invents no earlier social scenes');
+  assert.deepEqual(engine.migrateSave(JSON.parse(JSON.stringify(roundTrip))),roundTrip,'an updated save round-trips exactly');
+  const answered=engine.chooseEventOption(roundTrip,'care');
+  assert.equal(answered.event,null);
+  const blocked=engine.ageUp(answered);
+  assert.equal(blocked.day,answered.day);
+  assert.deepEqual(blocked.community,answered.community);
+  assert.ok(!engine.getActions(answered).some(a=>a.id==='career_work'),'a promised milestone cannot be worked twice by starting another job');
+  const finished=engine.chooseAction(answered,'community_continue');
+  assert.ok(engine.validateSave(finished));
+  assert.equal(finished.day-original.day,stage.days);
+  assert.equal(finished.community.project.step,1);
+  assert.equal(finished.community.project.workedDays,stage.days);
+  assert.equal(finished.community.project.paidGold,stage.cost);
+  assert.deepEqual(finished.equipment.materials,answered.equipment.materials,'continuation cannot consume the reserved materials again');
+  assert.equal(answered.hero.gold-finished.hero.gold,finished.householdBudget.paidGold-answered.householdBudget.paidGold,'continuation pays only its new actual household costs');
+  assert.equal(engine.getLifeCommitment(finished),null);
+});

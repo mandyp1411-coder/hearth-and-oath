@@ -1,0 +1,33 @@
+{
+  "base": "99e19bd",
+  "scope": "27 fixed ordinary-combat snapshot sequences; not full game coverage",
+  "hashes": {
+    "warrior:gentle:forest": "1a80cf3c518190575e8c6e224101098c4a30d11d03ed531dfd26c03e2009fb09",
+    "warrior:gentle:ruin": "768f69cb5a034ce57a0bde2e4eb7b192700120587846bd98c4ee73452e6a5109",
+    "warrior:gentle:initiation": "590f83bcfbe58dad22c3919d28078f5137aad4e37e9286b7383e3ee30f3ae852",
+    "warrior:balanced:forest": "3c12d22a1fa455a993a1e5c779d8523fd64da2e252c81c2301ad96a63d6e4c4f",
+    "warrior:balanced:ruin": "0a6b1882a9b9514de19163edd48c24f55035c17e5fa0ebc6bac245b0819cd3f4",
+    "warrior:balanced:initiation": "c9617fc3333560f2a6d9aa53729f71b26d6b815d6ff95aa6c1d9dac7a1a17d38",
+    "warrior:perilous:forest": "0eda51d783b49691138e70263af2619847b30ba5cc5d4f3aa0aab31dce1bcbd4",
+    "warrior:perilous:ruin": "ea7e7b0b53da1fbeace71683bd3de7251ca7d8146033149ffdef0131643c8833",
+    "warrior:perilous:initiation": "427750580bf0ba5c5409294221bf3e7e938545a82810c2ec6dcbfa3559b08eb7",
+    "mage:gentle:forest": "b793e643cfab654e1ad1fa2292fd07a6b58450e82a1c0777d199092b9a39bffe",
+    "mage:gentle:ruin": "5e796fdb6d28ff7cda051350bd9966602a6bb84bb703843a731e15f1226a297f",
+    "mage:gentle:initiation": "fe78968ace6075a8025ee8fa5b4096f5475a8705baf7be160885df5d9c5d5bea",
+    "mage:balanced:forest": "06fcb59a608b81682e28fe3f7d08b4c757c60692a419a4200ef94cf2fb5a5c55",
+    "mage:balanced:ruin": "969b67cfbbdb1e8b551ef767f1ca3491843b3542c8c378a1ce803fe3ff1439b8",
+    "mage:balanced:initiation": "3223173f78dc78273b15105197033e76257852e432b515a09a744b3e2ccb1221",
+    "mage:perilous:forest": "43654614ae93f57fd728afd0a4ba7b8c037c441a38307062c0ab10468b3454ca",
+    "mage:perilous:ruin": "d0a0c39d58198ed3f3c481480a572b99257a20bdd46865583d209aad1d4e877b",
+    "mage:perilous:initiation": "5c3b75d2ca5a023d546d48eb3873ce82b2c46fedcf68431a27ac2d42eb3c8c2d",
+    "rogue:gentle:forest": "eeca8b5f5a68a5f64e7ddea85a86606be312e9dd4d0b456f11457451e0a71341",
+    "rogue:gentle:ruin": "b8a555f9432db2c3b0db0e07f57571716ee43b0c57e52240120bbf6c0adf03f4",
+    "rogue:gentle:initiation": "a4cb6f144b185a5bd801fcd03b651ef26d2ca64bb106667bc457ae6e02a2e060",
+    "rogue:balanced:forest": "f02d08569bcbbcdc64776271c17e9ca8bc2432c37f0803642557d487e5c8f8d6",
+    "rogue:balanced:ruin": "1ebee5f9f36348fe2292032c071b125c5c7197228ba75cb75a47dbb4f6ec55d7",
+    "rogue:balanced:initiation": "c6f37d544263157601d0fac945812f33e5682f2beeaf8701c5ca5aed03e3a128",
+    "rogue:perilous:forest": "6663ed3c082a11415b9ecbd954f70c9d04f065120d6cb85b4cb6b3a6cff75937",
+    "rogue:perilous:ruin": "827edd670fad1658213de88dda8065beec5bcdfddb90195920e06f5a7ae8eb98",
+    "rogue:perilous:initiation": "7e9b9900087c9731bc0cb948855510095c45d9e535ed872176542d449d09fbe8"
+  }
+}

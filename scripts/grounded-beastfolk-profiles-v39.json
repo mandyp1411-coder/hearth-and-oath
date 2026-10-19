@@ -1,0 +1,735 @@
+{
+  "A": [
+    {
+      "morphology": "canine",
+      "presentation": "masculine",
+      "furTone": "mixed",
+      "speciesFamily": null,
+      "generationDescriptor": "Wolf or dog head with projecting muzzle, black nose and triangular ears. Clearly two-tone dark cap and pale muzzle/cheeks; keep exact patch boundaries."
+    },
+    {
+      "morphology": "feline",
+      "presentation": "masculine",
+      "furTone": "dark",
+      "speciesFamily": null,
+      "generationDescriptor": "Cat head with short feline muzzle, whisker pads and triangular ears. Dense charcoal-to-black coat across crown and cheeks."
+    },
+    {
+      "morphology": "bear",
+      "presentation": "masculine",
+      "furTone": "dark",
+      "speciesFamily": null,
+      "generationDescriptor": "Bear head with small round ears, broad snout and large nose. Dense charcoal-to-black coat across crown and cheeks."
+    },
+    {
+      "morphology": "horned",
+      "presentation": "masculine",
+      "furTone": "light",
+      "speciesFamily": null,
+      "generationDescriptor": "Goat head with paired curved horns, horizontal ears and long caprine muzzle. Predominantly ivory-to-pale-gray coat across crown and cheeks."
+    },
+    {
+      "morphology": "long_eared",
+      "presentation": "masculine",
+      "furTone": "light",
+      "speciesFamily": null,
+      "generationDescriptor": "Hare head with very long upright ears and small split muzzle. Predominantly ivory-to-pale-gray coat across crown and cheeks."
+    },
+    {
+      "morphology": "other",
+      "presentation": "masculine",
+      "furTone": "mixed",
+      "speciesFamily": "mustelid",
+      "generationDescriptor": "Mustelid ferret or stoat head with tiny round ears and low long narrow muzzle; never a cat. Clearly two-tone dark cap and pale muzzle/cheeks; keep exact patch boundaries."
+    },
+    {
+      "morphology": "canine",
+      "presentation": "feminine",
+      "furTone": "mixed",
+      "speciesFamily": null,
+      "generationDescriptor": "Wolf or dog head with projecting muzzle, black nose and triangular ears. Clearly two-tone dark cap and pale muzzle/cheeks; keep exact patch boundaries."
+    },
+    {
+      "morphology": "feline",
+      "presentation": "feminine",
+      "furTone": "dark",
+      "speciesFamily": null,
+      "generationDescriptor": "Cat head with short feline muzzle, whisker pads and triangular ears. Dense charcoal-to-black coat across crown and cheeks."
+    },
+    {
+      "morphology": "bear",
+      "presentation": "feminine",
+      "furTone": "dark",
+      "speciesFamily": null,
+      "generationDescriptor": "Bear head with small round ears, broad snout and large nose. Dense charcoal-to-black coat across crown and cheeks."
+    },
+    {
+      "morphology": "horned",
+      "presentation": "feminine",
+      "furTone": "light",
+      "speciesFamily": null,
+      "generationDescriptor": "Goat head with paired curved horns, horizontal ears and long caprine muzzle. Predominantly ivory-to-pale-gray coat across crown and cheeks."
+    },
+    {
+      "morphology": "long_eared",
+      "presentation": "feminine",
+      "furTone": "light",
+      "speciesFamily": null,
+      "generationDescriptor": "Hare head with very long upright ears and small split muzzle. Predominantly ivory-to-pale-gray coat across crown and cheeks."
+    },
+    {
+      "morphology": "other",
+      "presentation": "feminine",
+      "furTone": "mixed",
+      "speciesFamily": "mustelid",
+      "generationDescriptor": "Mustelid ferret or stoat head with tiny round ears and low long narrow muzzle; never a cat. Clearly two-tone dark cap and pale muzzle/cheeks; keep exact patch boundaries."
+    }
+  ],
+  "B": [
+    {
+      "morphology": "canine",
+      "presentation": "androgynous",
+      "furTone": "mixed",
+      "speciesFamily": null,
+      "generationDescriptor": "Wolf or dog head with projecting muzzle, black nose and triangular ears. Clearly two-tone dark cap and pale muzzle/cheeks; keep exact patch boundaries."
+    },
+    {
+      "morphology": "feline",
+      "presentation": "androgynous",
+      "furTone": "mixed",
+      "speciesFamily": null,
+      "generationDescriptor": "Cat head with short feline muzzle, whisker pads and triangular ears. Clearly two-tone dark cap and pale muzzle/cheeks; keep exact patch boundaries."
+    },
+    {
+      "morphology": "bear",
+      "presentation": "androgynous",
+      "furTone": "mixed",
+      "speciesFamily": null,
+      "generationDescriptor": "Bear head with small round ears, broad snout and large nose. Clearly two-tone dark cap and pale muzzle/cheeks; keep exact patch boundaries."
+    },
+    {
+      "morphology": "horned",
+      "presentation": "androgynous",
+      "furTone": "light",
+      "speciesFamily": null,
+      "generationDescriptor": "Goat head with paired curved horns, horizontal ears and long caprine muzzle. Predominantly ivory-to-pale-gray coat across crown and cheeks."
+    },
+    {
+      "morphology": "long_eared",
+      "presentation": "androgynous",
+      "furTone": "light",
+      "speciesFamily": null,
+      "generationDescriptor": "Hare head with very long upright ears and small split muzzle. Predominantly ivory-to-pale-gray coat across crown and cheeks."
+    },
+    {
+      "morphology": "other",
+      "presentation": "androgynous",
+      "furTone": "mixed",
+      "speciesFamily": "mustelid",
+      "generationDescriptor": "Mustelid ferret or stoat head with tiny round ears and low long narrow muzzle; never a cat. Clearly two-tone dark cap and pale muzzle/cheeks; keep exact patch boundaries."
+    },
+    {
+      "morphology": "bear",
+      "presentation": "masculine",
+      "furTone": "light",
+      "speciesFamily": null,
+      "generationDescriptor": "Bear head with small round ears, broad snout and large nose. Predominantly ivory-to-pale-gray coat across crown and cheeks."
+    },
+    {
+      "morphology": "bear",
+      "presentation": "feminine",
+      "furTone": "light",
+      "speciesFamily": null,
+      "generationDescriptor": "Bear head with small round ears, broad snout and large nose. Predominantly ivory-to-pale-gray coat across crown and cheeks."
+    },
+    {
+      "morphology": "canine",
+      "presentation": "feminine",
+      "furTone": "light",
+      "speciesFamily": null,
+      "generationDescriptor": "Wolf or dog head with projecting muzzle, black nose and triangular ears. Predominantly ivory-to-pale-gray coat across crown and cheeks."
+    },
+    {
+      "morphology": "feline",
+      "presentation": "masculine",
+      "furTone": "light",
+      "speciesFamily": null,
+      "generationDescriptor": "Cat head with short feline muzzle, whisker pads and triangular ears. Predominantly ivory-to-pale-gray coat across crown and cheeks."
+    },
+    {
+      "morphology": "feline",
+      "presentation": "feminine",
+      "furTone": "light",
+      "speciesFamily": null,
+      "generationDescriptor": "Cat head with short feline muzzle, whisker pads and triangular ears. Predominantly ivory-to-pale-gray coat across crown and cheeks."
+    },
+    {
+      "morphology": "feline",
+      "presentation": "androgynous",
+      "furTone": "light",
+      "speciesFamily": null,
+      "generationDescriptor": "Cat head with short feline muzzle, whisker pads and triangular ears. Predominantly ivory-to-pale-gray coat across crown and cheeks."
+    }
+  ],
+  "C": [
+    {
+      "identityId": "beastfolk-v39-c-01",
+      "localIdentityIndex": 0,
+      "cohortId": "beastfolk-cohort-03",
+      "morphology": "canine",
+      "presentation": "masculine",
+      "furTone": "light",
+      "speciesFamily": null,
+      "purpose": "uncovered",
+      "firstAgeRow": 1,
+      "column": 1,
+      "stageCells": {
+        "adult": 0,
+        "mature": 6,
+        "older": 12,
+        "elder": 18
+      },
+      "generationDescriptor": "Broad white-wolf muzzle, wide-set upright ears, thick pale cheek ruff. Predominantly ivory-to-pale-gray coat across crown and cheeks; keep the skin and nose separate from the light fur, and preserve the pale coat through all ages.",
+      "legacyExamples": [
+        "beastfolk-adult-00:03",
+        "beastfolk-adult-01:09",
+        "beastfolk-adult-05:01"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-c-02",
+      "localIdentityIndex": 1,
+      "cohortId": "beastfolk-cohort-01",
+      "morphology": "canine",
+      "presentation": "masculine",
+      "furTone": "dark",
+      "speciesFamily": null,
+      "purpose": "uncovered",
+      "firstAgeRow": 1,
+      "column": 2,
+      "stageCells": {
+        "adult": 1,
+        "mature": 7,
+        "older": 13,
+        "elder": 19
+      },
+      "generationDescriptor": "Lean black-wolf muzzle, narrow nose bridge, sharply upright ears and a small notch in the left ear. Dense charcoal-to-black coat across crown and cheeks; preserve dark fur through every age, with only sparse silver guard hairs in older faces.",
+      "legacyExamples": [
+        "beastfolk-adult-00:04",
+        "beastfolk-adult-00:12",
+        "beastfolk-adult-00:18"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-c-03",
+      "localIdentityIndex": 2,
+      "cohortId": "beastfolk-cohort-10",
+      "morphology": "feline",
+      "presentation": "masculine",
+      "furTone": "mixed",
+      "speciesFamily": null,
+      "purpose": "uncovered",
+      "firstAgeRow": 1,
+      "column": 3,
+      "stageCells": {
+        "adult": 2,
+        "mature": 8,
+        "older": 14,
+        "elder": 20
+      },
+      "generationDescriptor": "Long triangular cat face, dark forehead and ears, pale whisker pads, one dark diagonal cheek patch. Clearly two-tone coat: charcoal cap or patches against pale ash muzzle and cheeks; preserve the exact patch boundaries through all ages.",
+      "legacyExamples": [
+        "beastfolk-adult-00:01",
+        "beastfolk-adult-00:06",
+        "beastfolk-adult-00:11"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-c-04",
+      "localIdentityIndex": 3,
+      "cohortId": "beastfolk-cohort-19",
+      "morphology": "bear",
+      "presentation": "masculine",
+      "furTone": "mixed",
+      "speciesFamily": null,
+      "purpose": "uncovered",
+      "firstAgeRow": 1,
+      "column": 4,
+      "stageCells": {
+        "adult": 3,
+        "mature": 9,
+        "older": 15,
+        "elder": 21
+      },
+      "generationDescriptor": "Broad bear face, rounded dark ears and forehead, a large pale muzzle with dark side patches. Clearly two-tone coat: charcoal cap or patches against pale ash muzzle and cheeks; preserve the exact patch boundaries through all ages.",
+      "legacyExamples": [
+        "beastfolk-adult-01:11"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-c-05",
+      "localIdentityIndex": 4,
+      "cohortId": "beastfolk-cohort-26",
+      "morphology": "horned",
+      "presentation": "masculine",
+      "furTone": "dark",
+      "speciesFamily": null,
+      "purpose": "uncovered",
+      "firstAgeRow": 1,
+      "column": 5,
+      "stageCells": {
+        "adult": 4,
+        "mature": 10,
+        "older": 16,
+        "elder": 22
+      },
+      "generationDescriptor": "Charcoal goat face, heavy ridged swept-back horns, blunt broad muzzle and a short dark chin tuft. Dense charcoal-to-black coat across crown and cheeks; preserve dark fur through every age, with only sparse silver guard hairs in older faces.",
+      "legacyExamples": [
+        "beastfolk-adult-00:14",
+        "beastfolk-adult-02:11"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-c-06",
+      "localIdentityIndex": 5,
+      "cohortId": "beastfolk-cohort-31",
+      "morphology": "long_eared",
+      "presentation": "masculine",
+      "furTone": "dark",
+      "speciesFamily": null,
+      "purpose": "uncovered",
+      "firstAgeRow": 1,
+      "column": 6,
+      "stageCells": {
+        "adult": 5,
+        "mature": 11,
+        "older": 17,
+        "elder": 23
+      },
+      "generationDescriptor": "Charcoal hare face, very long narrow ears, elongated nose bridge and a tiny pale chin. Dense charcoal-to-black coat across crown and cheeks; preserve dark fur through every age, with only sparse silver guard hairs in older faces.",
+      "legacyExamples": [
+        "beastfolk-adult-00:22",
+        "beastfolk-adult-01:07",
+        "beastfolk-adult-02:07"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-c-07",
+      "localIdentityIndex": 6,
+      "cohortId": "beastfolk-cohort-13",
+      "morphology": "feline",
+      "presentation": "feminine",
+      "furTone": "mixed",
+      "speciesFamily": null,
+      "purpose": "uncovered",
+      "firstAgeRow": 5,
+      "column": 1,
+      "stageCells": {
+        "adult": 24,
+        "mature": 30,
+        "older": 36,
+        "elder": 42
+      },
+      "generationDescriptor": "Slender short-muzzled cat face with dark temple patches and a pale nose blaze; fine but clearly animal features. Clearly two-tone coat: charcoal cap or patches against pale ash muzzle and cheeks; preserve the exact patch boundaries through all ages.",
+      "legacyExamples": [
+        "beastfolk-adult-00:26",
+        "beastfolk-adult-00:29",
+        "beastfolk-adult-00:37"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-c-08",
+      "localIdentityIndex": 7,
+      "cohortId": "beastfolk-cohort-34",
+      "morphology": "long_eared",
+      "presentation": "feminine",
+      "furTone": "dark",
+      "speciesFamily": null,
+      "purpose": "uncovered",
+      "firstAgeRow": 5,
+      "column": 2,
+      "stageCells": {
+        "adult": 25,
+        "mature": 31,
+        "older": 37,
+        "elder": 43
+      },
+      "generationDescriptor": "Dark hare face, long narrow upright ears and a soft rounded cheek line; retain the charcoal coat. Dense charcoal-to-black coat across crown and cheeks; preserve dark fur through every age, with only sparse silver guard hairs in older faces.",
+      "legacyExamples": [
+        "beastfolk-adult-01:25"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-c-09",
+      "localIdentityIndex": 8,
+      "cohortId": "beastfolk-cohort-35",
+      "morphology": "long_eared",
+      "presentation": "feminine",
+      "furTone": "mixed",
+      "speciesFamily": null,
+      "purpose": "uncovered",
+      "firstAgeRow": 5,
+      "column": 3,
+      "stageCells": {
+        "adult": 26,
+        "mature": 32,
+        "older": 38,
+        "elder": 44
+      },
+      "generationDescriptor": "Hare face with dark ear tips and one dark cheek, pale forehead blaze and a pale split muzzle. Clearly two-tone coat: charcoal cap or patches against pale ash muzzle and cheeks; preserve the exact patch boundaries through all ages.",
+      "legacyExamples": [
+        "beastfolk-adult-02:45"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-c-10",
+      "localIdentityIndex": 9,
+      "cohortId": "beastfolk-cohort-41",
+      "morphology": "other",
+      "presentation": "feminine",
+      "furTone": "light",
+      "speciesFamily": "mustelid",
+      "purpose": "uncovered",
+      "firstAgeRow": 5,
+      "column": 4,
+      "stageCells": {
+        "adult": 27,
+        "mature": 33,
+        "older": 39,
+        "elder": 45
+      },
+      "generationDescriptor": "Pale ferret-like face, small round ears, narrow long muzzle and a tiny charcoal nose; no cat or dog ears. Predominantly ivory-to-pale-gray coat across crown and cheeks; keep the skin and nose separate from the light fur, and preserve the pale coat through all ages.",
+      "legacyExamples": [
+        "beastfolk-adult-08:37",
+        "beastfolk-adult-08:40"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-c-11",
+      "localIdentityIndex": 10,
+      "cohortId": "beastfolk-cohort-13",
+      "morphology": "feline",
+      "presentation": "feminine",
+      "furTone": "mixed",
+      "speciesFamily": null,
+      "purpose": "duplicate",
+      "firstAgeRow": 5,
+      "column": 5,
+      "stageCells": {
+        "adult": 28,
+        "mature": 34,
+        "older": 40,
+        "elder": 46
+      },
+      "generationDescriptor": "A second distinct feminine cat: broad round face, dark brow cap, pale cheeks, two narrow dark forehead stripes; different face geometry from C7. Clearly two-tone coat: charcoal cap or patches against pale ash muzzle and cheeks; preserve the exact patch boundaries through all ages.",
+      "legacyExamples": [
+        "beastfolk-adult-00:26",
+        "beastfolk-adult-00:29",
+        "beastfolk-adult-00:37"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-c-12",
+      "localIdentityIndex": 11,
+      "cohortId": "beastfolk-cohort-04",
+      "morphology": "canine",
+      "presentation": "feminine",
+      "furTone": "mixed",
+      "speciesFamily": null,
+      "purpose": "duplicate",
+      "firstAgeRow": 5,
+      "column": 6,
+      "stageCells": {
+        "adult": 29,
+        "mature": 35,
+        "older": 41,
+        "elder": 47
+      },
+      "generationDescriptor": "A second distinct feminine wolf: long delicate muzzle, large pointed ears, dark crown, pale cheek ruff and an asymmetric pale brow patch. Clearly two-tone coat: charcoal cap or patches against pale ash muzzle and cheeks; preserve the exact patch boundaries through all ages.",
+      "legacyExamples": [
+        "beastfolk-adult-00:24",
+        "beastfolk-adult-00:31",
+        "beastfolk-adult-00:33"
+      ]
+    }
+  ],
+  "D": [
+    {
+      "identityId": "beastfolk-v39-d-01",
+      "localIdentityIndex": 0,
+      "cohortId": "beastfolk-cohort-06",
+      "morphology": "canine",
+      "presentation": "androgynous",
+      "furTone": "dark",
+      "speciesFamily": null,
+      "purpose": "uncovered",
+      "firstAgeRow": 1,
+      "column": 1,
+      "stageCells": {
+        "adult": 0,
+        "mature": 6,
+        "older": 12,
+        "elder": 18
+      },
+      "generationDescriptor": "Narrow charcoal wolf face with a straight long muzzle, compact pointed ears and a calm neutral brow. Dense charcoal-to-black coat across crown and cheeks; preserve dark fur through every age, with only sparse silver guard hairs in older faces.",
+      "legacyExamples": [
+        "beastfolk-adult-00:53"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-d-02",
+      "localIdentityIndex": 1,
+      "cohortId": "beastfolk-cohort-08",
+      "morphology": "canine",
+      "presentation": "androgynous",
+      "furTone": "light",
+      "speciesFamily": null,
+      "purpose": "uncovered",
+      "firstAgeRow": 1,
+      "column": 2,
+      "stageCells": {
+        "adult": 1,
+        "mature": 7,
+        "older": 13,
+        "elder": 19
+      },
+      "generationDescriptor": "Pale wolf face with a broad square muzzle, upright triangular ears and a short fluffy cheek ruff. Predominantly ivory-to-pale-gray coat across crown and cheeks; keep the skin and nose separate from the light fur, and preserve the pale coat through all ages.",
+      "legacyExamples": [
+        "beastfolk-adult-00:60",
+        "beastfolk-adult-07:58",
+        "beastfolk-adult-14:56"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-d-03",
+      "localIdentityIndex": 2,
+      "cohortId": "beastfolk-cohort-15",
+      "morphology": "feline",
+      "presentation": "androgynous",
+      "furTone": "dark",
+      "speciesFamily": null,
+      "purpose": "uncovered",
+      "firstAgeRow": 1,
+      "column": 3,
+      "stageCells": {
+        "adult": 2,
+        "mature": 8,
+        "older": 14,
+        "elder": 20
+      },
+      "generationDescriptor": "Charcoal cat face with a short broad muzzle, triangular ears and clearly drawn pale whiskers. Dense charcoal-to-black coat across crown and cheeks; preserve dark fur through every age, with only sparse silver guard hairs in older faces.",
+      "legacyExamples": [
+        "beastfolk-adult-01:62",
+        "beastfolk-adult-05:55",
+        "beastfolk-adult-05:62"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-d-04",
+      "localIdentityIndex": 3,
+      "cohortId": "beastfolk-cohort-23",
+      "morphology": "bear",
+      "presentation": "androgynous",
+      "furTone": "dark",
+      "speciesFamily": null,
+      "purpose": "uncovered",
+      "firstAgeRow": 1,
+      "column": 4,
+      "stageCells": {
+        "adult": 3,
+        "mature": 9,
+        "older": 15,
+        "elder": 21
+      },
+      "generationDescriptor": "Dark bear face with small round ears, a wide dark snout and a tall rounded forehead. Dense charcoal-to-black coat across crown and cheeks; preserve dark fur through every age, with only sparse silver guard hairs in older faces.",
+      "legacyExamples": [
+        "beastfolk-adult-02:56",
+        "beastfolk-adult-03:53",
+        "beastfolk-adult-03:57"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-d-05",
+      "localIdentityIndex": 4,
+      "cohortId": "beastfolk-cohort-29",
+      "morphology": "horned",
+      "presentation": "androgynous",
+      "furTone": "dark",
+      "speciesFamily": null,
+      "purpose": "uncovered",
+      "firstAgeRow": 1,
+      "column": 5,
+      "stageCells": {
+        "adult": 4,
+        "mature": 10,
+        "older": 16,
+        "elder": 22
+      },
+      "generationDescriptor": "Charcoal caprine face, paired slender curved horns, horizontal ears and a long narrow goat muzzle. Dense charcoal-to-black coat across crown and cheeks; preserve dark fur through every age, with only sparse silver guard hairs in older faces.",
+      "legacyExamples": [
+        "beastfolk-adult-02:53",
+        "beastfolk-adult-08:60"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-d-06",
+      "localIdentityIndex": 5,
+      "cohortId": "beastfolk-cohort-37",
+      "morphology": "long_eared",
+      "presentation": "androgynous",
+      "furTone": "dark",
+      "speciesFamily": null,
+      "purpose": "uncovered",
+      "firstAgeRow": 1,
+      "column": 6,
+      "stageCells": {
+        "adult": 5,
+        "mature": 11,
+        "older": 17,
+        "elder": 23
+      },
+      "generationDescriptor": "Dark hare face, very long tall upright ears, slender cheeks and a small short split muzzle. Dense charcoal-to-black coat across crown and cheeks; preserve dark fur through every age, with only sparse silver guard hairs in older faces.",
+      "legacyExamples": [
+        "beastfolk-adult-00:54",
+        "beastfolk-adult-01:51"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-d-07",
+      "localIdentityIndex": 6,
+      "cohortId": "beastfolk-cohort-42",
+      "morphology": "other",
+      "presentation": "androgynous",
+      "furTone": "dark",
+      "speciesFamily": "mustelid",
+      "purpose": "uncovered",
+      "firstAgeRow": 5,
+      "column": 1,
+      "stageCells": {
+        "adult": 24,
+        "mature": 30,
+        "older": 36,
+        "elder": 42
+      },
+      "generationDescriptor": "Dark mink-like mustelid face with small round ears and a low elongated muzzle; keep charcoal fur over crown and cheeks. Dense charcoal-to-black coat across crown and cheeks; preserve dark fur through every age, with only sparse silver guard hairs in older faces.",
+      "legacyExamples": [
+        "beastfolk-adult-00:62"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-d-08",
+      "localIdentityIndex": 7,
+      "cohortId": "beastfolk-cohort-44",
+      "morphology": "other",
+      "presentation": "androgynous",
+      "furTone": "light",
+      "speciesFamily": "mustelid",
+      "purpose": "uncovered",
+      "firstAgeRow": 5,
+      "column": 2,
+      "stageCells": {
+        "adult": 25,
+        "mature": 31,
+        "older": 37,
+        "elder": 43
+      },
+      "generationDescriptor": "Pale stoat-like mustelid face, tiny round ears, a low narrow long muzzle and a small black nose. Predominantly ivory-to-pale-gray coat across crown and cheeks; keep the skin and nose separate from the light fur, and preserve the pale coat through all ages.",
+      "legacyExamples": [
+        "beastfolk-adult-04:57"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-d-09",
+      "localIdentityIndex": 8,
+      "cohortId": "beastfolk-cohort-25",
+      "morphology": "bear",
+      "presentation": "androgynous",
+      "furTone": "light",
+      "speciesFamily": null,
+      "purpose": "uncovered",
+      "firstAgeRow": 5,
+      "column": 3,
+      "stageCells": {
+        "adult": 26,
+        "mature": 32,
+        "older": 38,
+        "elder": 44
+      },
+      "generationDescriptor": "Pale bear face with small round ears, heavy broad snout, large black nose and short close cheek fur. Predominantly ivory-to-pale-gray coat across crown and cheeks; keep the skin and nose separate from the light fur, and preserve the pale coat through all ages.",
+      "legacyExamples": [
+        "beastfolk-adult-08:57",
+        "beastfolk-adult-08:61"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-d-10",
+      "localIdentityIndex": 9,
+      "cohortId": "beastfolk-cohort-32",
+      "morphology": "long_eared",
+      "presentation": "masculine",
+      "furTone": "mixed",
+      "speciesFamily": null,
+      "purpose": "uncovered",
+      "firstAgeRow": 5,
+      "column": 4,
+      "stageCells": {
+        "adult": 27,
+        "mature": 33,
+        "older": 39,
+        "elder": 45
+      },
+      "generationDescriptor": "Broad hare face with very long ears, a dark cap and ear tips, pale cheeks and a diagonal dark nose-side patch. Clearly two-tone coat: charcoal cap or patches against pale ash muzzle and cheeks; preserve the exact patch boundaries through all ages.",
+      "legacyExamples": [
+        "beastfolk-adult-02:21"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-d-11",
+      "localIdentityIndex": 10,
+      "cohortId": "beastfolk-cohort-10",
+      "morphology": "feline",
+      "presentation": "masculine",
+      "furTone": "mixed",
+      "speciesFamily": null,
+      "purpose": "duplicate",
+      "firstAgeRow": 5,
+      "column": 5,
+      "stageCells": {
+        "adult": 28,
+        "mature": 34,
+        "older": 40,
+        "elder": 46
+      },
+      "generationDescriptor": "A second distinct masculine cat: broad low muzzle, tufted triangular ears, dark crown and pale chin; sturdy face geometry unlike C3. Clearly two-tone coat: charcoal cap or patches against pale ash muzzle and cheeks; preserve the exact patch boundaries through all ages.",
+      "legacyExamples": [
+        "beastfolk-adult-00:01",
+        "beastfolk-adult-00:06",
+        "beastfolk-adult-00:11"
+      ]
+    },
+    {
+      "identityId": "beastfolk-v39-d-12",
+      "localIdentityIndex": 11,
+      "cohortId": "beastfolk-cohort-40",
+      "morphology": "other",
+      "presentation": "feminine",
+      "furTone": "mixed",
+      "speciesFamily": "mustelid",
+      "purpose": "duplicate",
+      "firstAgeRow": 5,
+      "column": 6,
+      "stageCells": {
+        "adult": 29,
+        "mature": 35,
+        "older": 41,
+        "elder": 47
+      },
+      "generationDescriptor": "A second distinct feminine mustelid: rounded otter-like muzzle, small circular ears, dark crown and two pale cheek patches; preserve mustelid anatomy. Clearly two-tone coat: charcoal cap or patches against pale ash muzzle and cheeks; preserve the exact patch boundaries through all ages.",
+      "legacyExamples": [
+        "beastfolk-adult-00:30",
+        "beastfolk-adult-00:36",
+        "beastfolk-adult-01:31"
+      ]
+    }
+  ]
+}

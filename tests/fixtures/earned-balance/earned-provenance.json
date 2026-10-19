@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "fixtureSetHash": "b01c01219d07ca04e65291372943539d6c9497b8c7e9f1d556e732d6df37fff7",
+  "matrixHash": "ade7472893dff80b5f0b41c1ab904dcb99b9ff2c1b4139f7ff89e569a0bf3233",
+  "sourceRevision": "2dd9de7",
+  "replayed": [
+    {
+      "id": "weapon-low",
+      "stateHash": "ab7b71775a32e2eed6ea824b6ea3b7140639bdd70215d5887816fa141e4845d3",
+      "traceHash": "fb27cacdd6a08be83aa712c0bbe47b311d95cdfcaa554ae3a21a4b60017f2137"
+    },
+    {
+      "id": "weapon-boundary-3",
+      "stateHash": "46c9c104525d30e2a41436cdbb7c3f50f83717d06ab80ef46b0644d1d104eb8b",
+      "traceHash": "cb0fb75c407a1470458be03d8d6261f94de4eeaa0ffa80b26f93318daa5e0da7"
+    },
+    {
+      "id": "weapon-mid",
+      "stateHash": "8bec7e034bbe416ca924c1cbb5b9bfe425fbe8b90e40f4c2d11dde6a17049086",
+      "traceHash": "befbcecc856953801f55eb8dc0bc2f638cbd7078e012e2da6def22cb0ba09097"
+    },
+    {
+      "id": "weapon-boundary-5",
+      "stateHash": "cc988feb796524445b8f9e7e73bdf875ed089c06eba54339e7194483351b6fb9",
+      "traceHash": "8c51ada509cf90072d7bb6a20d1e3d715b3861ef3d62b1ad03937426e0954fad"
+    },
+    {
+      "id": "caster-low",
+      "stateHash": "4ac7c2f9414ddd41a8c6a3a638afe2a98fe21b1e9b01c2da7714090227ba421a",
+      "traceHash": "adff06568d258af9d1f744de6f032b984ad6cfd5f7bb6e0579c7264efeb3b070"
+    },
+    {
+      "id": "caster-mid",
+      "stateHash": "2480ffd133e7636bcdd1e2cdc24cd7f36db8998e6fc18c179820d1ae6dd6946b",
+      "traceHash": "d82219161b786fa93d3db1477ace37e7a042aec4b47ff090dc17ce532360a38e"
+    },
+    {
+      "id": "defender-low",
+      "stateHash": "ea1b65e10436bfc247ad4db71b6f560cd258671bd41934cdd472a27b0c4d4043",
+      "traceHash": "b434467d850d3cb908c299b0caf955a609cc6f2186865a011dcb18a5e2d631c7"
+    },
+    {
+      "id": "defender-mid",
+      "stateHash": "4f31a693bf23ca6575db1171301b30bf261730a118e6903882c23c392901825b",
+      "traceHash": "6c4c4d261560fca0838e09af4d612d9caba33c6c5231734a9da7dfa3f82b9a64"
+    },
+    {
+      "id": "support-low",
+      "stateHash": "41c07d3aa460a291f278d47d9aa940878bf4fc0b38f9da3e1eb3c56282bd44b4",
+      "traceHash": "be4958173875ee5addef7fb04facf833f8b8fc6bb845ce82cb19e76f96f93a28"
+    },
+    {
+      "id": "support-mid",
+      "stateHash": "825d02a7c15df30e561116dafd14d12659fb4cd815a5a5b3892c7f95cff82c39",
+      "traceHash": "765223d22b6e5fca41618696e8ad13c4d446a12436a03f5357a2c6acbae15104"
+    },
+    {
+      "id": "support-traits-1",
+      "stateHash": "c25eb460a324f6c7dcea7886256447debdafaebaf156c12ac9b8147fa803aaaf",
+      "traceHash": "2b474e7a57987dfcb9305ac580f74ca16bda691ea7957bed19fc1fdd098ef8cc"
+    },
+    {
+      "id": "support-traits-2",
+      "stateHash": "b64ffda924ff2a6ac0dba408ec2a2f147d0f2ee0d000ef876a1169483e5b635c",
+      "traceHash": "c78bfe43ae0e064f75fbec32fe7d2589cb94b52c5a0655d57dffbf73eee23d94"
+    }
+  ],
+  "notRun": []
+}

@@ -1,0 +1,1209 @@
+{
+  "source": "Genuine first-playable version 1 states captured before revision 2; keep these independent of current createGame.",
+  "states": {
+    "childhood": {
+      "version": 1,
+      "seed": "legacy-v1-child",
+      "phase": "childhood",
+      "day": 0,
+      "age": 12,
+      "hero": {
+        "name": "Legacy Rowan",
+        "origin": "village",
+        "household": "poor",
+        "path": "warrior",
+        "specialization": null,
+        "profession": "Unemployed",
+        "appearance": {
+          "hair": "dark, loosely tied",
+          "eyes": "hazel",
+          "skin": "warm brown",
+          "build": "medium"
+        },
+        "ambition": "Protect the place I call home",
+        "level": 1,
+        "exp": 0,
+        "hp": 59,
+        "maxHp": 59,
+        "mp": 25,
+        "maxMp": 25,
+        "gold": 12,
+        "attributes": {
+          "strength": 6,
+          "agility": 3,
+          "vitality": 5,
+          "intellect": 3,
+          "willpower": 3,
+          "presence": 4
+        },
+        "skills": {
+          "weapons": 2,
+          "defense": 1,
+          "arcana": 0,
+          "devotion": 1,
+          "stealth": 0,
+          "survival": 1,
+          "scholarship": 0,
+          "persuasion": 0
+        },
+        "condition": null,
+        "potions": 2
+      },
+      "locationId": "home",
+      "world": {
+        "name": "The Rowan Vale",
+        "crisis": "Ashfall fever",
+        "locations": [
+          {
+            "id": "home",
+            "name": "Hearthmere",
+            "type": "village",
+            "travelDays": 1,
+            "safety": 5,
+            "necromancyLaw": "permitted",
+            "description": "A small settlement of hearth fires, kitchen gardens, and familiar faces. Ashfall fever has reached its households; the old shrine is still a place to seek help. Willing ancestral rites and the study of the dead are permitted; coercion and grave theft remain crimes."
+          },
+          {
+            "id": "city",
+            "name": "Brindlehall",
+            "type": "city",
+            "travelDays": 3,
+            "safety": 4,
+            "necromancyLaw": "permitted",
+            "description": "The region’s busy city gathers an academy, a guild market, and a sworn order behind its stone walls. Fever wards are filling, and scholars disagree over the cause. Willing ancestral rites and the study of the dead are permitted; coercion and grave theft remain crimes."
+          },
+          {
+            "id": "brook",
+            "name": "Fernbridge",
+            "type": "village",
+            "travelDays": 2,
+            "safety": 4,
+            "necromancyLaw": "permitted",
+            "description": "A riverside village where millers, ferrymen, and herbalists trade news. Families are sheltering travelers fleeing Ashfall fever. Willing ancestral rites and the study of the dead are permitted; coercion and grave theft remain crimes."
+          },
+          {
+            "id": "forest",
+            "name": "The Lantern Thicket",
+            "type": "forest",
+            "travelDays": 2,
+            "safety": 2,
+            "necromancyLaw": "regulated",
+            "description": "Old trails connect both villages beneath a canopy of moss and copper leaves. Healing herbs grow here, alongside hungry beasts and abandoned camps. The nearest settlement’s law governs witnessed acts."
+          },
+          {
+            "id": "ruin",
+            "name": "The Hollow Archive",
+            "type": "ruin",
+            "travelDays": 4,
+            "safety": 1,
+            "necromancyLaw": "regulated",
+            "description": "An abandoned sanctuary beyond the forest holds sealed research and the memories of its former keepers. Licensed expeditions may study its ancestral records; disturbing remains without consent invites scrutiny."
+          }
+        ],
+        "laws": "Local councils set their own rules. In Brindlehall, necromancy is permitted; in Hearthmere, it is permitted; in Fernbridge, it is permitted. Authorities act on witnesses, reports, and discovered evidence. Willing ancestral contact, grave theft, and unwilling soul binding are treated as different acts.",
+        "roads": [
+          {
+            "from": "home",
+            "to": "city"
+          },
+          {
+            "from": "home",
+            "to": "brook"
+          },
+          {
+            "from": "home",
+            "to": "forest"
+          },
+          {
+            "from": "brook",
+            "to": "forest"
+          },
+          {
+            "from": "forest",
+            "to": "ruin"
+          }
+        ],
+        "mentors": [
+          {
+            "id": "mentor-paladin",
+            "name": "Dame Mara Alder",
+            "locationId": "city",
+            "specialization": "paladin",
+            "available": true,
+            "description": "A sworn protector offers training and an initiation founded on a visible oath of mercy and protection."
+          },
+          {
+            "id": "mentor-necromancer",
+            "name": "Scholar Tamsin",
+            "locationId": "city",
+            "specialization": "necromancer",
+            "available": true,
+            "description": "A physician teaches consensual ancestral rites and sponsors students studying the ruined archive."
+          },
+          {
+            "id": "mentor-assassin",
+            "name": "Vey the Quiet",
+            "locationId": "city",
+            "specialization": "assassin",
+            "available": true,
+            "description": "A discreet contact offers a test of stealth and judgment, with the terms disclosed before accepting."
+          }
+        ],
+        "routes": {
+          "paladin": {
+            "mentorId": "mentor-paladin",
+            "locationIds": [
+              "city",
+              "ruin"
+            ]
+          },
+          "necromancer": {
+            "mentorId": "mentor-necromancer",
+            "locationIds": [
+              "city",
+              "ruin"
+            ]
+          },
+          "assassin": {
+            "mentorId": "mentor-assassin",
+            "locationIds": [
+              "city",
+              "ruin"
+            ]
+          }
+        }
+      },
+      "companions": [
+        {
+          "id": "mira",
+          "name": "Mira",
+          "role": "warrior",
+          "goal": "Earn a place in the Lantern Order without abandoning old friends.",
+          "values": [
+            "Protect the vulnerable",
+            "Never bind an unwilling soul"
+          ],
+          "relationship": 27,
+          "memories": [
+            "At seven, you spoke up when I was falsely accused."
+          ],
+          "recruited": false,
+          "active": false,
+          "hp": 58,
+          "maxHp": 58,
+          "mp": 22,
+          "maxMp": 22,
+          "agility": 5,
+          "baseAge": 18,
+          "age": 18
+        },
+        {
+          "id": "orrin",
+          "name": "Orrin",
+          "role": "mage",
+          "goal": "Find a remedy for the fever and keep his family safe.",
+          "values": [
+            "Consent matters",
+            "Knowledge should heal"
+          ],
+          "relationship": 0,
+          "memories": [],
+          "recruited": false,
+          "active": false,
+          "hp": 43,
+          "maxHp": 43,
+          "mp": 38,
+          "maxMp": 38,
+          "agility": 4,
+          "baseAge": 22,
+          "age": 22
+        },
+        {
+          "id": "kest",
+          "name": "Kest",
+          "role": "rogue",
+          "goal": "Make the western road safe enough to visit a missing sibling.",
+          "values": [
+            "Keep your word",
+            "Do not prey on desperate families"
+          ],
+          "relationship": 0,
+          "memories": [],
+          "recruited": false,
+          "active": false,
+          "hp": 48,
+          "maxHp": 48,
+          "mp": 24,
+          "maxMp": 24,
+          "agility": 8,
+          "baseAge": 19,
+          "age": 19
+        }
+      ],
+      "factions": {
+        "villagers": 0,
+        "academy": 0,
+        "order": 0,
+        "underworld": 0
+      },
+      "legal": {
+        "wanted": false,
+        "evidence": 0,
+        "description": "No local charges or known evidence.",
+        "incidents": []
+      },
+      "flags": {
+        "childhoodStage": 1,
+        "actionsTaken": 0,
+        "education": 0,
+        "clinicShifts": 0,
+        "training": 0,
+        "roadSafe": false,
+        "travelByNight": false,
+        "plagueStage": 0,
+        "childhoodFriend": true
+      },
+      "obligations": [],
+      "event": {
+        "id": "childhood_2",
+        "title": "A door into the wider world",
+        "category": "Childhood · age 12",
+        "body": "A visiting teacher brings academy books to your village. Tuition is beyond your family, but a service scholarship is available. What kind of education do you pursue?",
+        "choices": [
+          {
+            "id": "scholarship",
+            "label": "Earn a service scholarship",
+            "description": "Gain scholarship and arcana. Begin adulthood with 20 gold and one clinic shift promised within 35 days."
+          },
+          {
+            "id": "apprentice",
+            "label": "Learn a useful trade",
+            "description": "Gain survival and persuasion. Begin with an apprenticeship and 28 extra gold."
+          },
+          {
+            "id": "martial",
+            "label": "Study with a retired guard",
+            "description": "Gain weapons and defense. Your teacher introduces you to the local order."
+          }
+        ]
+      },
+      "journal": [
+        {
+          "id": "entry-1",
+          "day": 0,
+          "age": 7,
+          "title": "A life begins",
+          "text": "Born in Hearthmere, Legacy Rowan grows up in a struggling household. The regional crisis is Ashfall fever. Your ambition: Protect the place I call home.",
+          "tag": "origin"
+        },
+        {
+          "id": "entry-2",
+          "day": 0,
+          "age": 7,
+          "title": "A friendship at the wellside",
+          "text": "At seven, you spoke up when I was falsely accused.",
+          "tag": "childhood"
+        }
+      ],
+      "battle": null,
+      "notice": "",
+      "chronicle": null
+    },
+    "adult": {
+      "version": 1,
+      "seed": "legacy-v1-adult",
+      "phase": "adult",
+      "day": 23,
+      "age": 18,
+      "hero": {
+        "name": "Legacy Sable",
+        "origin": "village",
+        "household": "poor",
+        "path": "mage",
+        "specialization": "necromancer",
+        "profession": "Healer",
+        "appearance": {
+          "hair": "dark, loosely tied",
+          "eyes": "hazel",
+          "skin": "warm brown",
+          "build": "medium"
+        },
+        "ambition": "Protect the place I call home",
+        "level": 2,
+        "exp": 24,
+        "hp": 60,
+        "maxHp": 60,
+        "mp": 39,
+        "maxMp": 39,
+        "gold": 54,
+        "attributes": {
+          "strength": 3,
+          "agility": 3,
+          "vitality": 4,
+          "intellect": 7,
+          "willpower": 4,
+          "presence": 4
+        },
+        "skills": {
+          "weapons": 0,
+          "defense": 0,
+          "arcana": 7,
+          "devotion": 3,
+          "stealth": 0,
+          "survival": 1,
+          "scholarship": 4,
+          "persuasion": 0
+        },
+        "condition": null,
+        "potions": 2
+      },
+      "locationId": "city",
+      "world": {
+        "name": "The Lantern Coast",
+        "crisis": "Ashfall fever",
+        "locations": [
+          {
+            "id": "home",
+            "name": "Mossbell",
+            "type": "village",
+            "travelDays": 1,
+            "safety": 5,
+            "necromancyLaw": "regulated",
+            "description": "A small settlement of hearth fires, kitchen gardens, and familiar faces. Ashfall fever has reached its households; the old shrine is still a place to seek help. Ancestral rites require a witness or academy license; raising bodies and binding unwilling souls are prohibited."
+          },
+          {
+            "id": "city",
+            "name": "Larkspire",
+            "type": "city",
+            "travelDays": 3,
+            "safety": 4,
+            "necromancyLaw": "permitted",
+            "description": "The region’s busy city gathers an academy, a guild market, and a sworn order behind its stone walls. Fever wards are filling, and scholars disagree over the cause. Willing ancestral rites and the study of the dead are permitted; coercion and grave theft remain crimes."
+          },
+          {
+            "id": "brook",
+            "name": "Fernbridge",
+            "type": "village",
+            "travelDays": 2,
+            "safety": 4,
+            "necromancyLaw": "permitted",
+            "description": "A riverside village where millers, ferrymen, and herbalists trade news. Families are sheltering travelers fleeing Ashfall fever. Willing ancestral rites and the study of the dead are permitted; coercion and grave theft remain crimes."
+          },
+          {
+            "id": "forest",
+            "name": "The Wrenwood",
+            "type": "forest",
+            "travelDays": 2,
+            "safety": 2,
+            "necromancyLaw": "regulated",
+            "description": "Old trails connect both villages beneath a canopy of moss and copper leaves. Healing herbs grow here, alongside hungry beasts and abandoned camps. The nearest settlement’s law governs witnessed acts."
+          },
+          {
+            "id": "ruin",
+            "name": "The Silent Observatory",
+            "type": "ruin",
+            "travelDays": 4,
+            "safety": 1,
+            "necromancyLaw": "regulated",
+            "description": "An abandoned sanctuary beyond the forest holds sealed research and the memories of its former keepers. Licensed expeditions may study its ancestral records; disturbing remains without consent invites scrutiny."
+          }
+        ],
+        "laws": "Local councils set their own rules. In Larkspire, necromancy is permitted; in Mossbell, it is regulated; in Fernbridge, it is permitted. Authorities act on witnesses, reports, and discovered evidence. Willing ancestral contact, grave theft, and unwilling soul binding are treated as different acts.",
+        "roads": [
+          {
+            "from": "home",
+            "to": "city"
+          },
+          {
+            "from": "home",
+            "to": "brook"
+          },
+          {
+            "from": "home",
+            "to": "forest"
+          },
+          {
+            "from": "brook",
+            "to": "forest"
+          },
+          {
+            "from": "forest",
+            "to": "ruin"
+          }
+        ],
+        "mentors": [
+          {
+            "id": "mentor-paladin",
+            "name": "Ser Rowan Bell",
+            "locationId": "city",
+            "specialization": "paladin",
+            "available": true,
+            "description": "A sworn protector offers training and an initiation founded on a visible oath of mercy and protection."
+          },
+          {
+            "id": "mentor-necromancer",
+            "name": "Physician Sable",
+            "locationId": "city",
+            "specialization": "necromancer",
+            "available": true,
+            "description": "A physician teaches consensual ancestral rites and sponsors students studying the ruined archive."
+          },
+          {
+            "id": "mentor-assassin",
+            "name": "The Grey Finch",
+            "locationId": "city",
+            "specialization": "assassin",
+            "available": true,
+            "description": "A discreet contact offers a test of stealth and judgment, with the terms disclosed before accepting."
+          }
+        ],
+        "routes": {
+          "paladin": {
+            "mentorId": "mentor-paladin",
+            "locationIds": [
+              "city",
+              "ruin"
+            ]
+          },
+          "necromancer": {
+            "mentorId": "mentor-necromancer",
+            "locationIds": [
+              "city",
+              "ruin"
+            ]
+          },
+          "assassin": {
+            "mentorId": "mentor-assassin",
+            "locationIds": [
+              "city",
+              "ruin"
+            ]
+          }
+        }
+      },
+      "companions": [
+        {
+          "id": "mira",
+          "name": "Mira",
+          "role": "warrior",
+          "goal": "Earn a place in the Lantern Order without abandoning old friends.",
+          "values": [
+            "Protect the vulnerable",
+            "Never bind an unwilling soul"
+          ],
+          "relationship": 35,
+          "memories": [
+            "At seven, you spoke up when I was falsely accused.",
+            "You promised to help when the fever reached home.",
+            "We began traveling together after growing up as friends.",
+            "You studied necromancy but kept your promise to respect willing souls."
+          ],
+          "recruited": true,
+          "active": true,
+          "hp": 58,
+          "maxHp": 58,
+          "mp": 22,
+          "maxMp": 22,
+          "agility": 5,
+          "baseAge": 18,
+          "age": 18
+        },
+        {
+          "id": "orrin",
+          "name": "Orrin",
+          "role": "mage",
+          "goal": "Find a remedy for the fever and keep his family safe.",
+          "values": [
+            "Consent matters",
+            "Knowledge should heal"
+          ],
+          "relationship": 0,
+          "memories": [],
+          "recruited": false,
+          "active": false,
+          "hp": 43,
+          "maxHp": 43,
+          "mp": 38,
+          "maxMp": 38,
+          "agility": 4,
+          "baseAge": 22,
+          "age": 22
+        },
+        {
+          "id": "kest",
+          "name": "Kest",
+          "role": "rogue",
+          "goal": "Make the western road safe enough to visit a missing sibling.",
+          "values": [
+            "Keep your word",
+            "Do not prey on desperate families"
+          ],
+          "relationship": 0,
+          "memories": [],
+          "recruited": false,
+          "active": false,
+          "hp": 48,
+          "maxHp": 48,
+          "mp": 24,
+          "maxMp": 24,
+          "agility": 8,
+          "baseAge": 19,
+          "age": 19
+        }
+      ],
+      "factions": {
+        "villagers": 13,
+        "academy": 0,
+        "order": 0,
+        "underworld": 0
+      },
+      "legal": {
+        "wanted": false,
+        "evidence": 0,
+        "description": "No local charges or known evidence.",
+        "incidents": []
+      },
+      "flags": {
+        "childhoodStage": 3,
+        "actionsTaken": 9,
+        "education": 0,
+        "clinicShifts": 1,
+        "training": 2,
+        "roadSafe": false,
+        "travelByNight": false,
+        "plagueStage": 1,
+        "childhoodFriend": true,
+        "scholarship": true,
+        "ancestralMentor": true,
+        "knowsAncestralRite": true
+      },
+      "obligations": [
+        {
+          "id": "scholarship_service",
+          "title": "Repay a service scholarship with a clinic shift",
+          "dueDay": 35,
+          "description": "Help at a settlement fever clinic. One three-day shift fulfills the promise and pays 10 gold.",
+          "resolved": true
+        },
+        {
+          "id": "plague_return",
+          "title": "Answer your hometown’s plea",
+          "dueDay": 33,
+          "description": "Visit the fever clinic or bring a remedy to Mossbell.",
+          "resolved": false
+        }
+      ],
+      "event": null,
+      "journal": [
+        {
+          "id": "entry-1",
+          "day": 0,
+          "age": 7,
+          "title": "A life begins",
+          "text": "Born in Mossbell, Legacy Sable grows up in a struggling household. The regional crisis is Ashfall fever. Your ambition: Protect the place I call home.",
+          "tag": "origin"
+        },
+        {
+          "id": "entry-2",
+          "day": 0,
+          "age": 7,
+          "title": "A friendship at the wellside",
+          "text": "At seven, you spoke up when I was falsely accused.",
+          "tag": "childhood"
+        },
+        {
+          "id": "entry-3",
+          "day": 0,
+          "age": 12,
+          "title": "An education earned",
+          "text": "A service scholarship opened the academy through learning and a promise.",
+          "tag": "childhood"
+        },
+        {
+          "id": "entry-4",
+          "day": 0,
+          "age": 17,
+          "title": "A teacher’s question",
+          "text": "You asked what the prohibition protected. A discreet teacher remembers the question.",
+          "tag": "childhood"
+        },
+        {
+          "id": "entry-5",
+          "day": 0,
+          "age": 18,
+          "title": "Eighteen, and a life to make",
+          "text": "Your adult life begins in Mossbell. Work, learn, make time for people, and choose what to become. Mira can join you in any settlement. Your combat path is mage; your ambition is “Protect the place I call home.”",
+          "tag": "milestone"
+        },
+        {
+          "id": "entry-6",
+          "day": 3,
+          "age": 18,
+          "title": "A plea from the village",
+          "text": "Consult the academy in Larkspire, or help at a settlement clinic. Your hometown’s plea is in the journal.",
+          "tag": "story"
+        },
+        {
+          "id": "entry-7",
+          "day": 5,
+          "age": 18,
+          "title": "A profession alongside a path",
+          "text": "You begin work as a healer. Your mage path remains your way of fighting.",
+          "tag": "livelihood"
+        },
+        {
+          "id": "entry-8",
+          "day": 8,
+          "age": 18,
+          "title": "A living earned",
+          "text": "Three days of healer work earned 24 gold. Work at Mossbell keeps you part of the community.",
+          "tag": "livelihood"
+        },
+        {
+          "id": "entry-9",
+          "day": 8,
+          "age": 18,
+          "title": "A companion, not an equipment slot",
+          "text": "Mira joins your party. Their goals and values remain their own.",
+          "tag": "relationship"
+        },
+        {
+          "id": "entry-10",
+          "day": 11,
+          "age": 18,
+          "title": "A road taken",
+          "text": "3 days from Mossbell brings you to Larkspire.",
+          "tag": "travel"
+        },
+        {
+          "id": "entry-11",
+          "day": 23,
+          "age": 18,
+          "title": "Experience becomes confidence",
+          "text": "You reached level 2. Your health and magical reserves grew.",
+          "tag": "progress"
+        },
+        {
+          "id": "entry-12",
+          "day": 23,
+          "age": 18,
+          "title": "Initiated as a necromancer",
+          "text": "You earned the necromancer specialization. Your livelihood and personal history continue. Your practice began with consensual ancestral study, without an automatic criminal record.",
+          "tag": "specialization"
+        }
+      ],
+      "battle": null,
+      "notice": "You earned the necromancer specialization. Your livelihood and personal history continue.",
+      "chronicle": null
+    },
+    "battle": {
+      "version": 1,
+      "seed": "legacy-v1-adult",
+      "phase": "adult",
+      "day": 28,
+      "age": 18,
+      "hero": {
+        "name": "Legacy Sable",
+        "origin": "village",
+        "household": "poor",
+        "path": "mage",
+        "specialization": "necromancer",
+        "profession": "Healer",
+        "appearance": {
+          "hair": "dark, loosely tied",
+          "eyes": "hazel",
+          "skin": "warm brown",
+          "build": "medium"
+        },
+        "ambition": "Protect the place I call home",
+        "level": 2,
+        "exp": 24,
+        "hp": 60,
+        "maxHp": 60,
+        "mp": 39,
+        "maxMp": 39,
+        "gold": 54,
+        "attributes": {
+          "strength": 3,
+          "agility": 3,
+          "vitality": 4,
+          "intellect": 7,
+          "willpower": 4,
+          "presence": 4
+        },
+        "skills": {
+          "weapons": 0,
+          "defense": 0,
+          "arcana": 7,
+          "devotion": 3,
+          "stealth": 0,
+          "survival": 1,
+          "scholarship": 4,
+          "persuasion": 0
+        },
+        "condition": null,
+        "potions": 2
+      },
+      "locationId": "forest",
+      "world": {
+        "name": "The Lantern Coast",
+        "crisis": "Ashfall fever",
+        "locations": [
+          {
+            "id": "home",
+            "name": "Mossbell",
+            "type": "village",
+            "travelDays": 1,
+            "safety": 5,
+            "necromancyLaw": "regulated",
+            "description": "A small settlement of hearth fires, kitchen gardens, and familiar faces. Ashfall fever has reached its households; the old shrine is still a place to seek help. Ancestral rites require a witness or academy license; raising bodies and binding unwilling souls are prohibited."
+          },
+          {
+            "id": "city",
+            "name": "Larkspire",
+            "type": "city",
+            "travelDays": 3,
+            "safety": 4,
+            "necromancyLaw": "permitted",
+            "description": "The region’s busy city gathers an academy, a guild market, and a sworn order behind its stone walls. Fever wards are filling, and scholars disagree over the cause. Willing ancestral rites and the study of the dead are permitted; coercion and grave theft remain crimes."
+          },
+          {
+            "id": "brook",
+            "name": "Fernbridge",
+            "type": "village",
+            "travelDays": 2,
+            "safety": 4,
+            "necromancyLaw": "permitted",
+            "description": "A riverside village where millers, ferrymen, and herbalists trade news. Families are sheltering travelers fleeing Ashfall fever. Willing ancestral rites and the study of the dead are permitted; coercion and grave theft remain crimes."
+          },
+          {
+            "id": "forest",
+            "name": "The Wrenwood",
+            "type": "forest",
+            "travelDays": 2,
+            "safety": 2,
+            "necromancyLaw": "regulated",
+            "description": "Old trails connect both villages beneath a canopy of moss and copper leaves. Healing herbs grow here, alongside hungry beasts and abandoned camps. The nearest settlement’s law governs witnessed acts."
+          },
+          {
+            "id": "ruin",
+            "name": "The Silent Observatory",
+            "type": "ruin",
+            "travelDays": 4,
+            "safety": 1,
+            "necromancyLaw": "regulated",
+            "description": "An abandoned sanctuary beyond the forest holds sealed research and the memories of its former keepers. Licensed expeditions may study its ancestral records; disturbing remains without consent invites scrutiny."
+          }
+        ],
+        "laws": "Local councils set their own rules. In Larkspire, necromancy is permitted; in Mossbell, it is regulated; in Fernbridge, it is permitted. Authorities act on witnesses, reports, and discovered evidence. Willing ancestral contact, grave theft, and unwilling soul binding are treated as different acts.",
+        "roads": [
+          {
+            "from": "home",
+            "to": "city"
+          },
+          {
+            "from": "home",
+            "to": "brook"
+          },
+          {
+            "from": "home",
+            "to": "forest"
+          },
+          {
+            "from": "brook",
+            "to": "forest"
+          },
+          {
+            "from": "forest",
+            "to": "ruin"
+          }
+        ],
+        "mentors": [
+          {
+            "id": "mentor-paladin",
+            "name": "Ser Rowan Bell",
+            "locationId": "city",
+            "specialization": "paladin",
+            "available": true,
+            "description": "A sworn protector offers training and an initiation founded on a visible oath of mercy and protection."
+          },
+          {
+            "id": "mentor-necromancer",
+            "name": "Physician Sable",
+            "locationId": "city",
+            "specialization": "necromancer",
+            "available": true,
+            "description": "A physician teaches consensual ancestral rites and sponsors students studying the ruined archive."
+          },
+          {
+            "id": "mentor-assassin",
+            "name": "The Grey Finch",
+            "locationId": "city",
+            "specialization": "assassin",
+            "available": true,
+            "description": "A discreet contact offers a test of stealth and judgment, with the terms disclosed before accepting."
+          }
+        ],
+        "routes": {
+          "paladin": {
+            "mentorId": "mentor-paladin",
+            "locationIds": [
+              "city",
+              "ruin"
+            ]
+          },
+          "necromancer": {
+            "mentorId": "mentor-necromancer",
+            "locationIds": [
+              "city",
+              "ruin"
+            ]
+          },
+          "assassin": {
+            "mentorId": "mentor-assassin",
+            "locationIds": [
+              "city",
+              "ruin"
+            ]
+          }
+        }
+      },
+      "companions": [
+        {
+          "id": "mira",
+          "name": "Mira",
+          "role": "warrior",
+          "goal": "Earn a place in the Lantern Order without abandoning old friends.",
+          "values": [
+            "Protect the vulnerable",
+            "Never bind an unwilling soul"
+          ],
+          "relationship": 35,
+          "memories": [
+            "At seven, you spoke up when I was falsely accused.",
+            "You promised to help when the fever reached home.",
+            "We began traveling together after growing up as friends.",
+            "You studied necromancy but kept your promise to respect willing souls."
+          ],
+          "recruited": true,
+          "active": true,
+          "hp": 58,
+          "maxHp": 58,
+          "mp": 22,
+          "maxMp": 22,
+          "agility": 5,
+          "baseAge": 18,
+          "age": 18
+        },
+        {
+          "id": "orrin",
+          "name": "Orrin",
+          "role": "mage",
+          "goal": "Find a remedy for the fever and keep his family safe.",
+          "values": [
+            "Consent matters",
+            "Knowledge should heal"
+          ],
+          "relationship": 0,
+          "memories": [],
+          "recruited": false,
+          "active": false,
+          "hp": 43,
+          "maxHp": 43,
+          "mp": 38,
+          "maxMp": 38,
+          "agility": 4,
+          "baseAge": 22,
+          "age": 22
+        },
+        {
+          "id": "kest",
+          "name": "Kest",
+          "role": "rogue",
+          "goal": "Make the western road safe enough to visit a missing sibling.",
+          "values": [
+            "Keep your word",
+            "Do not prey on desperate families"
+          ],
+          "relationship": 0,
+          "memories": [],
+          "recruited": false,
+          "active": false,
+          "hp": 48,
+          "maxHp": 48,
+          "mp": 24,
+          "maxMp": 24,
+          "agility": 8,
+          "baseAge": 19,
+          "age": 19
+        }
+      ],
+      "factions": {
+        "villagers": 13,
+        "academy": 0,
+        "order": 0,
+        "underworld": 0
+      },
+      "legal": {
+        "wanted": false,
+        "evidence": 0,
+        "description": "No local charges or known evidence.",
+        "incidents": []
+      },
+      "flags": {
+        "childhoodStage": 3,
+        "actionsTaken": 11,
+        "education": 0,
+        "clinicShifts": 1,
+        "training": 2,
+        "roadSafe": false,
+        "travelByNight": false,
+        "plagueStage": 1,
+        "childhoodFriend": true,
+        "scholarship": true,
+        "ancestralMentor": true,
+        "knowsAncestralRite": true,
+        "battlesStarted": 1
+      },
+      "obligations": [
+        {
+          "id": "scholarship_service",
+          "title": "Repay a service scholarship with a clinic shift",
+          "dueDay": 35,
+          "description": "Help at a settlement fever clinic. One three-day shift fulfills the promise and pays 10 gold.",
+          "resolved": true
+        },
+        {
+          "id": "plague_return",
+          "title": "Answer your hometown’s plea",
+          "dueDay": 33,
+          "description": "Visit the fever clinic or bring a remedy to Mossbell.",
+          "resolved": false
+        }
+      ],
+      "event": null,
+      "journal": [
+        {
+          "id": "entry-1",
+          "day": 0,
+          "age": 7,
+          "title": "A life begins",
+          "text": "Born in Mossbell, Legacy Sable grows up in a struggling household. The regional crisis is Ashfall fever. Your ambition: Protect the place I call home.",
+          "tag": "origin"
+        },
+        {
+          "id": "entry-2",
+          "day": 0,
+          "age": 7,
+          "title": "A friendship at the wellside",
+          "text": "At seven, you spoke up when I was falsely accused.",
+          "tag": "childhood"
+        },
+        {
+          "id": "entry-3",
+          "day": 0,
+          "age": 12,
+          "title": "An education earned",
+          "text": "A service scholarship opened the academy through learning and a promise.",
+          "tag": "childhood"
+        },
+        {
+          "id": "entry-4",
+          "day": 0,
+          "age": 17,
+          "title": "A teacher’s question",
+          "text": "You asked what the prohibition protected. A discreet teacher remembers the question.",
+          "tag": "childhood"
+        },
+        {
+          "id": "entry-5",
+          "day": 0,
+          "age": 18,
+          "title": "Eighteen, and a life to make",
+          "text": "Your adult life begins in Mossbell. Work, learn, make time for people, and choose what to become. Mira can join you in any settlement. Your combat path is mage; your ambition is “Protect the place I call home.”",
+          "tag": "milestone"
+        },
+        {
+          "id": "entry-6",
+          "day": 3,
+          "age": 18,
+          "title": "A plea from the village",
+          "text": "Consult the academy in Larkspire, or help at a settlement clinic. Your hometown’s plea is in the journal.",
+          "tag": "story"
+        },
+        {
+          "id": "entry-7",
+          "day": 5,
+          "age": 18,
+          "title": "A profession alongside a path",
+          "text": "You begin work as a healer. Your mage path remains your way of fighting.",
+          "tag": "livelihood"
+        },
+        {
+          "id": "entry-8",
+          "day": 8,
+          "age": 18,
+          "title": "A living earned",
+          "text": "Three days of healer work earned 24 gold. Work at Mossbell keeps you part of the community.",
+          "tag": "livelihood"
+        },
+        {
+          "id": "entry-9",
+          "day": 8,
+          "age": 18,
+          "title": "A companion, not an equipment slot",
+          "text": "Mira joins your party. Their goals and values remain their own.",
+          "tag": "relationship"
+        },
+        {
+          "id": "entry-10",
+          "day": 11,
+          "age": 18,
+          "title": "A road taken",
+          "text": "3 days from Mossbell brings you to Larkspire.",
+          "tag": "travel"
+        },
+        {
+          "id": "entry-11",
+          "day": 23,
+          "age": 18,
+          "title": "Experience becomes confidence",
+          "text": "You reached level 2. Your health and magical reserves grew.",
+          "tag": "progress"
+        },
+        {
+          "id": "entry-12",
+          "day": 23,
+          "age": 18,
+          "title": "Initiated as a necromancer",
+          "text": "You earned the necromancer specialization. Your livelihood and personal history continue. Your practice began with consensual ancestral study, without an automatic criminal record.",
+          "tag": "specialization"
+        },
+        {
+          "id": "entry-13",
+          "day": 25,
+          "age": 18,
+          "title": "A road taken",
+          "text": "2 days from Larkspire brings you to The Wrenwood.",
+          "tag": "travel"
+        }
+      ],
+      "battle": {
+        "encounterId": "forest",
+        "title": "Trouble on the forest road",
+        "actors": [
+          {
+            "id": "hero",
+            "name": "Legacy Sable",
+            "side": "party",
+            "role": "mage",
+            "path": "mage",
+            "specialization": "necromancer",
+            "hp": 60,
+            "maxHp": 60,
+            "mp": 39,
+            "maxMp": 39,
+            "agility": 3,
+            "armor": 0,
+            "attributes": {
+              "strength": 3,
+              "agility": 3,
+              "vitality": 4,
+              "intellect": 7,
+              "willpower": 4,
+              "presence": 4
+            },
+            "skills": {
+              "weapons": 0,
+              "defense": 0,
+              "arcana": 7,
+              "devotion": 3,
+              "stealth": 0,
+              "survival": 1,
+              "scholarship": 4,
+              "persuasion": 0
+            },
+            "condition": null,
+            "oathBroken": false,
+            "defending": false,
+            "status": {}
+          },
+          {
+            "id": "mira",
+            "name": "Mira",
+            "side": "party",
+            "role": "warrior",
+            "hp": 54,
+            "maxHp": 58,
+            "mp": 18,
+            "maxMp": 22,
+            "agility": 5,
+            "attackPower": 11,
+            "armor": 1,
+            "defending": true,
+            "status": {
+              "protecting": true
+            }
+          },
+          {
+            "name": "Briar wolf",
+            "role": "beast",
+            "hp": 6,
+            "attackPower": 6,
+            "agility": 5,
+            "armor": 0,
+            "id": "enemy-1",
+            "side": "enemy",
+            "maxHp": 22,
+            "mp": 0,
+            "maxMp": 0,
+            "defending": false,
+            "status": {},
+            "intent": "Attacks the most injured ally; a defender can draw the attack."
+          },
+          {
+            "name": "Road scavenger",
+            "role": "skirmisher",
+            "hp": 18,
+            "attackPower": 5,
+            "agility": 4,
+            "armor": 0,
+            "id": "enemy-2",
+            "side": "enemy",
+            "maxHp": 18,
+            "mp": 0,
+            "maxMp": 0,
+            "defending": false,
+            "status": {},
+            "intent": "Attacks the most injured ally; a defender can draw the attack."
+          }
+        ],
+        "turnOrder": [
+          "mira",
+          "enemy-1",
+          "enemy-2",
+          "hero"
+        ],
+        "currentActorId": "hero",
+        "round": 1,
+        "log": [
+          "The danger is visible. Defend to draw attacks and reduce damage; retreat is always available.",
+          "Mira uses Shield bash.",
+          "Mira hits Briar wolf for 16.",
+          "Briar wolf hits Mira for 2.",
+          "Road scavenger hits Mira for 2."
+        ],
+        "potions": 2,
+        "outcome": null,
+        "rewards": {
+          "gold": 18,
+          "exp": 24
+        },
+        "potionsUsed": 0,
+        "instanceId": "battle-legacy-v1-adult-1"
+      },
+      "notice": "",
+      "chronicle": null
+    }
+  }
+}

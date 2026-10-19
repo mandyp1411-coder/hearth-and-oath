@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Roadmap 7: finite regression evidence, not a population win rate or universal balance certification.",
+  "rootSeeds": ["balance-earned-bard-a", "balance-earned-bard-b", "balance-earned-bard-c"],
+  "primaryRoot": 0,
+  "forms": [
+    {"id":"weapon", "calling":"ranger", "gear":["iron_sword","hunter_dagger","starter_sword"]},
+    {"id":"caster", "calling":"elementalist", "gear":["ash_staff","oak_wand","starter_staff"]},
+    {"id":"defender", "calling":"guardian", "gear":["chain_mail","leather_armor","oak_shield"]},
+    {"id":"support", "calling":"bard", "gear":["ash_staff","starter_staff","starter_dagger"]}
+  ],
+  "stages": ["low", "mid"],
+  "midLevel": 4,
+  "parties": {"solo":[], "one":["orrin"], "three":["mira","orrin","kest"]},
+  "encounters": [
+    {"id":"road_bandits", "intentBand":"routine-road"},
+    {"id":"ruin", "intentBand":"hazardous-ruin"},
+    {"id":"free_beast", "intentBand":"procedural-current-tier"},
+    {"id":"covenant_guardian", "intentBand":"named-guardian-risk"}
+  ],
+  "policies": ["attack-diagnostic", "resource-aware-v1"],
+  "bounds": {"setupTransitionsPerForm":300, "partyActionsPerEncounter":120, "primaryCases":192, "targetedCases":48, "expeditions":4, "expeditionMovements":120, "expeditionCommands":300},
+  "targeted": {
+    "earnedBoundaryLevels":[3,5],
+    "boundaryForm":"weapon",
+    "boundaryEncounters":["free_beast","free_construct"],
+    "secondaryRoots":[1,2],
+    "secondaryEncounter":"free_construct",
+    "secondarySensitivities":["earned-balanced", "counterfactual-perilous-level8"]
+  },
+  "expeditionCases": [
+    {"fixture":"weapon-low", "party":"solo"},
+    {"fixture":"caster-mid", "party":"one"},
+    {"fixture":"defender-mid", "party":"three"},
+    {"fixture":"support-mid", "party":"three"}
+  ],
+  "reviewThresholds": {"heroHpFraction":0.20, "partyMpFraction":0.25, "partyActionsFraction":0.25, "partyActionsFloor":3, "calendarDaysFloor":2, "calendarDaysFraction":0.25},
+  "intent": {
+    "hardInvariants":["Input immutability; valid JSON saves before combat and after public transitions.", "Finite nonnegative bounded HP/MP and supplies; no fixture stat/resource grants.", "Only legally learned calling, owned equipped gear and recruited available companions.", "No free unbounded self-refund exploit; explicit recovery turns and ally resource exchange remain legitimate costs/tradeoffs.", "Preserve 11x11 connected reciprocal maze doors, fog, finite caches and actual stair exits."],
+    "bands": {
+      "routine-road":"A rested earned adult should have an approachable route. A new defeat merits review, not an automatic numerical nerf.",
+      "hazardous-ruin":"Resource expenditure and retreat are acceptable. Compare the same build and policy before claiming a cliff.",
+      "procedural-current-tier":"Tier transitions must be visible and investigated when outcomes or reserves shift materially. A stat jump alone is not a demonstrated cliff.",
+      "named-guardian-risk":"Dangerous solo outcomes are acceptable; support/defense should retain distinct resource exchanges. No universal-victory requirement.",
+      "resource-carrying-expedition":"Completion or an honest safe withdrawal both produce evidence. No route or reserve reset, free refill, hidden-map oracle or teleport."}
+  }
+}

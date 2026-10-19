@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 470" fill="none">
+  <defs><linearGradient id="hall" x1="200" y1="0" x2="200" y2="470" gradientUnits="userSpaceOnUse"><stop stop-color="#d8ddc8"/><stop offset="1" stop-color="#e9dfc2"/></linearGradient><radialGradient id="light"><stop stop-color="#fcf3d0"/><stop offset="1" stop-color="#fcf3d0" stop-opacity="0"/></radialGradient></defs>
+  <path fill="url(#hall)" d="M0 0h400v470H0z"/>
+  <path d="M60 470V198C60 96 128 34 200 13c72 21 140 83 140 185v272" stroke="#bcb797" stroke-width="2"/>
+  <path d="M74 470V198C74 107 132 54 200 32c68 22 126 75 126 166v272" stroke="#c9c2a2"/>
+  <circle cx="200" cy="163" r="108" fill="url(#light)"/>
+  <circle cx="200" cy="163" r="73" stroke="#b7b18f" stroke-opacity=".6"/>
+  <circle cx="200" cy="163" r="64" stroke="#b7b18f" stroke-dasharray="1 5" stroke-opacity=".7"/>
+  <path d="m200 81 5 62 22-16-16 22 62 14-62 14 16 22-22-16-5 62-5-62-22 16 16-22-62-14 62-14-16-22 22 16 5-62Z" stroke="#c6b87e" stroke-opacity=".5"/>
+  <path d="M0 367c76-23 113-44 200-44s124 21 200 44v103H0V367Z" fill="#c8c7a9" fill-opacity=".55"/>
+  <path d="M0 386h400M0 402h400M0 439h400" stroke="#aaa88d" stroke-opacity=".3"/>
+  <path d="M21 0v470M379 0v470M41 0v470M359 0v470" stroke="#b2b398" stroke-opacity=".3"/>
+  <g fill="#b0a778" fill-opacity=".5"><path d="m21 68-5 8 5 8 5-8-5-8Zm0 260-5 8 5 8 5-8-5-8Zm358-260-5 8 5 8 5-8-5-8Zm0 260-5 8 5 8 5-8-5-8Z"/></g>
+</svg>

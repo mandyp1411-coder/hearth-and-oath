@@ -1,0 +1,5629 @@
+{
+  "baselineCommit": "19591036c8fbe32e08aaf08b9d5d05d60119b8a0",
+  "seed": "maze-identity-frozen-v047",
+  "baseState": {
+    "seed": "maze-identity-frozen-v047",
+    "day": 100,
+    "age": 21,
+    "phase": "adult",
+    "locationId": "marsh",
+    "hero": {
+      "level": 3,
+      "hp": 60,
+      "maxHp": 60,
+      "mp": 30,
+      "maxMp": 30,
+      "gold": 100,
+      "potions": 0,
+      "skills": {},
+      "attributes": {}
+    },
+    "world": {
+      "locations": [
+        {
+          "id": "marsh"
+        },
+        {
+          "id": "ruin"
+        },
+        {
+          "id": "forest"
+        },
+        {
+          "id": "tower"
+        },
+        {
+          "id": "citadel"
+        }
+      ]
+    },
+    "flags": {},
+    "dynasty": {
+      "generation": 1
+    },
+    "rpg": {
+      "expedition": null,
+      "expeditions": []
+    },
+    "adventuring": {
+      "expedition": null,
+      "rations": 2
+    },
+    "event": null,
+    "battle": null
+  },
+  "activeState": {
+    "seed": "maze-identity-frozen-v047",
+    "day": 101,
+    "age": 21,
+    "phase": "adult",
+    "locationId": "marsh",
+    "hero": {
+      "level": 3,
+      "hp": 60,
+      "maxHp": 60,
+      "mp": 30,
+      "maxMp": 30,
+      "gold": 100,
+      "potions": 0,
+      "skills": {},
+      "attributes": {}
+    },
+    "world": {
+      "locations": [
+        {
+          "id": "marsh"
+        },
+        {
+          "id": "ruin"
+        },
+        {
+          "id": "forest"
+        },
+        {
+          "id": "tower"
+        },
+        {
+          "id": "citadel"
+        }
+      ]
+    },
+    "flags": {},
+    "dynasty": {
+      "generation": 1
+    },
+    "rpg": {
+      "expedition": null,
+      "expeditions": []
+    },
+    "adventuring": {
+      "expedition": null,
+      "rations": 2
+    },
+    "event": null,
+    "battle": null,
+    "mazeBook": {
+      "version": 1,
+      "nextRun": 2,
+      "records": []
+    },
+    "maze": {
+      "version": 1,
+      "id": "maze-1",
+      "generation": 1,
+      "seed": "maze-identity-frozen-v047:maze:1:authored:cistern:marsh:1",
+      "kind": "authored",
+      "sourceId": "cistern",
+      "title": "The Drowned Cistern",
+      "tier": 2,
+      "questId": "well",
+      "locationId": "marsh",
+      "position": 0,
+      "previous": 0,
+      "visited": [
+        0
+      ],
+      "cleared": [
+        0
+      ],
+      "collected": [],
+      "steps": 0,
+      "objective": false,
+      "pendingRoom": null,
+      "proofBattleId": null,
+      "proofCaptured": false,
+      "startedDay": 101,
+      "status": "inside",
+      "guardianRoom": 75
+    },
+    "notice": "A stair rises behind you. Choose a neighbouring room on the map."
+  },
+  "layouts": [
+    {
+      "seed": "maze-identity-frozen-v047-a",
+      "layout": {
+        "size": 11,
+        "cells": [
+          {
+            "id": 0,
+            "x": 0,
+            "y": 0,
+            "doors": [
+              1
+            ],
+            "kind": "entrance",
+            "variant": 0,
+            "enemy": "undead"
+          },
+          {
+            "id": 1,
+            "x": 1,
+            "y": 0,
+            "doors": [
+              0,
+              12
+            ],
+            "kind": "camp",
+            "variant": 5,
+            "enemy": "construct"
+          },
+          {
+            "id": 2,
+            "x": 2,
+            "y": 0,
+            "doors": [
+              13,
+              3
+            ],
+            "kind": "enemy",
+            "variant": 1,
+            "enemy": "beast"
+          },
+          {
+            "id": 3,
+            "x": 3,
+            "y": 0,
+            "doors": [
+              2,
+              14
+            ],
+            "kind": "enemy",
+            "variant": 3,
+            "enemy": "bandit"
+          },
+          {
+            "id": 4,
+            "x": 4,
+            "y": 0,
+            "doors": [
+              15,
+              5
+            ],
+            "kind": "inscription",
+            "variant": 0,
+            "enemy": "undead"
+          },
+          {
+            "id": 5,
+            "x": 5,
+            "y": 0,
+            "doors": [
+              4,
+              16
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "bandit"
+          },
+          {
+            "id": 6,
+            "x": 6,
+            "y": 0,
+            "doors": [
+              17,
+              7
+            ],
+            "kind": "camp",
+            "variant": 2,
+            "enemy": "spirit"
+          },
+          {
+            "id": 7,
+            "x": 7,
+            "y": 0,
+            "doors": [
+              6,
+              18
+            ],
+            "kind": "cache",
+            "variant": 3,
+            "enemy": "construct"
+          },
+          {
+            "id": 8,
+            "x": 8,
+            "y": 0,
+            "doors": [
+              9,
+              19
+            ],
+            "kind": "enemy",
+            "variant": 0,
+            "enemy": "beast"
+          },
+          {
+            "id": 9,
+            "x": 9,
+            "y": 0,
+            "doors": [
+              20,
+              10,
+              8
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "undead"
+          },
+          {
+            "id": 10,
+            "x": 10,
+            "y": 0,
+            "doors": [
+              9,
+              21
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "construct"
+          },
+          {
+            "id": 11,
+            "x": 0,
+            "y": 1,
+            "doors": [
+              22
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "construct"
+          },
+          {
+            "id": 12,
+            "x": 1,
+            "y": 1,
+            "doors": [
+              1,
+              23
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "beast"
+          },
+          {
+            "id": 13,
+            "x": 2,
+            "y": 1,
+            "doors": [
+              24,
+              2
+            ],
+            "kind": "trap",
+            "variant": 1,
+            "enemy": "spirit"
+          },
+          {
+            "id": 14,
+            "x": 3,
+            "y": 1,
+            "doors": [
+              3,
+              25
+            ],
+            "kind": "camp",
+            "variant": 2,
+            "enemy": "aberration"
+          },
+          {
+            "id": 15,
+            "x": 4,
+            "y": 1,
+            "doors": [
+              26,
+              4
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "beast"
+          },
+          {
+            "id": 16,
+            "x": 5,
+            "y": 1,
+            "doors": [
+              5,
+              17
+            ],
+            "kind": "camp",
+            "variant": 0,
+            "enemy": "aberration"
+          },
+          {
+            "id": 17,
+            "x": 6,
+            "y": 1,
+            "doors": [
+              16,
+              6
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "spirit"
+          },
+          {
+            "id": 18,
+            "x": 7,
+            "y": 1,
+            "doors": [
+              7,
+              29
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "bandit"
+          },
+          {
+            "id": 19,
+            "x": 8,
+            "y": 1,
+            "doors": [
+              8,
+              30
+            ],
+            "kind": "trap",
+            "variant": 2,
+            "enemy": "construct"
+          },
+          {
+            "id": 20,
+            "x": 9,
+            "y": 1,
+            "doors": [
+              21,
+              9
+            ],
+            "kind": "cache",
+            "variant": 5,
+            "enemy": "bandit"
+          },
+          {
+            "id": 21,
+            "x": 10,
+            "y": 1,
+            "doors": [
+              32,
+              20,
+              10
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "spirit"
+          },
+          {
+            "id": 22,
+            "x": 0,
+            "y": 2,
+            "doors": [
+              33,
+              11
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "bandit"
+          },
+          {
+            "id": 23,
+            "x": 1,
+            "y": 2,
+            "doors": [
+              12,
+              24
+            ],
+            "kind": "enemy",
+            "variant": 4,
+            "enemy": "spirit"
+          },
+          {
+            "id": 24,
+            "x": 2,
+            "y": 2,
+            "doors": [
+              23,
+              13
+            ],
+            "kind": "cache",
+            "variant": 0,
+            "enemy": "aberration"
+          },
+          {
+            "id": 25,
+            "x": 3,
+            "y": 2,
+            "doors": [
+              14,
+              26
+            ],
+            "kind": "inscription",
+            "variant": 0,
+            "enemy": "spirit"
+          },
+          {
+            "id": 26,
+            "x": 4,
+            "y": 2,
+            "doors": [
+              25,
+              15
+            ],
+            "kind": "inscription",
+            "variant": 4,
+            "enemy": "undead"
+          },
+          {
+            "id": 27,
+            "x": 5,
+            "y": 2,
+            "doors": [
+              28
+            ],
+            "kind": "cache",
+            "variant": 5,
+            "enemy": "construct"
+          },
+          {
+            "id": 28,
+            "x": 6,
+            "y": 2,
+            "doors": [
+              39,
+              27
+            ],
+            "kind": "cache",
+            "variant": 0,
+            "enemy": "aberration"
+          },
+          {
+            "id": 29,
+            "x": 7,
+            "y": 2,
+            "doors": [
+              18,
+              40
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "aberration"
+          },
+          {
+            "id": 30,
+            "x": 8,
+            "y": 2,
+            "doors": [
+              19,
+              41
+            ],
+            "kind": "camp",
+            "variant": 5,
+            "enemy": "spirit"
+          },
+          {
+            "id": 31,
+            "x": 9,
+            "y": 2,
+            "doors": [
+              42,
+              32
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "construct"
+          },
+          {
+            "id": 32,
+            "x": 10,
+            "y": 2,
+            "doors": [
+              31,
+              21
+            ],
+            "kind": "trap",
+            "variant": 5,
+            "enemy": "beast"
+          },
+          {
+            "id": 33,
+            "x": 0,
+            "y": 3,
+            "doors": [
+              34,
+              44,
+              22
+            ],
+            "kind": "cache",
+            "variant": 2,
+            "enemy": "bandit"
+          },
+          {
+            "id": 34,
+            "x": 1,
+            "y": 3,
+            "doors": [
+              35,
+              33
+            ],
+            "kind": "inscription",
+            "variant": 4,
+            "enemy": "bandit"
+          },
+          {
+            "id": 35,
+            "x": 2,
+            "y": 3,
+            "doors": [
+              36,
+              34,
+              46
+            ],
+            "kind": "enemy",
+            "variant": 4,
+            "enemy": "construct"
+          },
+          {
+            "id": 36,
+            "x": 3,
+            "y": 3,
+            "doors": [
+              37,
+              35
+            ],
+            "kind": "cache",
+            "variant": 0,
+            "enemy": "undead"
+          },
+          {
+            "id": 37,
+            "x": 4,
+            "y": 3,
+            "doors": [
+              48,
+              38,
+              36
+            ],
+            "kind": "enemy",
+            "variant": 3,
+            "enemy": "bandit"
+          },
+          {
+            "id": 38,
+            "x": 5,
+            "y": 3,
+            "doors": [
+              37,
+              39
+            ],
+            "kind": "trap",
+            "variant": 2,
+            "enemy": "construct"
+          },
+          {
+            "id": 39,
+            "x": 6,
+            "y": 3,
+            "doors": [
+              38,
+              28,
+              50
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "aberration"
+          },
+          {
+            "id": 40,
+            "x": 7,
+            "y": 3,
+            "doors": [
+              29,
+              51
+            ],
+            "kind": "enemy",
+            "variant": 0,
+            "enemy": "spirit"
+          },
+          {
+            "id": 41,
+            "x": 8,
+            "y": 3,
+            "doors": [
+              30
+            ],
+            "kind": "cache",
+            "variant": 5,
+            "enemy": "spirit"
+          },
+          {
+            "id": 42,
+            "x": 9,
+            "y": 3,
+            "doors": [
+              43,
+              31
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "construct"
+          },
+          {
+            "id": 43,
+            "x": 10,
+            "y": 3,
+            "doors": [
+              54,
+              42
+            ],
+            "kind": "trap",
+            "variant": 1,
+            "enemy": "aberration"
+          },
+          {
+            "id": 44,
+            "x": 0,
+            "y": 4,
+            "doors": [
+              33,
+              55
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "aberration"
+          },
+          {
+            "id": 45,
+            "x": 1,
+            "y": 4,
+            "doors": [
+              46
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "construct"
+          },
+          {
+            "id": 46,
+            "x": 2,
+            "y": 4,
+            "doors": [
+              57,
+              45,
+              47,
+              35
+            ],
+            "kind": "camp",
+            "variant": 5,
+            "enemy": "spirit"
+          },
+          {
+            "id": 47,
+            "x": 3,
+            "y": 4,
+            "doors": [
+              46
+            ],
+            "kind": "camp",
+            "variant": 5,
+            "enemy": "undead"
+          },
+          {
+            "id": 48,
+            "x": 4,
+            "y": 4,
+            "doors": [
+              59,
+              37,
+              49
+            ],
+            "kind": "camp",
+            "variant": 1,
+            "enemy": "spirit"
+          },
+          {
+            "id": 49,
+            "x": 5,
+            "y": 4,
+            "doors": [
+              50,
+              60,
+              48
+            ],
+            "kind": "cache",
+            "variant": 5,
+            "enemy": "bandit"
+          },
+          {
+            "id": 50,
+            "x": 6,
+            "y": 4,
+            "doors": [
+              39,
+              49
+            ],
+            "kind": "enemy",
+            "variant": 1,
+            "enemy": "aberration"
+          },
+          {
+            "id": 51,
+            "x": 7,
+            "y": 4,
+            "doors": [
+              40,
+              52
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "undead"
+          },
+          {
+            "id": 52,
+            "x": 8,
+            "y": 4,
+            "doors": [
+              51,
+              53
+            ],
+            "kind": "trap",
+            "variant": 0,
+            "enemy": "construct"
+          },
+          {
+            "id": 53,
+            "x": 9,
+            "y": 4,
+            "doors": [
+              52,
+              54
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "undead"
+          },
+          {
+            "id": 54,
+            "x": 10,
+            "y": 4,
+            "doors": [
+              53,
+              43,
+              65
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "aberration"
+          },
+          {
+            "id": 55,
+            "x": 0,
+            "y": 5,
+            "doors": [
+              44,
+              56
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "spirit"
+          },
+          {
+            "id": 56,
+            "x": 1,
+            "y": 5,
+            "doors": [
+              55,
+              57
+            ],
+            "kind": "enemy",
+            "variant": 0,
+            "enemy": "beast"
+          },
+          {
+            "id": 57,
+            "x": 2,
+            "y": 5,
+            "doors": [
+              56,
+              68,
+              46
+            ],
+            "kind": "cache",
+            "variant": 4,
+            "enemy": "bandit"
+          },
+          {
+            "id": 58,
+            "x": 3,
+            "y": 5,
+            "doors": [
+              69,
+              59
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "aberration"
+          },
+          {
+            "id": 59,
+            "x": 4,
+            "y": 5,
+            "doors": [
+              58,
+              48
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "beast"
+          },
+          {
+            "id": 60,
+            "x": 5,
+            "y": 5,
+            "doors": [
+              49,
+              71
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "spirit"
+          },
+          {
+            "id": 61,
+            "x": 6,
+            "y": 5,
+            "doors": [
+              62,
+              72
+            ],
+            "kind": "enemy",
+            "variant": 2,
+            "enemy": "undead"
+          },
+          {
+            "id": 62,
+            "x": 7,
+            "y": 5,
+            "doors": [
+              73,
+              61
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "beast"
+          },
+          {
+            "id": 63,
+            "x": 8,
+            "y": 5,
+            "doors": [
+              64,
+              74
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "aberration"
+          },
+          {
+            "id": 64,
+            "x": 9,
+            "y": 5,
+            "doors": [
+              65,
+              63
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "aberration"
+          },
+          {
+            "id": 65,
+            "x": 10,
+            "y": 5,
+            "doors": [
+              54,
+              64
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "spirit"
+          },
+          {
+            "id": 66,
+            "x": 0,
+            "y": 6,
+            "doors": [
+              67,
+              77
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "bandit"
+          },
+          {
+            "id": 67,
+            "x": 1,
+            "y": 6,
+            "doors": [
+              68,
+              66
+            ],
+            "kind": "enemy",
+            "variant": 1,
+            "enemy": "spirit"
+          },
+          {
+            "id": 68,
+            "x": 2,
+            "y": 6,
+            "doors": [
+              57,
+              67,
+              79
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "aberration"
+          },
+          {
+            "id": 69,
+            "x": 3,
+            "y": 6,
+            "doors": [
+              80,
+              58
+            ],
+            "kind": "trap",
+            "variant": 0,
+            "enemy": "spirit"
+          },
+          {
+            "id": 70,
+            "x": 4,
+            "y": 6,
+            "doors": [
+              71,
+              81
+            ],
+            "kind": "cache",
+            "variant": 5,
+            "enemy": "beast"
+          },
+          {
+            "id": 71,
+            "x": 5,
+            "y": 6,
+            "doors": [
+              60,
+              70
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "construct"
+          },
+          {
+            "id": 72,
+            "x": 6,
+            "y": 6,
+            "doors": [
+              61,
+              83
+            ],
+            "kind": "enemy",
+            "variant": 2,
+            "enemy": "construct"
+          },
+          {
+            "id": 73,
+            "x": 7,
+            "y": 6,
+            "doors": [
+              74,
+              62
+            ],
+            "kind": "enemy",
+            "variant": 3,
+            "enemy": "beast"
+          },
+          {
+            "id": 74,
+            "x": 8,
+            "y": 6,
+            "doors": [
+              63,
+              73
+            ],
+            "kind": "camp",
+            "variant": 5,
+            "enemy": "construct"
+          },
+          {
+            "id": 75,
+            "x": 9,
+            "y": 6,
+            "doors": [
+              86,
+              76
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "construct"
+          },
+          {
+            "id": 76,
+            "x": 10,
+            "y": 6,
+            "doors": [
+              75,
+              87
+            ],
+            "kind": "camp",
+            "variant": 5,
+            "enemy": "beast"
+          },
+          {
+            "id": 77,
+            "x": 0,
+            "y": 7,
+            "doors": [
+              66,
+              88
+            ],
+            "kind": "trap",
+            "variant": 5,
+            "enemy": "beast"
+          },
+          {
+            "id": 78,
+            "x": 1,
+            "y": 7,
+            "doors": [
+              79
+            ],
+            "kind": "objective",
+            "variant": 3,
+            "enemy": "undead"
+          },
+          {
+            "id": 79,
+            "x": 2,
+            "y": 7,
+            "doors": [
+              90,
+              78,
+              68
+            ],
+            "kind": "guardian",
+            "variant": 5,
+            "enemy": "construct"
+          },
+          {
+            "id": 80,
+            "x": 3,
+            "y": 7,
+            "doors": [
+              91,
+              69,
+              81
+            ],
+            "kind": "trap",
+            "variant": 4,
+            "enemy": "aberration"
+          },
+          {
+            "id": 81,
+            "x": 4,
+            "y": 7,
+            "doors": [
+              70,
+              80
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "undead"
+          },
+          {
+            "id": 82,
+            "x": 5,
+            "y": 7,
+            "doors": [
+              83,
+              93
+            ],
+            "kind": "enemy",
+            "variant": 0,
+            "enemy": "bandit"
+          },
+          {
+            "id": 83,
+            "x": 6,
+            "y": 7,
+            "doors": [
+              72,
+              82
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "construct"
+          },
+          {
+            "id": 84,
+            "x": 7,
+            "y": 7,
+            "doors": [
+              95,
+              85
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "bandit"
+          },
+          {
+            "id": 85,
+            "x": 8,
+            "y": 7,
+            "doors": [
+              84,
+              96
+            ],
+            "kind": "enemy",
+            "variant": 5,
+            "enemy": "construct"
+          },
+          {
+            "id": 86,
+            "x": 9,
+            "y": 7,
+            "doors": [
+              87,
+              75
+            ],
+            "kind": "cache",
+            "variant": 5,
+            "enemy": "bandit"
+          },
+          {
+            "id": 87,
+            "x": 10,
+            "y": 7,
+            "doors": [
+              98,
+              86,
+              76
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "bandit"
+          },
+          {
+            "id": 88,
+            "x": 0,
+            "y": 8,
+            "doors": [
+              77,
+              89
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "bandit"
+          },
+          {
+            "id": 89,
+            "x": 1,
+            "y": 8,
+            "doors": [
+              88,
+              100
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "construct"
+          },
+          {
+            "id": 90,
+            "x": 2,
+            "y": 8,
+            "doors": [
+              101,
+              79
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "aberration"
+          },
+          {
+            "id": 91,
+            "x": 3,
+            "y": 8,
+            "doors": [
+              92,
+              80
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "spirit"
+          },
+          {
+            "id": 92,
+            "x": 4,
+            "y": 8,
+            "doors": [
+              103,
+              91
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "undead"
+          },
+          {
+            "id": 93,
+            "x": 5,
+            "y": 8,
+            "doors": [
+              82,
+              94
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "bandit"
+          },
+          {
+            "id": 94,
+            "x": 6,
+            "y": 8,
+            "doors": [
+              93,
+              95,
+              105
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "spirit"
+          },
+          {
+            "id": 95,
+            "x": 7,
+            "y": 8,
+            "doors": [
+              94,
+              84
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "construct"
+          },
+          {
+            "id": 96,
+            "x": 8,
+            "y": 8,
+            "doors": [
+              85,
+              107
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "spirit"
+          },
+          {
+            "id": 97,
+            "x": 9,
+            "y": 8,
+            "doors": [
+              108,
+              98
+            ],
+            "kind": "camp",
+            "variant": 3,
+            "enemy": "construct"
+          },
+          {
+            "id": 98,
+            "x": 10,
+            "y": 8,
+            "doors": [
+              97,
+              109,
+              87
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "beast"
+          },
+          {
+            "id": 99,
+            "x": 0,
+            "y": 9,
+            "doors": [
+              110
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "undead"
+          },
+          {
+            "id": 100,
+            "x": 1,
+            "y": 9,
+            "doors": [
+              89,
+              111
+            ],
+            "kind": "inscription",
+            "variant": 3,
+            "enemy": "beast"
+          },
+          {
+            "id": 101,
+            "x": 2,
+            "y": 9,
+            "doors": [
+              112,
+              102,
+              90
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "construct"
+          },
+          {
+            "id": 102,
+            "x": 3,
+            "y": 9,
+            "doors": [
+              101,
+              113
+            ],
+            "kind": "enemy",
+            "variant": 5,
+            "enemy": "undead"
+          },
+          {
+            "id": 103,
+            "x": 4,
+            "y": 9,
+            "doors": [
+              114,
+              92,
+              104
+            ],
+            "kind": "enemy",
+            "variant": 0,
+            "enemy": "spirit"
+          },
+          {
+            "id": 104,
+            "x": 5,
+            "y": 9,
+            "doors": [
+              103,
+              105
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "beast"
+          },
+          {
+            "id": 105,
+            "x": 6,
+            "y": 9,
+            "doors": [
+              104,
+              106,
+              94
+            ],
+            "kind": "trap",
+            "variant": 4,
+            "enemy": "undead"
+          },
+          {
+            "id": 106,
+            "x": 7,
+            "y": 9,
+            "doors": [
+              105
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "construct"
+          },
+          {
+            "id": 107,
+            "x": 8,
+            "y": 9,
+            "doors": [
+              96,
+              108
+            ],
+            "kind": "camp",
+            "variant": 0,
+            "enemy": "bandit"
+          },
+          {
+            "id": 108,
+            "x": 9,
+            "y": 9,
+            "doors": [
+              107,
+              97
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "construct"
+          },
+          {
+            "id": 109,
+            "x": 10,
+            "y": 9,
+            "doors": [
+              98,
+              120
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "bandit"
+          },
+          {
+            "id": 110,
+            "x": 0,
+            "y": 10,
+            "doors": [
+              111,
+              99
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "construct"
+          },
+          {
+            "id": 111,
+            "x": 1,
+            "y": 10,
+            "doors": [
+              100,
+              112,
+              110
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "construct"
+          },
+          {
+            "id": 112,
+            "x": 2,
+            "y": 10,
+            "doors": [
+              111,
+              101
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "bandit"
+          },
+          {
+            "id": 113,
+            "x": 3,
+            "y": 10,
+            "doors": [
+              102
+            ],
+            "kind": "cache",
+            "variant": 0,
+            "enemy": "beast"
+          },
+          {
+            "id": 114,
+            "x": 4,
+            "y": 10,
+            "doors": [
+              115,
+              103
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "spirit"
+          },
+          {
+            "id": 115,
+            "x": 5,
+            "y": 10,
+            "doors": [
+              116,
+              114
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "bandit"
+          },
+          {
+            "id": 116,
+            "x": 6,
+            "y": 10,
+            "doors": [
+              117,
+              115
+            ],
+            "kind": "camp",
+            "variant": 3,
+            "enemy": "spirit"
+          },
+          {
+            "id": 117,
+            "x": 7,
+            "y": 10,
+            "doors": [
+              118,
+              116
+            ],
+            "kind": "cache",
+            "variant": 3,
+            "enemy": "construct"
+          },
+          {
+            "id": 118,
+            "x": 8,
+            "y": 10,
+            "doors": [
+              119,
+              117
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "aberration"
+          },
+          {
+            "id": 119,
+            "x": 9,
+            "y": 10,
+            "doors": [
+              120,
+              118
+            ],
+            "kind": "inscription",
+            "variant": 2,
+            "enemy": "beast"
+          },
+          {
+            "id": 120,
+            "x": 10,
+            "y": 10,
+            "doors": [
+              109,
+              119
+            ],
+            "kind": "enemy",
+            "variant": 4,
+            "enemy": "bandit"
+          }
+        ],
+        "goal": 78,
+        "guardian": 79
+      }
+    },
+    {
+      "seed": "maze-identity-frozen-v047-b",
+      "layout": {
+        "size": 11,
+        "cells": [
+          {
+            "id": 0,
+            "x": 0,
+            "y": 0,
+            "doors": [
+              1
+            ],
+            "kind": "entrance",
+            "variant": 0,
+            "enemy": "undead"
+          },
+          {
+            "id": 1,
+            "x": 1,
+            "y": 0,
+            "doors": [
+              0,
+              12
+            ],
+            "kind": "enemy",
+            "variant": 4,
+            "enemy": "undead"
+          },
+          {
+            "id": 2,
+            "x": 2,
+            "y": 0,
+            "doors": [
+              13,
+              3
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "aberration"
+          },
+          {
+            "id": 3,
+            "x": 3,
+            "y": 0,
+            "doors": [
+              2,
+              4
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "aberration"
+          },
+          {
+            "id": 4,
+            "x": 4,
+            "y": 0,
+            "doors": [
+              3,
+              5
+            ],
+            "kind": "cache",
+            "variant": 0,
+            "enemy": "spirit"
+          },
+          {
+            "id": 5,
+            "x": 5,
+            "y": 0,
+            "doors": [
+              4
+            ],
+            "kind": "trap",
+            "variant": 0,
+            "enemy": "beast"
+          },
+          {
+            "id": 6,
+            "x": 6,
+            "y": 0,
+            "doors": [
+              7,
+              17
+            ],
+            "kind": "cache",
+            "variant": 3,
+            "enemy": "aberration"
+          },
+          {
+            "id": 7,
+            "x": 7,
+            "y": 0,
+            "doors": [
+              18,
+              8,
+              6
+            ],
+            "kind": "trap",
+            "variant": 5,
+            "enemy": "undead"
+          },
+          {
+            "id": 8,
+            "x": 8,
+            "y": 0,
+            "doors": [
+              7,
+              9
+            ],
+            "kind": "cache",
+            "variant": 4,
+            "enemy": "construct"
+          },
+          {
+            "id": 9,
+            "x": 9,
+            "y": 0,
+            "doors": [
+              8,
+              10
+            ],
+            "kind": "camp",
+            "variant": 4,
+            "enemy": "aberration"
+          },
+          {
+            "id": 10,
+            "x": 10,
+            "y": 0,
+            "doors": [
+              9,
+              21
+            ],
+            "kind": "enemy",
+            "variant": 1,
+            "enemy": "undead"
+          },
+          {
+            "id": 11,
+            "x": 0,
+            "y": 1,
+            "doors": [
+              12,
+              22
+            ],
+            "kind": "cache",
+            "variant": 5,
+            "enemy": "beast"
+          },
+          {
+            "id": 12,
+            "x": 1,
+            "y": 1,
+            "doors": [
+              1,
+              11
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "spirit"
+          },
+          {
+            "id": 13,
+            "x": 2,
+            "y": 1,
+            "doors": [
+              24,
+              2
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "undead"
+          },
+          {
+            "id": 14,
+            "x": 3,
+            "y": 1,
+            "doors": [
+              15,
+              25
+            ],
+            "kind": "trap",
+            "variant": 3,
+            "enemy": "bandit"
+          },
+          {
+            "id": 15,
+            "x": 4,
+            "y": 1,
+            "doors": [
+              16,
+              14,
+              26
+            ],
+            "kind": "camp",
+            "variant": 3,
+            "enemy": "construct"
+          },
+          {
+            "id": 16,
+            "x": 5,
+            "y": 1,
+            "doors": [
+              17,
+              15
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "spirit"
+          },
+          {
+            "id": 17,
+            "x": 6,
+            "y": 1,
+            "doors": [
+              6,
+              16
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "construct"
+          },
+          {
+            "id": 18,
+            "x": 7,
+            "y": 1,
+            "doors": [
+              19,
+              7
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "undead"
+          },
+          {
+            "id": 19,
+            "x": 8,
+            "y": 1,
+            "doors": [
+              30,
+              18
+            ],
+            "kind": "trap",
+            "variant": 3,
+            "enemy": "spirit"
+          },
+          {
+            "id": 20,
+            "x": 9,
+            "y": 1,
+            "doors": [
+              31
+            ],
+            "kind": "inscription",
+            "variant": 3,
+            "enemy": "undead"
+          },
+          {
+            "id": 21,
+            "x": 10,
+            "y": 1,
+            "doors": [
+              10,
+              32
+            ],
+            "kind": "inscription",
+            "variant": 4,
+            "enemy": "construct"
+          },
+          {
+            "id": 22,
+            "x": 0,
+            "y": 2,
+            "doors": [
+              11,
+              33
+            ],
+            "kind": "cache",
+            "variant": 2,
+            "enemy": "aberration"
+          },
+          {
+            "id": 23,
+            "x": 1,
+            "y": 2,
+            "doors": [
+              34,
+              24
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "spirit"
+          },
+          {
+            "id": 24,
+            "x": 2,
+            "y": 2,
+            "doors": [
+              23,
+              13
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "undead"
+          },
+          {
+            "id": 25,
+            "x": 3,
+            "y": 2,
+            "doors": [
+              14,
+              36
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "aberration"
+          },
+          {
+            "id": 26,
+            "x": 4,
+            "y": 2,
+            "doors": [
+              37,
+              27,
+              15
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "undead"
+          },
+          {
+            "id": 27,
+            "x": 5,
+            "y": 2,
+            "doors": [
+              26,
+              28
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "bandit"
+          },
+          {
+            "id": 28,
+            "x": 6,
+            "y": 2,
+            "doors": [
+              27
+            ],
+            "kind": "camp",
+            "variant": 0,
+            "enemy": "undead"
+          },
+          {
+            "id": 29,
+            "x": 7,
+            "y": 2,
+            "doors": [
+              40,
+              30
+            ],
+            "kind": "cache",
+            "variant": 5,
+            "enemy": "undead"
+          },
+          {
+            "id": 30,
+            "x": 8,
+            "y": 2,
+            "doors": [
+              29,
+              19
+            ],
+            "kind": "camp",
+            "variant": 3,
+            "enemy": "spirit"
+          },
+          {
+            "id": 31,
+            "x": 9,
+            "y": 2,
+            "doors": [
+              42,
+              20
+            ],
+            "kind": "trap",
+            "variant": 2,
+            "enemy": "bandit"
+          },
+          {
+            "id": 32,
+            "x": 10,
+            "y": 2,
+            "doors": [
+              21,
+              43
+            ],
+            "kind": "enemy",
+            "variant": 4,
+            "enemy": "construct"
+          },
+          {
+            "id": 33,
+            "x": 0,
+            "y": 3,
+            "doors": [
+              22,
+              44
+            ],
+            "kind": "inscription",
+            "variant": 1,
+            "enemy": "aberration"
+          },
+          {
+            "id": 34,
+            "x": 1,
+            "y": 3,
+            "doors": [
+              35,
+              23
+            ],
+            "kind": "trap",
+            "variant": 1,
+            "enemy": "bandit"
+          },
+          {
+            "id": 35,
+            "x": 2,
+            "y": 3,
+            "doors": [
+              36,
+              34
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "aberration"
+          },
+          {
+            "id": 36,
+            "x": 3,
+            "y": 3,
+            "doors": [
+              25,
+              35,
+              37
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "spirit"
+          },
+          {
+            "id": 37,
+            "x": 4,
+            "y": 3,
+            "doors": [
+              36,
+              26
+            ],
+            "kind": "enemy",
+            "variant": 4,
+            "enemy": "construct"
+          },
+          {
+            "id": 38,
+            "x": 5,
+            "y": 3,
+            "doors": [
+              49,
+              39
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "construct"
+          },
+          {
+            "id": 39,
+            "x": 6,
+            "y": 3,
+            "doors": [
+              38,
+              40
+            ],
+            "kind": "trap",
+            "variant": 2,
+            "enemy": "beast"
+          },
+          {
+            "id": 40,
+            "x": 7,
+            "y": 3,
+            "doors": [
+              39,
+              29
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "beast"
+          },
+          {
+            "id": 41,
+            "x": 8,
+            "y": 3,
+            "doors": [
+              42,
+              52
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "spirit"
+          },
+          {
+            "id": 42,
+            "x": 9,
+            "y": 3,
+            "doors": [
+              43,
+              31,
+              41
+            ],
+            "kind": "camp",
+            "variant": 0,
+            "enemy": "construct"
+          },
+          {
+            "id": 43,
+            "x": 10,
+            "y": 3,
+            "doors": [
+              32,
+              42
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "aberration"
+          },
+          {
+            "id": 44,
+            "x": 0,
+            "y": 4,
+            "doors": [
+              33,
+              45
+            ],
+            "kind": "camp",
+            "variant": 2,
+            "enemy": "spirit"
+          },
+          {
+            "id": 45,
+            "x": 1,
+            "y": 4,
+            "doors": [
+              44,
+              46
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "construct"
+          },
+          {
+            "id": 46,
+            "x": 2,
+            "y": 4,
+            "doors": [
+              45,
+              47
+            ],
+            "kind": "inscription",
+            "variant": 5,
+            "enemy": "aberration"
+          },
+          {
+            "id": 47,
+            "x": 3,
+            "y": 4,
+            "doors": [
+              46,
+              48
+            ],
+            "kind": "trap",
+            "variant": 0,
+            "enemy": "beast"
+          },
+          {
+            "id": 48,
+            "x": 4,
+            "y": 4,
+            "doors": [
+              47,
+              59
+            ],
+            "kind": "trap",
+            "variant": 4,
+            "enemy": "undead"
+          },
+          {
+            "id": 49,
+            "x": 5,
+            "y": 4,
+            "doors": [
+              60,
+              38
+            ],
+            "kind": "camp",
+            "variant": 3,
+            "enemy": "undead"
+          },
+          {
+            "id": 50,
+            "x": 6,
+            "y": 4,
+            "doors": [
+              51
+            ],
+            "kind": "cache",
+            "variant": 4,
+            "enemy": "construct"
+          },
+          {
+            "id": 51,
+            "x": 7,
+            "y": 4,
+            "doors": [
+              62,
+              50
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "spirit"
+          },
+          {
+            "id": 52,
+            "x": 8,
+            "y": 4,
+            "doors": [
+              41,
+              53,
+              63
+            ],
+            "kind": "enemy",
+            "variant": 1,
+            "enemy": "construct"
+          },
+          {
+            "id": 53,
+            "x": 9,
+            "y": 4,
+            "doors": [
+              52,
+              64
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "construct"
+          },
+          {
+            "id": 54,
+            "x": 10,
+            "y": 4,
+            "doors": [
+              65
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "bandit"
+          },
+          {
+            "id": 55,
+            "x": 0,
+            "y": 5,
+            "doors": [
+              66
+            ],
+            "kind": "objective",
+            "variant": 3,
+            "enemy": "undead"
+          },
+          {
+            "id": 56,
+            "x": 1,
+            "y": 5,
+            "doors": [
+              57,
+              67
+            ],
+            "kind": "cache",
+            "variant": 3,
+            "enemy": "bandit"
+          },
+          {
+            "id": 57,
+            "x": 2,
+            "y": 5,
+            "doors": [
+              58,
+              56
+            ],
+            "kind": "cache",
+            "variant": 0,
+            "enemy": "spirit"
+          },
+          {
+            "id": 58,
+            "x": 3,
+            "y": 5,
+            "doors": [
+              59,
+              57,
+              69
+            ],
+            "kind": "enemy",
+            "variant": 4,
+            "enemy": "construct"
+          },
+          {
+            "id": 59,
+            "x": 4,
+            "y": 5,
+            "doors": [
+              48,
+              58
+            ],
+            "kind": "camp",
+            "variant": 5,
+            "enemy": "bandit"
+          },
+          {
+            "id": 60,
+            "x": 5,
+            "y": 5,
+            "doors": [
+              61,
+              49
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "beast"
+          },
+          {
+            "id": 61,
+            "x": 6,
+            "y": 5,
+            "doors": [
+              72,
+              60
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "bandit"
+          },
+          {
+            "id": 62,
+            "x": 7,
+            "y": 5,
+            "doors": [
+              73,
+              51
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "bandit"
+          },
+          {
+            "id": 63,
+            "x": 8,
+            "y": 5,
+            "doors": [
+              64,
+              74,
+              52
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "undead"
+          },
+          {
+            "id": 64,
+            "x": 9,
+            "y": 5,
+            "doors": [
+              53,
+              63
+            ],
+            "kind": "cache",
+            "variant": 3,
+            "enemy": "construct"
+          },
+          {
+            "id": 65,
+            "x": 10,
+            "y": 5,
+            "doors": [
+              76,
+              54
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "spirit"
+          },
+          {
+            "id": 66,
+            "x": 0,
+            "y": 6,
+            "doors": [
+              77,
+              55
+            ],
+            "kind": "guardian",
+            "variant": 0,
+            "enemy": "beast"
+          },
+          {
+            "id": 67,
+            "x": 1,
+            "y": 6,
+            "doors": [
+              56,
+              68
+            ],
+            "kind": "enemy",
+            "variant": 5,
+            "enemy": "spirit"
+          },
+          {
+            "id": 68,
+            "x": 2,
+            "y": 6,
+            "doors": [
+              67,
+              79
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "spirit"
+          },
+          {
+            "id": 69,
+            "x": 3,
+            "y": 6,
+            "doors": [
+              80,
+              70,
+              58
+            ],
+            "kind": "trap",
+            "variant": 1,
+            "enemy": "beast"
+          },
+          {
+            "id": 70,
+            "x": 4,
+            "y": 6,
+            "doors": [
+              69,
+              71
+            ],
+            "kind": "cache",
+            "variant": 5,
+            "enemy": "beast"
+          },
+          {
+            "id": 71,
+            "x": 5,
+            "y": 6,
+            "doors": [
+              70,
+              72
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "beast"
+          },
+          {
+            "id": 72,
+            "x": 6,
+            "y": 6,
+            "doors": [
+              71,
+              61
+            ],
+            "kind": "trap",
+            "variant": 0,
+            "enemy": "construct"
+          },
+          {
+            "id": 73,
+            "x": 7,
+            "y": 6,
+            "doors": [
+              84,
+              62
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "undead"
+          },
+          {
+            "id": 74,
+            "x": 8,
+            "y": 6,
+            "doors": [
+              63,
+              85
+            ],
+            "kind": "cache",
+            "variant": 4,
+            "enemy": "beast"
+          },
+          {
+            "id": 75,
+            "x": 9,
+            "y": 6,
+            "doors": [
+              76
+            ],
+            "kind": "enemy",
+            "variant": 0,
+            "enemy": "aberration"
+          },
+          {
+            "id": 76,
+            "x": 10,
+            "y": 6,
+            "doors": [
+              87,
+              65,
+              75
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "bandit"
+          },
+          {
+            "id": 77,
+            "x": 0,
+            "y": 7,
+            "doors": [
+              88,
+              66,
+              78
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "undead"
+          },
+          {
+            "id": 78,
+            "x": 1,
+            "y": 7,
+            "doors": [
+              77,
+              79
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "spirit"
+          },
+          {
+            "id": 79,
+            "x": 2,
+            "y": 7,
+            "doors": [
+              68,
+              80,
+              78
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "undead"
+          },
+          {
+            "id": 80,
+            "x": 3,
+            "y": 7,
+            "doors": [
+              79,
+              69
+            ],
+            "kind": "trap",
+            "variant": 3,
+            "enemy": "bandit"
+          },
+          {
+            "id": 81,
+            "x": 4,
+            "y": 7,
+            "doors": [
+              92
+            ],
+            "kind": "cache",
+            "variant": 2,
+            "enemy": "undead"
+          },
+          {
+            "id": 82,
+            "x": 5,
+            "y": 7,
+            "doors": [
+              83,
+              93
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "spirit"
+          },
+          {
+            "id": 83,
+            "x": 6,
+            "y": 7,
+            "doors": [
+              94,
+              82,
+              84
+            ],
+            "kind": "enemy",
+            "variant": 3,
+            "enemy": "beast"
+          },
+          {
+            "id": 84,
+            "x": 7,
+            "y": 7,
+            "doors": [
+              83,
+              95,
+              73
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "construct"
+          },
+          {
+            "id": 85,
+            "x": 8,
+            "y": 7,
+            "doors": [
+              74,
+              86
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "bandit"
+          },
+          {
+            "id": 86,
+            "x": 9,
+            "y": 7,
+            "doors": [
+              85,
+              87
+            ],
+            "kind": "enemy",
+            "variant": 2,
+            "enemy": "undead"
+          },
+          {
+            "id": 87,
+            "x": 10,
+            "y": 7,
+            "doors": [
+              86,
+              98,
+              76
+            ],
+            "kind": "inscription",
+            "variant": 1,
+            "enemy": "aberration"
+          },
+          {
+            "id": 88,
+            "x": 0,
+            "y": 8,
+            "doors": [
+              99,
+              77
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "construct"
+          },
+          {
+            "id": 89,
+            "x": 1,
+            "y": 8,
+            "doors": [
+              90,
+              100
+            ],
+            "kind": "cache",
+            "variant": 4,
+            "enemy": "beast"
+          },
+          {
+            "id": 90,
+            "x": 2,
+            "y": 8,
+            "doors": [
+              101,
+              91,
+              89
+            ],
+            "kind": "trap",
+            "variant": 0,
+            "enemy": "construct"
+          },
+          {
+            "id": 91,
+            "x": 3,
+            "y": 8,
+            "doors": [
+              90,
+              92
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "construct"
+          },
+          {
+            "id": 92,
+            "x": 4,
+            "y": 8,
+            "doors": [
+              91,
+              103,
+              81
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "beast"
+          },
+          {
+            "id": 93,
+            "x": 5,
+            "y": 8,
+            "doors": [
+              82,
+              104
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "bandit"
+          },
+          {
+            "id": 94,
+            "x": 6,
+            "y": 8,
+            "doors": [
+              105,
+              83
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "beast"
+          },
+          {
+            "id": 95,
+            "x": 7,
+            "y": 8,
+            "doors": [
+              84,
+              96
+            ],
+            "kind": "camp",
+            "variant": 3,
+            "enemy": "undead"
+          },
+          {
+            "id": 96,
+            "x": 8,
+            "y": 8,
+            "doors": [
+              95,
+              97
+            ],
+            "kind": "enemy",
+            "variant": 2,
+            "enemy": "bandit"
+          },
+          {
+            "id": 97,
+            "x": 9,
+            "y": 8,
+            "doors": [
+              98,
+              108,
+              96
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "bandit"
+          },
+          {
+            "id": 98,
+            "x": 10,
+            "y": 8,
+            "doors": [
+              87,
+              97,
+              109
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "beast"
+          },
+          {
+            "id": 99,
+            "x": 0,
+            "y": 9,
+            "doors": [
+              110,
+              88
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "bandit"
+          },
+          {
+            "id": 100,
+            "x": 1,
+            "y": 9,
+            "doors": [
+              89,
+              111
+            ],
+            "kind": "cache",
+            "variant": 2,
+            "enemy": "aberration"
+          },
+          {
+            "id": 101,
+            "x": 2,
+            "y": 9,
+            "doors": [
+              112,
+              90
+            ],
+            "kind": "enemy",
+            "variant": 4,
+            "enemy": "undead"
+          },
+          {
+            "id": 102,
+            "x": 3,
+            "y": 9,
+            "doors": [
+              103
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "construct"
+          },
+          {
+            "id": 103,
+            "x": 4,
+            "y": 9,
+            "doors": [
+              92,
+              102
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "undead"
+          },
+          {
+            "id": 104,
+            "x": 5,
+            "y": 9,
+            "doors": [
+              93,
+              115
+            ],
+            "kind": "camp",
+            "variant": 1,
+            "enemy": "bandit"
+          },
+          {
+            "id": 105,
+            "x": 6,
+            "y": 9,
+            "doors": [
+              116,
+              94
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "construct"
+          },
+          {
+            "id": 106,
+            "x": 7,
+            "y": 9,
+            "doors": [
+              107,
+              117
+            ],
+            "kind": "trap",
+            "variant": 0,
+            "enemy": "beast"
+          },
+          {
+            "id": 107,
+            "x": 8,
+            "y": 9,
+            "doors": [
+              118,
+              106
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "construct"
+          },
+          {
+            "id": 108,
+            "x": 9,
+            "y": 9,
+            "doors": [
+              97,
+              109
+            ],
+            "kind": "enemy",
+            "variant": 4,
+            "enemy": "spirit"
+          },
+          {
+            "id": 109,
+            "x": 10,
+            "y": 9,
+            "doors": [
+              108,
+              120,
+              98
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "undead"
+          },
+          {
+            "id": 110,
+            "x": 0,
+            "y": 10,
+            "doors": [
+              111,
+              99
+            ],
+            "kind": "enemy",
+            "variant": 1,
+            "enemy": "bandit"
+          },
+          {
+            "id": 111,
+            "x": 1,
+            "y": 10,
+            "doors": [
+              100,
+              110,
+              112
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "spirit"
+          },
+          {
+            "id": 112,
+            "x": 2,
+            "y": 10,
+            "doors": [
+              113,
+              101,
+              111
+            ],
+            "kind": "enemy",
+            "variant": 0,
+            "enemy": "bandit"
+          },
+          {
+            "id": 113,
+            "x": 3,
+            "y": 10,
+            "doors": [
+              114,
+              112
+            ],
+            "kind": "enemy",
+            "variant": 3,
+            "enemy": "construct"
+          },
+          {
+            "id": 114,
+            "x": 4,
+            "y": 10,
+            "doors": [
+              115,
+              113
+            ],
+            "kind": "trap",
+            "variant": 1,
+            "enemy": "undead"
+          },
+          {
+            "id": 115,
+            "x": 5,
+            "y": 10,
+            "doors": [
+              104,
+              114
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "undead"
+          },
+          {
+            "id": 116,
+            "x": 6,
+            "y": 10,
+            "doors": [
+              117,
+              105
+            ],
+            "kind": "cache",
+            "variant": 1,
+            "enemy": "construct"
+          },
+          {
+            "id": 117,
+            "x": 7,
+            "y": 10,
+            "doors": [
+              106,
+              116
+            ],
+            "kind": "trap",
+            "variant": 2,
+            "enemy": "construct"
+          },
+          {
+            "id": 118,
+            "x": 8,
+            "y": 10,
+            "doors": [
+              119,
+              107
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "bandit"
+          },
+          {
+            "id": 119,
+            "x": 9,
+            "y": 10,
+            "doors": [
+              120,
+              118
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "construct"
+          },
+          {
+            "id": 120,
+            "x": 10,
+            "y": 10,
+            "doors": [
+              109,
+              119
+            ],
+            "kind": "trap",
+            "variant": 3,
+            "enemy": "spirit"
+          }
+        ],
+        "goal": 55,
+        "guardian": 66
+      }
+    },
+    {
+      "seed": "maze-identity-frozen-v047:maze:1:authored:cistern:marsh:1",
+      "layout": {
+        "size": 11,
+        "cells": [
+          {
+            "id": 0,
+            "x": 0,
+            "y": 0,
+            "doors": [
+              1
+            ],
+            "kind": "entrance",
+            "variant": 5,
+            "enemy": "aberration"
+          },
+          {
+            "id": 1,
+            "x": 1,
+            "y": 0,
+            "doors": [
+              0,
+              12
+            ],
+            "kind": "cache",
+            "variant": 1,
+            "enemy": "construct"
+          },
+          {
+            "id": 2,
+            "x": 2,
+            "y": 0,
+            "doors": [
+              3
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "bandit"
+          },
+          {
+            "id": 3,
+            "x": 3,
+            "y": 0,
+            "doors": [
+              14,
+              2,
+              4
+            ],
+            "kind": "cache",
+            "variant": 3,
+            "enemy": "aberration"
+          },
+          {
+            "id": 4,
+            "x": 4,
+            "y": 0,
+            "doors": [
+              3,
+              15
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "spirit"
+          },
+          {
+            "id": 5,
+            "x": 5,
+            "y": 0,
+            "doors": [
+              6,
+              16
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "construct"
+          },
+          {
+            "id": 6,
+            "x": 6,
+            "y": 0,
+            "doors": [
+              7,
+              5
+            ],
+            "kind": "trap",
+            "variant": 5,
+            "enemy": "aberration"
+          },
+          {
+            "id": 7,
+            "x": 7,
+            "y": 0,
+            "doors": [
+              18,
+              6,
+              8
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "undead"
+          },
+          {
+            "id": 8,
+            "x": 8,
+            "y": 0,
+            "doors": [
+              7,
+              19
+            ],
+            "kind": "trap",
+            "variant": 1,
+            "enemy": "bandit"
+          },
+          {
+            "id": 9,
+            "x": 9,
+            "y": 0,
+            "doors": [
+              10
+            ],
+            "kind": "trap",
+            "variant": 0,
+            "enemy": "beast"
+          },
+          {
+            "id": 10,
+            "x": 10,
+            "y": 0,
+            "doors": [
+              21,
+              9
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "aberration"
+          },
+          {
+            "id": 11,
+            "x": 0,
+            "y": 1,
+            "doors": [
+              22
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "undead"
+          },
+          {
+            "id": 12,
+            "x": 1,
+            "y": 1,
+            "doors": [
+              1,
+              13
+            ],
+            "kind": "trap",
+            "variant": 0,
+            "enemy": "construct"
+          },
+          {
+            "id": 13,
+            "x": 2,
+            "y": 1,
+            "doors": [
+              12,
+              14
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "aberration"
+          },
+          {
+            "id": 14,
+            "x": 3,
+            "y": 1,
+            "doors": [
+              13,
+              3
+            ],
+            "kind": "cache",
+            "variant": 5,
+            "enemy": "beast"
+          },
+          {
+            "id": 15,
+            "x": 4,
+            "y": 1,
+            "doors": [
+              4,
+              26
+            ],
+            "kind": "cache",
+            "variant": 1,
+            "enemy": "undead"
+          },
+          {
+            "id": 16,
+            "x": 5,
+            "y": 1,
+            "doors": [
+              5,
+              27
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "aberration"
+          },
+          {
+            "id": 17,
+            "x": 6,
+            "y": 1,
+            "doors": [
+              28,
+              18
+            ],
+            "kind": "trap",
+            "variant": 5,
+            "enemy": "undead"
+          },
+          {
+            "id": 18,
+            "x": 7,
+            "y": 1,
+            "doors": [
+              17,
+              7
+            ],
+            "kind": "camp",
+            "variant": 0,
+            "enemy": "undead"
+          },
+          {
+            "id": 19,
+            "x": 8,
+            "y": 1,
+            "doors": [
+              8,
+              20
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "spirit"
+          },
+          {
+            "id": 20,
+            "x": 9,
+            "y": 1,
+            "doors": [
+              19,
+              31
+            ],
+            "kind": "enemy",
+            "variant": 5,
+            "enemy": "bandit"
+          },
+          {
+            "id": 21,
+            "x": 10,
+            "y": 1,
+            "doors": [
+              32,
+              10
+            ],
+            "kind": "camp",
+            "variant": 1,
+            "enemy": "undead"
+          },
+          {
+            "id": 22,
+            "x": 0,
+            "y": 2,
+            "doors": [
+              33,
+              23,
+              11
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "construct"
+          },
+          {
+            "id": 23,
+            "x": 1,
+            "y": 2,
+            "doors": [
+              22,
+              24
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "undead"
+          },
+          {
+            "id": 24,
+            "x": 2,
+            "y": 2,
+            "doors": [
+              23,
+              35
+            ],
+            "kind": "enemy",
+            "variant": 2,
+            "enemy": "construct"
+          },
+          {
+            "id": 25,
+            "x": 3,
+            "y": 2,
+            "doors": [
+              26,
+              36
+            ],
+            "kind": "cache",
+            "variant": 2,
+            "enemy": "undead"
+          },
+          {
+            "id": 26,
+            "x": 4,
+            "y": 2,
+            "doors": [
+              15,
+              25
+            ],
+            "kind": "inscription",
+            "variant": 0,
+            "enemy": "beast"
+          },
+          {
+            "id": 27,
+            "x": 5,
+            "y": 2,
+            "doors": [
+              16
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "undead"
+          },
+          {
+            "id": 28,
+            "x": 6,
+            "y": 2,
+            "doors": [
+              29,
+              17
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "spirit"
+          },
+          {
+            "id": 29,
+            "x": 7,
+            "y": 2,
+            "doors": [
+              30,
+              28
+            ],
+            "kind": "enemy",
+            "variant": 4,
+            "enemy": "aberration"
+          },
+          {
+            "id": 30,
+            "x": 8,
+            "y": 2,
+            "doors": [
+              41,
+              29,
+              31
+            ],
+            "kind": "trap",
+            "variant": 2,
+            "enemy": "spirit"
+          },
+          {
+            "id": 31,
+            "x": 9,
+            "y": 2,
+            "doors": [
+              20,
+              32,
+              30
+            ],
+            "kind": "trap",
+            "variant": 0,
+            "enemy": "undead"
+          },
+          {
+            "id": 32,
+            "x": 10,
+            "y": 2,
+            "doors": [
+              31,
+              21,
+              43
+            ],
+            "kind": "inscription",
+            "variant": 3,
+            "enemy": "bandit"
+          },
+          {
+            "id": 33,
+            "x": 0,
+            "y": 3,
+            "doors": [
+              44,
+              22
+            ],
+            "kind": "cache",
+            "variant": 2,
+            "enemy": "spirit"
+          },
+          {
+            "id": 34,
+            "x": 1,
+            "y": 3,
+            "doors": [
+              35
+            ],
+            "kind": "cache",
+            "variant": 5,
+            "enemy": "undead"
+          },
+          {
+            "id": 35,
+            "x": 2,
+            "y": 3,
+            "doors": [
+              24,
+              46,
+              34
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "construct"
+          },
+          {
+            "id": 36,
+            "x": 3,
+            "y": 3,
+            "doors": [
+              25,
+              37
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "undead"
+          },
+          {
+            "id": 37,
+            "x": 4,
+            "y": 3,
+            "doors": [
+              36,
+              38
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "beast"
+          },
+          {
+            "id": 38,
+            "x": 5,
+            "y": 3,
+            "doors": [
+              37,
+              39
+            ],
+            "kind": "camp",
+            "variant": 3,
+            "enemy": "bandit"
+          },
+          {
+            "id": 39,
+            "x": 6,
+            "y": 3,
+            "doors": [
+              38,
+              40
+            ],
+            "kind": "camp",
+            "variant": 4,
+            "enemy": "undead"
+          },
+          {
+            "id": 40,
+            "x": 7,
+            "y": 3,
+            "doors": [
+              39,
+              51
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "beast"
+          },
+          {
+            "id": 41,
+            "x": 8,
+            "y": 3,
+            "doors": [
+              52,
+              30
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "undead"
+          },
+          {
+            "id": 42,
+            "x": 9,
+            "y": 3,
+            "doors": [
+              43,
+              53
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "aberration"
+          },
+          {
+            "id": 43,
+            "x": 10,
+            "y": 3,
+            "doors": [
+              32,
+              42
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "construct"
+          },
+          {
+            "id": 44,
+            "x": 0,
+            "y": 4,
+            "doors": [
+              45,
+              33
+            ],
+            "kind": "enemy",
+            "variant": 0,
+            "enemy": "construct"
+          },
+          {
+            "id": 45,
+            "x": 1,
+            "y": 4,
+            "doors": [
+              56,
+              44
+            ],
+            "kind": "inscription",
+            "variant": 1,
+            "enemy": "spirit"
+          },
+          {
+            "id": 46,
+            "x": 2,
+            "y": 4,
+            "doors": [
+              35,
+              47
+            ],
+            "kind": "cache",
+            "variant": 1,
+            "enemy": "undead"
+          },
+          {
+            "id": 47,
+            "x": 3,
+            "y": 4,
+            "doors": [
+              46,
+              48
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "construct"
+          },
+          {
+            "id": 48,
+            "x": 4,
+            "y": 4,
+            "doors": [
+              47,
+              49
+            ],
+            "kind": "cache",
+            "variant": 4,
+            "enemy": "bandit"
+          },
+          {
+            "id": 49,
+            "x": 5,
+            "y": 4,
+            "doors": [
+              48,
+              60
+            ],
+            "kind": "cache",
+            "variant": 5,
+            "enemy": "beast"
+          },
+          {
+            "id": 50,
+            "x": 6,
+            "y": 4,
+            "doors": [
+              51,
+              61
+            ],
+            "kind": "cache",
+            "variant": 2,
+            "enemy": "aberration"
+          },
+          {
+            "id": 51,
+            "x": 7,
+            "y": 4,
+            "doors": [
+              40,
+              50,
+              62
+            ],
+            "kind": "cache",
+            "variant": 3,
+            "enemy": "undead"
+          },
+          {
+            "id": 52,
+            "x": 8,
+            "y": 4,
+            "doors": [
+              63,
+              41
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "spirit"
+          },
+          {
+            "id": 53,
+            "x": 9,
+            "y": 4,
+            "doors": [
+              42,
+              54
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "aberration"
+          },
+          {
+            "id": 54,
+            "x": 10,
+            "y": 4,
+            "doors": [
+              53,
+              65
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "undead"
+          },
+          {
+            "id": 55,
+            "x": 0,
+            "y": 5,
+            "doors": [
+              66,
+              56
+            ],
+            "kind": "cache",
+            "variant": 3,
+            "enemy": "spirit"
+          },
+          {
+            "id": 56,
+            "x": 1,
+            "y": 5,
+            "doors": [
+              55,
+              45
+            ],
+            "kind": "enemy",
+            "variant": 5,
+            "enemy": "bandit"
+          },
+          {
+            "id": 57,
+            "x": 2,
+            "y": 5,
+            "doors": [
+              58,
+              68
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "spirit"
+          },
+          {
+            "id": 58,
+            "x": 3,
+            "y": 5,
+            "doors": [
+              69,
+              57
+            ],
+            "kind": "enemy",
+            "variant": 1,
+            "enemy": "bandit"
+          },
+          {
+            "id": 59,
+            "x": 4,
+            "y": 5,
+            "doors": [
+              60,
+              70
+            ],
+            "kind": "trap",
+            "variant": 4,
+            "enemy": "construct"
+          },
+          {
+            "id": 60,
+            "x": 5,
+            "y": 5,
+            "doors": [
+              61,
+              59,
+              49
+            ],
+            "kind": "cache",
+            "variant": 4,
+            "enemy": "construct"
+          },
+          {
+            "id": 61,
+            "x": 6,
+            "y": 5,
+            "doors": [
+              50,
+              60,
+              62
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "aberration"
+          },
+          {
+            "id": 62,
+            "x": 7,
+            "y": 5,
+            "doors": [
+              63,
+              73,
+              51,
+              61
+            ],
+            "kind": "enemy",
+            "variant": 3,
+            "enemy": "construct"
+          },
+          {
+            "id": 63,
+            "x": 8,
+            "y": 5,
+            "doors": [
+              74,
+              52,
+              62
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "beast"
+          },
+          {
+            "id": 64,
+            "x": 9,
+            "y": 5,
+            "doors": [
+              75
+            ],
+            "kind": "objective",
+            "variant": 3,
+            "enemy": "aberration"
+          },
+          {
+            "id": 65,
+            "x": 10,
+            "y": 5,
+            "doors": [
+              54,
+              76
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "bandit"
+          },
+          {
+            "id": 66,
+            "x": 0,
+            "y": 6,
+            "doors": [
+              67,
+              55,
+              77
+            ],
+            "kind": "camp",
+            "variant": 5,
+            "enemy": "beast"
+          },
+          {
+            "id": 67,
+            "x": 1,
+            "y": 6,
+            "doors": [
+              78,
+              66
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "aberration"
+          },
+          {
+            "id": 68,
+            "x": 2,
+            "y": 6,
+            "doors": [
+              57,
+              79
+            ],
+            "kind": "camp",
+            "variant": 4,
+            "enemy": "bandit"
+          },
+          {
+            "id": 69,
+            "x": 3,
+            "y": 6,
+            "doors": [
+              80,
+              58
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "spirit"
+          },
+          {
+            "id": 70,
+            "x": 4,
+            "y": 6,
+            "doors": [
+              59,
+              71
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "undead"
+          },
+          {
+            "id": 71,
+            "x": 5,
+            "y": 6,
+            "doors": [
+              70,
+              82,
+              72
+            ],
+            "kind": "enemy",
+            "variant": 0,
+            "enemy": "spirit"
+          },
+          {
+            "id": 72,
+            "x": 6,
+            "y": 6,
+            "doors": [
+              83,
+              71
+            ],
+            "kind": "enemy",
+            "variant": 0,
+            "enemy": "aberration"
+          },
+          {
+            "id": 73,
+            "x": 7,
+            "y": 6,
+            "doors": [
+              62,
+              84
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "undead"
+          },
+          {
+            "id": 74,
+            "x": 8,
+            "y": 6,
+            "doors": [
+              85,
+              63
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "aberration"
+          },
+          {
+            "id": 75,
+            "x": 9,
+            "y": 6,
+            "doors": [
+              76,
+              64,
+              86
+            ],
+            "kind": "guardian",
+            "variant": 2,
+            "enemy": "aberration"
+          },
+          {
+            "id": 76,
+            "x": 10,
+            "y": 6,
+            "doors": [
+              65,
+              75,
+              87
+            ],
+            "kind": "camp",
+            "variant": 4,
+            "enemy": "beast"
+          },
+          {
+            "id": 77,
+            "x": 0,
+            "y": 7,
+            "doors": [
+              66,
+              88
+            ],
+            "kind": "enemy",
+            "variant": 4,
+            "enemy": "aberration"
+          },
+          {
+            "id": 78,
+            "x": 1,
+            "y": 7,
+            "doors": [
+              79,
+              67
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "spirit"
+          },
+          {
+            "id": 79,
+            "x": 2,
+            "y": 7,
+            "doors": [
+              68,
+              78
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "aberration"
+          },
+          {
+            "id": 80,
+            "x": 3,
+            "y": 7,
+            "doors": [
+              91,
+              69
+            ],
+            "kind": "enemy",
+            "variant": 1,
+            "enemy": "spirit"
+          },
+          {
+            "id": 81,
+            "x": 4,
+            "y": 7,
+            "doors": [
+              82,
+              92
+            ],
+            "kind": "trap",
+            "variant": 1,
+            "enemy": "bandit"
+          },
+          {
+            "id": 82,
+            "x": 5,
+            "y": 7,
+            "doors": [
+              71,
+              81,
+              93
+            ],
+            "kind": "camp",
+            "variant": 1,
+            "enemy": "spirit"
+          },
+          {
+            "id": 83,
+            "x": 6,
+            "y": 7,
+            "doors": [
+              94,
+              72
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "beast"
+          },
+          {
+            "id": 84,
+            "x": 7,
+            "y": 7,
+            "doors": [
+              73,
+              95
+            ],
+            "kind": "inscription",
+            "variant": 3,
+            "enemy": "aberration"
+          },
+          {
+            "id": 85,
+            "x": 8,
+            "y": 7,
+            "doors": [
+              86,
+              74
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "construct"
+          },
+          {
+            "id": 86,
+            "x": 9,
+            "y": 7,
+            "doors": [
+              97,
+              85,
+              75
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "aberration"
+          },
+          {
+            "id": 87,
+            "x": 10,
+            "y": 7,
+            "doors": [
+              76
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "construct"
+          },
+          {
+            "id": 88,
+            "x": 0,
+            "y": 8,
+            "doors": [
+              77,
+              99
+            ],
+            "kind": "enemy",
+            "variant": 5,
+            "enemy": "undead"
+          },
+          {
+            "id": 89,
+            "x": 1,
+            "y": 8,
+            "doors": [
+              100,
+              90
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "undead"
+          },
+          {
+            "id": 90,
+            "x": 2,
+            "y": 8,
+            "doors": [
+              89
+            ],
+            "kind": "cache",
+            "variant": 1,
+            "enemy": "undead"
+          },
+          {
+            "id": 91,
+            "x": 3,
+            "y": 8,
+            "doors": [
+              102,
+              80
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "spirit"
+          },
+          {
+            "id": 92,
+            "x": 4,
+            "y": 8,
+            "doors": [
+              81,
+              103
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "aberration"
+          },
+          {
+            "id": 93,
+            "x": 5,
+            "y": 8,
+            "doors": [
+              94,
+              104,
+              82
+            ],
+            "kind": "enemy",
+            "variant": 1,
+            "enemy": "undead"
+          },
+          {
+            "id": 94,
+            "x": 6,
+            "y": 8,
+            "doors": [
+              95,
+              93,
+              83
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "construct"
+          },
+          {
+            "id": 95,
+            "x": 7,
+            "y": 8,
+            "doors": [
+              84,
+              94,
+              96
+            ],
+            "kind": "cache",
+            "variant": 4,
+            "enemy": "undead"
+          },
+          {
+            "id": 96,
+            "x": 8,
+            "y": 8,
+            "doors": [
+              95
+            ],
+            "kind": "enemy",
+            "variant": 4,
+            "enemy": "construct"
+          },
+          {
+            "id": 97,
+            "x": 9,
+            "y": 8,
+            "doors": [
+              98,
+              86,
+              108
+            ],
+            "kind": "inscription",
+            "variant": 1,
+            "enemy": "aberration"
+          },
+          {
+            "id": 98,
+            "x": 10,
+            "y": 8,
+            "doors": [
+              109,
+              97
+            ],
+            "kind": "cache",
+            "variant": 1,
+            "enemy": "beast"
+          },
+          {
+            "id": 99,
+            "x": 0,
+            "y": 9,
+            "doors": [
+              88,
+              110
+            ],
+            "kind": "enemy",
+            "variant": 0,
+            "enemy": "beast"
+          },
+          {
+            "id": 100,
+            "x": 1,
+            "y": 9,
+            "doors": [
+              101,
+              89
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "construct"
+          },
+          {
+            "id": 101,
+            "x": 2,
+            "y": 9,
+            "doors": [
+              112,
+              100
+            ],
+            "kind": "empty",
+            "variant": 1,
+            "enemy": "spirit"
+          },
+          {
+            "id": 102,
+            "x": 3,
+            "y": 9,
+            "doors": [
+              113,
+              91
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "construct"
+          },
+          {
+            "id": 103,
+            "x": 4,
+            "y": 9,
+            "doors": [
+              92,
+              114,
+              104
+            ],
+            "kind": "camp",
+            "variant": 1,
+            "enemy": "construct"
+          },
+          {
+            "id": 104,
+            "x": 5,
+            "y": 9,
+            "doors": [
+              93,
+              105,
+              103
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "bandit"
+          },
+          {
+            "id": 105,
+            "x": 6,
+            "y": 9,
+            "doors": [
+              104
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "bandit"
+          },
+          {
+            "id": 106,
+            "x": 7,
+            "y": 9,
+            "doors": [
+              117,
+              107
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "beast"
+          },
+          {
+            "id": 107,
+            "x": 8,
+            "y": 9,
+            "doors": [
+              106,
+              118
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "spirit"
+          },
+          {
+            "id": 108,
+            "x": 9,
+            "y": 9,
+            "doors": [
+              97
+            ],
+            "kind": "empty",
+            "variant": 5,
+            "enemy": "bandit"
+          },
+          {
+            "id": 109,
+            "x": 10,
+            "y": 9,
+            "doors": [
+              120,
+              98
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "spirit"
+          },
+          {
+            "id": 110,
+            "x": 0,
+            "y": 10,
+            "doors": [
+              99,
+              111
+            ],
+            "kind": "trap",
+            "variant": 0,
+            "enemy": "beast"
+          },
+          {
+            "id": 111,
+            "x": 1,
+            "y": 10,
+            "doors": [
+              110,
+              112
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "aberration"
+          },
+          {
+            "id": 112,
+            "x": 2,
+            "y": 10,
+            "doors": [
+              111,
+              101
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "aberration"
+          },
+          {
+            "id": 113,
+            "x": 3,
+            "y": 10,
+            "doors": [
+              114,
+              102
+            ],
+            "kind": "enemy",
+            "variant": 4,
+            "enemy": "beast"
+          },
+          {
+            "id": 114,
+            "x": 4,
+            "y": 10,
+            "doors": [
+              103,
+              115,
+              113
+            ],
+            "kind": "camp",
+            "variant": 2,
+            "enemy": "bandit"
+          },
+          {
+            "id": 115,
+            "x": 5,
+            "y": 10,
+            "doors": [
+              114,
+              116
+            ],
+            "kind": "empty",
+            "variant": 0,
+            "enemy": "spirit"
+          },
+          {
+            "id": 116,
+            "x": 6,
+            "y": 10,
+            "doors": [
+              115,
+              117
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "construct"
+          },
+          {
+            "id": 117,
+            "x": 7,
+            "y": 10,
+            "doors": [
+              116,
+              106,
+              118
+            ],
+            "kind": "empty",
+            "variant": 2,
+            "enemy": "aberration"
+          },
+          {
+            "id": 118,
+            "x": 8,
+            "y": 10,
+            "doors": [
+              107,
+              119,
+              117
+            ],
+            "kind": "empty",
+            "variant": 4,
+            "enemy": "construct"
+          },
+          {
+            "id": 119,
+            "x": 9,
+            "y": 10,
+            "doors": [
+              118,
+              120
+            ],
+            "kind": "enemy",
+            "variant": 5,
+            "enemy": "aberration"
+          },
+          {
+            "id": 120,
+            "x": 10,
+            "y": 10,
+            "doors": [
+              119,
+              109
+            ],
+            "kind": "empty",
+            "variant": 3,
+            "enemy": "construct"
+          }
+        ],
+        "goal": 64,
+        "guardian": 75
+      }
+    }
+  ],
+  "authoredDefinitions": [
+    {
+      "id": "cistern",
+      "title": "The Drowned Cistern",
+      "locationId": "marsh",
+      "description": "Follow the water beneath the reeds. Two approaches reach a keeper and the source of the corruption.",
+      "rooms": [
+        {
+          "id": "entry",
+          "title": "The reed stair",
+          "description": "Old watermarks descend below the marsh. You can follow the sluice or the flooded service passage.",
+          "kind": "safe",
+          "exits": [
+            "sluice",
+            "flooded",
+            "witness"
+          ]
+        },
+        {
+          "id": "sluice",
+          "title": "The broken sluice",
+          "description": "Hungry marsh creatures shelter beside a gate that can still be repaired.",
+          "kind": "fight",
+          "exits": [
+            "entry",
+            "cache",
+            "witness"
+          ],
+          "encounterId": "cistern_sluice",
+          "parley": true
+        },
+        {
+          "id": "flooded",
+          "title": "The flooded passage",
+          "description": "The water hides sharp scrap and a nest of fever-carrying creatures. A careful search can locate a dry ledge.",
+          "kind": "hazard",
+          "exits": [
+            "entry",
+            "cache",
+            "service"
+          ],
+          "encounterId": "cistern_flooded"
+        },
+        {
+          "id": "cache",
+          "title": "The pump workshop",
+          "description": "A dry shelf holds useful scraps and a maintenance ledger. The keeper’s chamber lies beyond.",
+          "kind": "treasure",
+          "exits": [
+            "sluice",
+            "flooded",
+            "keeper",
+            "service"
+          ],
+          "loot": {
+            "gold": 8,
+            "ore": 2,
+            "cloth": 1
+          }
+        },
+        {
+          "id": "keeper",
+          "title": "The cistern keeper",
+          "description": "A bound guardian mistakes every traveler for the people who poisoned its charge. Its next attack is visible in battle.\n\nIshravelle Vessareth, keeper of the lower water. People and creatures have made a refuge here. Its custodian fears that reopening the place will make those dependants expendable.",
+          "kind": "boss",
+          "exits": [
+            "cache",
+            "source"
+          ],
+          "encounterId": "cistern_keeper"
+        },
+        {
+          "id": "source",
+          "title": "The tainted spring",
+          "description": "A covenant conduit feeds the contamination. Record its pattern before returning to the people waiting above.\n\nThe source preserves the shift names of workers sent below during the first fever. Their families asked for an account, while the academy asked only for a diagram.",
+          "kind": "objective",
+          "exits": [
+            "keeper"
+          ]
+        },
+        {
+          "id": "witness",
+          "title": "Tavelo de Veyano’s refuge",
+          "description": "Tavelo de Veyano, the last pump attendant. The attendant lives on a dry landing, preserving the names of sick neighbors. They ask whether you intend to repair a channel or merely take an interesting diagram.",
+          "kind": "witness",
+          "exits": [
+            "entry",
+            "sluice"
+          ],
+          "optional": true
+        },
+        {
+          "id": "service",
+          "title": "The bellows culvert",
+          "description": "A maintenance crawlway crosses beneath the guarded sluice. Its corroded brackets still carry old work orders.",
+          "kind": "hazard",
+          "exits": [
+            "flooded",
+            "cache"
+          ],
+          "optional": true
+        }
+      ],
+      "version": 1,
+      "seed": "maze-identity-frozen-v047",
+      "layout": 0,
+      "objective": {
+        "id": "missing-workers",
+        "title": "The workers who did not return",
+        "description": "The source preserves the shift names of workers sent below during the first fever. Their families asked for an account, while the academy asked only for a diagram.",
+        "work": "Seal and identify the workers’ flooded memorial niche",
+        "materials": {
+          "cloth": 2
+        },
+        "result": "The workers’ names are protected from the water, with a dry place for their families to visit."
+      },
+      "motive": {
+        "id": "shelter",
+        "title": "A home under threat",
+        "skill": "survival",
+        "role": "rogue",
+        "need": "People and creatures have made a refuge here. Its custodian fears that reopening the place will make those dependants expendable."
+      },
+      "custodian": {
+        "name": "Ishravelle Vessareth",
+        "role": "keeper of the lower water"
+      },
+      "witness": {
+        "name": "Tavelo de Veyano",
+        "role": "the last pump attendant"
+      }
+    },
+    {
+      "id": "buried_archive",
+      "title": "The Buried Archive",
+      "locationId": "ruin",
+      "description": "A branching archive preserves the covenant’s origin and the people it was supposed to protect.",
+      "rooms": [
+        {
+          "id": "entry",
+          "title": "The collapsed vestibule",
+          "description": "The scriptoria remain lit by pale runes. A narrow stair offers another route through a trapped reading room.",
+          "kind": "safe",
+          "exits": [
+            "scriptoria",
+            "trap",
+            "service"
+          ]
+        },
+        {
+          "id": "scriptoria",
+          "title": "The silent scriptoria",
+          "description": "A warding adept and its echo defend the names in these books. A patient visitor can request passage.",
+          "kind": "fight",
+          "exits": [
+            "entry",
+            "vault",
+            "reliquary"
+          ],
+          "encounterId": "archive_scriptoria",
+          "parley": true
+        },
+        {
+          "id": "trap",
+          "title": "The ink-sealed stair",
+          "description": "Old defensive runes react to hurried movement. Study their repeated pattern or confront the guardians bound to them.",
+          "kind": "hazard",
+          "exits": [
+            "entry",
+            "vault"
+          ],
+          "encounterId": "archive_vault"
+        },
+        {
+          "id": "vault",
+          "title": "The record vault",
+          "description": "A locked coffer holds workshop supplies beside the record of the first covenant.",
+          "kind": "treasure",
+          "exits": [
+            "scriptoria",
+            "trap",
+            "archivist",
+            "service",
+            "reliquary"
+          ],
+          "loot": {
+            "gold": 10,
+            "ore": 1,
+            "cloth": 2
+          }
+        },
+        {
+          "id": "archivist",
+          "title": "The last archivist",
+          "description": "The guardian will test your intent before surrendering the original seal.\n\nKavdrun Roshud, keeper of the unabridged account. The people who built this place left maintenance promises unfulfilled. Its custodian wants practical responsibility, rather than another order from above.",
+          "kind": "boss",
+          "exits": [
+            "vault",
+            "seal"
+          ],
+          "encounterId": "archive_warden"
+        },
+        {
+          "id": "seal",
+          "title": "The original seal",
+          "description": "Read the names behind the official account. The knowledge belongs to your life; its political use is another decision.\n\nThe original seal includes a separate register of people who refused a binding term. Later copies removed that register. The campaign needs the terms; the people’s refusal deserves a record of its own.",
+          "kind": "objective",
+          "exits": [
+            "archivist"
+          ]
+        },
+        {
+          "id": "service",
+          "title": "The bookbinders’ lift",
+          "description": "A narrow supply shaft links the vestibule and vault. Rotted boards must be surveyed before a party can use it.",
+          "kind": "hazard",
+          "exits": [
+            "entry",
+            "vault"
+          ],
+          "optional": true
+        },
+        {
+          "id": "reliquary",
+          "title": "The unclaimed reading desk",
+          "description": "A dead reader’s binding tool lies beside a refusal written in their own hand. The tool could be sold; the page could be preserved.",
+          "kind": "dilemma",
+          "exits": [
+            "scriptoria",
+            "vault"
+          ],
+          "optional": true
+        }
+      ],
+      "version": 1,
+      "seed": "maze-identity-frozen-v047",
+      "layout": 1,
+      "objective": {
+        "id": "refused-names",
+        "title": "The names that refused the covenant",
+        "description": "The original seal includes a separate register of people who refused a binding term. Later copies removed that register. The campaign needs the terms; the people’s refusal deserves a record of its own.",
+        "work": "Make protected copies of the refused names",
+        "materials": {
+          "cloth": 2
+        },
+        "result": "The refused names survive in separate cloth-bound copies entrusted to the displaced readers."
+      },
+      "motive": {
+        "id": "duty",
+        "title": "An unpaid duty",
+        "skill": "scholarship",
+        "role": "warrior",
+        "need": "The people who built this place left maintenance promises unfulfilled. Its custodian wants practical responsibility, rather than another order from above."
+      },
+      "custodian": {
+        "name": "Kavdrun Roshud",
+        "role": "keeper of the unabridged account"
+      },
+      "witness": {
+        "name": "Demeria Iscard",
+        "role": "a displaced copyist"
+      }
+    },
+    {
+      "id": "root_caverns",
+      "title": "The Moonroot Caverns",
+      "locationId": "forest",
+      "description": "Tracks and living thorns lead to a spring hidden beneath the old forest.",
+      "rooms": [
+        {
+          "id": "entry",
+          "title": "The split root",
+          "description": "Animal tracks enter a low tunnel; a narrow passage winds through the thorns.",
+          "kind": "safe",
+          "exits": [
+            "spoor",
+            "thorns",
+            "service"
+          ]
+        },
+        {
+          "id": "spoor",
+          "title": "The hunting den",
+          "description": "Beasts guard their young. Waiting and leaving supplies can secure passage without a fight.",
+          "kind": "fight",
+          "exits": [
+            "entry",
+            "refuge",
+            "reliquary"
+          ],
+          "encounterId": "root_spoor",
+          "parley": true
+        },
+        {
+          "id": "thorns",
+          "title": "The thorn passage",
+          "description": "Sharp living vines conceal an older path. A careful search can spare your party a wound.",
+          "kind": "hazard",
+          "exits": [
+            "entry",
+            "refuge"
+          ],
+          "encounterId": "root_thorns"
+        },
+        {
+          "id": "refuge",
+          "title": "The old ranger’s refuge",
+          "description": "A dry alcove contains bundled herbs and the remains of a craftsman’s pack.",
+          "kind": "treasure",
+          "exits": [
+            "spoor",
+            "thorns",
+            "thornheart",
+            "service",
+            "reliquary"
+          ],
+          "loot": {
+            "gold": 4,
+            "ore": 1,
+            "cloth": 1,
+            "herbs": 2
+          }
+        },
+        {
+          "id": "thornheart",
+          "title": "The Thornheart",
+          "description": "A rooted guardian draws strength from the damaged grove. Cleansing wards answer its barbed attacks.\n\nDessa de Bavero, the grove’s scarred custodian. The people who built this place left maintenance promises unfulfilled. Its custodian wants practical responsibility, rather than another order from above.",
+          "kind": "boss",
+          "exits": [
+            "refuge",
+            "spring"
+          ],
+          "encounterId": "thornheart"
+        },
+        {
+          "id": "spring",
+          "title": "The moonroot spring",
+          "description": "The hidden spring is accessible again. Gather three herb bundles once and learn the route through the forest.\n\nThe spring holds moonroot and a few seeds from a grove that vanished above. Taking every useful plant would end its return. The cure still needs its three herb bundles.",
+          "kind": "objective",
+          "exits": [
+            "thornheart"
+          ],
+          "herbs": 3
+        },
+        {
+          "id": "service",
+          "title": "The badger run",
+          "description": "A low burrow circles the hunting den. Fresh tracks reveal which roots can support a traveler’s weight.",
+          "kind": "hazard",
+          "exits": [
+            "entry",
+            "refuge"
+          ],
+          "optional": true
+        },
+        {
+          "id": "reliquary",
+          "title": "The abandoned tending kit",
+          "description": "An iron pruning tool rests beside a cloth roll and a grove-tender’s account of the damaged spring.",
+          "kind": "dilemma",
+          "exits": [
+            "spoor",
+            "refuge"
+          ],
+          "optional": true
+        }
+      ],
+      "version": 1,
+      "seed": "maze-identity-frozen-v047",
+      "layout": 1,
+      "objective": {
+        "id": "last-seeds",
+        "title": "The last seeds of an older grove",
+        "description": "The spring holds moonroot and a few seeds from a grove that vanished above. Taking every useful plant would end its return. The cure still needs its three herb bundles.",
+        "work": "Protect a small seed bed beside the spring",
+        "materials": {
+          "herbs": 2
+        },
+        "result": "A protected seed bed remains for the older grove. Your expedition’s remedy bundles are gathered separately."
+      },
+      "motive": {
+        "id": "duty",
+        "title": "An unpaid duty",
+        "skill": "scholarship",
+        "role": "warrior",
+        "need": "The people who built this place left maintenance promises unfulfilled. Its custodian wants practical responsibility, rather than another order from above."
+      },
+      "custodian": {
+        "name": "Dessa de Bavero",
+        "role": "the grove’s scarred custodian"
+      },
+      "witness": {
+        "name": "Odemi Daveru",
+        "role": "an exiled grove-tender"
+      }
+    },
+    {
+      "id": "watchtower",
+      "title": "The Broken Watchtower",
+      "locationId": "tower",
+      "description": "A roadside garrison has become a prison. A cliff path and cellar approach lead to its captain.",
+      "rooms": [
+        {
+          "id": "entry",
+          "title": "The tower approach",
+          "description": "A ladder reaches the cliff patrol. The cellar opens toward the captives instead.",
+          "kind": "safe",
+          "exits": [
+            "cliff",
+            "cells",
+            "reliquary"
+          ]
+        },
+        {
+          "id": "cliff",
+          "title": "The cliff patrol",
+          "description": "A veteran screens a slinger. Their different roles reward choosing the first target carefully.",
+          "kind": "fight",
+          "exits": [
+            "entry",
+            "cache",
+            "cells"
+          ],
+          "encounterId": "tower_cliff"
+        },
+        {
+          "id": "cells",
+          "title": "The holding cells",
+          "description": "A jailer guards ordinary travelers accused of trespass. Speak for them, or force the cell doors.",
+          "kind": "fight",
+          "exits": [
+            "entry",
+            "cache",
+            "witness",
+            "cliff"
+          ],
+          "encounterId": "tower_cells",
+          "parley": true,
+          "rescue": true
+        },
+        {
+          "id": "cache",
+          "title": "The garrison stores",
+          "description": "Confiscated tools remain beside a ledger of bribes. Take the useful scraps and preserve the names.",
+          "kind": "treasure",
+          "exits": [
+            "cliff",
+            "cells",
+            "captain",
+            "witness",
+            "reliquary"
+          ],
+          "loot": {
+            "gold": 12,
+            "ore": 2,
+            "cloth": 2
+          }
+        },
+        {
+          "id": "captain",
+          "title": "The captain’s platform",
+          "description": "The captain commands a fixed pair of guards. Watch the promised volley before spending the party’s turns.\n\nCaldran Kestell, the captain of the paid silence. An official account omitted someone who objected. Its custodian wants that person heard with consent before surrendering the records.",
+          "kind": "boss",
+          "exits": [
+            "cache",
+            "signal"
+          ],
+          "encounterId": "tower_captain"
+        },
+        {
+          "id": "signal",
+          "title": "The signal brazier",
+          "description": "The tower can now warn travelers instead of trapping them. The council will hear what you recovered.\n\nThe brazier holds the unsanctioned order that turned a watch post into a prison. A copy can prove it; the courier who brought it fears being blamed for its author.",
+          "kind": "objective",
+          "exits": [
+            "captain"
+          ]
+        },
+        {
+          "id": "witness",
+          "title": "Emnuk of Emdral Hall’s refuge",
+          "description": "Emnuk of Emdral Hall, a detained courier. A courier waits between the cells with a torn travel permit. They carried an order, not its authority. They ask you to preserve that distinction.",
+          "kind": "witness",
+          "exits": [
+            "cells",
+            "cache"
+          ],
+          "optional": true
+        },
+        {
+          "id": "reliquary",
+          "title": "The confiscation desk",
+          "description": "One iron clasp lies among a courier’s letters and the names of families awaiting their return.",
+          "kind": "dilemma",
+          "exits": [
+            "entry",
+            "cache"
+          ],
+          "optional": true
+        }
+      ],
+      "version": 1,
+      "seed": "maze-identity-frozen-v047",
+      "layout": 2,
+      "objective": {
+        "id": "false-orders",
+        "title": "The order without a seal",
+        "description": "The brazier holds the unsanctioned order that turned a watch post into a prison. A copy can prove it; the courier who brought it fears being blamed for its author.",
+        "work": "Restore a public road-warning lamp",
+        "materials": {
+          "ore": 1,
+          "cloth": 1
+        },
+        "result": "The repaired lamp warns ordinary travelers. The courier’s account remains distinct from the captain’s command."
+      },
+      "motive": {
+        "id": "witness",
+        "title": "A witness who was erased",
+        "skill": "persuasion",
+        "role": "mage",
+        "need": "An official account omitted someone who objected. Its custodian wants that person heard with consent before surrendering the records."
+      },
+      "custodian": {
+        "name": "Caldran Kestell",
+        "role": "the captain of the paid silence"
+      },
+      "witness": {
+        "name": "Emnuk of Emdral Hall",
+        "role": "a detained courier"
+      }
+    },
+    {
+      "id": "covenant_core",
+      "title": "The Covenant Core",
+      "locationId": "citadel",
+      "description": "Two routes through the citadel reach the anchor that binds the region’s fate.",
+      "rooms": [
+        {
+          "id": "entry",
+          "title": "The inner threshold",
+          "description": "The procession hall offers a direct route. The damaged forge holds a narrower alternative.",
+          "kind": "safe",
+          "exits": [
+            "hall",
+            "forge",
+            "reliquary"
+          ]
+        },
+        {
+          "id": "hall",
+          "title": "The procession hall",
+          "description": "Iron husks protect an acolyte whose wards sustain them.",
+          "kind": "fight",
+          "exits": [
+            "entry",
+            "library",
+            "forge"
+          ],
+          "encounterId": "core_hall"
+        },
+        {
+          "id": "forge",
+          "title": "The broken forge",
+          "description": "A rune golem and living sparks remain among the fragments. Careful investigation can cut their power.",
+          "kind": "hazard",
+          "exits": [
+            "entry",
+            "library",
+            "witness",
+            "hall"
+          ],
+          "encounterId": "core_forge"
+        },
+        {
+          "id": "library",
+          "title": "The covenant library",
+          "description": "Emergency supplies lie beside the plans used to build the anchor. Its purpose becomes comprehensible.",
+          "kind": "treasure",
+          "exits": [
+            "hall",
+            "forge",
+            "warden",
+            "witness",
+            "reliquary"
+          ],
+          "loot": {
+            "gold": 8,
+            "ore": 3,
+            "cloth": 1
+          }
+        },
+        {
+          "id": "warden",
+          "title": "The anchor warden",
+          "description": "The warden announces a charged strike, a protective seal, and a sweeping pulse. Prepare for its sequence.\n\nMadoruk Oskard, the warden with competing commands. The people who built this place left maintenance promises unfulfilled. Its custodian wants practical responsibility, rather than another order from above.",
+          "kind": "boss",
+          "exits": [
+            "library",
+            "anchor"
+          ],
+          "encounterId": "core_warden"
+        },
+        {
+          "id": "anchor",
+          "title": "The living anchor",
+          "description": "You reached the mechanism that sustains the covenant. Your campaign choices determine what happens to it.\n\nThe anchor repeats compulsory commands carved over a first instruction requiring a willing term. The warden’s violence follows the contradiction, not a verdict on your character.",
+          "kind": "objective",
+          "exits": [
+            "warden"
+          ]
+        },
+        {
+          "id": "witness",
+          "title": "Tolva Bresmorr’s refuge",
+          "description": "Tolva Bresmorr, an anchor maintenance apprentice. An apprentice hides in a service niche beside their abandoned tools. They know which instruction was overwritten and who was required to continue working.",
+          "kind": "witness",
+          "exits": [
+            "forge",
+            "library"
+          ],
+          "optional": true
+        },
+        {
+          "id": "reliquary",
+          "title": "The workers’ muster",
+          "description": "An iron fitting lies on a ledger of living workers. Several names have been crossed out without explanation.",
+          "kind": "dilemma",
+          "exits": [
+            "entry",
+            "library"
+          ],
+          "optional": true
+        }
+      ],
+      "version": 1,
+      "seed": "maze-identity-frozen-v047",
+      "layout": 2,
+      "objective": {
+        "id": "overwritten-command",
+        "title": "The first command beneath the last",
+        "description": "The anchor repeats compulsory commands carved over a first instruction requiring a willing term. The warden’s violence follows the contradiction, not a verdict on your character.",
+        "work": "Restore the visible consent instruction",
+        "materials": {
+          "cloth": 2
+        },
+        "result": "The oldest consent instruction is made legible beside the later command. The mechanism remains dangerous until the final campaign decision."
+      },
+      "motive": {
+        "id": "duty",
+        "title": "An unpaid duty",
+        "skill": "scholarship",
+        "role": "warrior",
+        "need": "The people who built this place left maintenance promises unfulfilled. Its custodian wants practical responsibility, rather than another order from above."
+      },
+      "custodian": {
+        "name": "Madoruk Oskard",
+        "role": "the warden with competing commands"
+      },
+      "witness": {
+        "name": "Tolva Bresmorr",
+        "role": "an anchor maintenance apprentice"
+      }
+    }
+  ],
+  "legacyDefinitions": [
+    {
+      "id": "cistern",
+      "title": "The Drowned Cistern",
+      "locationId": "marsh",
+      "description": "Follow the water beneath the reeds. Two approaches reach a keeper and the source of the corruption.",
+      "rooms": [
+        {
+          "id": "entry",
+          "title": "The reed stair",
+          "description": "Old watermarks descend below the marsh. You can follow the sluice or the flooded service passage.",
+          "kind": "safe",
+          "exits": [
+            "sluice",
+            "flooded"
+          ]
+        },
+        {
+          "id": "sluice",
+          "title": "The broken sluice",
+          "description": "Hungry marsh creatures shelter beside a gate that can still be repaired.",
+          "kind": "fight",
+          "exits": [
+            "entry",
+            "cache"
+          ],
+          "encounterId": "cistern_sluice",
+          "parley": true
+        },
+        {
+          "id": "flooded",
+          "title": "The flooded passage",
+          "description": "The water hides sharp scrap and a nest of fever-carrying creatures. A careful search can locate a dry ledge.",
+          "kind": "hazard",
+          "exits": [
+            "entry",
+            "cache"
+          ],
+          "encounterId": "cistern_flooded"
+        },
+        {
+          "id": "cache",
+          "title": "The pump workshop",
+          "description": "A dry shelf holds useful scraps and a maintenance ledger. The keeper’s chamber lies beyond.",
+          "kind": "treasure",
+          "exits": [
+            "sluice",
+            "flooded",
+            "keeper"
+          ],
+          "loot": {
+            "gold": 8,
+            "ore": 2,
+            "cloth": 1
+          }
+        },
+        {
+          "id": "keeper",
+          "title": "The cistern keeper",
+          "description": "A bound guardian mistakes every traveler for the people who poisoned its charge. Its next attack is visible in battle.",
+          "kind": "boss",
+          "exits": [
+            "cache",
+            "source"
+          ],
+          "encounterId": "cistern_keeper"
+        },
+        {
+          "id": "source",
+          "title": "The tainted spring",
+          "description": "A covenant conduit feeds the contamination. Record its pattern before returning to the people waiting above.",
+          "kind": "objective",
+          "exits": [
+            "keeper"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "buried_archive",
+      "title": "The Buried Archive",
+      "locationId": "ruin",
+      "description": "A branching archive preserves the covenant’s origin and the people it was supposed to protect.",
+      "rooms": [
+        {
+          "id": "entry",
+          "title": "The collapsed vestibule",
+          "description": "The scriptoria remain lit by pale runes. A narrow stair offers another route through a trapped reading room.",
+          "kind": "safe",
+          "exits": [
+            "scriptoria",
+            "trap"
+          ]
+        },
+        {
+          "id": "scriptoria",
+          "title": "The silent scriptoria",
+          "description": "A warding adept and its echo defend the names in these books. A patient visitor can request passage.",
+          "kind": "fight",
+          "exits": [
+            "entry",
+            "vault"
+          ],
+          "encounterId": "archive_scriptoria",
+          "parley": true
+        },
+        {
+          "id": "trap",
+          "title": "The ink-sealed stair",
+          "description": "Old defensive runes react to hurried movement. Study their repeated pattern or confront the guardians bound to them.",
+          "kind": "hazard",
+          "exits": [
+            "entry",
+            "vault"
+          ],
+          "encounterId": "archive_vault"
+        },
+        {
+          "id": "vault",
+          "title": "The record vault",
+          "description": "A locked coffer holds workshop supplies beside the record of the first covenant.",
+          "kind": "treasure",
+          "exits": [
+            "scriptoria",
+            "trap",
+            "archivist"
+          ],
+          "loot": {
+            "gold": 10,
+            "ore": 1,
+            "cloth": 2
+          }
+        },
+        {
+          "id": "archivist",
+          "title": "The last archivist",
+          "description": "The guardian will test your intent before surrendering the original seal.",
+          "kind": "boss",
+          "exits": [
+            "vault",
+            "seal"
+          ],
+          "encounterId": "archive_warden"
+        },
+        {
+          "id": "seal",
+          "title": "The original seal",
+          "description": "Read the names behind the official account. The knowledge belongs to your life; its political use is another decision.",
+          "kind": "objective",
+          "exits": [
+            "archivist"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "root_caverns",
+      "title": "The Moonroot Caverns",
+      "locationId": "forest",
+      "description": "Tracks and living thorns lead to a spring hidden beneath the old forest.",
+      "rooms": [
+        {
+          "id": "entry",
+          "title": "The split root",
+          "description": "Animal tracks enter a low tunnel; a narrow passage winds through the thorns.",
+          "kind": "safe",
+          "exits": [
+            "spoor",
+            "thorns"
+          ]
+        },
+        {
+          "id": "spoor",
+          "title": "The hunting den",
+          "description": "Beasts guard their young. Waiting and leaving supplies can secure passage without a fight.",
+          "kind": "fight",
+          "exits": [
+            "entry",
+            "refuge"
+          ],
+          "encounterId": "root_spoor",
+          "parley": true
+        },
+        {
+          "id": "thorns",
+          "title": "The thorn passage",
+          "description": "Sharp living vines conceal an older path. A careful search can spare your party a wound.",
+          "kind": "hazard",
+          "exits": [
+            "entry",
+            "refuge"
+          ],
+          "encounterId": "root_thorns"
+        },
+        {
+          "id": "refuge",
+          "title": "The old ranger’s refuge",
+          "description": "A dry alcove contains bundled herbs and the remains of a craftsman’s pack.",
+          "kind": "treasure",
+          "exits": [
+            "spoor",
+            "thorns",
+            "thornheart"
+          ],
+          "loot": {
+            "gold": 4,
+            "ore": 1,
+            "cloth": 1,
+            "herbs": 2
+          }
+        },
+        {
+          "id": "thornheart",
+          "title": "The Thornheart",
+          "description": "A rooted guardian draws strength from the damaged grove. Cleansing wards answer its barbed attacks.",
+          "kind": "boss",
+          "exits": [
+            "refuge",
+            "spring"
+          ],
+          "encounterId": "thornheart"
+        },
+        {
+          "id": "spring",
+          "title": "The moonroot spring",
+          "description": "The hidden spring is accessible again. Gather three herb bundles once and learn the route through the forest.",
+          "kind": "objective",
+          "exits": [
+            "thornheart"
+          ],
+          "herbs": 3
+        }
+      ]
+    },
+    {
+      "id": "watchtower",
+      "title": "The Broken Watchtower",
+      "locationId": "tower",
+      "description": "A roadside garrison has become a prison. A cliff path and cellar approach lead to its captain.",
+      "rooms": [
+        {
+          "id": "entry",
+          "title": "The tower approach",
+          "description": "A ladder reaches the cliff patrol. The cellar opens toward the captives instead.",
+          "kind": "safe",
+          "exits": [
+            "cliff",
+            "cells"
+          ]
+        },
+        {
+          "id": "cliff",
+          "title": "The cliff patrol",
+          "description": "A veteran screens a slinger. Their different roles reward choosing the first target carefully.",
+          "kind": "fight",
+          "exits": [
+            "entry",
+            "cache"
+          ],
+          "encounterId": "tower_cliff"
+        },
+        {
+          "id": "cells",
+          "title": "The holding cells",
+          "description": "A jailer guards ordinary travelers accused of trespass. Speak for them, or force the cell doors.",
+          "kind": "fight",
+          "exits": [
+            "entry",
+            "cache"
+          ],
+          "encounterId": "tower_cells",
+          "parley": true,
+          "rescue": true
+        },
+        {
+          "id": "cache",
+          "title": "The garrison stores",
+          "description": "Confiscated tools remain beside a ledger of bribes. Take the useful scraps and preserve the names.",
+          "kind": "treasure",
+          "exits": [
+            "cliff",
+            "cells",
+            "captain"
+          ],
+          "loot": {
+            "gold": 12,
+            "ore": 2,
+            "cloth": 2
+          }
+        },
+        {
+          "id": "captain",
+          "title": "The captain’s platform",
+          "description": "The captain commands a fixed pair of guards. Watch the promised volley before spending the party’s turns.",
+          "kind": "boss",
+          "exits": [
+            "cache",
+            "signal"
+          ],
+          "encounterId": "tower_captain"
+        },
+        {
+          "id": "signal",
+          "title": "The signal brazier",
+          "description": "The tower can now warn travelers instead of trapping them. The council will hear what you recovered.",
+          "kind": "objective",
+          "exits": [
+            "captain"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "covenant_core",
+      "title": "The Covenant Core",
+      "locationId": "citadel",
+      "description": "Two routes through the citadel reach the anchor that binds the region’s fate.",
+      "rooms": [
+        {
+          "id": "entry",
+          "title": "The inner threshold",
+          "description": "The procession hall offers a direct route. The damaged forge holds a narrower alternative.",
+          "kind": "safe",
+          "exits": [
+            "hall",
+            "forge"
+          ]
+        },
+        {
+          "id": "hall",
+          "title": "The procession hall",
+          "description": "Iron husks protect an acolyte whose wards sustain them.",
+          "kind": "fight",
+          "exits": [
+            "entry",
+            "library"
+          ],
+          "encounterId": "core_hall"
+        },
+        {
+          "id": "forge",
+          "title": "The broken forge",
+          "description": "A rune golem and living sparks remain among the fragments. Careful investigation can cut their power.",
+          "kind": "hazard",
+          "exits": [
+            "entry",
+            "library"
+          ],
+          "encounterId": "core_forge"
+        },
+        {
+          "id": "library",
+          "title": "The covenant library",
+          "description": "Emergency supplies lie beside the plans used to build the anchor. Its purpose becomes comprehensible.",
+          "kind": "treasure",
+          "exits": [
+            "hall",
+            "forge",
+            "warden"
+          ],
+          "loot": {
+            "gold": 8,
+            "ore": 3,
+            "cloth": 1
+          }
+        },
+        {
+          "id": "warden",
+          "title": "The anchor warden",
+          "description": "The warden announces a charged strike, a protective seal, and a sweeping pulse. Prepare for its sequence.",
+          "kind": "boss",
+          "exits": [
+            "library",
+            "anchor"
+          ],
+          "encounterId": "core_warden"
+        },
+        {
+          "id": "anchor",
+          "title": "The living anchor",
+          "description": "You reached the mechanism that sustains the covenant. Your campaign choices determine what happens to it.",
+          "kind": "objective",
+          "exits": [
+            "warden"
+          ]
+        }
+      ]
+    }
+  ],
+  "sourceHashes": {
+    "maze-v31.js": "5590f5b1d1977be1a71adbe3e37897fb7b43da8f9e3c5da272e88c3cec3f4119",
+    "maze-rules.js": "6a2601791d9923a65d973af529d0f2c101c6e0c3927a6e9414f805d3d544f50f",
+    "exploration.js": "e6c2785d3399d325120a729ba47cb052ece1c31d48aa351e3a2cc5ef69ab9172",
+    "rpg-depth-v27.js": "53af56bfa04a6f1f1cfd4de1313de0b404d6c14c0f77a01a384f413cdb808de5",
+    "boss-stories-v27.js": "3c7962c0e81b7b38420e8ccb571524b943d192d926a198d74d9c5d294f6acd0a"
+  }
+}

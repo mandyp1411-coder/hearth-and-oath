@@ -1,0 +1,133 @@
+{
+  "manifestVersion": 1,
+  "worldSeed": "maze-identity-frozen-v047",
+  "rows": [
+    {
+      "run": {
+        "version": 2,
+        "id": "maze-1",
+        "kind": "authored",
+        "sourceId": "cistern",
+        "locationId": "marsh",
+        "seed": "maze-content-narrow:cistern:0"
+      },
+      "sha256": "577606257e90808cf817e2b50def8837324bffb7cbdfb926f8eb562397ed5469"
+    },
+    {
+      "run": {
+        "version": 2,
+        "id": "maze-1",
+        "kind": "authored",
+        "sourceId": "buried_archive",
+        "locationId": "ruin",
+        "seed": "maze-content-narrow:buried_archive:0"
+      },
+      "sha256": "e27c7688db8f03501df0b208ae0199a5faff6be42cdfbba15e6af5f2992725bd"
+    },
+    {
+      "run": {
+        "version": 2,
+        "id": "maze-1",
+        "kind": "authored",
+        "sourceId": "root_caverns",
+        "locationId": "forest",
+        "seed": "maze-content-narrow:root_caverns:0"
+      },
+      "sha256": "5894edcb305217c4fbc4ae5cdb8dbbc87f2058a2bd9fd664e4ef71b4dbcc496d"
+    },
+    {
+      "run": {
+        "version": 2,
+        "id": "maze-1",
+        "kind": "authored",
+        "sourceId": "watchtower",
+        "locationId": "tower",
+        "seed": "maze-content-narrow:watchtower:0"
+      },
+      "sha256": "ac9244cd05f1ae968341c041c8b540885e74c7795071c53ed2887decbd2c038e"
+    },
+    {
+      "run": {
+        "version": 2,
+        "id": "maze-1",
+        "kind": "authored",
+        "sourceId": "covenant_core",
+        "locationId": "citadel",
+        "seed": "maze-content-narrow:covenant_core:0"
+      },
+      "sha256": "b39a93d44d3d329a67994e44bbb05f5a64507098c28ebb3f96571c5061009eb9"
+    },
+    {
+      "run": {
+        "version": 2,
+        "id": "maze-1",
+        "kind": "regional",
+        "sourceId": "signature_rainward",
+        "locationId": "canonical-rainward",
+        "regionId": "rainward",
+        "seed": "maze-content-narrow:signature_rainward:0"
+      },
+      "sha256": "ed728ec76f691e24b502ba09ecc7e78e02f50b6956a583d669de6ce621e0247d"
+    },
+    {
+      "run": {
+        "version": 2,
+        "id": "maze-1",
+        "kind": "regional",
+        "sourceId": "signature_saltreach",
+        "locationId": "canonical-saltreach",
+        "regionId": "saltreach",
+        "seed": "maze-content-narrow:signature_saltreach:0"
+      },
+      "sha256": "235d7cd5a45792a075575ac258d36f51e3ea1633d3666c5f1b2fb6cbef50302b"
+    },
+    {
+      "run": {
+        "version": 2,
+        "id": "maze-1",
+        "kind": "regional",
+        "sourceId": "signature_highstone",
+        "locationId": "canonical-highstone",
+        "regionId": "highstone",
+        "seed": "maze-content-narrow:signature_highstone:0"
+      },
+      "sha256": "bba2bf66492810ee20ae66171f38ddcefe40e1b88c1c5c3d8645d846cf740f5c"
+    },
+    {
+      "run": {
+        "version": 2,
+        "id": "maze-1",
+        "kind": "regional",
+        "sourceId": "signature_blackgrove",
+        "locationId": "canonical-blackgrove",
+        "regionId": "blackgrove",
+        "seed": "maze-content-narrow:signature_blackgrove:0"
+      },
+      "sha256": "3439ece22a3b0d8e7db548c306c40a7615cbdf4f861411add1f763a71e4d3eb0"
+    },
+    {
+      "run": {
+        "version": 2,
+        "id": "maze-1",
+        "kind": "regional",
+        "sourceId": "signature_ashplain",
+        "locationId": "canonical-ashplain",
+        "regionId": "ashplain",
+        "seed": "maze-content-narrow:signature_ashplain:0"
+      },
+      "sha256": "f1d064cb6825a07bf19aa57389713f8ac916d72d82dd0917168061395464d5b8"
+    },
+    {
+      "run": {
+        "version": 2,
+        "id": "maze-1",
+        "kind": "regional",
+        "sourceId": "signature_bellwater",
+        "locationId": "canonical-bellwater",
+        "regionId": "bellwater",
+        "seed": "maze-content-narrow:signature_bellwater:0"
+      },
+      "sha256": "75bf3f7b7a288bb25181bd7064d786be5d90340ff252d0420e7c3a0a0723c873"
+    }
+  ]
+}

@@ -1,0 +1,3115 @@
+{
+  "version": 1,
+  "revision": 3,
+  "difficulty": "balanced",
+  "seed": "the-broken-anchor",
+  "phase": "adult",
+  "day": 6733,
+  "age": 18,
+  "hero": {
+    "name": "Aster",
+    "origin": "village",
+    "household": "tradesfolk",
+    "path": "warrior",
+    "specialization": "guardian",
+    "profession": "Unemployed",
+    "appearance": {
+      "ancestry": "human",
+      "skin": "warm",
+      "hair": "chestnut",
+      "hairStyle": "tied",
+      "eyes": "hazel",
+      "face": "soft",
+      "build": "average",
+      "outfit": "travel",
+      "outfitColor": "forest",
+      "accessory": "none",
+      "scar": "none",
+      "tattoo": "none"
+    },
+    "temperament": "curious",
+    "belief": "lantern",
+    "pronouns": "they/them",
+    "ambition": "Protect the place I call home",
+    "level": 4,
+    "exp": 103,
+    "hp": 92,
+    "maxHp": 92,
+    "mp": 31,
+    "maxMp": 31,
+    "gold": 267,
+    "attributes": {
+      "strength": 3,
+      "agility": 3,
+      "vitality": 12,
+      "intellect": 3,
+      "willpower": 3,
+      "presence": 3
+    },
+    "skills": {
+      "weapons": 14,
+      "defense": 3,
+      "arcana": 0,
+      "devotion": 1,
+      "stealth": 2,
+      "survival": 14,
+      "scholarship": 1,
+      "persuasion": 0
+    },
+    "condition": null,
+    "potions": 2
+  },
+  "locationId": "home",
+  "world": {
+    "name": "The Morrow Reach",
+    "crisis": "Ashfall fever",
+    "locations": [
+      {
+        "id": "home",
+        "name": "Mossbell",
+        "type": "village",
+        "travelDays": 1,
+        "safety": 5,
+        "necromancyLaw": "regulated",
+        "description": "A small settlement of hearth fires, kitchen gardens, and familiar faces. Ashfall fever has reached its households; the old shrine is still a place to seek help. Ancestral rites require a witness or academy license; raising bodies and binding unwilling souls are prohibited. Households reached safety before the rupture destroyed their homes.",
+        "status": "destroyed",
+        "services": [
+          "hearth",
+          "shrine",
+          "market"
+        ],
+        "servicesAvailable": false
+      },
+      {
+        "id": "city",
+        "name": "Goldmere",
+        "type": "city",
+        "travelDays": 3,
+        "safety": 4,
+        "necromancyLaw": "forbidden",
+        "description": "The region’s busy city gathers an academy, a guild market, and a sworn order behind its stone walls. Fever wards are filling, and scholars disagree over the cause. Public necromantic practice is prohibited. Authorities require a witness or evidence before opening an investigation. The city survived with damaged wards and an urgent need for ordinary repairs.",
+        "status": "scarred",
+        "services": [
+          "academy",
+          "order",
+          "market",
+          "smith",
+          "hearth",
+          "mentor"
+        ],
+        "servicesAvailable": true
+      },
+      {
+        "id": "brook",
+        "name": "Reedcross",
+        "type": "village",
+        "travelDays": 2,
+        "safety": 4,
+        "necromancyLaw": "regulated",
+        "description": "A riverside village where millers, ferrymen, and herbalists trade news. Families are sheltering travelers fleeing Ashfall fever. Ancestral rites require a witness or academy license; raising bodies and binding unwilling souls are prohibited. The households reached the refugee camp before the surge. Buildings and the old mill were lost.",
+        "status": "destroyed",
+        "services": [
+          "hearth",
+          "herbalist",
+          "market"
+        ],
+        "servicesAvailable": false
+      },
+      {
+        "id": "forest",
+        "name": "The Copperwood",
+        "type": "forest",
+        "travelDays": 2,
+        "safety": 2,
+        "necromancyLaw": "regulated",
+        "description": "Old trails connect both villages beneath a canopy of moss and copper leaves. Healing herbs grow here, alongside hungry beasts and abandoned camps. The nearest settlement’s law governs witnessed acts.",
+        "status": "thriving",
+        "services": [
+          "guide",
+          "herbs"
+        ]
+      },
+      {
+        "id": "ruin",
+        "name": "Saint Orin’s Ruin",
+        "type": "ruin",
+        "travelDays": 4,
+        "safety": 1,
+        "necromancyLaw": "regulated",
+        "description": "An abandoned sanctuary beyond the forest holds sealed research and the memories of its former keepers. Licensed expeditions may study its ancestral records; disturbing remains without consent invites scrutiny.",
+        "status": "thriving",
+        "services": [
+          "archive"
+        ]
+      },
+      {
+        "id": "mountain",
+        "name": "The Stormward Peaks",
+        "type": "mountain",
+        "travelDays": 5,
+        "safety": 2,
+        "services": [
+          "guide",
+          "mine"
+        ],
+        "necromancyLaw": "regulated",
+        "status": "thriving",
+        "description": "Wind-carved passes and abandoned mines cross the northern mountains. Guides keep a refuge beneath the high stones."
+      },
+      {
+        "id": "marsh",
+        "name": "The Reedwaste",
+        "type": "marsh",
+        "travelDays": 4,
+        "safety": 2,
+        "services": [
+          "herbalist",
+          "guide"
+        ],
+        "necromancyLaw": "forbidden",
+        "status": "thriving",
+        "description": "Lanterns mark a boardwalk through deep reed beds. Apothecaries gather rare remedies beside drowned foundations."
+      },
+      {
+        "id": "coast",
+        "name": "Saltbell Harbor",
+        "type": "coast",
+        "travelDays": 4,
+        "safety": 4,
+        "services": [
+          "market",
+          "hearth",
+          "ferry"
+        ],
+        "necromancyLaw": "regulated",
+        "status": "thriving",
+        "description": "A harbor of salt-white sails, fisher families, and traders from distant provinces. New arrivals bring both opportunity and rumor."
+      },
+      {
+        "id": "tower",
+        "name": "The Moonward Spire",
+        "type": "tower",
+        "travelDays": 4,
+        "safety": 3,
+        "services": [
+          "academy",
+          "mentor",
+          "hearth"
+        ],
+        "necromancyLaw": "forbidden",
+        "status": "thriving",
+        "description": "A lonely observatory studies the stars and preserves knowledge beyond the city academy’s reach. Its keepers welcome careful learners."
+      },
+      {
+        "id": "camp",
+        "name": "The Wandering Hearth",
+        "type": "camp",
+        "travelDays": 2,
+        "safety": 4,
+        "services": [
+          "market",
+          "guide",
+          "hearth",
+          "mentor"
+        ],
+        "necromancyLaw": "permitted",
+        "status": "thriving",
+        "description": "Travelers, scouts, and craftspeople share a guarded camp. A meal and an honest story can earn a place by the communal fire. Shared kitchens, a meeting hearth, and timber dwellings turn temporary shelter into a permanent community.",
+        "servicesAvailable": true
+      },
+      {
+        "id": "gate",
+        "name": "The Dawn Gate",
+        "type": "gate",
+        "travelDays": 3,
+        "safety": 3,
+        "services": [
+          "order",
+          "guide"
+        ],
+        "necromancyLaw": "forbidden",
+        "status": "thriving",
+        "description": "An ancient gateway controls the road into the uplands. Watchers record travelers, while weathered carvings hint at older promises."
+      },
+      {
+        "id": "citadel",
+        "name": "The Bastion of Bells",
+        "type": "citadel",
+        "travelDays": 5,
+        "safety": 4,
+        "services": [
+          "order",
+          "market",
+          "smith",
+          "hearth",
+          "mentor"
+        ],
+        "necromancyLaw": "forbidden",
+        "status": "destroyed",
+        "description": "A fortified settlement overlooks the eastern roads. Orders and guilds offer an alternative to the city’s institutions. The covenant mechanism and its citadel were permanently destroyed. The voices it held are free.",
+        "servicesAvailable": false
+      },
+      {
+        "id": "sanctuary",
+        "name": "The Hearthward Sanctuary",
+        "type": "sanctuary",
+        "travelDays": 3,
+        "safety": 5,
+        "services": [
+          "academy",
+          "order",
+          "hearth",
+          "shrine",
+          "mentor"
+        ],
+        "necromancyLaw": "permitted",
+        "status": "thriving",
+        "description": "A protected sanctuary shelters displaced families and teachers. Its doors remain open when other institutions fall silent."
+      }
+    ],
+    "laws": "Local councils set their own rules. In Goldmere, necromancy is forbidden; in Mossbell, it is regulated; in Reedcross, it is regulated. Authorities act on witnesses, reports, and discovered evidence. Willing ancestral contact, grave theft, and unwilling soul binding are treated as different acts.",
+    "culture": "Families honor willing ancestors with named memorials; a person’s consent matters beyond death.",
+    "festival": {
+      "name": "The Hearthlight Gathering",
+      "day": 238,
+      "tradition": "Families share a public meal and leave a place for absent friends."
+    },
+    "rumors": [
+      "The academy in Goldmere is seeking careful field observers, not only wealthy students.",
+      "A moonwise ranger near The Copperwood can teach a refuge ritual without demanding allegiance.",
+      "Discreet physicians preserve ancestral knowledge despite the ban."
+    ],
+    "roads": [
+      {
+        "from": "home",
+        "to": "city",
+        "days": 2,
+        "danger": 2
+      },
+      {
+        "from": "home",
+        "to": "brook",
+        "days": 1,
+        "danger": 2
+      },
+      {
+        "from": "home",
+        "to": "forest",
+        "days": 1,
+        "danger": 4
+      },
+      {
+        "from": "brook",
+        "to": "forest",
+        "days": 2,
+        "danger": 4
+      },
+      {
+        "from": "forest",
+        "to": "ruin",
+        "days": 1,
+        "danger": 5
+      },
+      {
+        "from": "home",
+        "to": "camp",
+        "days": 3,
+        "danger": 2
+      },
+      {
+        "from": "camp",
+        "to": "sanctuary",
+        "days": 1,
+        "danger": 2
+      },
+      {
+        "from": "camp",
+        "to": "mountain",
+        "days": 3,
+        "danger": 4
+      },
+      {
+        "from": "mountain",
+        "to": "tower",
+        "days": 2,
+        "danger": 4
+      },
+      {
+        "from": "tower",
+        "to": "city",
+        "days": 1,
+        "danger": 3
+      },
+      {
+        "from": "tower",
+        "to": "gate",
+        "days": 1,
+        "danger": 3
+      },
+      {
+        "from": "city",
+        "to": "gate",
+        "days": 1,
+        "danger": 3
+      },
+      {
+        "from": "gate",
+        "to": "citadel",
+        "days": 2,
+        "danger": 3
+      },
+      {
+        "from": "citadel",
+        "to": "coast",
+        "days": 3,
+        "danger": 2
+      },
+      {
+        "from": "coast",
+        "to": "brook",
+        "days": 3,
+        "danger": 2
+      },
+      {
+        "from": "brook",
+        "to": "marsh",
+        "days": 1,
+        "danger": 4
+      },
+      {
+        "from": "marsh",
+        "to": "forest",
+        "days": 3,
+        "danger": 4
+      },
+      {
+        "from": "sanctuary",
+        "to": "ruin",
+        "days": 1,
+        "danger": 5
+      },
+      {
+        "from": "sanctuary",
+        "to": "home",
+        "days": 3,
+        "danger": 1
+      },
+      {
+        "from": "city",
+        "to": "citadel",
+        "days": 2,
+        "danger": 2
+      }
+    ],
+    "mentors": [
+      {
+        "id": "mentor-paladin",
+        "name": "Ser Rowan Bell",
+        "locationId": "city",
+        "specialization": "paladin",
+        "available": true,
+        "description": "A sworn protector offers training and an initiation founded on a visible oath of mercy and protection."
+      },
+      {
+        "id": "mentor-necromancer",
+        "name": "Physician Sable",
+        "locationId": "city",
+        "specialization": "necromancer",
+        "available": true,
+        "description": "A physician quietly teaches consensual ancestral rites and points promising students toward the ruined archive."
+      },
+      {
+        "id": "mentor-assassin",
+        "name": "The Grey Finch",
+        "locationId": "city",
+        "specialization": "assassin",
+        "available": true,
+        "description": "A discreet contact offers a test of stealth and judgment, with the terms disclosed before accepting."
+      }
+    ],
+    "routes": {
+      "paladin": {
+        "mentorId": "mentor-paladin",
+        "locationIds": [
+          "city",
+          "ruin"
+        ]
+      },
+      "necromancer": {
+        "mentorId": "mentor-necromancer",
+        "locationIds": [
+          "city",
+          "ruin"
+        ]
+      },
+      "assassin": {
+        "mentorId": "mentor-assassin",
+        "locationIds": [
+          "city",
+          "ruin"
+        ]
+      }
+    },
+    "changes": [
+      {
+        "id": "covenant-brook-destroyed-An empty village beneath the flood",
+        "day": 6664,
+        "locationId": "brook",
+        "title": "An empty village beneath the flood",
+        "text": "The households reached the refugee camp before the surge. Buildings and the old mill were lost."
+      },
+      {
+        "id": "covenant-camp-thriving-A camp becoming a town",
+        "day": 6670,
+        "locationId": "camp",
+        "title": "A camp becoming a town",
+        "text": "Shared kitchens, a meeting hearth, and timber dwellings turn temporary shelter into a permanent community."
+      },
+      {
+        "id": "covenant-citadel-destroyed-The anchor became a crater",
+        "day": 6725,
+        "locationId": "citadel",
+        "title": "The anchor became a crater",
+        "text": "The covenant mechanism and its citadel were permanently destroyed. The voices it held are free."
+      },
+      {
+        "id": "covenant-home-destroyed-The hearths that could not hold",
+        "day": 6725,
+        "locationId": "home",
+        "title": "The hearths that could not hold",
+        "text": "Households reached safety before the rupture destroyed their homes."
+      },
+      {
+        "id": "covenant-city-scarred-A city after the rupture",
+        "day": 6725,
+        "locationId": "city",
+        "title": "A city after the rupture",
+        "text": "The city survived with damaged wards and an urgent need for ordinary repairs."
+      }
+    ],
+    "map": {
+      "generationVersion": 3,
+      "width": 1000,
+      "height": 700,
+      "expanded": true,
+      "nodes": [
+        {
+          "id": "home",
+          "x": 378,
+          "y": 462
+        },
+        {
+          "id": "city",
+          "x": 580,
+          "y": 328
+        },
+        {
+          "id": "brook",
+          "x": 708,
+          "y": 470
+        },
+        {
+          "id": "forest",
+          "x": 491,
+          "y": 592
+        },
+        {
+          "id": "ruin",
+          "x": 279,
+          "y": 613
+        },
+        {
+          "id": "mountain",
+          "x": 189,
+          "y": 121
+        },
+        {
+          "id": "marsh",
+          "x": 805,
+          "y": 634
+        },
+        {
+          "id": "coast",
+          "x": 889,
+          "y": 370
+        },
+        {
+          "id": "tower",
+          "x": 432,
+          "y": 156
+        },
+        {
+          "id": "camp",
+          "x": 254,
+          "y": 329
+        },
+        {
+          "id": "gate",
+          "x": 620,
+          "y": 152
+        },
+        {
+          "id": "citadel",
+          "x": 776,
+          "y": 190
+        },
+        {
+          "id": "sanctuary",
+          "x": 104,
+          "y": 479
+        }
+      ],
+      "terrain": [
+        {
+          "id": "uplands",
+          "type": "mountain",
+          "label": "THE HIGH COUNTRY",
+          "points": [
+            [
+              38,
+              32
+            ],
+            [
+              641,
+              16
+            ],
+            [
+              693,
+              184
+            ],
+            [
+              383,
+              244
+            ],
+            [
+              172,
+              303
+            ],
+            [
+              44,
+              176
+            ]
+          ]
+        },
+        {
+          "id": "woodlands",
+          "type": "forest",
+          "label": "THE OLD WOODS",
+          "points": [
+            [
+              205,
+              473
+            ],
+            [
+              502,
+              404
+            ],
+            [
+              692,
+              491
+            ],
+            [
+              647,
+              672
+            ],
+            [
+              225,
+              673
+            ],
+            [
+              158,
+              609
+            ]
+          ]
+        },
+        {
+          "id": "reedbeds",
+          "type": "marsh",
+          "label": "THE LOW FENS",
+          "points": [
+            [
+              702,
+              467
+            ],
+            [
+              876,
+              466
+            ],
+            [
+              945,
+              708
+            ],
+            [
+              678,
+              690
+            ]
+          ]
+        },
+        {
+          "id": "sea",
+          "type": "water",
+          "label": "THE DAWN SEA",
+          "points": [
+            [
+              949,
+              3
+            ],
+            [
+              998,
+              -2
+            ],
+            [
+              985,
+              703
+            ],
+            [
+              945,
+              694
+            ],
+            [
+              930,
+              497
+            ],
+            [
+              937,
+              412
+            ],
+            [
+              915,
+              244
+            ]
+          ]
+        }
+      ],
+      "landmarks": [
+        {
+          "id": "tree-0",
+          "type": "tree",
+          "x": 565,
+          "y": 581,
+          "scale": 0.77
+        },
+        {
+          "id": "tree-1",
+          "type": "tree",
+          "x": 586,
+          "y": 602,
+          "scale": 0.86
+        },
+        {
+          "id": "tree-2",
+          "type": "tree",
+          "x": 246,
+          "y": 569,
+          "scale": 0.88
+        },
+        {
+          "id": "tree-3",
+          "type": "tree",
+          "x": 318,
+          "y": 472,
+          "scale": 1
+        },
+        {
+          "id": "tree-4",
+          "type": "tree",
+          "x": 552,
+          "y": 561,
+          "scale": 1.04
+        },
+        {
+          "id": "tree-5",
+          "type": "tree",
+          "x": 647,
+          "y": 610,
+          "scale": 0.73
+        },
+        {
+          "id": "tree-6",
+          "type": "tree",
+          "x": 383,
+          "y": 471,
+          "scale": 0.78
+        },
+        {
+          "id": "tree-7",
+          "type": "tree",
+          "x": 599,
+          "y": 520,
+          "scale": 0.76
+        },
+        {
+          "id": "tree-8",
+          "type": "tree",
+          "x": 342,
+          "y": 615,
+          "scale": 0.65
+        },
+        {
+          "id": "tree-9",
+          "type": "tree",
+          "x": 467,
+          "y": 566,
+          "scale": 0.99
+        },
+        {
+          "id": "tree-10",
+          "type": "tree",
+          "x": 514,
+          "y": 494,
+          "scale": 0.99
+        },
+        {
+          "id": "tree-11",
+          "type": "tree",
+          "x": 464,
+          "y": 578,
+          "scale": 0.8500000000000001
+        },
+        {
+          "id": "tree-12",
+          "type": "tree",
+          "x": 223,
+          "y": 492,
+          "scale": 0.76
+        },
+        {
+          "id": "tree-13",
+          "type": "tree",
+          "x": 517,
+          "y": 537,
+          "scale": 0.97
+        },
+        {
+          "id": "tree-14",
+          "type": "tree",
+          "x": 603,
+          "y": 603,
+          "scale": 0.8500000000000001
+        },
+        {
+          "id": "tree-15",
+          "type": "tree",
+          "x": 294,
+          "y": 476,
+          "scale": 1.01
+        },
+        {
+          "id": "tree-16",
+          "type": "tree",
+          "x": 332,
+          "y": 552,
+          "scale": 1
+        },
+        {
+          "id": "tree-17",
+          "type": "tree",
+          "x": 566,
+          "y": 482,
+          "scale": 0.66
+        },
+        {
+          "id": "tree-18",
+          "type": "tree",
+          "x": 340,
+          "y": 476,
+          "scale": 0.8500000000000001
+        },
+        {
+          "id": "tree-19",
+          "type": "tree",
+          "x": 332,
+          "y": 594,
+          "scale": 0.75
+        },
+        {
+          "id": "tree-20",
+          "type": "tree",
+          "x": 317,
+          "y": 534,
+          "scale": 0.91
+        },
+        {
+          "id": "tree-21",
+          "type": "tree",
+          "x": 576,
+          "y": 636,
+          "scale": 1.24
+        },
+        {
+          "id": "tree-22",
+          "type": "tree",
+          "x": 555,
+          "y": 475,
+          "scale": 0.97
+        },
+        {
+          "id": "tree-23",
+          "type": "tree",
+          "x": 301,
+          "y": 494,
+          "scale": 0.66
+        },
+        {
+          "id": "tree-24",
+          "type": "tree",
+          "x": 338,
+          "y": 532,
+          "scale": 1.09
+        },
+        {
+          "id": "peak-0",
+          "type": "peak",
+          "x": 234,
+          "y": 97,
+          "scale": 1.0499999999999998
+        },
+        {
+          "id": "peak-1",
+          "type": "peak",
+          "x": 453,
+          "y": 177,
+          "scale": 1.01
+        },
+        {
+          "id": "peak-2",
+          "type": "peak",
+          "x": 567,
+          "y": 74,
+          "scale": 0.83
+        },
+        {
+          "id": "peak-3",
+          "type": "peak",
+          "x": 419,
+          "y": 62,
+          "scale": 1.01
+        },
+        {
+          "id": "peak-4",
+          "type": "peak",
+          "x": 217,
+          "y": 161,
+          "scale": 1.24
+        },
+        {
+          "id": "peak-5",
+          "type": "peak",
+          "x": 312,
+          "y": 225,
+          "scale": 0.75
+        },
+        {
+          "id": "peak-6",
+          "type": "peak",
+          "x": 270,
+          "y": 49,
+          "scale": 1.04
+        },
+        {
+          "id": "peak-7",
+          "type": "peak",
+          "x": 128,
+          "y": 196,
+          "scale": 1.02
+        },
+        {
+          "id": "peak-8",
+          "type": "peak",
+          "x": 109,
+          "y": 112,
+          "scale": 1.23
+        },
+        {
+          "id": "peak-9",
+          "type": "peak",
+          "x": 125,
+          "y": 150,
+          "scale": 1.01
+        },
+        {
+          "id": "peak-10",
+          "type": "peak",
+          "x": 396,
+          "y": 127,
+          "scale": 1
+        },
+        {
+          "id": "peak-11",
+          "type": "peak",
+          "x": 443,
+          "y": 154,
+          "scale": 0.7
+        },
+        {
+          "id": "peak-12",
+          "type": "peak",
+          "x": 131,
+          "y": 81,
+          "scale": 0.86
+        }
+      ]
+    }
+  },
+  "companions": [
+    {
+      "id": "mira",
+      "name": "Mira",
+      "role": "warrior",
+      "goal": "Earn a place in the Lantern Order without abandoning old friends.",
+      "values": [
+        "Protect the vulnerable",
+        "Never bind an unwilling soul"
+      ],
+      "relationship": 32,
+      "memories": [
+        "At seven, you helped turn an accusation into cooperation.",
+        "We began traveling together after growing up as friends.",
+        "You trusted me with the original covenant evidence."
+      ],
+      "recruited": true,
+      "active": true,
+      "hp": 58,
+      "maxHp": 58,
+      "mp": 22,
+      "maxMp": 22,
+      "agility": 5,
+      "baseAge": 0,
+      "age": 18
+    },
+    {
+      "id": "orrin",
+      "name": "Orrin",
+      "role": "mage",
+      "goal": "Find a remedy for the fever and keep his family safe.",
+      "values": [
+        "Consent matters",
+        "Knowledge should heal"
+      ],
+      "relationship": 10,
+      "memories": [
+        "You invited me to travel as a healer, without asking me to forget my family."
+      ],
+      "recruited": true,
+      "active": true,
+      "hp": 43,
+      "maxHp": 43,
+      "mp": 38,
+      "maxMp": 38,
+      "agility": 4,
+      "baseAge": 1,
+      "age": 19
+    },
+    {
+      "id": "kest",
+      "name": "Kest",
+      "role": "rogue",
+      "goal": "Make the western road safe enough to visit a missing sibling.",
+      "values": [
+        "Keep your word",
+        "Do not prey on desperate families"
+      ],
+      "relationship": 20,
+      "memories": [
+        "You invited me onto the road while respecting my search for my sibling.",
+        "You respected my sibling’s fear while recovering the transport evidence."
+      ],
+      "recruited": true,
+      "active": true,
+      "hp": 48,
+      "maxHp": 48,
+      "mp": 24,
+      "maxMp": 24,
+      "agility": 8,
+      "baseAge": 2,
+      "age": 20
+    }
+  ],
+  "factions": {
+    "villagers": 29,
+    "academy": 0,
+    "order": 10,
+    "underworld": 0
+  },
+  "legal": {
+    "wanted": false,
+    "evidence": 0,
+    "description": "No local charges or known evidence.",
+    "incidents": []
+  },
+  "flags": {
+    "childhoodStage": 3,
+    "actionsTaken": 311,
+    "education": 0,
+    "clinicShifts": 0,
+    "training": 0,
+    "roadSafe": false,
+    "travelByNight": false,
+    "plagueStage": 0,
+    "childhoodFriend": true,
+    "scholarship": false,
+    "apprenticeship": false,
+    "childhoodMentor": true,
+    "ancestralMentor": false,
+    "hiddenPage": true,
+    "dungeonRecords": {
+      "cistern": {
+        "visited": [
+          "entry",
+          "sluice",
+          "cache",
+          "keeper",
+          "source"
+        ],
+        "cleared": [
+          "sluice",
+          "cache",
+          "keeper",
+          "source"
+        ],
+        "facts": {
+          "questId": "well",
+          "claimed_cache": true,
+          "discovery": true
+        },
+        "complete": true
+      },
+      "buried_archive": {
+        "visited": [
+          "entry",
+          "scriptoria",
+          "vault",
+          "archivist",
+          "seal"
+        ],
+        "cleared": [
+          "scriptoria",
+          "vault",
+          "archivist",
+          "seal"
+        ],
+        "facts": {
+          "questId": "ledger",
+          "peaceful_scriptoria": true,
+          "claimed_vault": true,
+          "discovery": true
+        },
+        "complete": true
+      },
+      "root_caverns": {
+        "visited": [
+          "entry",
+          "spoor",
+          "refuge",
+          "thornheart",
+          "spring"
+        ],
+        "cleared": [
+          "spoor",
+          "refuge",
+          "thornheart",
+          "spring"
+        ],
+        "facts": {
+          "questId": "orchard",
+          "peaceful_spoor": true,
+          "claimed_refuge": true,
+          "objectiveHerbs": true,
+          "discovery": true
+        },
+        "complete": true
+      },
+      "covenant_core": {
+        "visited": [
+          "entry",
+          "hall",
+          "library",
+          "warden",
+          "anchor"
+        ],
+        "cleared": [
+          "hall",
+          "library",
+          "warden",
+          "anchor"
+        ],
+        "facts": {
+          "questId": "descent",
+          "claimed_library": true,
+          "discovery": true
+        },
+        "complete": true
+      }
+    },
+    "battlesStarted": 7,
+    "lastResolvedBattle": "battle-the-broken-anchor-7",
+    "herbs": 5
+  },
+  "obligations": [],
+  "event": null,
+  "journal": [
+    {
+      "id": "entry-1",
+      "day": 0,
+      "age": 0,
+      "title": "A life begins at birth",
+      "text": "Aster is born in Mossbell. Household circumstances shape opportunities; no class has been chosen. Your guardians make the first decisions.",
+      "tag": "origin"
+    },
+    {
+      "id": "entry-2",
+      "day": 0,
+      "age": 0,
+      "title": "The arms that first held you",
+      "text": "Your guardians chose to try an unfamiliar path. Your vitality grew through care and experience.",
+      "tag": "childhood"
+    },
+    {
+      "id": "entry-3",
+      "day": 365,
+      "age": 1,
+      "title": "A first winter",
+      "text": "Your guardians chose to try an unfamiliar path. Your vitality grew through care and experience.",
+      "tag": "childhood"
+    },
+    {
+      "id": "entry-4",
+      "day": 730,
+      "age": 2,
+      "title": "The words you keep",
+      "text": "Your guardians chose to try an unfamiliar path. Your vitality grew through care and experience.",
+      "tag": "childhood"
+    },
+    {
+      "id": "entry-5",
+      "day": 1095,
+      "age": 3,
+      "title": "Beyond the garden gate",
+      "text": "You chose to try an unfamiliar path. You developed survival and weapons.",
+      "tag": "childhood"
+    },
+    {
+      "id": "entry-6",
+      "day": 1460,
+      "age": 4,
+      "title": "A little thing worth saving",
+      "text": "You chose to try an unfamiliar path. You developed survival and weapons.",
+      "tag": "childhood"
+    },
+    {
+      "id": "entry-7",
+      "day": 1460,
+      "age": 4,
+      "title": "The Rootremembered omen · age 4",
+      "text": "At four, roots curl around a forgotten grave without disturbing it. You hear a name that no one has spoken that morning.",
+      "tag": "fate"
+    },
+    {
+      "id": "entry-8",
+      "day": 1825,
+      "age": 5,
+      "title": "The light beneath the hill",
+      "text": "You chose to try an unfamiliar path. You developed survival and weapons.",
+      "tag": "childhood"
+    },
+    {
+      "id": "entry-9",
+      "day": 2190,
+      "age": 6,
+      "title": "A place at the school table",
+      "text": "You chose to try an unfamiliar path. You developed survival and weapons.",
+      "tag": "childhood"
+    },
+    {
+      "id": "entry-10",
+      "day": 2555,
+      "age": 7,
+      "title": "The missing silver charm",
+      "text": "You chose to try an unfamiliar path. You developed survival and weapons.",
+      "tag": "childhood"
+    },
+    {
+      "id": "entry-11",
+      "day": 2920,
+      "age": 8,
+      "title": "Orrin’s borrowed book",
+      "text": "You chose to try an unfamiliar path. You developed survival and weapons.",
+      "tag": "childhood"
+    },
+    {
+      "id": "entry-12",
+      "day": 3285,
+      "age": 9,
+      "title": "The bridge in the rain",
+      "text": "You chose to try an unfamiliar path. You developed survival and weapons.",
+      "tag": "childhood"
+    },
+    {
+      "id": "entry-13",
+      "day": 3650,
+      "age": 10,
+      "title": "A teacher asks what you want",
+      "text": "You chose to try an unfamiliar path. You developed stealth and survival.",
+      "tag": "childhood"
+    },
+    {
+      "id": "entry-14",
+      "day": 3650,
+      "age": 10,
+      "title": "The Rootremembered omen · age 10",
+      "text": "At ten, the storm exposes roots growing around an old marker. They trace a path away from the city and toward the sanctuary.",
+      "tag": "fate"
+    },
+    {
+      "id": "entry-15",
+      "day": 4015,
+      "age": 11,
+      "title": "The answer you could copy",
+      "text": "You chose to try an unfamiliar path. You developed survival and weapons.",
+      "tag": "childhood"
+    },
+    {
+      "id": "entry-16",
+      "day": 4380,
+      "age": 12,
+      "title": "An education with open doors",
+      "text": "You chose to try an unfamiliar path. You developed weapons and devotion.",
+      "tag": "childhood"
+    },
+    {
+      "id": "entry-17",
+      "day": 4745,
+      "age": 13,
+      "title": "The path through the brambles",
+      "text": "You chose to try an unfamiliar path. You developed survival and weapons.",
+      "tag": "childhood"
+    },
+    {
+      "id": "entry-18",
+      "day": 5110,
+      "age": 14,
+      "title": "The first road taken alone",
+      "text": "You chose to try an unfamiliar path. You developed survival and weapons.",
+      "tag": "childhood"
+    },
+    {
+      "id": "entry-19",
+      "day": 5475,
+      "age": 15,
+      "title": "A page the academy forbids",
+      "text": "You chose to try an unfamiliar path. You developed stealth and scholarship.",
+      "tag": "childhood"
+    },
+    {
+      "id": "entry-20",
+      "day": 5475,
+      "age": 15,
+      "title": "The Rootremembered omen · age 15",
+      "text": "At fifteen, a drawing in the hidden book shows a forest carrying memories that the city’s wards refuse to keep.",
+      "tag": "fate"
+    },
+    {
+      "id": "entry-21",
+      "day": 5840,
+      "age": 16,
+      "title": "Work with a name attached",
+      "text": "You chose to try an unfamiliar path. You developed survival and weapons.",
+      "tag": "childhood"
+    },
+    {
+      "id": "entry-22",
+      "day": 6205,
+      "age": 17,
+      "title": "The promise before leaving",
+      "text": "You chose to try an unfamiliar path. You developed survival and weapons.",
+      "tag": "childhood"
+    },
+    {
+      "id": "entry-23",
+      "day": 6570,
+      "age": 18,
+      "title": "A life you choose for yourself",
+      "text": "You chose to try an unfamiliar path. You developed survival and weapons.",
+      "tag": "birthday"
+    },
+    {
+      "id": "entry-24",
+      "day": 6573,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to The Wandering Hearth. 3 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-25",
+      "day": 6574,
+      "age": 18,
+      "title": "A guardian mentor",
+      "text": "Sable Reed agrees to teach you. Stand between danger and people who cannot withstand it. Initiation needs weapons 3, defense 3 and adulthood; supervised service can help you prepare.",
+      "tag": "calling"
+    },
+    {
+      "id": "entry-26",
+      "day": 6578,
+      "age": 18,
+      "title": "A discipline practiced",
+      "text": "Sable Reed sees you practice defense. It reaches 1; the lesson leaves your other learned skills intact.",
+      "tag": "calling"
+    },
+    {
+      "id": "entry-27",
+      "day": 6582,
+      "age": 18,
+      "title": "A discipline practiced",
+      "text": "Sable Reed sees you practice defense. It reaches 2; the lesson leaves your other learned skills intact.",
+      "tag": "calling"
+    },
+    {
+      "id": "entry-28",
+      "day": 6586,
+      "age": 18,
+      "title": "A discipline practiced",
+      "text": "Sable Reed sees you practice defense. It reaches 3; the lesson leaves your other learned skills intact.",
+      "tag": "calling"
+    },
+    {
+      "id": "entry-29",
+      "day": 6588,
+      "age": 18,
+      "title": "Earned calling: Guardian",
+      "text": "Sable Reed recognizes your guardian initiation. A wagon overturns during the evacuation drill. Hold the shield line while the apprentices carry an injured traveler clear. Intercept: brace with a stronger ward and protect the party. You now fight as a warrior; your earlier life remains your own.",
+      "tag": "calling"
+    },
+    {
+      "id": "entry-30",
+      "day": 6593,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to Goldmere. 5 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-31",
+      "day": 6593,
+      "age": 18,
+      "title": "A companion, not an equipment slot",
+      "text": "Mira joins your party. Their goals and values remain their own.",
+      "tag": "relationship"
+    },
+    {
+      "id": "entry-32",
+      "day": 6593,
+      "age": 18,
+      "title": "A companion, not an equipment slot",
+      "text": "Orrin joins your party. Their goals and values remain their own.",
+      "tag": "relationship"
+    },
+    {
+      "id": "entry-33",
+      "day": 6593,
+      "age": 18,
+      "title": "A companion, not an equipment slot",
+      "text": "Kest joins your party. Their goals and values remain their own.",
+      "tag": "relationship"
+    },
+    {
+      "id": "entry-34",
+      "day": 6593,
+      "age": 18,
+      "title": "A purchase for the road",
+      "text": "You purchased Iron longsword. Equip it in your inventory when no event or battle is pending.",
+      "tag": "equipment"
+    },
+    {
+      "id": "entry-35",
+      "day": 6597,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to The Reedwaste. 4 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-36",
+      "day": 6599,
+      "age": 18,
+      "title": "Beneath the familiar world",
+      "text": "You entered The Drowned Cistern. Its rooms and choices remain connected to the life above.",
+      "tag": "exploration"
+    },
+    {
+      "id": "entry-37",
+      "day": 6599,
+      "age": 18,
+      "title": "Ash beneath clean water",
+      "text": "Explore the old cistern and discover what is entering the water.",
+      "tag": "campaign"
+    },
+    {
+      "id": "entry-38",
+      "day": 6600,
+      "age": 18,
+      "title": "Experience becomes confidence",
+      "text": "You reached level 2. Your health and magical reserves grew.",
+      "tag": "progress"
+    },
+    {
+      "id": "entry-39",
+      "day": 6600,
+      "age": 18,
+      "title": "A battle returned to a life",
+      "text": "Victory earns 10 gold and 18 experience. Your remaining health, magic, and potions carry back into life.",
+      "tag": "combat"
+    },
+    {
+      "id": "entry-40",
+      "day": 6601,
+      "age": 18,
+      "title": "A cache recovered once",
+      "text": "You recovered 8 gold, 2 ore, 1 cloth from The pump workshop.",
+      "tag": "equipment"
+    },
+    {
+      "id": "entry-41",
+      "day": 6602,
+      "age": 18,
+      "title": "A battle returned to a life",
+      "text": "Victory earns 35 gold and 50 experience. Your remaining health, magic, and potions carry back into life.",
+      "tag": "combat"
+    },
+    {
+      "id": "entry-42",
+      "day": 6603,
+      "age": 18,
+      "title": "An expedition remembered",
+      "text": "The Drowned Cistern is complete. The discovery survives in your journal and can change the story above.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-43",
+      "day": 6603,
+      "age": 18,
+      "title": "Ash beneath clean water",
+      "text": "Completed at age 18. Next: Hear what a patient and their family want before choosing a remedy.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-44",
+      "day": 6605,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to Mossbell. 2 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-45",
+      "day": 6611,
+      "age": 18,
+      "title": "The patient’s own voice",
+      "text": "Completed at age 18. Next: Decide how to approach institutions that disagree about your findings.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-46",
+      "day": 6613,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to Goldmere. 2 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-47",
+      "day": 6615,
+      "age": 18,
+      "title": "A letter with two seals",
+      "text": "Completed at age 18. Next: Bring care home and decide who learns how it was obtained.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-48",
+      "day": 6617,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to Mossbell. 2 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-49",
+      "day": 6619,
+      "age": 18,
+      "title": "The homecoming account",
+      "text": "Completed at age 18. Next: Recover the original covenant records from the buried archive.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-50",
+      "day": 6621,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to Saint Orin’s Ruin. 2 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-51",
+      "day": 6623,
+      "age": 18,
+      "title": "Beneath the familiar world",
+      "text": "You entered The Buried Archive. Its rooms and choices remain connected to the life above.",
+      "tag": "exploration"
+    },
+    {
+      "id": "entry-52",
+      "day": 6623,
+      "age": 18,
+      "title": "The academy’s missing ledger",
+      "text": "Recover the original covenant records from the buried archive.",
+      "tag": "campaign"
+    },
+    {
+      "id": "entry-53",
+      "day": 6625,
+      "age": 18,
+      "title": "Another way through",
+      "text": "You earned peaceful passage through The silent scriptoria. There was no combat reward.",
+      "tag": "exploration"
+    },
+    {
+      "id": "entry-54",
+      "day": 6626,
+      "age": 18,
+      "title": "A cache recovered once",
+      "text": "You recovered 10 gold, 1 ore, 2 cloth from The record vault.",
+      "tag": "equipment"
+    },
+    {
+      "id": "entry-55",
+      "day": 6627,
+      "age": 18,
+      "title": "Experience becomes confidence",
+      "text": "You reached level 3. Your health and magical reserves grew.",
+      "tag": "progress"
+    },
+    {
+      "id": "entry-56",
+      "day": 6627,
+      "age": 18,
+      "title": "A battle returned to a life",
+      "text": "Victory earns 38 gold and 54 experience. Your remaining health, magic, and potions carry back into life.",
+      "tag": "combat"
+    },
+    {
+      "id": "entry-57",
+      "day": 6628,
+      "age": 18,
+      "title": "An expedition remembered",
+      "text": "The Buried Archive is complete. The discovery survives in your journal and can change the story above.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-58",
+      "day": 6628,
+      "age": 18,
+      "title": "The academy’s missing ledger",
+      "text": "Completed at age 18. Next: Choose what evidence to place before the Lantern investigators.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-59",
+      "day": 6632,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to Goldmere. 4 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-60",
+      "day": 6636,
+      "age": 18,
+      "title": "Mira’s difficult inquiry",
+      "text": "Completed at age 18. Next: Find what Kest’s missing sibling transported and who can testify.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-61",
+      "day": 6641,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to Saltbell Harbor. 5 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-62",
+      "day": 6643,
+      "age": 18,
+      "title": "The ferryman’s missing brother",
+      "text": "Completed at age 18. Next: Reconcile the oath, the conduit map, and the forest record.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-63",
+      "day": 6650,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to The Hearthward Sanctuary. 7 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-64",
+      "day": 6652,
+      "age": 18,
+      "title": "Three accounts of the first winter",
+      "text": "Completed at age 18. Next: Set the terms of your relationship with the academy’s patron.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-65",
+      "day": 6657,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to Goldmere. 5 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-66",
+      "day": 6659,
+      "age": 18,
+      "title": "The chancellor’s open hand",
+      "text": "Completed at age 18. Next: Choose whom the failing ward can protect and prepare for its collapse.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-67",
+      "day": 6662,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to Reedcross. 3 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-68",
+      "day": 6664,
+      "age": 18,
+      "title": "An empty village beneath the flood",
+      "text": "Reedcross: The households reached the refugee camp before the surge. Buildings and the old mill were lost.",
+      "tag": "world"
+    },
+    {
+      "id": "entry-69",
+      "day": 6664,
+      "age": 18,
+      "title": "People need another address",
+      "text": "Displaced households from Reedcross gather at The Wandering Hearth. The lost place remains on the map.",
+      "tag": "world"
+    },
+    {
+      "id": "entry-70",
+      "day": 6664,
+      "age": 18,
+      "title": "The cracked floodgate",
+      "text": "Completed at age 18. Next: Find a lasting place for displaced households.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-71",
+      "day": 6668,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to The Wandering Hearth. 4 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-72",
+      "day": 6670,
+      "age": 18,
+      "title": "A camp becoming a town",
+      "text": "The Wandering Hearth: Shared kitchens, a meeting hearth, and timber dwellings turn temporary shelter into a permanent community.",
+      "tag": "world"
+    },
+    {
+      "id": "entry-73",
+      "day": 6670,
+      "age": 18,
+      "title": "The empty seats at supper",
+      "text": "Completed at age 18. Next: Follow the roots into the place where discarded memories survive.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-74",
+      "day": 6673,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to The Copperwood. 3 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-75",
+      "day": 6675,
+      "age": 18,
+      "title": "Beneath the familiar world",
+      "text": "You entered The Moonroot Caverns. Its rooms and choices remain connected to the life above.",
+      "tag": "exploration"
+    },
+    {
+      "id": "entry-76",
+      "day": 6675,
+      "age": 18,
+      "title": "The orchard of names",
+      "text": "Follow the roots into the place where discarded memories survive.",
+      "tag": "campaign"
+    },
+    {
+      "id": "entry-77",
+      "day": 6677,
+      "age": 18,
+      "title": "Another way through",
+      "text": "You earned peaceful passage through The hunting den. There was no combat reward.",
+      "tag": "exploration"
+    },
+    {
+      "id": "entry-78",
+      "day": 6678,
+      "age": 18,
+      "title": "A cache recovered once",
+      "text": "You recovered 4 gold, 1 ore, 1 cloth, and 2 herbs from The old ranger’s refuge.",
+      "tag": "equipment"
+    },
+    {
+      "id": "entry-79",
+      "day": 6679,
+      "age": 18,
+      "title": "A battle returned to a life",
+      "text": "Victory earns 34 gold and 52 experience. Your remaining health, magic, and potions carry back into life.",
+      "tag": "combat"
+    },
+    {
+      "id": "entry-80",
+      "day": 6680,
+      "age": 18,
+      "title": "An expedition remembered",
+      "text": "The Moonroot Caverns is complete. The discovery survives in your journal and can change the story above.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-81",
+      "day": 6680,
+      "age": 18,
+      "title": "The orchard of names",
+      "text": "Completed at age 18. Next: Decide whether emergency protection justifies a new binding device.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-82",
+      "day": 6684,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to The Moonward Spire. 4 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-83",
+      "day": 6688,
+      "age": 18,
+      "title": "The second anchor",
+      "text": "Completed at age 18. Next: Decide who may speak for the living and the bound.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-84",
+      "day": 6689,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to Goldmere. 1 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-85",
+      "day": 6691,
+      "age": 18,
+      "title": "Who has a seat at the council?",
+      "text": "Completed at age 18. Next: Reach the original anchor and the First Keeper.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-86",
+      "day": 6693,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to The Bastion of Bells. 2 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-87",
+      "day": 6695,
+      "age": 18,
+      "title": "Beneath the familiar world",
+      "text": "You entered The Covenant Core. Its rooms and choices remain connected to the life above.",
+      "tag": "exploration"
+    },
+    {
+      "id": "entry-88",
+      "day": 6695,
+      "age": 18,
+      "title": "Beneath the sealed citadel",
+      "text": "Reach the original anchor and the First Keeper.",
+      "tag": "campaign"
+    },
+    {
+      "id": "entry-89",
+      "day": 6696,
+      "age": 18,
+      "title": "A battle returned to a life",
+      "text": "Victory earns 16 gold and 24 experience. Your remaining health, magic, and potions carry back into life.",
+      "tag": "combat"
+    },
+    {
+      "id": "entry-90",
+      "day": 6697,
+      "age": 18,
+      "title": "A cache recovered once",
+      "text": "You recovered 8 gold, 3 ore, 1 cloth from The covenant library.",
+      "tag": "equipment"
+    },
+    {
+      "id": "entry-91",
+      "day": 6698,
+      "age": 18,
+      "title": "Experience becomes confidence",
+      "text": "You reached level 4. Your health and magical reserves grew.",
+      "tag": "progress"
+    },
+    {
+      "id": "entry-92",
+      "day": 6698,
+      "age": 18,
+      "title": "A battle returned to a life",
+      "text": "Victory earns 45 gold and 64 experience. Your remaining health, magic, and potions carry back into life.",
+      "tag": "combat"
+    },
+    {
+      "id": "entry-93",
+      "day": 6699,
+      "age": 18,
+      "title": "An expedition remembered",
+      "text": "The Covenant Core is complete. The discovery survives in your journal and can change the story above.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-94",
+      "day": 6699,
+      "age": 18,
+      "title": "Beneath the sealed citadel",
+      "text": "Completed at age 18. Next: Hear the First Keeper’s wishes before proposing another bargain.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-95",
+      "day": 6705,
+      "age": 18,
+      "title": "A keeper is still a person",
+      "text": "Completed at age 18. Next: Choose a plan for the covenant, with its costs plainly stated.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-96",
+      "day": 6712,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to The Hearthward Sanctuary. 7 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-97",
+      "day": 6714,
+      "age": 18,
+      "title": "A promise made in public",
+      "text": "Completed at age 18. Next: Choose what you will protect if the old wards fail.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-98",
+      "day": 6717,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to Mossbell. 3 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-99",
+      "day": 6719,
+      "age": 18,
+      "title": "The work before the last night",
+      "text": "Completed at age 18. Next: Resolve the guardian’s challenge and carry out your prepared plan.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-100",
+      "day": 6723,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to The Bastion of Bells. 4 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-101",
+      "day": 6725,
+      "age": 18,
+      "title": "A battle returned to a life",
+      "text": "Victory earns 55 gold and 75 experience. Your remaining health, magic, and potions carry back into life.",
+      "tag": "combat"
+    },
+    {
+      "id": "entry-102",
+      "day": 6725,
+      "age": 18,
+      "title": "The anchor became a crater",
+      "text": "The Bastion of Bells: The covenant mechanism and its citadel were permanently destroyed. The voices it held are free.",
+      "tag": "world"
+    },
+    {
+      "id": "entry-103",
+      "day": 6725,
+      "age": 18,
+      "title": "The hearths that could not hold",
+      "text": "Mossbell: Households reached safety before the rupture destroyed their homes.",
+      "tag": "world"
+    },
+    {
+      "id": "entry-104",
+      "day": 6725,
+      "age": 18,
+      "title": "People need another address",
+      "text": "Displaced households from Mossbell gather at The Wandering Hearth. The lost place remains on the map.",
+      "tag": "world"
+    },
+    {
+      "id": "entry-105",
+      "day": 6725,
+      "age": 18,
+      "title": "A city after the rupture",
+      "text": "Goldmere: The city survived with damaged wards and an urgent need for ordinary repairs.",
+      "tag": "world"
+    },
+    {
+      "id": "entry-106",
+      "day": 6725,
+      "age": 18,
+      "title": "The Broken Anchor",
+      "text": "The mechanism is destroyed. Its captive voices are free, but the landscape and settlements bear a permanent wound. Survivors decide what can be rebuilt. Lasting losses or departures: Mossbell, Reedcross, The Bastion of Bells.",
+      "tag": "campaign"
+    },
+    {
+      "id": "entry-107",
+      "day": 6725,
+      "age": 18,
+      "title": "The last night of ash",
+      "text": "Completed at age 18. Next: Return to the places and people your decisions changed.",
+      "tag": "quest"
+    },
+    {
+      "id": "entry-108",
+      "day": 6729,
+      "age": 18,
+      "title": "A road taken",
+      "text": "The road brings you to Mossbell. 4 days elapsed on this journey.",
+      "tag": "travel"
+    },
+    {
+      "id": "entry-109",
+      "day": 6733,
+      "age": 18,
+      "title": "The morning belongs to the living",
+      "text": "Completed at age 18. The campaign is finished; your life continues.",
+      "tag": "quest"
+    }
+  ],
+  "battle": null,
+  "notice": "",
+  "chronicle": null,
+  "equipment": {
+    "owned": [
+      "iron_sword"
+    ],
+    "equipped": {
+      "weapon": "iron_sword",
+      "armor": null,
+      "trinket": null
+    },
+    "materials": {
+      "ore": 7,
+      "cloth": 5
+    }
+  },
+  "life": {
+    "focus": "livelihood",
+    "lifestyle": "frugal",
+    "happiness": 60,
+    "stress": 0,
+    "health": 100,
+    "career": {
+      "rank": 0,
+      "experience": 0
+    },
+    "home": {
+      "tier": "lodgings"
+    },
+    "people": [
+      {
+        "id": "kin",
+        "name": "Neris Thorne",
+        "role": "relative",
+        "baseAge": 27,
+        "age": 45,
+        "relation": "family",
+        "disposition": "kind",
+        "bond": 63,
+        "memories": [
+          "Our household was displaced from Mossbell.",
+          "After the covenant, you made time for the people who stayed."
+        ],
+        "knownFacts": [],
+        "locationId": "camp"
+      },
+      {
+        "id": "fellow",
+        "name": "Bram Vale",
+        "role": "friend",
+        "baseAge": 0,
+        "age": 18,
+        "relation": "friend",
+        "disposition": "kind",
+        "bond": 35,
+        "memories": [
+          "Our household was displaced from Mossbell."
+        ],
+        "knownFacts": [],
+        "locationId": "camp"
+      },
+      {
+        "id": "rival",
+        "name": "Avel Brindle",
+        "role": "rival",
+        "baseAge": 1,
+        "age": 19,
+        "relation": "rival",
+        "disposition": "driven",
+        "bond": 18,
+        "memories": [
+          "Our household was displaced from Mossbell."
+        ],
+        "knownFacts": [],
+        "locationId": "camp"
+      },
+      {
+        "id": "river",
+        "name": "Elowen Hearth",
+        "role": "friend",
+        "baseAge": 2,
+        "age": 20,
+        "relation": "acquaintance",
+        "disposition": "reserved",
+        "bond": 30,
+        "memories": [
+          "Our household was displaced from Mossbell."
+        ],
+        "knownFacts": [],
+        "locationId": "camp"
+      }
+    ],
+    "partnerId": null,
+    "courtshipId": null,
+    "children": [],
+    "goals": [],
+    "achievements": [],
+    "yearHistory": [],
+    "eventHistory": [],
+    "yearlyDecisions": [],
+    "pendingEvent": null,
+    "householdSupport": false,
+    "plan": null
+  },
+  "timeline": {
+    "mode": "birth",
+    "yearTarget": null,
+    "yearStartDay": 6570,
+    "yearHistory": [
+      {
+        "id": "birthday-0",
+        "age": 0,
+        "day": 0,
+        "title": "The arms that first held you",
+        "summary": "Your guardians chose to try an unfamiliar path. Your vitality grew through care and experience.",
+        "choice": "courage"
+      },
+      {
+        "id": "birthday-1",
+        "age": 1,
+        "day": 365,
+        "title": "A first winter",
+        "summary": "Your guardians chose to try an unfamiliar path. Your vitality grew through care and experience.",
+        "choice": "courage"
+      },
+      {
+        "id": "birthday-2",
+        "age": 2,
+        "day": 730,
+        "title": "The words you keep",
+        "summary": "Your guardians chose to try an unfamiliar path. Your vitality grew through care and experience.",
+        "choice": "courage"
+      },
+      {
+        "id": "birthday-3",
+        "age": 3,
+        "day": 1095,
+        "title": "Beyond the garden gate",
+        "summary": "You chose to try an unfamiliar path. You developed survival and weapons.",
+        "choice": "courage"
+      },
+      {
+        "id": "birthday-4",
+        "age": 4,
+        "day": 1460,
+        "title": "A little thing worth saving",
+        "summary": "You chose to try an unfamiliar path. You developed survival and weapons.",
+        "choice": "courage"
+      },
+      {
+        "id": "birthday-5",
+        "age": 5,
+        "day": 1825,
+        "title": "The light beneath the hill",
+        "summary": "You chose to try an unfamiliar path. You developed survival and weapons.",
+        "choice": "courage"
+      },
+      {
+        "id": "birthday-6",
+        "age": 6,
+        "day": 2190,
+        "title": "A place at the school table",
+        "summary": "You chose to try an unfamiliar path. You developed survival and weapons.",
+        "choice": "courage"
+      },
+      {
+        "id": "birthday-7",
+        "age": 7,
+        "day": 2555,
+        "title": "The missing silver charm",
+        "summary": "You chose to try an unfamiliar path. You developed survival and weapons.",
+        "choice": "courage"
+      },
+      {
+        "id": "birthday-8",
+        "age": 8,
+        "day": 2920,
+        "title": "Orrin’s borrowed book",
+        "summary": "You chose to try an unfamiliar path. You developed survival and weapons.",
+        "choice": "courage"
+      },
+      {
+        "id": "birthday-9",
+        "age": 9,
+        "day": 3285,
+        "title": "The bridge in the rain",
+        "summary": "You chose to try an unfamiliar path. You developed survival and weapons.",
+        "choice": "courage"
+      },
+      {
+        "id": "birthday-10",
+        "age": 10,
+        "day": 3650,
+        "title": "A teacher asks what you want",
+        "summary": "You chose to try an unfamiliar path. You developed stealth and survival.",
+        "choice": "courage"
+      },
+      {
+        "id": "birthday-11",
+        "age": 11,
+        "day": 4015,
+        "title": "The answer you could copy",
+        "summary": "You chose to try an unfamiliar path. You developed survival and weapons.",
+        "choice": "courage"
+      },
+      {
+        "id": "birthday-12",
+        "age": 12,
+        "day": 4380,
+        "title": "An education with open doors",
+        "summary": "You chose to try an unfamiliar path. You developed weapons and devotion.",
+        "choice": "courage"
+      },
+      {
+        "id": "birthday-13",
+        "age": 13,
+        "day": 4745,
+        "title": "The path through the brambles",
+        "summary": "You chose to try an unfamiliar path. You developed survival and weapons.",
+        "choice": "courage"
+      },
+      {
+        "id": "birthday-14",
+        "age": 14,
+        "day": 5110,
+        "title": "The first road taken alone",
+        "summary": "You chose to try an unfamiliar path. You developed survival and weapons.",
+        "choice": "courage"
+      },
+      {
+        "id": "birthday-15",
+        "age": 15,
+        "day": 5475,
+        "title": "A page the academy forbids",
+        "summary": "You chose to try an unfamiliar path. You developed stealth and scholarship.",
+        "choice": "courage"
+      },
+      {
+        "id": "birthday-16",
+        "age": 16,
+        "day": 5840,
+        "title": "Work with a name attached",
+        "summary": "You chose to try an unfamiliar path. You developed survival and weapons.",
+        "choice": "courage"
+      },
+      {
+        "id": "birthday-17",
+        "age": 17,
+        "day": 6205,
+        "title": "The promise before leaving",
+        "summary": "You chose to try an unfamiliar path. You developed survival and weapons.",
+        "choice": "courage"
+      },
+      {
+        "id": "birthday-18",
+        "age": 18,
+        "day": 6570,
+        "title": "A life you choose for yourself",
+        "summary": "You chose to try an unfamiliar path. You developed survival and weapons.",
+        "choice": "courage"
+      }
+    ],
+    "activityUses": {},
+    "childhoodFacts": {
+      "year_0": "try an unfamiliar path",
+      "year_1": "try an unfamiliar path",
+      "year_2": "try an unfamiliar path",
+      "year_3": "try an unfamiliar path",
+      "year_4": "try an unfamiliar path",
+      "year_5": "try an unfamiliar path",
+      "year_6": "try an unfamiliar path",
+      "year_7": "try an unfamiliar path",
+      "year_8": "try an unfamiliar path",
+      "year_9": "try an unfamiliar path",
+      "year_10": "try an unfamiliar path",
+      "year_11": "try an unfamiliar path",
+      "year_12": "try an unfamiliar path",
+      "year_13": "try an unfamiliar path",
+      "year_14": "try an unfamiliar path",
+      "year_15": "try an unfamiliar path",
+      "year_16": "try an unfamiliar path",
+      "year_17": "try an unfamiliar path",
+      "year_18": "try an unfamiliar path"
+    },
+    "journey": null,
+    "lastJourney": {
+      "route": [
+        "citadel",
+        "city",
+        "home"
+      ],
+      "day": 6729
+    }
+  },
+  "progression": {
+    "learnedClassIds": [
+      "guardian"
+    ],
+    "pendingCalling": null,
+    "mentors": {
+      "guardian": {
+        "id": "calling-mentor-guardian",
+        "name": "Sable Reed",
+        "locationId": "camp",
+        "met": true,
+        "lessons": 3
+      },
+      "berserker": {
+        "id": "calling-mentor-berserker",
+        "name": "Neris Bell",
+        "locationId": "mountain",
+        "met": false,
+        "lessons": 0
+      },
+      "knight": {
+        "id": "calling-mentor-knight",
+        "name": "Iona Fen",
+        "locationId": "citadel",
+        "met": false,
+        "lessons": 0
+      },
+      "paladin": {
+        "id": "calling-mentor-paladin",
+        "name": "Ser Rowan Bell",
+        "locationId": "city",
+        "met": false,
+        "lessons": 0
+      },
+      "healer": {
+        "id": "calling-mentor-healer",
+        "name": "Elowen Moss",
+        "locationId": "brook",
+        "met": false,
+        "lessons": 0
+      },
+      "elementalist": {
+        "id": "calling-mentor-elementalist",
+        "name": "Dame Corin",
+        "locationId": "tower",
+        "met": false,
+        "lessons": 0
+      },
+      "druid": {
+        "id": "calling-mentor-druid",
+        "name": "Hadrin Clay",
+        "locationId": "forest",
+        "met": false,
+        "lessons": 0
+      },
+      "necromancer": {
+        "id": "calling-mentor-necromancer",
+        "name": "Physician Sable",
+        "locationId": "ruin",
+        "met": false,
+        "lessons": 0
+      },
+      "thief": {
+        "id": "calling-mentor-thief",
+        "name": "Sorin Tide",
+        "locationId": "city",
+        "met": false,
+        "lessons": 0
+      },
+      "ranger": {
+        "id": "calling-mentor-ranger",
+        "name": "Vessa Wren",
+        "locationId": "forest",
+        "met": false,
+        "lessons": 0
+      },
+      "assassin": {
+        "id": "calling-mentor-assassin",
+        "name": "The Grey Finch",
+        "locationId": "city",
+        "met": false,
+        "lessons": 0
+      },
+      "bard": {
+        "id": "calling-mentor-bard",
+        "name": "Dara Flint",
+        "locationId": "coast",
+        "met": false,
+        "lessons": 0
+      }
+    }
+  },
+  "conversations": {
+    "threads": {
+      "kin": [
+        {
+          "id": "letter-1",
+          "speaker": "kin",
+          "text": "Neris Thorne keeps a small note for your future self: “At 0, you reached for the world in your own way. We are learning how to care for you.”",
+          "day": 0,
+          "age": 0
+        },
+        {
+          "id": "letter-2",
+          "speaker": "kin",
+          "text": "Neris Thorne keeps a small note for your future self: “At 1, you reached for the world in your own way. We are learning how to care for you.”",
+          "day": 365,
+          "age": 1
+        },
+        {
+          "id": "letter-3",
+          "speaker": "kin",
+          "text": "Neris Thorne keeps a small note for your future self: “At 2, you reached for the world in your own way. We are learning how to care for you.”",
+          "day": 730,
+          "age": 2
+        },
+        {
+          "id": "letter-4",
+          "speaker": "kin",
+          "text": "“Another birthday. I wonder what impossible kingdom we will draw this year.”",
+          "day": 1095,
+          "age": 3
+        },
+        {
+          "id": "letter-7",
+          "speaker": "kin",
+          "text": "“Another birthday. I wonder what impossible kingdom we will draw this year.”",
+          "day": 1460,
+          "age": 4
+        },
+        {
+          "id": "letter-10",
+          "speaker": "kin",
+          "text": "“Another birthday. I wonder what impossible kingdom we will draw this year.”",
+          "day": 1825,
+          "age": 5
+        },
+        {
+          "id": "letter-13",
+          "speaker": "kin",
+          "text": "“Happy birthday. Keep asking the questions you cannot find at the back of the schoolbook.”",
+          "day": 2190,
+          "age": 6
+        },
+        {
+          "id": "letter-17",
+          "speaker": "kin",
+          "text": "“Happy birthday. Keep asking the questions you cannot find at the back of the schoolbook.”",
+          "day": 2555,
+          "age": 7
+        },
+        {
+          "id": "letter-21",
+          "speaker": "kin",
+          "text": "“Happy birthday. Keep asking the questions you cannot find at the back of the schoolbook.”",
+          "day": 2920,
+          "age": 8
+        },
+        {
+          "id": "letter-25",
+          "speaker": "kin",
+          "text": "“Happy birthday. Keep asking the questions you cannot find at the back of the schoolbook.”",
+          "day": 3285,
+          "age": 9
+        },
+        {
+          "id": "letter-29",
+          "speaker": "kin",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 3650,
+          "age": 10
+        },
+        {
+          "id": "letter-33",
+          "speaker": "kin",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 4015,
+          "age": 11
+        },
+        {
+          "id": "letter-37",
+          "speaker": "kin",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 4380,
+          "age": 12
+        },
+        {
+          "id": "letter-41",
+          "speaker": "kin",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 4745,
+          "age": 13
+        },
+        {
+          "id": "letter-45",
+          "speaker": "kin",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 5110,
+          "age": 14
+        },
+        {
+          "id": "letter-49",
+          "speaker": "kin",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 5475,
+          "age": 15
+        },
+        {
+          "id": "letter-53",
+          "speaker": "kin",
+          "text": "“A new year of your life begins. Come sit with me when you can; I would like to hear what matters to you now.”",
+          "day": 5840,
+          "age": 16
+        },
+        {
+          "id": "letter-57",
+          "speaker": "kin",
+          "text": "“A new year of your life begins. Come sit with me when you can; I would like to hear what matters to you now.”",
+          "day": 6205,
+          "age": 17
+        },
+        {
+          "id": "letter-61",
+          "speaker": "kin",
+          "text": "“A new year of your life begins. Come sit with me when you can; I would like to hear what matters to you now.”",
+          "day": 6570,
+          "age": 18
+        }
+      ],
+      "fellow": [
+        {
+          "id": "letter-5",
+          "speaker": "fellow",
+          "text": "“Another birthday. I wonder what impossible kingdom we will draw this year.”",
+          "day": 1095,
+          "age": 3
+        },
+        {
+          "id": "letter-8",
+          "speaker": "fellow",
+          "text": "“Another birthday. I wonder what impossible kingdom we will draw this year.”",
+          "day": 1460,
+          "age": 4
+        },
+        {
+          "id": "letter-11",
+          "speaker": "fellow",
+          "text": "“Another birthday. I wonder what impossible kingdom we will draw this year.”",
+          "day": 1825,
+          "age": 5
+        },
+        {
+          "id": "letter-14",
+          "speaker": "fellow",
+          "text": "“Happy birthday. Keep asking the questions you cannot find at the back of the schoolbook.”",
+          "day": 2190,
+          "age": 6
+        },
+        {
+          "id": "letter-18",
+          "speaker": "fellow",
+          "text": "“Happy birthday. Keep asking the questions you cannot find at the back of the schoolbook.”",
+          "day": 2555,
+          "age": 7
+        },
+        {
+          "id": "letter-22",
+          "speaker": "fellow",
+          "text": "“Happy birthday. Keep asking the questions you cannot find at the back of the schoolbook.”",
+          "day": 2920,
+          "age": 8
+        },
+        {
+          "id": "letter-26",
+          "speaker": "fellow",
+          "text": "“Happy birthday. Keep asking the questions you cannot find at the back of the schoolbook.”",
+          "day": 3285,
+          "age": 9
+        },
+        {
+          "id": "letter-30",
+          "speaker": "fellow",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 3650,
+          "age": 10
+        },
+        {
+          "id": "letter-34",
+          "speaker": "fellow",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 4015,
+          "age": 11
+        },
+        {
+          "id": "letter-38",
+          "speaker": "fellow",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 4380,
+          "age": 12
+        },
+        {
+          "id": "letter-42",
+          "speaker": "fellow",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 4745,
+          "age": 13
+        },
+        {
+          "id": "letter-46",
+          "speaker": "fellow",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 5110,
+          "age": 14
+        },
+        {
+          "id": "letter-50",
+          "speaker": "fellow",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 5475,
+          "age": 15
+        },
+        {
+          "id": "letter-54",
+          "speaker": "fellow",
+          "text": "“A new year of your life begins. Come sit with me when you can; I would like to hear what matters to you now.”",
+          "day": 5840,
+          "age": 16
+        },
+        {
+          "id": "letter-58",
+          "speaker": "fellow",
+          "text": "“A new year of your life begins. Come sit with me when you can; I would like to hear what matters to you now.”",
+          "day": 6205,
+          "age": 17
+        },
+        {
+          "id": "letter-62",
+          "speaker": "fellow",
+          "text": "“A new year of your life begins. Come sit with me when you can; I would like to hear what matters to you now.”",
+          "day": 6570,
+          "age": 18
+        }
+      ],
+      "mira": [
+        {
+          "id": "letter-6",
+          "speaker": "mira",
+          "text": "“Another birthday. I wonder what impossible kingdom we will draw this year.”",
+          "day": 1095,
+          "age": 3
+        },
+        {
+          "id": "letter-9",
+          "speaker": "mira",
+          "text": "“Another birthday. I wonder what impossible kingdom we will draw this year.”",
+          "day": 1460,
+          "age": 4
+        },
+        {
+          "id": "letter-12",
+          "speaker": "mira",
+          "text": "“Another birthday. I wonder what impossible kingdom we will draw this year.”",
+          "day": 1825,
+          "age": 5
+        },
+        {
+          "id": "letter-16",
+          "speaker": "mira",
+          "text": "“Happy birthday. Keep asking the questions you cannot find at the back of the schoolbook.”",
+          "day": 2190,
+          "age": 6
+        },
+        {
+          "id": "letter-20",
+          "speaker": "mira",
+          "text": "“Happy birthday. Keep asking the questions you cannot find at the back of the schoolbook.”",
+          "day": 2555,
+          "age": 7
+        },
+        {
+          "id": "letter-24",
+          "speaker": "mira",
+          "text": "“Happy birthday. Keep asking the questions you cannot find at the back of the schoolbook.”",
+          "day": 2920,
+          "age": 8
+        },
+        {
+          "id": "letter-28",
+          "speaker": "mira",
+          "text": "“Happy birthday. Keep asking the questions you cannot find at the back of the schoolbook.”",
+          "day": 3285,
+          "age": 9
+        },
+        {
+          "id": "letter-32",
+          "speaker": "mira",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 3650,
+          "age": 10
+        },
+        {
+          "id": "letter-36",
+          "speaker": "mira",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 4015,
+          "age": 11
+        },
+        {
+          "id": "letter-40",
+          "speaker": "mira",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 4380,
+          "age": 12
+        },
+        {
+          "id": "letter-44",
+          "speaker": "mira",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 4745,
+          "age": 13
+        },
+        {
+          "id": "letter-48",
+          "speaker": "mira",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 5110,
+          "age": 14
+        },
+        {
+          "id": "letter-52",
+          "speaker": "mira",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 5475,
+          "age": 15
+        },
+        {
+          "id": "letter-56",
+          "speaker": "mira",
+          "text": "“I remember who you were, and I want to know who you are becoming. There is a place beside the hearth when you have time.”",
+          "day": 5840,
+          "age": 16
+        },
+        {
+          "id": "letter-60",
+          "speaker": "mira",
+          "text": "“I remember who you were, and I want to know who you are becoming. There is a place beside the hearth when you have time.”",
+          "day": 6205,
+          "age": 17
+        },
+        {
+          "id": "letter-64",
+          "speaker": "mira",
+          "text": "“I remember who you were, and I want to know who you are becoming. There is a place beside the hearth when you have time.”",
+          "day": 6570,
+          "age": 18
+        }
+      ],
+      "river": [
+        {
+          "id": "letter-15",
+          "speaker": "river",
+          "text": "“Happy birthday. Keep asking the questions you cannot find at the back of the schoolbook.”",
+          "day": 2190,
+          "age": 6
+        },
+        {
+          "id": "letter-19",
+          "speaker": "river",
+          "text": "“Happy birthday. Keep asking the questions you cannot find at the back of the schoolbook.”",
+          "day": 2555,
+          "age": 7
+        },
+        {
+          "id": "letter-23",
+          "speaker": "river",
+          "text": "“Happy birthday. Keep asking the questions you cannot find at the back of the schoolbook.”",
+          "day": 2920,
+          "age": 8
+        },
+        {
+          "id": "letter-27",
+          "speaker": "river",
+          "text": "“Happy birthday. Keep asking the questions you cannot find at the back of the schoolbook.”",
+          "day": 3285,
+          "age": 9
+        },
+        {
+          "id": "letter-31",
+          "speaker": "river",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 3650,
+          "age": 10
+        },
+        {
+          "id": "letter-35",
+          "speaker": "river",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 4015,
+          "age": 11
+        },
+        {
+          "id": "letter-39",
+          "speaker": "river",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 4380,
+          "age": 12
+        },
+        {
+          "id": "letter-43",
+          "speaker": "river",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 4745,
+          "age": 13
+        },
+        {
+          "id": "letter-47",
+          "speaker": "river",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 5110,
+          "age": 14
+        },
+        {
+          "id": "letter-51",
+          "speaker": "river",
+          "text": "“Another year, and no one can tell you exactly who you will become. I hope we keep making room for one another.”",
+          "day": 5475,
+          "age": 15
+        },
+        {
+          "id": "letter-55",
+          "speaker": "river",
+          "text": "“A new year of your life begins. Come sit with me when you can; I would like to hear what matters to you now.”",
+          "day": 5840,
+          "age": 16
+        },
+        {
+          "id": "letter-59",
+          "speaker": "river",
+          "text": "“A new year of your life begins. Come sit with me when you can; I would like to hear what matters to you now.”",
+          "day": 6205,
+          "age": 17
+        },
+        {
+          "id": "letter-63",
+          "speaker": "river",
+          "text": "“A new year of your life begins. Come sit with me when you can; I would like to hear what matters to you now.”",
+          "day": 6570,
+          "age": 18
+        }
+      ]
+    },
+    "seen": [
+      "kin:birthday-letter-0",
+      "kin:birthday-letter-1",
+      "kin:birthday-letter-2",
+      "kin:birthday-letter-3",
+      "fellow:birthday-letter-3",
+      "mira:birthday-letter-3",
+      "kin:birthday-letter-4",
+      "fellow:birthday-letter-4",
+      "mira:birthday-letter-4",
+      "kin:birthday-letter-5",
+      "fellow:birthday-letter-5",
+      "mira:birthday-letter-5",
+      "kin:birthday-letter-6",
+      "fellow:birthday-letter-6",
+      "river:birthday-letter-6",
+      "mira:birthday-letter-6",
+      "kin:birthday-letter-7",
+      "fellow:birthday-letter-7",
+      "river:birthday-letter-7",
+      "mira:birthday-letter-7",
+      "kin:birthday-letter-8",
+      "fellow:birthday-letter-8",
+      "river:birthday-letter-8",
+      "mira:birthday-letter-8",
+      "kin:birthday-letter-9",
+      "fellow:birthday-letter-9",
+      "river:birthday-letter-9",
+      "mira:birthday-letter-9",
+      "kin:birthday-letter-10",
+      "fellow:birthday-letter-10",
+      "river:birthday-letter-10",
+      "mira:birthday-letter-10",
+      "kin:birthday-letter-11",
+      "fellow:birthday-letter-11",
+      "river:birthday-letter-11",
+      "mira:birthday-letter-11",
+      "kin:birthday-letter-12",
+      "fellow:birthday-letter-12",
+      "river:birthday-letter-12",
+      "mira:birthday-letter-12",
+      "kin:birthday-letter-13",
+      "fellow:birthday-letter-13",
+      "river:birthday-letter-13",
+      "mira:birthday-letter-13",
+      "kin:birthday-letter-14",
+      "fellow:birthday-letter-14",
+      "river:birthday-letter-14",
+      "mira:birthday-letter-14",
+      "kin:birthday-letter-15",
+      "fellow:birthday-letter-15",
+      "river:birthday-letter-15",
+      "mira:birthday-letter-15",
+      "kin:birthday-letter-16",
+      "fellow:birthday-letter-16",
+      "river:birthday-letter-16",
+      "mira:birthday-letter-16",
+      "kin:birthday-letter-17",
+      "fellow:birthday-letter-17",
+      "river:birthday-letter-17",
+      "mira:birthday-letter-17",
+      "kin:birthday-letter-18",
+      "fellow:birthday-letter-18",
+      "river:birthday-letter-18",
+      "mira:birthday-letter-18"
+    ],
+    "pending": null,
+    "relationships": {},
+    "sequence": 64
+  },
+  "campaign": {
+    "fate": "thorn",
+    "act": 5,
+    "stage": "complete",
+    "facts": {
+      "clue4": true,
+      "clue10": true,
+      "clue15": true,
+      "dungeon_well": true,
+      "contaminationKnown": true,
+      "remedyMethod": "moonroot",
+      "patientConsent": true,
+      "firstSponsor": "order",
+      "publicAccount": "quiet",
+      "villageCaredFor": true,
+      "dungeon_ledger": true,
+      "originalLedger": true,
+      "covenantExposed": true,
+      "inquiryAccount": "record",
+      "transportProof": true,
+      "protectedWitness": true,
+      "consentTerms": true,
+      "powerConduits": true,
+      "forestMemory": true,
+      "recordAudience": "compare",
+      "patronAgreement": "independent",
+      "gateChoice": "evacuate",
+      "brookEvacuated": true,
+      "refugePlan": "camp",
+      "refugeeShelter": true,
+      "refugeReady": true,
+      "dungeon_orchard": true,
+      "ancestralNames": true,
+      "secondAnchor": "voluntary",
+      "voluntaryWard": true,
+      "councilChoice": "inclusive",
+      "councilCoalition": true,
+      "dungeon_descent": true,
+      "anchorReached": true,
+      "keeperTestimony": true,
+      "keeperHeard": "listen",
+      "allRoutesKnown": true,
+      "plannedEnding": "shatter",
+      "preparation": "evacuate",
+      "wardsReady": false,
+      "evacuationReady": true,
+      "guardianResolution": "battle",
+      "ancestorsReleased": true,
+      "anchorDestroyed": true,
+      "missingHouseholds": false,
+      "householdDisplaced": true,
+      "householdRefuge": "camp",
+      "afterwardPriority": "people"
+    },
+    "decisions": [
+      {
+        "questId": "patients",
+        "choiceId": "living",
+        "day": 6611
+      },
+      {
+        "questId": "letter",
+        "choiceId": "order",
+        "day": 6615
+      },
+      {
+        "questId": "return",
+        "choiceId": "quiet",
+        "day": 6619
+      },
+      {
+        "questId": "inquiry",
+        "choiceId": "record",
+        "day": 6636
+      },
+      {
+        "questId": "ferryman",
+        "choiceId": "protect",
+        "day": 6643
+      },
+      {
+        "questId": "accounts",
+        "choiceId": "compare",
+        "day": 6652
+      },
+      {
+        "questId": "patron",
+        "choiceId": "independent",
+        "day": 6659
+      },
+      {
+        "questId": "gate",
+        "choiceId": "evacuate",
+        "day": 6664
+      },
+      {
+        "questId": "refugees",
+        "choiceId": "camp",
+        "day": 6670
+      },
+      {
+        "questId": "anchor",
+        "choiceId": "voluntary",
+        "day": 6688
+      },
+      {
+        "questId": "council",
+        "choiceId": "inclusive",
+        "day": 6691
+      },
+      {
+        "questId": "keeper",
+        "choiceId": "listen",
+        "day": 6705
+      },
+      {
+        "questId": "pledge",
+        "choiceId": "shatter",
+        "day": 6714
+      },
+      {
+        "questId": "prepare",
+        "choiceId": "evacuate",
+        "day": 6719
+      },
+      {
+        "questId": "final",
+        "choiceId": "fight",
+        "day": 6725
+      },
+      {
+        "questId": "aftermath",
+        "choiceId": "people",
+        "day": 6733
+      }
+    ],
+    "completed": [
+      "well",
+      "patients",
+      "letter",
+      "return",
+      "ledger",
+      "inquiry",
+      "ferryman",
+      "accounts",
+      "patron",
+      "gate",
+      "refugees",
+      "orchard",
+      "anchor",
+      "council",
+      "descent",
+      "keeper",
+      "pledge",
+      "prepare",
+      "final",
+      "aftermath"
+    ],
+    "ending": {
+      "id": "shatter",
+      "title": "The Broken Anchor",
+      "summary": "The mechanism is destroyed. Its captive voices are free, but the landscape and settlements bear a permanent wound. Survivors decide what can be rebuilt. Lasting losses or departures: Mossbell, Reedcross, The Bastion of Bells.",
+      "day": 6725
+    },
+    "pending": null,
+    "sidequests": {},
+    "ageClues": [
+      4,
+      10,
+      15
+    ],
+    "followups": [],
+    "lastFollowupAge": 0
+  },
+  "dungeon": null
+}
