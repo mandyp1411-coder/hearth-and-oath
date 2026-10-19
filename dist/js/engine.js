@@ -817,7 +817,7 @@ function engineContext(state, { annual = false, resolvingNeed=null } = {}) {
     witnesses: () => witnesses(state),
     setEvent: (id, title, category, body, choices) => setEvent(state, id, title, category, body, choices),
     setResearchEvent: snapshot => { if (preserveResearchEvent(state,snapshot)) state.event=editionEvent(state,copy(snapshot)); },
-    afterAction: () => afterAction(state),
+    afterAction: () => { reconcile(state); },
     nextInterruptionDay: () => nextInterruptionDay(state),
     pendingNeed: () => pendingNeed(state),
     endLife: cause => endLife(state,cause),
@@ -898,8 +898,9 @@ function moonEvent(state) {
     ]);
 }
 
-function afterAction(state) {
-  if (terminalRun(state)) return copy(state);
+/** Reconcile the state in place after an action: derived records, pauses, notices. */
+function reconcile(state) {
+  if (terminalRun(state)) return state;
   refreshNarrativeRecords(state);
   respectPersonalBoundaries(state);
   initializeQuestJournal(state);
@@ -908,7 +909,7 @@ function afterAction(state) {
   settlePublicRoster(state);reconcileTournament(state);
   for(const r of Object.values(state.realm?.politics?.regions||{}))if(r.capitalId&&!state.cartography.sites[r.capitalId])markSiteKnowledge(state,r.capitalId,'Rumored','A regional capital printed on your atlas');
   for(const q of regionalQuestRows(state))if(q.locationId&&!state.cartography.sites[q.locationId])markSiteKnowledge(state,q.locationId,'Rumored','Your accepted regional quest');
-  if (state.phase === 'retired') return copy(state);
+  if (state.phase === 'retired') return state;
   const bloodPlan=state.hero.condition?.feedingPlan;
   if(bloodPlan&&state.hero.condition.hunger>=65&&!waiting(state)&&!state.justice?.prison&&!state.sanctuaries?.commitment){const id='sanctuary_feed_'+bloodPlan.agreementId,offer=sanctuaryActions(state).find(a=>a.id===id);if(offer&&!offer.disabledReason&&((nextInterruptionDay(state,{ignoreNeed:'vampire'})??state.day+2)>state.day)){applySanctuaryAction(state,id,engineContext(state,{annual:true,resolvingNeed:'vampire'}));if(state.phase==='retired')return copy(state);}else if(!offer||offer.disabledReason){state.hero.condition.feedingPlan=null;addJournal(state,'A standing agreement interrupted',offer?.disabledReason||'The agreed donor is no longer available. No fee or feeding was taken.','condition');}}
   if (state.workshop) refreshWorkshop(state, engineContext(state));
@@ -943,8 +944,10 @@ function afterAction(state) {
   reconcileTournament(state);
   if(state.event?.id.startsWith('birth_'))state.notice=observationalInfancy(state)?'Continue watching your early years when you are ready.':'Make your birthday choice before the year can continue.';
   refreshNarrativeRecords(state);
-  return copy(state);
+  return state;
 }
+/** Public-command tail: reconcile, then return a detached copy. */
+function afterAction(state) { return copy(reconcile(state)); }
 
 
 // Apply nature only to a committed choice, never a failed or disabled command.
@@ -2003,7 +2006,7 @@ function resumeRoad(state) {
   if (!j) return state;
   const ctx = engineContext(state, { annual: true });
   while (j.legIndex < j.route.length - 1 && !waiting(state)) {
-    if (pendingNeed(state)) { afterAction(state); break; }
+    if (pendingNeed(state)) { reconcile(state); break; }
     const from = j.route[j.legIndex], to = j.route[j.legIndex + 1];
     const road = state.world.roads.find(r => [r.from, r.to].includes(from) && [r.from, r.to].includes(to));
     const legIndex=j.legIndex, leg=j.legs?.[legIndex], totalDays=leg?.totalDays??road.days;
@@ -2026,7 +2029,7 @@ function resumeRoad(state) {
         addJournal(state, 'A road taken', state.notice, 'travel');
       }
     }
-    afterAction(state);
+    reconcile(state);
     if(j.energyVersion===1||actual===0&&j.legIndex===legIndex||!state.timeline.journey||waiting(state))break;
   }
   if(state.timeline.journey&&!waiting(state))state.notice=j.energyVersion===1?'You stop beside the trail. Continue walking, or make camp to recover Focus.':'Your journey pauses for a visible need. Resolve it, then continue the same road.';

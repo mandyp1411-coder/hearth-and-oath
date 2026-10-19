@@ -28,7 +28,10 @@ function populateContracts(s){
   for(const c of old)archiveContract(s,c);
   data.contracts=old.filter(c=>['active','ready'].includes(c.status)||c.season===season&&c.status==='offered');
   const archived=new Set((data.archive||[]).map(row=>row.id));
-  for(const place of s.world.locations.filter(p=>isSettlement(s.world,p.id))){
+  // Offered contracts are only ever persisted for the current settlement (see
+  // the filter below) and are seeded by place id, so generating the other
+  // boards here was pure waste: this runs after every action.
+  for(const place of s.world.locations.filter(p=>p.id===s.locationId&&isSettlement(s.world,p.id))){
     for(let slot=0;slot<3;slot++){
       const id=`contract-${place.id}-${season}-${slot}`;if(archived.has(id)||data.contracts.some(c=>c.id===id))continue;
       const f=CONTRACT_FLAVOR[seededRoll(s.seed,id+':flavor',CONTRACT_FLAVOR.length)],destinations=s.world.locations.filter(p=>p.id!==place.id),dest=destinations[seededRoll(s.seed,id+':destination',destinations.length)]||place;
