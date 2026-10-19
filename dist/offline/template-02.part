@@ -1,4 +1,10 @@
-ary:'A friend can encourage my plan without becoming its owner.',updates:['I want to choose my next piece of work before somebody chooses it for me.']},
+veteran and civilian watchkeeper',concern:'Work beyond the old company',ask:'What do you want the watch to protect now?',answer:'A bakery door that can shut at night. Wages people can claim without threatening a child. I have had enough standards to march behind.',share:'Tell me about work that left you tired in a good way. Mine has not always done that.',boundary:'A watch is a paid shift. It is not a private retinue.',updates:['The old token proves a wage claim. The paymaster’s child signed none of it.','The flour sack needs a guard who can leave when asked.','A room for mending straps would be more useful than another banner.','I want an inventory the claimants can inspect before anybody takes a share.','The drawing can stay by the chest. The contents still belong to the people named.','I can keep an ordinary door without becoming somebody’s standing army.']},
+ vesper:{role:'bard and keeper of competing verses',concern:'A song without an owner',ask:'Which verse should the audience hear?',answer:'Let them hear that there are two. Leave the family unnamed if they ask. A good ending does not need to win somebody else’s life.',share:'Sing me the wrong version you grew up with. I promise to ask before borrowing it.',boundary:'You can pay for a performance. You cannot buy the singer’s next answer.',updates:['A mother is named in the verse. I need her permission before I need applause.','The rival can sing. I would rather answer with a verse than a locked tavern.','A teaching room needs room for the version its keeper dislikes.','The family’s account does not fit the victory refrain. That is the refrain’s problem.','I want the notebook to keep the unfinished part too.','Someone else can finish the tune. Keeping it was never the same as owning it.']},
+});
+const companionRole=p=>COMPANION_IDENTITIES[p.id]?.role||({warrior:'protector',mage:'scholar',rogue:'scout',healer:'healer',bard:'bard'}[p.role]||p.role||'companion');
+const CORE_IDENTITIES={
+ kin:{concern:'Time beside your own life',ask:'What would you choose for an afternoon of your own?',answer:'A little room for my own work, and company that asks how it went. Raising you was part of my life. It was never all I was.',share:'Tell me the part of your day you would have told me when you were small.',boundary:'We can care for one another without choosing each other’s future.',updates:['I would like a conversation about something besides what either of us ought to do.']},
+ fellow:{concern:'A practice that bears my name',ask:'Which part of the work feels like yours?',answer:'The part I can explain without repeating somebody else’s answer. I want to get good enough to sign it, then have an evening left over.',share:'Tell me what you are still learning. I am tired of pretending everybody else is finished.',boundary:'A friend can encourage my plan without becoming its owner.',updates:['I want to choose my next piece of work before somebody chooses it for me.']},
  rival:{concern:'A name beside the evidence',ask:'What question are you trying to settle?',answer:'Which observation survives being checked. I can bear being wrong. I do not want my work disappearing beneath a more fashionable signature.',share:'Tell me where your own account might be wrong. I will try to offer the same courtesy.',boundary:'We can disagree and still keep both names on the page.',updates:['I want a record that can be argued with, and a name that stays beside it.']},
  river:{concern:'The future beyond this bank',ask:'What would you keep if your plans changed?',answer:'The right to change them. A familiar home can be dear to me without making every other road a betrayal.',share:'Tell me where you would like to live for a season. We need not make a promise of it.',boundary:'Affection can be welcome while a shared household is still an unanswered question.',updates:['I would like to talk about a possible future without having to promise it tonight.']},
 };
@@ -11508,7 +11514,10 @@ function populateContracts(s){
   for(const c of old)archiveContract(s,c);
   data.contracts=old.filter(c=>['active','ready'].includes(c.status)||c.season===season&&c.status==='offered');
   const archived=new Set((data.archive||[]).map(row=>row.id));
-  for(const place of s.world.locations.filter(p=>isSettlement(s.world,p.id))){
+  // Offered contracts are only ever persisted for the current settlement (see
+  // the filter below) and are seeded by place id, so generating the other
+  // boards here was pure waste: this runs after every action.
+  for(const place of s.world.locations.filter(p=>p.id===s.locationId&&isSettlement(s.world,p.id))){
     for(let slot=0;slot<3;slot++){
       const id=`contract-${place.id}-${season}-${slot}`;if(archived.has(id)||data.contracts.some(c=>c.id===id))continue;
       const f=CONTRACT_FLAVOR[seededRoll(s.seed,id+':flavor',CONTRACT_FLAVOR.length)],destinations=s.world.locations.filter(p=>p.id!==place.id),dest=destinations[seededRoll(s.seed,id+':destination',destinations.length)]||place;
@@ -14401,7 +14410,7 @@ function yardConversation(s,p){
 return {yardConversation,yardConversationEligible};
 })();
 const __birthday_correspondence = (() => {
-const {seededRoll} = __world;
+const {seededRoll, withArticle } = __world;
 const chapters=Object.freeze({
   infant:[
     'I am keeping this page for the day you are old enough to read it. There is no answer for you to give yet; being cared for is enough.',
@@ -14482,7 +14491,7 @@ function circumstanceLine(state,p,relation){
   if(state.life?.stress>=65)return 'If the days feel crowded, let this page wait. There is no deadline for a reply.';
   if(state.age<18&&state.education?.enrolled)return 'I hope your lessons leave you curious, and that someone makes time for the questions outside them.';
   if(p.locationId&&state.locationId&&p.locationId!==state.locationId)return 'Distance makes me glad of a page that can travel between us. Write when it suits you; I can be patient.';
-  if(family&&p.occupation&&p.occupation!=='schoolchild')return `My work as a ${p.occupation} gives me plenty to think about, but I wanted to make room for your birthday too.`;
+  if(family&&p.occupation&&p.occupation!=='schoolchild')return `My work as ${withArticle(p.occupation)} gives me plenty to think about, but I wanted to make room for your birthday too.`;
   if(p.disposition==='bold')return 'If you have a new idea, I hope you give yourself a fair chance to try it.';
   if(p.disposition==='reserved'||p.disposition==='quiet')return 'I am better with a few honest words than a grand speech. These will have to do for today.';
   return '';
@@ -22298,7 +22307,7 @@ function scene(state, pending) {
     lore: { title: 'An old mark on the roadside stone', body: `A weathered stone between ${from} and ${to} carries a local inscription. ${state.world.culture} You can record a piece of this region’s lived history; it does not establish a new universal law.`, choices: [choice('record', 'Record what the inscription actually says', 'Gain 1 scholarship the first time this road’s inscription is recorded. Add a lasting journal entry.'), choice('continue', 'Let the old stone keep its silence', 'Continue without a cost.')] },
   };
   const selected = data[pending.type];
-  if(pending.type==='weather'&&pending.account){const rough=/rain|snow|storm|fog|mist|wind|frost|ash|spore/i.test(pending.account.weather);selected.title=rough?'The weather on this stretch':'An exposed stretch of road';selected.body=`Between ${from} and ${to}, the road crosses an exposed bank. ${rough?`${pending.account.weather} limits the open crossing.`:`The air brings ${pending.account.weather}; the bank still gives little shelter.`} Waiting lets the party find a sheltered crossing. Pressing on costs bodily health; taking cover costs time.`;selected.choices[0]={...selected.choices[0],label:'Wait and find a sheltered crossing'};selected.choices[1]={...selected.choices[1],label:'Cross the exposed stretch now'};}
+  if(pending.type==='weather'&&pending.account){const rough=/rain|snow|storm|fog|mist|wind|frost|ash|spore/i.test(pending.account.weather),weather=String(pending.account.weather||''),Weather=weather.charAt(0).toUpperCase()+weather.slice(1),party=state.companions?.some(p=>p.recruited&&p.active&&p.alive!==false);selected.title=rough?'The weather on this stretch':'An exposed stretch of road';selected.body=`Between ${from} and ${to}, the road crosses an exposed bank. ${rough?`${Weather} limits the open crossing.`:`The air brings ${weather}; the bank still gives little shelter.`} Waiting lets ${party?'the party':'you'} find a sheltered crossing. Pressing on costs bodily health; taking cover costs time.`;selected.choices[0]={...selected.choices[0],label:'Wait and find a sheltered crossing'};selected.choices[1]={...selected.choices[1],label:'Cross the exposed stretch now'};}
   return { id: `travel_${pending.type}`, ...selected,body:pending.account?describeRoadAccount(pending.account,selected.body):selected.body, choices: selected.choices.filter(option => !['fight','extort','join','pocket'].includes(option.id) || state.age >= 16) };
 }
 
@@ -26620,7 +26629,7 @@ const { initializeCartography, syncCartography, inheritCartography, cartographyA
 const { culturalName } = __names;
 const { generateCharacter } = __characters;
 const { originById, MAX_START_AGE } = __origins;
-const { generateWorld, seededRoll, validateWorld, expandWorld, travelPreview, resolveBirthplace, generatePersonName, isSettlement, worldCalendarContext } = __world;
+const { generateWorld, seededRoll, validateWorld, expandWorld, travelPreview, resolveBirthplace, generatePersonName, isSettlement, worldCalendarContext, withArticle } = __world;
 const { createBattle, takeBattleAction, getBattleActions, combatProfile } = __combat;
 const { initializePersonality, initializePersonalityDecision, personalityActions, applyPersonalityAction, applyPersonalityChoice, personalityEventIds, applyPersonalityBuild, applyPersonalityImpact, personalitySelectionReason, personalityImpact, validatePersonality } = __personality;
 const { validateStartingAttributes } = __starting_attributes;
@@ -26732,9 +26741,12 @@ const setEvent = (state, id, title, category, body, choices) => {
   if(/(?:^|_)letter(?:$|_)/.test(id))receiveNotification(state,{kind:'letter',sourceId:'event-letter:'+id+':'+state.day,title:state.event.title.slice(0,160),body:state.event.body.slice(0,2400)});
   if(state.narrativeEdition===30&&state.timeline?.annualScene&&id==='birth_adult_year'){state.timeline.annualScene.title=state.event.title;state.timeline.annualScene.body=state.event.body;}
 };
+// Entries written by the current narrative edition are stamped so the edition
+// upgrade (narrative-edition.js) leaves their words alone. Only prose from
+// older saves lacks the stamp and is rewritten from its recorded facts.
 const addJournal = (state, title, text, tag = 'life', {literal=false,meta={}}={}) => {
   const format=literal?text=>String(text??''):text=>personalNames(state,text);
-  state.journal.push({ id: `entry-${state.journal.length + 1}`, day: state.day, age: state.age, title:format(title), text:format(text), tag,...meta,...(state.narrativeEdition===30&&(tag==='combat'||title==='A Trade Across the Counter')?{narrativeEdition:30}:{}), ...(state.revision>=5?{generation:state.dynasty?.generation||1}:{}) });
+  state.journal.push({ id: `entry-${state.journal.length + 1}`, day: state.day, age: state.age, title:format(title), text:format(text), tag,...meta,...(state.narrativeEdition===30?{narrativeEdition:30}:{}), ...(state.revision>=5?{generation:state.dynasty?.generation||1}:{}) });
 };
 const recordPlanGold = (state, before) => {
   if (!state.life?.plan) return;
@@ -27385,7 +27397,7 @@ function engineContext(state, { annual = false, resolvingNeed=null } = {}) {
     witnesses: () => witnesses(state),
     setEvent: (id, title, category, body, choices) => setEvent(state, id, title, category, body, choices),
     setResearchEvent: snapshot => { if (preserveResearchEvent(state,snapshot)) state.event=editionEvent(state,copy(snapshot)); },
-    afterAction: () => afterAction(state),
+    afterAction: () => { reconcile(state); },
     nextInterruptionDay: () => nextInterruptionDay(state),
     pendingNeed: () => pendingNeed(state),
     endLife: cause => endLife(state,cause),
@@ -27466,8 +27478,9 @@ function moonEvent(state) {
     ]);
 }
 
-function afterAction(state) {
-  if (terminalRun(state)) return copy(state);
+/** Reconcile the state in place after an action: derived records, pauses, notices. */
+function reconcile(state) {
+  if (terminalRun(state)) return state;
   refreshNarrativeRecords(state);
   respectPersonalBoundaries(state);
   initializeQuestJournal(state);
@@ -27476,7 +27489,7 @@ function afterAction(state) {
   settlePublicRoster(state);reconcileTournament(state);
   for(const r of Object.values(state.realm?.politics?.regions||{}))if(r.capitalId&&!state.cartography.sites[r.capitalId])markSiteKnowledge(state,r.capitalId,'Rumored','A regional capital printed on your atlas');
   for(const q of regionalQuestRows(state))if(q.locationId&&!state.cartography.sites[q.locationId])markSiteKnowledge(state,q.locationId,'Rumored','Your accepted regional quest');
-  if (state.phase === 'retired') return copy(state);
+  if (state.phase === 'retired') return state;
   const bloodPlan=state.hero.condition?.feedingPlan;
   if(bloodPlan&&state.hero.condition.hunger>=65&&!waiting(state)&&!state.justice?.prison&&!state.sanctuaries?.commitment){const id='sanctuary_feed_'+bloodPlan.agreementId,offer=sanctuaryActions(state).find(a=>a.id===id);if(offer&&!offer.disabledReason&&((nextInterruptionDay(state,{ignoreNeed:'vampire'})??state.day+2)>state.day)){applySanctuaryAction(state,id,engineContext(state,{annual:true,resolvingNeed:'vampire'}));if(state.phase==='retired')return copy(state);}else if(!offer||offer.disabledReason){state.hero.condition.feedingPlan=null;addJournal(state,'A standing agreement interrupted',offer?.disabledReason||'The agreed donor is no longer available. No fee or feeding was taken.','condition');}}
   if (state.workshop) refreshWorkshop(state, engineContext(state));
@@ -27511,8 +27524,10 @@ function afterAction(state) {
   reconcileTournament(state);
   if(state.event?.id.startsWith('birth_'))state.notice=observationalInfancy(state)?'Continue watching your early years when you are ready.':'Make your birthday choice before the year can continue.';
   refreshNarrativeRecords(state);
-  return copy(state);
+  return state;
 }
+/** Public-command tail: reconcile, then return a detached copy. */
+function afterAction(state) { return copy(reconcile(state)); }
 
 
 // Apply nature only to a committed choice, never a failed or disabled command.
@@ -28259,7 +28274,7 @@ function retire(state, reason='retirement') {
   const life = [
     `${hero.name}’s chronicle`,
     `Born in ${state.world.locations.find(p=>p.id===hero.birthplaceId)?.name || (hero.origin === 'city' ? city(state).name : home(state).name)} to a ${hero.household === 'poor' ? 'struggling' : hero.household === 'noble' ? 'noble' : 'working'} household, your childhood and education shaped a life of your own.`,
-    `At age ${state.age}, you closed this chapter as ${hero.profession === 'Unemployed' ? 'a person still free to find a calling' : `a ${hero.profession.toLowerCase()}`}${hero.specialization ? `, with the training of a ${hero.specialization}` : ''}. Your ambition was “${hero.ambition}.”`,
+    `At age ${state.age}, you closed this chapter as ${hero.profession === 'Unemployed' ? 'a person still free to find a calling' : `${withArticle(hero.profession.toLowerCase())}`}${hero.specialization ? `, with the training of a ${hero.specialization}` : ''}. Your ambition was “${hero.ambition}.”`,
   ];
   if (state.flags.villageSaved) life.push(`You helped ${home(state).name} survive Ashfall fever through ${state.flags.remedyMethod === 'ancestral' ? 'ancestral testimony' : 'careful moonroot fieldwork'}. ${state.flags.publicNecromancy ? 'The neighbors know how the cure was found.' : 'The public account leaves some of the method private.'}`);
   else life.push(`The region’s fever remained part of the world you lived in. You gave ${state.flags.clinicShifts} clinic shift${state.flags.clinicShifts === 1 ? '' : 's'} to its people.`);
@@ -28571,7 +28586,7 @@ function resumeRoad(state) {
   if (!j) return state;
   const ctx = engineContext(state, { annual: true });
   while (j.legIndex < j.route.length - 1 && !waiting(state)) {
-    if (pendingNeed(state)) { afterAction(state); break; }
+    if (pendingNeed(state)) { reconcile(state); break; }
     const from = j.route[j.legIndex], to = j.route[j.legIndex + 1];
     const road = state.world.roads.find(r => [r.from, r.to].includes(from) && [r.from, r.to].includes(to));
     const legIndex=j.legIndex, leg=j.legs?.[legIndex], totalDays=leg?.totalDays??road.days;
@@ -28594,7 +28609,7 @@ function resumeRoad(state) {
         addJournal(state, 'A road taken', state.notice, 'travel');
       }
     }
-    afterAction(state);
+    reconcile(state);
     if(j.energyVersion===1||actual===0&&j.legIndex===legIndex||!state.timeline.journey||waiting(state))break;
   }
   if(state.timeline.journey&&!waiting(state))state.notice=j.energyVersion===1?'You stop beside the trail. Continue walking, or make camp to recover Focus.':'Your journey pauses for a visible need. Resolve it, then continue the same road.';
@@ -30117,7 +30132,11 @@ function renderInbox(s,ui,{selectedId,soundEnabled=true,page=0}={}){
 }
 function renderNotificationToasts(rows,ui,{hidden=false}={}){
   const {e}=ui;
-  return `<aside class="notification-toast-stack" aria-label="New Notifications" aria-live="polite"${hidden?' inert aria-hidden="true"':''}>${rows.map(n=>`<article class="notification-toast"><button type="button" class="notification-toast-open" data-op="notification-toast-open" data-id="${e(n.id)}"><small>${names[n.kind]}</small><strong>${e(n.title)}</strong><span>${e(n.body.length>140?n.body.slice(0,137)+'…':n.body)}</span></button><button type="button" class="notification-dismiss" data-op="notice-dismiss" data-id="${e(n.id)}" aria-label="Dismiss ${e(n.title)}">×</button></article>`).join('')}</aside>`;
+  // One quiet corner card at a time. The rest are already waiting in the
+  // inbox; a short line says so instead of stacking cards over the page.
+  const shown=rows.slice(0,1),more=rows.length-shown.length;
+  const tail=more>0?`<p class="notification-toast-more"><button type="button" class="link-button" data-op="notifications">${more} more ${more===1?'notice':'notices'} in your inbox</button></p>`:'';
+  return `<aside class="notification-toast-stack" aria-label="New Notifications" aria-live="polite"${hidden?' inert aria-hidden="true"':''}>${shown.map(n=>`<article class="notification-toast"><button type="button" class="notification-toast-open" data-op="notification-toast-open" data-id="${e(n.id)}"><small>${names[n.kind]}</small><strong>${e(n.title)}</strong><span>${e(n.body.length>140?n.body.slice(0,137)+'…':n.body)}</span></button><button type="button" class="notification-dismiss" data-op="notice-dismiss" data-id="${e(n.id)}" aria-label="Dismiss ${e(n.title)}">×</button></article>`).join('')}${tail}</aside>`;
 }
 
 return {renderInbox,renderNotificationToasts};
@@ -33725,6 +33744,170 @@ function createSaveStore(storage, validate = value => value, options = {}) {
 
 return {LEGACY_SAVE_KEY,SAVE_SLOT_COUNT,createSaveCoordinator,createSaveStore};
 })();
+const __save_storage = (() => {
+// Durable save storage without the localStorage quota.
+//
+// The save store (saves.js) and the Ironman store expect a synchronous
+// `Storage`-shaped object: getItem / setItem / removeItem / key / length.
+// localStorage gives that, but with a ~5 MB per-origin ceiling that a long
+// life exceeds. This module provides the same interface backed by an
+// in-memory cache that is flushed, write by write and in order, to an
+// IndexedDB object store, which browsers size in hundreds of megabytes.
+//
+// `openSaveStorage()` loads the cache once before the app module runs. When
+// IndexedDB is unavailable (private windows in some browsers, file: URLs,
+// blocked storage) it returns localStorage, and when even that is blocked it
+// returns null, which the app already treats as "storage unavailable".
+//
+// First run on a browser that already holds localStorage saves: every
+// `hearth-and-oath:` key is copied into IndexedDB once, then localStorage
+// keeps a shrinking mirror only of the small settings keys. The large
+// save keys are removed from localStorage after the copy so the quota is
+// freed, and they are never written there again.
+//
+// Cross-tab coordination: writes to any key are announced on a
+// BroadcastChannel, and listeners registered through `onChange` receive
+// `{key, oldValue, newValue}` the way a `storage` event would.
+
+const DB_NAME = 'hearth-and-oath';
+const DB_VERSION = 1;
+const STORE = 'keyvalue';
+const CHANNEL = 'hearth-and-oath:storage';
+const OWNED_PREFIX = 'hearth-and-oath:';
+
+const idb = () => { try { return globalThis.indexedDB || null; } catch { return null; } };
+
+function openDatabase() {
+  return new Promise((resolve, reject) => {
+    const factory = idb();
+    if (!factory) { reject(new Error('IndexedDB unavailable')); return; }
+    let request;
+    try { request = factory.open(DB_NAME, DB_VERSION); } catch (error) { reject(error); return; }
+    request.onupgradeneeded = () => { const db = request.result; if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE); };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error('IndexedDB open failed'));
+    request.onblocked = () => reject(new Error('IndexedDB open blocked'));
+  });
+}
+
+function readAll(db) {
+  return new Promise((resolve, reject) => {
+    const entries = new Map();
+    let request;
+    try { request = db.transaction(STORE, 'readonly').objectStore(STORE).openCursor(); } catch (error) { reject(error); return; }
+    request.onsuccess = () => {
+      const cursor = request.result;
+      if (!cursor) { resolve(entries); return; }
+      if (typeof cursor.key === 'string' && typeof cursor.value === 'string') entries.set(cursor.key, cursor.value);
+      cursor.continue();
+    };
+    request.onerror = () => reject(request.error || new Error('IndexedDB read failed'));
+  });
+}
+
+function writeBatch(db, operations) {
+  return new Promise((resolve, reject) => {
+    let tx;
+    try { tx = db.transaction(STORE, 'readwrite'); } catch (error) { reject(error); return; }
+    const store = tx.objectStore(STORE);
+    for (const [key, value] of operations) { if (value === null) store.delete(key); else store.put(value, key); }
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error || new Error('IndexedDB write failed'));
+    tx.onabort = () => reject(tx.error || new Error('IndexedDB write aborted'));
+  });
+}
+
+/** A synchronous Storage facade over a cache, flushed in order to IndexedDB. */
+function createCachedStorage(db, initial = new Map(), { channel = null, onFlushError = () => {} } = {}) {
+  const cache = new Map(initial);
+  const listeners = new Set();
+  let queue = [];
+  let flushing = null;
+  let failed = false;
+  function schedule() {
+    if (flushing || !queue.length) return;
+    const batch = queue; queue = [];
+    flushing = writeBatch(db, batch).catch(error => { failed = true; onFlushError(error); }).then(() => { flushing = null; schedule(); });
+  }
+  function announce(key, oldValue, newValue) {
+    const event = { key, oldValue, newValue };
+    try { channel?.postMessage(event); } catch { /* Announcements are best effort. */ }
+  }
+  const storage = {
+    get length() { return cache.size; },
+    key(index) { return [...cache.keys()][index] ?? null; },
+    getItem(key) { return cache.has(String(key)) ? cache.get(String(key)) : null; },
+    setItem(key, value) {
+      if (failed) throw new Error('Save storage is no longer writable');
+      const k = String(key), v = String(value), old = cache.has(k) ? cache.get(k) : null;
+      cache.set(k, v); queue.push([k, v]); schedule(); announce(k, old, v);
+    },
+    removeItem(key) {
+      const k = String(key);
+      if (!cache.has(k)) return;
+      const old = cache.get(k);
+      cache.delete(k); queue.push([k, null]); schedule(); announce(k, old, null);
+    },
+    clear() { for (const key of [...cache.keys()]) storage.removeItem(key); },
+    /** Resolves once every write issued so far has reached the database. */
+    flushed() { return (flushing || Promise.resolve()).then(() => (queue.length || flushing ? storage.flushed() : undefined)); },
+    /** Receive changes made in other tabs, shaped like a `storage` event. */
+    onChange(listener) { listeners.add(listener); return () => listeners.delete(listener); },
+    /** True when a write to the database has failed; the cache is still live. */
+    get degraded() { return failed; },
+    backend: 'indexeddb',
+  };
+  if (channel) {
+    channel.onmessage = message => {
+      const event = message?.data;
+      if (!event || typeof event.key !== 'string') return;
+      if (event.newValue === null) cache.delete(event.key); else cache.set(event.key, event.newValue);
+      for (const listener of listeners) { try { listener(event); } catch { /* One listener must not block the rest. */ } }
+    };
+  }
+  return storage;
+}
+
+const SETTINGS_KEYS = ['hearth-and-oath:audio', 'hearth-and-oath:display'];
+
+/** Copy existing localStorage saves into the database once; free the quota. */
+async function migrateFromLocalStorage(db, cache, local) {
+  if (!local) return;
+  const moved = [];
+  let keys = [];
+  try { for (let i = 0; i < local.length; i++) { const key = local.key(i); if (key && key.startsWith(OWNED_PREFIX)) keys.push(key); } } catch { return; }
+  for (const key of keys) {
+    if (cache.has(key)) continue;
+    let value = null;
+    try { value = local.getItem(key); } catch { continue; }
+    if (typeof value !== 'string') continue;
+    cache.set(key, value); moved.push([key, value]);
+  }
+  if (moved.length) await writeBatch(db, moved);
+  // Settings stay mirrored in localStorage for the audio/display modules.
+  for (const [key] of moved) { if (!SETTINGS_KEYS.includes(key)) { try { local.removeItem(key); } catch { /* Quota freeing is best effort. */ } } }
+}
+
+/**
+ * Open the durable storage used for saves. Returns a synchronous Storage
+ * facade (IndexedDB-backed), or localStorage when IndexedDB is unavailable,
+ * or null when nothing can be used.
+ */
+async function openSaveStorage({ local = (() => { try { return globalThis.localStorage; } catch { return null; } })(), timeoutMs = 4000 } = {}) {
+  let db;
+  try {
+    db = await Promise.race([openDatabase(), new Promise((_, reject) => setTimeout(() => reject(new Error('IndexedDB open timed out')), timeoutMs))]);
+  } catch { return local ?? null; }
+  let cache;
+  try { cache = await readAll(db); } catch { try { db.close(); } catch {} return local ?? null; }
+  try { await migrateFromLocalStorage(db, cache, local); } catch { /* A failed copy leaves localStorage intact. */ }
+  let channel = null;
+  try { channel = typeof BroadcastChannel === 'function' ? new BroadcastChannel(CHANNEL) : null; } catch { channel = null; }
+  return createCachedStorage(db, cache, { channel, onFlushError: error => console.error('Hearth & Oath: a save could not be written to the database.', error) });
+}
+
+return {createCachedStorage,openSaveStorage};
+})();
 const __ironman_session = (() => {
 const { isIronman, validateIronman, ironmanHeroDeath } = __ironman;
 const { validIronmanRunId } = __ironman_storage;
@@ -34243,7 +34426,7 @@ function sanctuaryPanel(s,ui,scope='all') {
 
 return {adoptionPanel,commitmentPanel,communityPanel,compatibilityPanel,fellowshipPanel,sanctuaryPanel,schoolDepthPanel,societyPanel};
 })();
-(() => {
+await (async () => {
 const {MAX_SAVE_FILE_BYTES} = __save_limits;
 const { beginUiMeasure } = __ui_metrics;
 const { routineOffers, routineReview, executeRoutine } = __routine_planner;
@@ -34374,6 +34557,7 @@ const { travelPlanPreview, travelEncounterPerson } = __travel;
 const { getAudioSettings, setSoundEnabled, setSoundVolume, playUISound, setMusicEnabled, setMusicVolume, setAudioScene, audioSceneFor, unlockAudio } = __audio;
 const { renderCharacterCreator, captureCreatorDraft, randomizeCreatorDraft, defaultCreatorDraft, creatorStepTitles, selectCreatorPortrait, selectCreatorHeritage, rollCreatorName, toggleCreatorTrait, adjustCreatorAttribute, selectCreatorOrigin, normalizeCreatorDraft, randomizeCreatorPortrait, toggleCreatorLock, creatorDependencyChanges } = __creator;
 const { createSaveStore, createSaveCoordinator } = __saves;
+const { openSaveStorage } = __save_storage;
 const { createIronmanSession } = __ironman_session;
 const { isIronman, createIronmanMetadata } = __ironman;
 const { isIronmanStorageKey, IRONMAN_RECORD_PREFIX, IRONMAN_ENDED_PREFIX, validIronmanRunId } = __ironman_storage;
@@ -34427,7 +34611,11 @@ const sceneReturnReaders={services:settlementServices,people:nearbyContacts};
 let shopSession=null,mapLife=null,renderedModal=null;
 const mapCamera=installMapCamera(root,{zoom:zoomChart,home:()=>zoomChart('home'),cancelInspection:()=>clearTimeout(spatialClickTimer)});
 let screen = 'title', slotsMode = 'load', overwriteSlot = null, entryNotice = '';
-let storage; try { storage = globalThis.localStorage; } catch { storage = null; }
+// Saves live in IndexedDB (no localStorage quota) behind a synchronous facade;
+// localStorage remains the fallback. The module waits for it to load before
+// anything reads a save. The boot guard in index.html waits for the same.
+const storage = await openSaveStorage();
+if(storage?.onChange)storage.onChange(event=>window.dispatchEvent(new StorageEvent('storage',{key:event.key,oldValue:event.oldValue,newValue:event.newValue})));
 let displaySettings=readDisplay(storage);applyDisplay(displaySettings);
 const saveStore = createSaveStore(storage, migrateSave);
 let activeSlot = saveStore.active();
@@ -34807,7 +34995,7 @@ const navigationGroups=[
 function groupedNavigation(){return navigationGroups.map(([name,rows])=>`<details class="navigation-group" open><summary>${e(name)}</summary>${rows.map(([id,label])=>`<button type="button" class="nav-item ${tab===id?'active':''}" data-op="tab" data-id="${id}" ${tab===id?'aria-current="page"':''}>${uiIcon(id)}<span>${e(label)}</span></button>`).join('')}</details>`).join('');}
 function sidebar() {
  const main=navigationGroups[0][1];
- return `<aside class="sidebar game-rail"><button class="brand" type="button" data-op="menu" aria-label="Open game menu"><span class="brand-title">Hearth &amp; Oath</span><small>VOLUME I</small></button><nav aria-label="Main views">${main.map(([id,label])=>`<button type="button" class="nav-item ${tab===id?'active':''}" data-op="tab" data-id="${id}" aria-label="${label}" title="${label}" ${tab===id?'aria-current="page"':''}>${uiIcon(id)}<span>${label}</span></button>`).join('')}</nav><div class="rail-footer">${button('Character','tab','character','ghost small')}${button('Party','tab','party','ghost small')}${button('Main Menu','title-menu','','ghost small')}${button('Settings','game-settings','','ghost small')}<small>v0.59.0</small></div></aside>`;
+ return `<aside class="sidebar game-rail"><button class="brand" type="button" data-op="menu" aria-label="Open game menu"><span class="brand-title">Hearth &amp; Oath</span><small>VOLUME I</small></button><nav aria-label="Main views">${main.map(([id,label])=>`<button type="button" class="nav-item ${tab===id?'active':''}" data-op="tab" data-id="${id}" aria-label="${label}" title="${label}" ${tab===id?'aria-current="page"':''}>${uiIcon(id)}<span>${label}</span></button>`).join('')}</nav><div class="rail-footer">${button('Character','tab','character','ghost small')}${button('Party','tab','party','ghost small')}${button('Main Menu','title-menu','','ghost small')}${button('Settings','game-settings','','ghost small')}<small>v0.60.0</small></div></aside>`;
 }
 function ageControlState() {
   let reason='';
@@ -34841,9 +35029,11 @@ function ageButton(cls='') {
 function bottomNav() {
   if(!game)return '';
   const mobileTabs=navigationGroups[0][1];
-  return `<div class="mobile-command-dock"><nav class="bottom-nav" aria-label="Mobile main views">${mobileTabs.map(([id,label])=>`<button type="button" data-op="tab" data-id="${id}" class="${tab===id?'active':''}" ${tab===id?'aria-current="page"':''}>${uiIcon(id)}<span>${label}</span></button>`).join('')}<button type="button" data-op="menu" data-id="nav" aria-label="Open game menu" aria-expanded="${modal==='menu'}" aria-controls="menu-drawer">${uiIcon('menu')}<span>Menu</span></button></nav></div>`;
+  // Short visible labels for a 7-button phone bar; the full name stays the accessible name.
+  const MOBILE_TAB_LABELS={relationships:'People',activities:'Activity'};
+  return `<div class="mobile-command-dock"><nav class="bottom-nav" aria-label="Mobile main views">${mobileTabs.map(([id,label])=>`<button type="button" data-op="tab" data-id="${id}" class="${tab===id?'active':''}" ${tab===id?'aria-current="page"':''} aria-label="${label}">${uiIcon(id)}<span>${MOBILE_TAB_LABELS[id]||label}</span></button>`).join('')}<button type="button" data-op="menu" data-id="nav" aria-label="Open game menu" aria-expanded="${modal==='menu'}" aria-controls="menu-drawer">${uiIcon('menu')}<span>Menu</span></button></nav></div>`;
 }
-function commandbar(){const {reason,continuing,needsBlood}=ageControlState();return `<footer class="game-commandbar"><div class="command-note" id="command-age-reason">${e(reason||ageForecast()||(continuing?'Continue this year when you are ready.':'Your next birthday begins another chapter.'))}</div><div class="command-age-control">${button('Menu','menu','','ghost small')}${ageButton('command-age-button')}</div></footer>`;}
+function commandbar(){const {reason,continuing,needsBlood}=ageControlState();return `<footer class="game-commandbar"><div class="command-note" id="command-age-reason">${e(reason||ageForecast()||(continuing?'Continue this year when you are ready.':'Your next birthday begins another chapter.'))}</div><div class="command-age-control">${button('Menu','menu','','ghost small command-menu-button')}${ageButton('command-age-button')}</div></footer>`;}
 function statusBars() {
   const h=game.battle?.actors.find(a=>a.id==='hero')||game.hero;
   const stats=[['health','Health',h.hp,h.maxHp,`${h.hp}/${h.maxHp}`],['joy','Joy',game.life?.happiness??50,100,`${game.life?.happiness??50}%`],['focus','Focus',h.mp,h.maxMp,`${h.mp}/${h.maxMp}`],['stress','Stress',game.life?.stress??0,100,`${game.life?.stress??0}%`]];
@@ -34868,7 +35058,7 @@ function titleScreen() {
   const card=state?returnLifeCardView(state,slotSaveHealth(recent.id,live),{live,readCommitment:getLifeCommitment}):null;
   const place=state?properPlaceName(state.world.locations.find(place=>place.id===state.locationId)?.name||state.world.name):'';
   const primary=state?`<article class="title-life" data-return-life-card data-slot-live="${live}" aria-label="Your current life"><button type="button" class="title-menu-item title-continue-card" data-op="title-continue" data-id="${recent.id}"><span class="title-life-portrait" aria-hidden="true">${renderAvatar(state.hero,{size:'small',age:state.age??18})}</span><span class="title-life-copy"><span class="title-action-label">Continue</span><strong>${e(state.hero.name)}</strong><small>Age ${state.age??18} · ${isIronman(state)?'Ironman · ':''}Slot ${recent.id+1}</small><span class="title-life-place">${e(place)}</span>${card.context?`<span class="title-life-context">${e(card.context)}</span>`:''}</span><span class="menu-arrow" aria-hidden="true">→</span></button><p class="title-source-note" data-slot-source ${card.sourceNote?'':'hidden'}>${e(card.sourceNote)}</p>${saveHealthMarkup(recent.id,{live})}</article>`:menuItem('Begin a new life','title-new',{detail:'Choose an origin, a face and your first year.',className:'title-begin'});
-  return `<main class="title-screen" aria-labelledby="title-heading">${titleArtwork()}<header class="title-topline"><span>A DARK FANTASY LIFE</span>${button(fullscreenLabel(),'fullscreen','','ghost small')}</header><div class="title-content"><h1 id="title-heading" class="title-wordmark"><span>Hearth</span> <span><em>&amp;</em> Oath</span></h1><p class="title-tagline">The world is old.<br>${state?'Your story continues.':'Your story is unwritten.'}</p><nav class="title-menu" aria-label="Title menu">${primary}<div class="title-life-actions">${state?menuItem('New life','title-new'):''}${menuItem('Saved lives','title-load',{disabled:!occupied.length,detail:occupied.length?`${occupied.length} of 3 slots occupied`:'No lives saved in this browser'})}</div><div class="title-secondary">${menuItem('Settings','title-settings')}${menuItem('How to play','help')}${menuItem('Tactics rehearsal','practice-open',{id:'protect_ally',detail:'Practice with a fictional party'})}${menuItem('Import a saved life','import',{detail:'Open an exported save file'})}</div></nav>${!state?saveHealthMarkup(activeSlot):''}</div><footer class="title-footer"><div class="title-settings"><button type="button" class="button ghost small" data-op="music-toggle" aria-pressed="${getAudioSettings().musicEnabled}">♫ Music ${getAudioSettings().musicEnabled?'on':'off'}</button><span>Ambient score · adjustable in Settings</span></div><p class="title-save-note">Saves stay in this browser. Export a file to keep a separate copy.</p><div class="title-bottomline"><span>VOLUME I · THE BOOK OF A LIFE</span><span>v0.59.0</span></div></footer></main>`;
+  return `<main class="title-screen" aria-labelledby="title-heading">${titleArtwork()}<header class="title-topline"><span>A DARK FANTASY LIFE</span>${button(fullscreenLabel(),'fullscreen','','ghost small')}</header><div class="title-content"><h1 id="title-heading" class="title-wordmark"><span>Hearth</span> <span><em>&amp;</em> Oath</span></h1><p class="title-tagline">The world is old.<br>${state?'Your story continues.':'Your story is unwritten.'}</p><nav class="title-menu" aria-label="Title menu">${primary}<div class="title-life-actions">${state?menuItem('New life','title-new'):''}${menuItem('Saved lives','title-load',{disabled:!occupied.length,detail:occupied.length?`${occupied.length} of 3 slots occupied`:'No lives saved in this browser'})}</div><div class="title-secondary">${menuItem('Settings','title-settings')}${menuItem('How to play','help')}${menuItem('Tactics rehearsal','practice-open',{id:'protect_ally',detail:'Practice with a fictional party'})}${menuItem('Import a saved life','import',{detail:'Open an exported save file'})}</div></nav>${!state?saveHealthMarkup(activeSlot):''}</div><footer class="title-footer"><div class="title-settings"><button type="button" class="button ghost small" data-op="music-toggle" aria-pressed="${getAudioSettings().musicEnabled}">♫ Music ${getAudioSettings().musicEnabled?'on':'off'}</button><span>Ambient score · adjustable in Settings</span></div><p class="title-save-note">Saves stay in this browser. Export a file to keep a separate copy.</p><div class="title-bottomline"><span>VOLUME I · THE BOOK OF A LIFE</span><span>v0.60.0</span></div></footer></main>`;
 }
 function saveSafetyHint(){return coordinateSave.locking()?'Close older game tabs after an update.':'This browser cannot lock saves across tabs. Keep only one game tab open to avoid simultaneous save conflicts.';}
 function saveSlotRow(slot,creating) {
@@ -36233,7 +36423,6 @@ window.addEventListener?.('beforeunload',event=>{
   event.preventDefault();event.returnValue='';
 });
 
-
 })();
 
 </script>
@@ -36287,14 +36476,22 @@ window.addEventListener?.('beforeunload',event=>{
             if (gameSource) fail();
           } catch { /* Unknown error sources must not replace the game. */ }
         }
-        function onReady() {
+        function settle() {
           if (state !== 'loading') return;
-          // Deferred modules have finished. A completed entry must have rendered,
-          // not left the placeholder behind. This also covers inline offline
-          // modules, which do not emit an external script load event.
+          // A completed entry must have rendered, not left the placeholder behind.
           if (root.querySelector('#boot-state')) { fail(); return; }
           state = 'ready';
           cleanup();
+        }
+        function onReady() {
+          if (state !== 'loading') return;
+          // Deferred modules have finished parsing. The entry opens its save
+          // database before rendering (a top-level await), so it may still be
+          // evaluating here: an external entry settles on its own load event,
+          // an inline offline entry on a deadline. A rendered page settles now.
+          if (!root.querySelector('#boot-state')) { settle(); return; }
+          if (entry.hasAttribute('src')) entry.addEventListener('load', settle);
+          else setTimeout(settle, 15000);
         }
         window.addEventListener('error', onError, true);
         document.addEventListener('DOMContentLoaded', onReady);

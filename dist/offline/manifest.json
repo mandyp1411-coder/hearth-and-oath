@@ -1,217 +1,217 @@
 {
   "schemaVersion": 2,
-  "version": "0.59.0",
-  "bytes": 332979441,
-  "sha256": "f19256ced0a7a8abacf67c300d7007ac35727cab69a20209f876b727b3bd036d",
+  "version": "0.60.0",
+  "bytes": 332992564,
+  "sha256": "587fb6b0040359746300ba78846b1164ebc7204e923bac264c97db2e3814d27a",
   "loaderSha256": "3a04d1cd7f7091eb36bd78c28afc99a2b24ccbac777be88b0668db25c75d19c5",
   "source": {
-    "sha256": "d4e6213b8b58f484762c4686474a5b9c3c2c58e46dde1ef1ae89f0735e34e8ca",
-    "files": 1033
+    "sha256": "d8e0e8109d7778579e481f17ef52d5fa075d817a6f4c60838323e996d4c757b5",
+    "files": 1034
   },
   "buildGit": {
-    "head": "0cd830d24b60e8197ac8ed4e5bf676dcdb84452c",
+    "head": "f6f5532f48ce6353a03dc856ca3cb4494c3de863",
     "dirty": true
   },
   "parts": [
     {
       "file": "game-01.part",
       "bytes": 8388608,
-      "sha256": "c06540bb1caeab4d502d45da3368ac7b5adf4627ccd68e56f0c9a428e1987756"
+      "sha256": "ca71efed6b11b678e85b6954399236f5edb245d298e995578487b6141ac03746"
     },
     {
       "file": "game-02.part",
       "bytes": 8388608,
-      "sha256": "fda5641912fad1f2b70cb4a1e235dae0039fcb46c1df339dad770f3668144200"
+      "sha256": "a7527e97e194f49d1433de162afaf584662587f06a1cfd7ffdd83ef2b96044e7"
     },
     {
       "file": "game-03.part",
       "bytes": 8388608,
-      "sha256": "58af3526cd1586d7bcc812ef0d7cca06d9df0897c3d95534e358fc2d0534d97a"
+      "sha256": "49fc580bcfb0a334164f6e70d8a5f970a2aa93d33aedda9fd1c164cf33ab0780"
     },
     {
       "file": "game-04.part",
       "bytes": 8388608,
-      "sha256": "41a7d2866fe3b3b7f290c1c4a668888618952e20b017299e61e04ed85df50ea3"
+      "sha256": "835dabfd2e340615befbc4d1c3f16da538954389ff9be7a2b0fb5126f08366ed"
     },
     {
       "file": "game-05.part",
       "bytes": 8388608,
-      "sha256": "3dae7ac48a5860c003d3d6ea68e9ad4ef182e08376562a24cfe476bf078a0031"
+      "sha256": "35ad901625469a8294daefe8b3df0ef298e630b58f7dfa23870089f95656df2e"
     },
     {
       "file": "game-06.part",
       "bytes": 8388608,
-      "sha256": "e126681c9e12df9a91e3fbee3dff269fb6ddbe571c12f63ef91b651447507677"
+      "sha256": "5ca786b11e976cd51da81ac6f09b9115dcba8974e8ff1cdb528e0642c0288135"
     },
     {
       "file": "game-07.part",
       "bytes": 8388608,
-      "sha256": "15751f555a73c38a4071eba2aac38bf4162ac8c384bd4d006727d4f726c2ade8"
+      "sha256": "23dcdba9150def768c3163d6d588ff3de58d5da0f5465a728dcaabade1714cf3"
     },
     {
       "file": "game-08.part",
       "bytes": 8388608,
-      "sha256": "1c78192ea52bd0b926813792e32fde51cc0c8094add9a3a06a44d3efbf00aa3c"
+      "sha256": "4fb07e2ca3554453d4cf5ab490a1420894acbebf9e28c97ca6c568d3a7052911"
     },
     {
       "file": "game-09.part",
       "bytes": 8388608,
-      "sha256": "e20de7d8cae73530cfb6c2789442eb11b18051c8811e512e77241453ad4d58ab"
+      "sha256": "c0aee9fbfdd904ec8402da44b179fdf5bb9e99833f39e3879b860be6089a6b83"
     },
     {
       "file": "game-10.part",
       "bytes": 8388608,
-      "sha256": "a158f79fbfe5493fc69b724e87a34083260298e9c802dafbc16e5051c5c64a9f"
+      "sha256": "a02371c2b1c9d9b2dbbcfb65cfad10ccc820933164e3cb97872614e7ca7c957a"
     },
     {
       "file": "game-11.part",
       "bytes": 8388608,
-      "sha256": "d4a2b4658d06abe5db0c0319a28883d6583237c72f1693163edae5d2f70df0c3"
+      "sha256": "7cce1b6ea92920bbc67cae756e034f3eea9c00957d156769144f2391ab789cde"
     },
     {
       "file": "game-12.part",
       "bytes": 8388608,
-      "sha256": "0490768ae93d26220da3d911ad37b3b9df74d94f64e4cd6e8c80f584bd74b6e7"
+      "sha256": "2c310e6aa3626e0af56578cff5b9b881bd869e0ad0babcc6108fa303a3ffb5ac"
     },
     {
       "file": "game-13.part",
       "bytes": 8388608,
-      "sha256": "6c2df0f21cb1ff64099770212cddfe6fe82dc5326ca6c7e57ae2e932b2e790b6"
+      "sha256": "88b2d594a22ea9b07ffa7f131b813ea4ebf2a5a88ec82caa2ac45d11e398a0af"
     },
     {
       "file": "game-14.part",
       "bytes": 8388608,
-      "sha256": "ba05c3446cff743001bbdc656a93493a508eeb205707866e92ca1a034a77135f"
+      "sha256": "3bf7c2aaee3b2a2d78be7175159eb93ebd10a48212237ec5a8768dd5bea15e44"
     },
     {
       "file": "game-15.part",
       "bytes": 8388608,
-      "sha256": "cf510191dcc3b4c1698ac39b66172cd9c36fcdcdc98d83f17bcc15ba27317b23"
+      "sha256": "c1637881298d1d6933e2a54d5a20883c079864d6c9e12235b2a9cf8b5bd86661"
     },
     {
       "file": "game-16.part",
       "bytes": 8388608,
-      "sha256": "6a81cb9d9e9414fedce83963c2a6a90fd9ad6a7b9664bfd27d51fb24d2000cc5"
+      "sha256": "6a17f14ea083b80cc17f01a79ea5be05ae4ef1146f7ddd2b3370cb69f63261bf"
     },
     {
       "file": "game-17.part",
       "bytes": 8388608,
-      "sha256": "ff51318fb48db81da15b9bf5e962601737a44e1780674495b18eaac07aee7062"
+      "sha256": "5e8c343e72872515e9b828ca81b95c82ea9a5a5d6cedb486544104a8efa73ef5"
     },
     {
       "file": "game-18.part",
       "bytes": 8388608,
-      "sha256": "df75fa97d3f887ef4af11cc7170a29f8ea1c603225324d6bebc3852eb3b6b517"
+      "sha256": "89c6e7d2d207d38fc52382758a8051231a143969ad5ee6e4e0c48a032356aee7"
     },
     {
       "file": "game-19.part",
       "bytes": 8388608,
-      "sha256": "5adcf4b04f37b206ab3b0537c7dc99005c36cb91b5d195e828a56861bced98bb"
+      "sha256": "95f1ad89a563d5eada0330aa5f9e4205287499fdfa33347c366bb56b88956ccc"
     },
     {
       "file": "game-20.part",
       "bytes": 8388608,
-      "sha256": "c38876718da9a973798bafedaad04b94791ccb31df4c7a68d7d7e2b3c680c23e"
+      "sha256": "95ede57790ba11a3332fc6356a06cc52c9250c359479a9c4b09b2008fd3a1511"
     },
     {
       "file": "game-21.part",
       "bytes": 8388608,
-      "sha256": "847b0d21a0ff4d18b6156f210a6f8f5086ab1a678b986de9e791892b212b46fd"
+      "sha256": "07e40ef7df5fae985e58ac17eb31f8777c724fad1ca0c28a7986511e1d7a3279"
     },
     {
       "file": "game-22.part",
       "bytes": 8388608,
-      "sha256": "6508881b5b9eebfc964ed2cdbe980420509f0c6519f7d7b3b4401ae73e685cfe"
+      "sha256": "d0f7852c8c7e855b38c972c14a2d0c45a795cf7226f2d3e4aec975518ba21fd1"
     },
     {
       "file": "game-23.part",
       "bytes": 8388608,
-      "sha256": "5da433df5b4eafdf4dce809c575a3ea05b036f359edcfdcdf8453ca7f7fbf1e8"
+      "sha256": "18375419a21b2cd19180a86f47c961b880d79517cf1cf7f2ea22386cd21b1b00"
     },
     {
       "file": "game-24.part",
       "bytes": 8388608,
-      "sha256": "aa7c6dc0ebe405bb1ff4076d2656220728db0cdb228231de51f14d67c903af7d"
+      "sha256": "9932ef5c0350a04c712aeb3a3e5889803ef52a786f357254072fc626faa9b4f7"
     },
     {
       "file": "game-25.part",
       "bytes": 8388608,
-      "sha256": "0e15d4e37dcb1c33052358b2eb86948bda68a7778b4bedb14459554f3f4fa450"
+      "sha256": "07e790721b2599c4c16429e7be7e90077a6d165d80a3dc6efd5fb2cb5aa73c86"
     },
     {
       "file": "game-26.part",
       "bytes": 8388608,
-      "sha256": "6ae69f306bc99ca9da122674a243238b82dfac5359694d8607c99991e3ffebbe"
+      "sha256": "be8c5a65c85cdd458042d7d737fe6870cea07f1c319d46dfd8509b8aab08314d"
     },
     {
       "file": "game-27.part",
       "bytes": 8388608,
-      "sha256": "01a2f4ba9ea0929a5d07fb5dce0f4331716329463ec3caca61ca835b0537de8e"
+      "sha256": "cd6c273d53aedcfd135b8c0ce4dac43b71960650ce9ac7ab65ce67d03eda49fe"
     },
     {
       "file": "game-28.part",
       "bytes": 8388608,
-      "sha256": "4636ff1ba1f2af2358db04382d56421b11737d13e6eeb92b12e9d1e5e2afa4c9"
+      "sha256": "3c5aa8b23dfb664c85e51308617be784aa80f9eef00f80928992ea33500005ff"
     },
     {
       "file": "game-29.part",
       "bytes": 8388608,
-      "sha256": "683674f0918f53909bba1f06181dc860ea64d6bbb6d6143a7e5c74dcd015f37c"
+      "sha256": "fa5f9b00b007b95495b30dfe1365ff9580d0562e76c97c823ee449fc857af8e6"
     },
     {
       "file": "game-30.part",
       "bytes": 8388608,
-      "sha256": "4cc8c9d7368de5ab31f9b48a813d8361cba3a7fa54d370e957beb1ee16235983"
+      "sha256": "7b317966c09ae2d4e4b78294fae2f2029afad36cfef47465f3b89728b64adc1e"
     },
     {
       "file": "game-31.part",
       "bytes": 8388608,
-      "sha256": "149e37381a586df353a2e9ff490b4567c8d187db0ee30fb4e1f229cca4015010"
+      "sha256": "09e861136718429969b988748f256232ecd1e72957258c2db783270f4d862575"
     },
     {
       "file": "game-32.part",
       "bytes": 8388608,
-      "sha256": "07ffae9f364f34e64928eca674af6c5d3e2b094d814543d80dd86fcd860e2633"
+      "sha256": "6f0e484aadaa80b9094948d606b84f08a9a1c340ed1edbd164afb28cdf026c68"
     },
     {
       "file": "game-33.part",
       "bytes": 8388608,
-      "sha256": "d240a5b9a20a1cd7a3644d2b9369ff350dc6d858f98a181f41b16e0b72f5de26"
+      "sha256": "e97a86cb2906b665e22ab9a58f52f4910be1954cd06cf688595b7eb74ea6b4f6"
     },
     {
       "file": "game-34.part",
       "bytes": 8388608,
-      "sha256": "49bc78bdc967128277f5b8eea7254651b1d57ed2bce6143e4bdcec2b69c5f849"
+      "sha256": "6955585d8599387671a1524848c147a092c430847f983369ad7767490d57ce19"
     },
     {
       "file": "game-35.part",
       "bytes": 8388608,
-      "sha256": "92eb90432b96e38f1e93deaf3b5181384decae36994fd4afbca7283f19fe444e"
+      "sha256": "3d77271e28b4119b039015becfa1339dc31f33baef10d5ee192f39c361255e4d"
     },
     {
       "file": "game-36.part",
       "bytes": 8388608,
-      "sha256": "53b1d9b19139cf0827c7f1f88bbf37fe1b80843f467cd322cf9a5670f367452c"
+      "sha256": "ae3c58295f91b6eb2f1b9374c545118bb89e0d0a67e35a8b1f2d0c15ab253bdc"
     },
     {
       "file": "game-37.part",
       "bytes": 8388608,
-      "sha256": "41372d41ba5e28f7530a4314faa1efc0b1f52f9c12bee5df886d61589500397a"
+      "sha256": "1801a93391edec6285fd5cc4db65641e163be35d82173b38fe1856a2219daed1"
     },
     {
       "file": "game-38.part",
       "bytes": 8388608,
-      "sha256": "9a6484348d2a2752278a848096e71c14c75d624732d3bc5b7e9a970bc52cd40e"
+      "sha256": "39bcefeca8e73df83985328fb432eff51cd0429d8631211efbb6f53410849ebe"
     },
     {
       "file": "game-39.part",
       "bytes": 8388608,
-      "sha256": "4af45f37346675a52e720b770769bd9c99ff13809e490a4c98537c8e8fce5ce8"
+      "sha256": "08ac9246c4b2eabd096961031400bbdc43cd0a6de70412d63d470413aef12feb"
     },
     {
       "file": "game-40.part",
-      "bytes": 5823729,
-      "sha256": "a19031f25bd553173af61fa36d47202d2759bbaa98a3697a9ebf0cbe5f69e1da"
+      "bytes": 5836852,
+      "sha256": "c9378083c1cbe7500e8a4255b8ae33daaba59f06b7afd99f5aaa8f66691367c0"
     }
   ]
 }
