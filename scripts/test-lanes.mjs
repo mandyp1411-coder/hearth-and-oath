@@ -22,10 +22,11 @@ export const SLOW = new Set([
   'world-expansion-v31.test.js', 'maze-integration-v50.test.js', 'expansion.test.js',
 ]);
 
-// Known debt carried from v0.59.0: fails there too, exercises pre-edition-30
-// save compatibility that the new edition does not promise. Kept in the slow
-// lane so it is still visible, not silenced.
-export const KNOWN_DEBT = new Set(['interface-overhaul.test.js']);
+// Known debt carried from v0.59.0: these fail there too. interface-overhaul
+// test 14 exercises pre-edition-30 save compatibility the new edition does
+// not promise; v9-integration test 1 uses a fixture life that cannot afford
+// its own supper. Kept in the slow lane so they stay visible, not silenced.
+export const KNOWN_DEBT = new Set(['interface-overhaul.test.js', 'v9-integration.test.js']);
 for (const f of KNOWN_DEBT) SLOW.add(f);
 
 const all = readdirSync('tests').filter(f => f.endsWith('.test.js')).sort();
