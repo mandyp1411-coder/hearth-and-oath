@@ -601,9 +601,11 @@ function ageButton(cls='') {
 function bottomNav() {
   if(!game)return '';
   const mobileTabs=navigationGroups[0][1];
-  return `<div class="mobile-command-dock"><nav class="bottom-nav" aria-label="Mobile main views">${mobileTabs.map(([id,label])=>`<button type="button" data-op="tab" data-id="${id}" class="${tab===id?'active':''}" ${tab===id?'aria-current="page"':''}>${uiIcon(id)}<span>${label}</span></button>`).join('')}<button type="button" data-op="menu" data-id="nav" aria-label="Open game menu" aria-expanded="${modal==='menu'}" aria-controls="menu-drawer">${uiIcon('menu')}<span>Menu</span></button></nav></div>`;
+  // Short visible labels for a 7-button phone bar; the full name stays the accessible name.
+  const MOBILE_TAB_LABELS={relationships:'People',activities:'Activity'};
+  return `<div class="mobile-command-dock"><nav class="bottom-nav" aria-label="Mobile main views">${mobileTabs.map(([id,label])=>`<button type="button" data-op="tab" data-id="${id}" class="${tab===id?'active':''}" ${tab===id?'aria-current="page"':''} aria-label="${label}">${uiIcon(id)}<span>${MOBILE_TAB_LABELS[id]||label}</span></button>`).join('')}<button type="button" data-op="menu" data-id="nav" aria-label="Open game menu" aria-expanded="${modal==='menu'}" aria-controls="menu-drawer">${uiIcon('menu')}<span>Menu</span></button></nav></div>`;
 }
-function commandbar(){const {reason,continuing,needsBlood}=ageControlState();return `<footer class="game-commandbar"><div class="command-note" id="command-age-reason">${e(reason||ageForecast()||(continuing?'Continue this year when you are ready.':'Your next birthday begins another chapter.'))}</div><div class="command-age-control">${button('Menu','menu','','ghost small')}${ageButton('command-age-button')}</div></footer>`;}
+function commandbar(){const {reason,continuing,needsBlood}=ageControlState();return `<footer class="game-commandbar"><div class="command-note" id="command-age-reason">${e(reason||ageForecast()||(continuing?'Continue this year when you are ready.':'Your next birthday begins another chapter.'))}</div><div class="command-age-control">${button('Menu','menu','','ghost small command-menu-button')}${ageButton('command-age-button')}</div></footer>`;}
 function statusBars() {
   const h=game.battle?.actors.find(a=>a.id==='hero')||game.hero;
   const stats=[['health','Health',h.hp,h.maxHp,`${h.hp}/${h.maxHp}`],['joy','Joy',game.life?.happiness??50,100,`${game.life?.happiness??50}%`],['focus','Focus',h.mp,h.maxMp,`${h.mp}/${h.maxMp}`],['stress','Stress',game.life?.stress??0,100,`${game.life?.stress??0}%`]];

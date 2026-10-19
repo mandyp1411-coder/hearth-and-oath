@@ -49,7 +49,7 @@ import { initializeCartography, syncCartography, inheritCartography, cartography
 import { culturalName } from './names.js';
 import { generateCharacter } from './characters.js';
 import { originById, MAX_START_AGE } from './origins.js';
-import { generateWorld, seededRoll, validateWorld, expandWorld, travelPreview, resolveBirthplace, generatePersonName, isSettlement, worldCalendarContext } from './world.js';
+import { generateWorld, seededRoll, validateWorld, expandWorld, travelPreview, resolveBirthplace, generatePersonName, isSettlement, worldCalendarContext, withArticle } from './world.js';
 import { createBattle, takeBattleAction, getBattleActions, combatProfile } from './combat.js';
 import { initializePersonality, initializePersonalityDecision, personalityActions, applyPersonalityAction, applyPersonalityChoice, personalityEventIds, applyPersonalityBuild, applyPersonalityImpact, personalitySelectionReason, personalityImpact, validatePersonality } from './personality.js';
 import { validateStartingAttributes } from './starting-attributes.js';
@@ -164,9 +164,12 @@ const setEvent = (state, id, title, category, body, choices) => {
   if(/(?:^|_)letter(?:$|_)/.test(id))receiveNotification(state,{kind:'letter',sourceId:'event-letter:'+id+':'+state.day,title:state.event.title.slice(0,160),body:state.event.body.slice(0,2400)});
   if(state.narrativeEdition===30&&state.timeline?.annualScene&&id==='birth_adult_year'){state.timeline.annualScene.title=state.event.title;state.timeline.annualScene.body=state.event.body;}
 };
+// Entries written by the current narrative edition are stamped so the edition
+// upgrade (narrative-edition.js) leaves their words alone. Only prose from
+// older saves lacks the stamp and is rewritten from its recorded facts.
 const addJournal = (state, title, text, tag = 'life', {literal=false,meta={}}={}) => {
   const format=literal?text=>String(text??''):text=>personalNames(state,text);
-  state.journal.push({ id: `entry-${state.journal.length + 1}`, day: state.day, age: state.age, title:format(title), text:format(text), tag,...meta,...(state.narrativeEdition===30&&(tag==='combat'||title==='A Trade Across the Counter')?{narrativeEdition:30}:{}), ...(state.revision>=5?{generation:state.dynasty?.generation||1}:{}) });
+  state.journal.push({ id: `entry-${state.journal.length + 1}`, day: state.day, age: state.age, title:format(title), text:format(text), tag,...meta,...(state.narrativeEdition===30?{narrativeEdition:30}:{}), ...(state.revision>=5?{generation:state.dynasty?.generation||1}:{}) });
 };
 const recordPlanGold = (state, before) => {
   if (!state.life?.plan) return;
@@ -1694,7 +1697,7 @@ function retire(state, reason='retirement') {
   const life = [
     `${hero.name}’s chronicle`,
     `Born in ${state.world.locations.find(p=>p.id===hero.birthplaceId)?.name || (hero.origin === 'city' ? city(state).name : home(state).name)} to a ${hero.household === 'poor' ? 'struggling' : hero.household === 'noble' ? 'noble' : 'working'} household, your childhood and education shaped a life of your own.`,
-    `At age ${state.age}, you closed this chapter as ${hero.profession === 'Unemployed' ? 'a person still free to find a calling' : `a ${hero.profession.toLowerCase()}`}${hero.specialization ? `, with the training of a ${hero.specialization}` : ''}. Your ambition was “${hero.ambition}.”`,
+    `At age ${state.age}, you closed this chapter as ${hero.profession === 'Unemployed' ? 'a person still free to find a calling' : `${withArticle(hero.profession.toLowerCase())}`}${hero.specialization ? `, with the training of a ${hero.specialization}` : ''}. Your ambition was “${hero.ambition}.”`,
   ];
   if (state.flags.villageSaved) life.push(`You helped ${home(state).name} survive Ashfall fever through ${state.flags.remedyMethod === 'ancestral' ? 'ancestral testimony' : 'careful moonroot fieldwork'}. ${state.flags.publicNecromancy ? 'The neighbors know how the cure was found.' : 'The public account leaves some of the method private.'}`);
   else life.push(`The region’s fever remained part of the world you lived in. You gave ${state.flags.clinicShifts} clinic shift${state.flags.clinicShifts === 1 ? '' : 's'} to its people.`);

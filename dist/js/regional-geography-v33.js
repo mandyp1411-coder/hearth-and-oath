@@ -20,5 +20,14 @@ export function expandRegionalGeography(world,seed,{roll,name}){
   const place={id,type,regionId:region.id,name:name(seed,id,region.id),travelDays:2+roll(seed,id+'days',4),safety:2+roll(seed,id+'safety',4),services,description:i===0?`The seat of the ${culture.government.toLowerCase()}. Its ${culture.court.toLowerCase()} hears petitions from across the region.`:i===5?'An abandoned stronghold stands beside a disused road. Its lower chambers remain unexplored.':i>5?'Paths leave the settled country for a wild and sparsely traveled reach.':`A community of ${culture.culture.toLowerCase()}. ${culture.custom}`,necromancyLaw:['permitted','regulated','forbidden'][roll(seed,id+'law',3)],status:'thriving'};
   world.locations.push(place);map.nodes.push({id,x:p[0],y:p[1]});
  }
+ // Names are independent rolls, so two places in one world could share one
+ // ("Frost Reach" twice). Re-roll later duplicates deterministically, trying a
+ // few salted ids before accepting the collision. Only new worlds reach here.
+ const taken=new Set();
+ for(const place of world.locations){
+  let candidate=place.name;
+  for(let attempt=1;taken.has(candidate.toLowerCase())&&attempt<=6;attempt++)candidate=name(seed,`${place.id}:alt${attempt}`,place.regionId);
+  place.name=candidate;taken.add(candidate.toLowerCase());
+ }
  return world;
 }

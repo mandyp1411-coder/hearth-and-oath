@@ -73,6 +73,8 @@ export function worldCalendarContext(world, day=0, seed='hearth',regionId=world?
 
 
 /** A stable, independent roll. The upper bound is exclusive. */
+/** "a"/"an" by the word's first sound; `withArticle('alchemist')` → "an alchemist". */
+export function withArticle(word){const w=String(word??'').trim();return w?`${/^(?:[aeiou]|hour|heir|honest|honou?r)/i.test(w)?'an':'a'} ${w}`:'';}
 export function seededRoll(seed, salt, range) {
   const limit = Math.floor(Number(range));
   if (!Number.isFinite(limit) || limit <= 0) return 0;
