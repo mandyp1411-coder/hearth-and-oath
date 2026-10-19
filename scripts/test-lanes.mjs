@@ -1,21 +1,25 @@
 // Split the test files into a fast lane (unit/engine, minutes) and a slow lane
 // (life cohorts, full playthroughs, tens of minutes). Usage:
 //   node scripts/test-lanes.mjs fast|slow|list
+// The fast lane runs files concurrently; the slow lane runs them one at a time.
 import { readdirSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 
 // Files known to take more than ~60 s each (measured on Node 22).
 export const SLOW = new Set([
-  'birth.test.js', 'birth-v9.test.js', 'campaign-roleplay.test.js',
-  'campaign-home-loss-playthrough.test.js', 'careers.test.js',
-  'claims-tournament-integration.test.js', 'audit-v21.test.js',
-  'full-rpg-v14.test.js', 'lineage.test.js', 'dynasty.test.js',
-  'rpg-v18.test.js', 'v9-integration.test.js', 'world-focus.test.js',
-  'story-life-integration-v52.test.js', 'playtest-regressions.test.js',
-  'health-focus.test.js', 'people-focus.test.js', 'expansion.test.js',
-  'supernatural-focus.test.js', 'growth-focus.test.js', 'economy-focus.test.js',
+  // Measured before the v0.60 speedups, so these are upper bounds.
+  'campaign-roleplay.test.js', 'birth.test.js', 'campaign-home-loss-playthrough.test.js',
+  'pastimes.test.js', 'birth-v9.test.js', 'careers.test.js', 'ironman-session.test.js',
+  'new-life-v15.test.js', 'ironman-store.test.js', 'dynasty.test.js', 'rebuild-v4.test.js',
+  'claims-tournament-integration.test.js', 'ironman-save-coordination.test.js',
+  'household.test.js', 'audit-v21.test.js', 'ironman-app-extended.test.js',
+  'ironman-app.test.js', 'lore.test.js',
+  // Not yet timed but known long: full-life cohorts and integrations.
+  'full-rpg-v14.test.js', 'lineage.test.js', 'rpg-v18.test.js', 'v9-integration.test.js',
+  'world-focus.test.js', 'story-life-integration-v52.test.js', 'playtest-regressions.test.js',
+  'health-focus.test.js', 'supernatural-focus.test.js', 'economy-focus.test.js',
   'family-depth.test.js', 'religion-v26.test.js', 'regional-world-v33.test.js',
-  'world-expansion-v31.test.js', 'maze-integration-v50.test.js',
+  'world-expansion-v31.test.js', 'maze-integration-v50.test.js', 'expansion.test.js',
 ]);
 
 // Known debt carried from v0.59.0: fails there too, exercises pre-edition-30
@@ -31,5 +35,7 @@ const fast = all.filter(f => !SLOW.has(f)).map(f => 'tests/' + f);
 const slow = [...all.filter(f => SLOW.has(f)).map(f => 'tests/' + f), ...stress];
 if (lane === 'list') { console.log(`fast: ${fast.length} files\nslow: ${slow.length} files`); process.exit(0); }
 const files = lane === 'fast' ? fast : slow;
-const result = spawnSync(process.execPath, ['--test', ...files], { stdio: 'inherit' });
+// Files are independent processes; run a few at once on the fast lane.
+const concurrency = lane === 'fast' ? String(Math.max(2, Math.min(4, (await import('node:os')).cpus().length - 1))) : '1';
+const result = spawnSync(process.execPath, ['--test', '--test-concurrency=' + concurrency, ...files], { stdio: 'inherit' });
 process.exit(result.status ?? 1);
