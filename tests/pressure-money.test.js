@@ -1,11 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as engine from '../dist/js/engine.js';
+import { rollBirthCircumstances } from '../dist/js/station.js';
 import { settleHouseholdBudget, chargeDebtInterest, debtReckoning, applyDebtReckoningChoice, householdAnnualCost, DEBT_INTEREST } from '../dist/js/budget.js';
 import { onFortuneTime, fortuneIncomeFactor } from '../dist/js/fortune.js';
 
 function adult(seed = 'pressure-money') {
-  let s = engine.createBirthGame({ seed });
+  let s = engine.createBirthGame({ seed, station: rollBirthCircumstances(seed, 'common', 'human') });
   for (let n = 0; n < 400 && s.age < 18; n++) s = s.event ? engine.chooseEventOption(s, s.event.choices[0].id) : engine.ageUp(s);
   for (let n = 0; s.event && n < 20; n++) s = engine.chooseEventOption(s, s.event.choices[0].id);
   return s;

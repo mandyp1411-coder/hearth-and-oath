@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as engine from '../dist/js/engine.js';
+import { rollBirthCircumstances } from '../dist/js/station.js';
 
 function adult(seed = 'pressure-wellbeing') {
-  let s = engine.createBirthGame({ seed });
+  let s = engine.createBirthGame({ seed, station: rollBirthCircumstances(seed, 'common', 'human') });
   for (let n = 0; n < 400 && s.age < 18; n++) s = s.event ? engine.chooseEventOption(s, s.event.choices[0].id) : engine.ageUp(s);
   for (let n = 0; s.event && n < 20; n++) s = engine.chooseEventOption(s, s.event.choices[0].id);
   return s;
