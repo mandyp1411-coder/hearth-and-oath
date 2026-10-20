@@ -346,7 +346,10 @@ function progressConditions(state, ctx) {
             else if (condition.severity === 3 && !fatalRolled && state.householdBudget?.debt !== undefined && !state.health.deathCause && state.hero.condition?.type !== 'vampire') {
               fatalRolled = true;
               const bodilyNow = state.life?.health ?? 80;
-              const odds = (condition.type === 'injury' ? 4 : 9) + (bodilyNow < 40 ? 8 : 0) + (state.age >= 60 ? 6 : state.age < 6 ? 6 : 0);
+              // Per uncared fortnight at severity 3: a healthy adult who ignores
+              // an infection for a year is more likely dead than not; a worn body,
+              // the very old and the very young go faster.
+              const odds = (condition.type === 'injury' ? 2 : 5) + (bodilyNow < 40 ? 6 : 0) + (state.age >= 60 ? 5 : state.age < 6 ? 5 : 0);
               if (seededRoll(state.seed, `health:fatal:${condition.id}:${condition.lastEffectDay}`, 100) < odds) {
                 const data = PHYSICAL[condition.type];
                 state.health.deathCause = `${data.name}, left untreated`;

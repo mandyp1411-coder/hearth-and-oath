@@ -14,13 +14,13 @@ const SHOCKS = [
   { id: 'theft', weight: 10, title: 'Robbed', text: ({ gold }) => `Someone knew where you kept it. ${gold} gold gone, and the lock was not even forced.`, gold: s => Math.min(Math.max(10, Math.floor(s.hero.gold * 0.25)), 150) },
   { id: 'lost_work', weight: 18, title: 'No work this season', text: () => `The work dried up. Whatever you earn this season, half of it goes to simply waiting for the next.`, incomeFactor: 0.5 },
   { id: 'repair', weight: 14, title: 'The roof', text: ({ gold }) => `The roof gave in the first hard rain. ${gold} gold to make it right, or live under the hole.`, gold: s => 15 + Math.floor(annualCost(s) * 0.1), onlyIf: s => !!s.life?.home?.tier && s.life.home.tier !== 'lodgings' },
-  { id: 'rent_rise', weight: 10, title: 'The rent goes up', text: ({ gold }) => `The landlord has found someone who will pay more. You pay ${gold} gold to keep the door, or you look for another.`, gold: s => 12 + Math.floor(annualCost(s) * 0.08), onlyIf: s => !s.life?.home?.tier || s.life.home.tier === 'lodgings' },
+  { id: 'rent_rise', weight: 10, title: 'The rent goes up', text: ({ gold }) => `The landlord has found someone who will pay more. You pay ${gold} gold to keep the door, or you look for another.`, gold: s => 12 + Math.floor(annualCost(s) * 0.08), onlyIf: s => (!s.life?.home?.tier || s.life.home.tier === 'lodgings') && !(s.family?.housing && s.family.housing !== 'secure') },
   { id: 'sick_season', weight: 10, title: 'A season lost to sickness', text: () => `Fever took the household for weeks. Little was earned and less was done.`, incomeFactor: 0.4, stress: 8 },
   { id: 'windfall', weight: 9, title: 'A stroke of luck', text: ({ gold }) => `A debt you had written off was paid, or a buyer paid more than the thing was worth. ${gold} gold you did not expect.`, gold: s => -(20 + Math.floor(annualCost(s) * 0.15)) },
   { id: 'good_year', weight: 6, title: 'A good season', text: () => `Prices held, the work was steady and the weather kind. For once, the season paid what it promised.`, incomeFactor: 1.3 },
 ];
 
-function annualCost(s) { return s.life ? 180 + (({ lodgings: 60, cottage: 30, townhouse: 90, estate: 240 })[s.life.home?.tier] ?? 60) : 180; }
+function annualCost(s) { const tier = s.life?.home?.tier, sheltered = s.family?.housing && s.family.housing !== 'secure'; return 180 + (tier && tier !== 'lodgings' ? ({ cottage: 30, townhouse: 90, estate: 240 })[tier] ?? 0 : sheltered ? 0 : 60); }
 
 export function initializeFortune(s) {
   if (!s.fortune) s.fortune = { version: 1, lastSeason: Math.floor(s.day / SEASON), incomeFactor: 1, factorUntil: 0, history: [] };

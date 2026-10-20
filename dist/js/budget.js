@@ -34,7 +34,10 @@ export function initializeHouseholdBudget(s,{reset=false,edition=false}={}) {
 export function householdAnnualCost(s,day=s.day) {
   if(!s.life)return 0;
   const lifestyle=HOUSEHOLD_LIFESTYLES.find(l=>l.id===s.life.lifestyle)||HOUSEHOLD_LIFESTYLES[0];
-  const home={lodgings:60,cottage:30,townhouse:90,estate:240}[s.life.home?.tier]??60;
+  // Rented lodgings cost rent; a shared shelter or no roof at all costs nothing
+  // but comfort. Owned homes cost their upkeep.
+  const tier=s.life.home?.tier,sheltered=s.family?.housing&&s.family.housing!=='secure';
+  const home=tier&&tier!=='lodgings'?({cottage:30,townhouse:90,estate:240})[tier]??0:sheltered?0:60;
   const children=s.life.children.filter(c=>c.alive!==false&&Math.max(0,Math.floor((day-c.bornDay)/365))<18).length;
   const address=s.life.home?.locationId||s.hero.birthplaceId||s.locationId;
   const support=communityFoodSupportAt(s,address,day);
