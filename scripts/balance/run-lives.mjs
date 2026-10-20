@@ -8,6 +8,7 @@ import { performance } from 'node:perf_hooks';
 import { writeFileSync } from 'node:fs';
 import * as engine from '../../dist/js/engine.js';
 import { createLifeAtAge } from '../../dist/js/new-life.js';
+import { isSettlement } from '../../dist/js/world.js';
 
 const arg = (name, fallback) => { const i = process.argv.indexOf('--' + name); return i > 0 ? process.argv[i + 1] : fallback; };
 const LIVES = Number(arg('lives', 24)), START = Number(arg('start', 18)), YEARS = Number(arg('years', 60));
@@ -31,10 +32,24 @@ function act(s, predicate) {
   const a = engine.getActions(s).find(x => !x.disabled && !x.disabledReason && predicate(x));
   return a ? engine.chooseAction(s, a.id) : null;
 }
+// A worker lives in a town and goes to its work yard; the generated start is
+// often a wilderness site, so the first year begins with the walk there.
+function goToWork(s) {
+  if (!isSettlement(s.world, s.locationId)) {
+    const towns = s.world.locations.filter(p => isSettlement(s.world, p.id)).map(p => ({ id: p.id, prev: engine.exploreTravelPreview(s, p.id) })).filter(t => t.prev && !t.prev.disabledReason).sort((a, b) => (a.prev.days || 99) - (b.prev.days || 99));
+    if (!towns.length) return s;
+    s = engine.startExploreJourney(s, towns[0].id);
+    for (let guard = 0; guard < 200 && s.timeline?.journey && alive(s); guard++) s = s.event ? engine.chooseEventOption(s, s.event.choices[0].id) : engine.continueExploreJourney(s);
+    s = resolveEvents(s);
+  }
+  if (engine.getActions(s).some(a => a.id === 'atlas_room_workyard' && !a.disabledReason)) s = engine.chooseAction(s, 'atlas_room_workyard');
+  return s;
+}
 const policies = {
   passive: s => s,
-  worker: s => { for (let n = 0; n < 40 && alive(s); n++) { const next = act(s, a => a.id === 'career_work'); if (!next || next.day === s.day) break; s = resolveEvents(next); } return s; },
+  worker: s => { s = goToWork(s); for (let n = 0; n < 40 && alive(s); n++) { const next = act(s, a => a.id === 'career_work'); if (!next || next.day === s.day) break; s = resolveEvents(next); } return s; },
   striver: s => {
+    s = goToWork(s);
     for (let n = 0; n < 30 && alive(s); n++) { const next = act(s, a => a.id === 'career_work'); if (!next || next.day === s.day) break; s = resolveEvents(next); }
     for (let n = 0; n < 4 && alive(s); n++) { const next = act(s, a => /^career_practice|^training_|^calling_practice/.test(a.id)); if (!next || next.day === s.day) break; s = resolveEvents(next); }
     return s;

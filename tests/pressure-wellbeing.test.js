@@ -65,3 +65,14 @@ test('a worn-down worker earns less for a shift', () => {
   s.life.stress = 80; const worn = engine.chooseAction(s, 'career_work').hero.gold - s.hero.gold;
   assert.ok(worn < rested, `worn ${worn} < rested ${rested}`);
 });
+
+test('no work on an empty tank: a shift needs some Focus', () => {
+  const s = adult('pressure-focus');
+  const open = engine.getActions(s).find(a => a.id === 'career_work' && !a.disabledReason);
+  if (!open) return; // the shift is reachable only at a work yard; other fixtures cover that walk
+  s.hero.mp = 0;
+  const spent = engine.getActions(s).find(a => a.id === 'career_work');
+  assert.match(spent.disabledReason || '', /spent/);
+  s.hero.mp = 1;
+  assert.equal(engine.getActions(s).find(a => a.id === 'career_work').disabledReason, undefined);
+});

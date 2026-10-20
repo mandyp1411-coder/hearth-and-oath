@@ -81,7 +81,9 @@ export function settleHouseholdBudget(s,ctx={},forceJournal=false) {
   if(support||borrowed)s.life.lifestyle='frugal';
   const entry={day:s.day,due,paid,support,focus:s.life.focus,lifestyle:s.life.lifestyle,...(borrowed?{borrowed}:{})};
   b.history.push(entry);b.history=b.history.slice(-100);
-  if(forceJournal||short||b.lastJournalYear!==year) {
+  // Small settlements after short actions accumulate quietly; the year's
+  // entry, a shortfall, or a notable bill gets written down.
+  if(forceJournal||short||(b.lastJournalYear!==year&&(paid>=10||due>=10))) {
     const text=borrowed
       ?`The household cost ${due} gold this season and you had ${paid}. The rest, ${borrowed} gold, is owed. You owe ${b.debt} gold in all, and the lender counts the years.`
       :support

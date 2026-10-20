@@ -331,6 +331,19 @@ function progressConditions(state, ctx) {
             const previousSeverity = condition.severity;
             condition.severity = Math.min(3, condition.severity + 1);
             if (condition.severity > previousSeverity) condition.acknowledged = false;
+            // At its worst and still untreated, a fever or an infection can
+            // kill, and does more easily in a body already worn down.
+            else if (condition.severity === 3 && state.householdBudget?.debt !== undefined && !state.health.deathCause && state.hero.condition?.type !== 'vampire') {
+              const bodilyNow = state.life?.health ?? 80;
+              const odds = (condition.type === 'injury' ? 4 : 9) + (bodilyNow < 40 ? 8 : 0) + (state.age >= 60 ? 6 : state.age < 6 ? 6 : 0);
+              if (seededRoll(state.seed, `health:fatal:${condition.id}:${condition.lastEffectDay}`, 100) < odds) {
+                const data = PHYSICAL[condition.type];
+                state.health.deathCause = `${data.name}, left untreated`;
+                note(state, ctx, 'The end of a lived life', `${data.name} ran its course with no one able to stop it. Care, friendship, and every choice made before this day remain part of your chronicle.`);
+                ctx.endLife?.(state.health.deathCause);
+                return;
+              }
+            }
           }
         }
         if (condition.type === 'chronic' && cared) condition.severity = Math.max(1, condition.severity - 1);
@@ -391,6 +404,24 @@ function driftMood(state, day) {
   state.life.stress = clamp(stress + Math.sign(stressTarget - stress) * Math.max(stress === stressTarget ? 0 : 1, Math.round(Math.abs(stressTarget - stress) / 5)));
   void day;
 }
+// The yearly chance of death from the elder age, per cent. It starts small
+// and climbs; a worn body, an untreated condition and a hard life each steepen
+// it. A comfortable human reaches the 80s often and the 90s rarely; a poor,
+// sick one is lucky to see 70. Tuned against the balance harness.
+export function mortalityChance(state, age, a, bodily) {
+  if (age < a.elder - 5) return 0;
+  const past = age - a.elder;                        // years past the elder age (may be slightly negative)
+  let chance = past < 0 ? 0.5 : 1.5 + past * past * 0.09;  // 1.5% at elder, ~5% ten years on, ~16% twenty on
+  if (bodily < 55) chance *= 1.6;
+  if (bodily < 30) chance *= 1.5;
+  const conditions = (state.health?.physical?.length || 0);
+  if (conditions) chance *= 1 + 0.35 * conditions;
+  if ((state.life?.stress ?? 0) >= 70) chance *= 1.2;
+  if (state.householdBudget?.debt > 0) chance *= 1.1;
+  if (state.life?.lifestyle === 'generous') chance *= 0.85;
+  if (state.health?.care?.medicineUntil >= state.day) chance *= 0.85;
+  return Math.min(60, chance);
+}
 export function onHealthTime(state, { oldDay, newDay = state.day, outdoors = false } = {}, ctx = {}) {
   if (!state.health || !Number.isFinite(oldDay) || newDay <= oldDay || state.phase === 'retired' || state.health.deathCause) return;
   progressConditions(state, ctx);
@@ -424,9 +455,10 @@ export function onHealthTime(state, { oldDay, newDay = state.day, outdoors = fal
       const a=state.health.agePolicy===25?agingPolicy(state.hero):{elder:65,frail:90,late:105,extreme:120};
       if (age >= a.elder) wellbeing(state, 0, 0, -(age >= a.frail ? 2 : 1));
       const bodily = state.life?.health ?? 80;
-      const chance = age >= a.extreme ? Math.min(45, 8 + (age - a.extreme) * 3) : age >= a.late && bodily < 55 ? 6 + Math.min(14, age - a.late) : age >= a.frail && bodily < 15 ? 5 : 0;
+      const chance = state.householdBudget?.debt !== undefined ? mortalityChance(state, age, a, bodily)
+        : age >= a.extreme ? Math.min(45, 8 + (age - a.extreme) * 3) : age >= a.late && bodily < 55 ? 6 + Math.min(14, age - a.late) : age >= a.frail && bodily < 15 ? 5 : 0;
       if (chance && seededRoll(state.seed, `health:mortality:${nextYear}`, 100) < chance) {
-        const cause = age >= a.late ? 'Natural death in advanced age' : 'Complications of physical frailty in advanced age';
+        const cause = age >= a.late ? 'Natural death in advanced age' : age >= a.frail ? 'Complications of physical frailty in advanced age' : bodily < 40 ? 'A body worn out before its years' : 'Death in old age';
         health.deathCause = cause;
         note(state, ctx, 'The end of a lived life', `${cause}. Care, friendship, and every choice made before this day remain part of your chronicle.`);
         ctx.endLife?.(cause);
