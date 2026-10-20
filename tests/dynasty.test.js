@@ -146,7 +146,7 @@ function settle(state) {
     let pick;
     if (/^(birth_|fate_)/.test(id)) pick = state.event.choices.some(c => c.id === 'care') ? 'care' : 'curiosity';
     else if(id==='society_staff')pick=state.event.choices.some(c=>c.id==='boundary')?'boundary':'prepare';
-    else pick = ({ career_year: 'care', life_birthday: 'people', plague_letter: 'later', deadline_review: 'pause', health_concern: state.health?.pending?.kind === 'physical' ? 'rest' : 'support', health_break: 'pray', debt_reckoning: 'plead', lineage_bereavement: 'share', society_customer:'decline',society_neighbor:'welcome',society_launch:'independent' })[id];
+    else pick = ({ career_year: 'care', life_birthday: 'people', plague_letter: 'later', deadline_review: 'pause', health_concern: state.health?.pending?.kind === 'physical' ? 'rest' : 'support', health_break: 'pray', debt_reckoning: 'plead', hard_winter: 'share', lineage_bereavement: 'share', society_customer:'decline',society_neighbor:'welcome',society_launch:'independent' })[id];
     // This parent prioritizes the already agreed work and their children's
     // schooling: tell customers an honest limit, welcome new neighbors and
     // leave unfunded staff requests open. Funded positive arcs are exercised by
