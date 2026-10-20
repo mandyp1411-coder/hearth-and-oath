@@ -1,3 +1,4 @@
+import { fortuneIncomeFactor } from './fortune.js';
 import { generateCharacter } from './characters.js';
 import { seededRoll, generatePersonName, worldCalendarContext, isSettlement, withArticle } from './world.js';
 import { GEAR_CATALOG, MATERIAL_IDS } from './gear.js';
@@ -250,9 +251,9 @@ export function applyCareerAction(s,id,ctx={}) {
     r.specialty=idSuffix;record(s,ctx,'A professional focus chosen',`${CAREER_SPECIALTIES[idSuffix].name} now guides new ${p.name.toLowerCase()} commissions. Six days and 24 gold were committed; existing customer terms remain unchanged.`);return true;
   }
   if(id==='career_work') {
-    const wage=professionWage(s);s.hero.gold+=wage;recordCareerWork(s,{days:3,source:'shift',gold:wage},ctx);if(!modern(s))skill(s,p.skill);
-    if(s.life){s.life.career.experience+=2;s.life.stress=clamp(s.life.stress+2);}
-    record(s,ctx,'Ordinary useful work',`Three days of ${p.name.toLowerCase()} work earned ${wage} gold in ${place(s).name}. Your civilian skill and reputation can carry a whole life.`);return true;
+    const bonded=(s.householdBudget?.bondedUntil||0)>s.day,wage=bonded?0:Math.floor(professionWage(s)*fortuneIncomeFactor(s));s.hero.gold+=wage;recordCareerWork(s,{days:3,source:'shift',gold:wage},ctx);if(!modern(s))skill(s,p.skill);
+    if(s.life){s.life.career.experience+=2;s.life.stress=clamp(s.life.stress+(bonded?4:2));}
+    record(s,ctx,bonded?'Work for the creditor':'Ordinary useful work',bonded?`Three days of ${p.name.toLowerCase()} work, and every coin of it to the creditor. ${Math.max(0,s.householdBudget.bondedUntil-s.day)} days of the bond remain.`:`Three days of ${p.name.toLowerCase()} work earned ${wage} gold in ${place(s).name}.`);return true;
   }
   if(id==='career_practice') {
     if(p.name==='Unemployed' || r.lastPracticeDay!==null && s.day-r.lastPracticeDay<14)return false;
