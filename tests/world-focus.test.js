@@ -29,7 +29,7 @@ function choose(s,id){assert.ok(s.event?.choices.some(c=>c.id===id&&!c.disabledR
 function act(s,id){
   s=atService(s,id);const a=E.getActions(s).find(a=>a.id===id);assert.ok(a,id);assert.ok(!a.disabledReason,a.disabledReason);return roundtrip(E.chooseAction(s,id));}
 function settle(s){for(let n=0;n<200;n++){
- if(s.event){const a=s.event.choices.find(c=>['care','keep','later','quiet','defend','record','listen','continue','support'].includes(c.id)&&!c.disabledReason)||s.event.choices.find(c=>!c.disabledReason);s=E.chooseEventOption(s,a.id);}
+ if(s.event){const physical=s.event.id==='health_concern'&&s.health?.pending?.kind==='physical';const a=physical&&s.event.choices.find(c=>c.id==='rest'&&!c.disabledReason)||s.event.choices.find(c=>['care','keep','later','quiet','defend','record','listen','continue','support'].includes(c.id)&&!c.disabledReason)||s.event.choices.find(c=>!c.disabledReason);s=E.chooseEventOption(s,a.id);}
  else if(s.stories?.project)s=E.chooseAction(s,'stories_continue');
  else if(s.community?.project?.commitment)s=E.chooseAction(s,'community_continue');
  else if(s.timeline?.yearTarget!=null)s=E.continueAgeUp(s);
