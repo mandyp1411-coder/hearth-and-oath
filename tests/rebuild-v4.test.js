@@ -2,6 +2,7 @@ import { assertMigrationMechanics, assertEventMechanics, assertCapturedMigration
 import { atService } from './helpers/service-visit.mjs';
 import { knownCurseMeeting } from './helpers/known-curse-meeting.mjs';
 import test from 'node:test';
+import { rollBirthCircumstances } from '../dist/js/station.js';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import * as engine from '../dist/js/engine.js';
@@ -56,6 +57,7 @@ function grow(state, target) {
     if (state.event) {
       if (state.event.id === 'health_concern') { state = choose(state, 'continue'); continue; }
       if (state.event.id === 'lineage_bereavement') { state = choose(state, 'private'); continue; }
+      if (state.event.id === 'hard_winter') { state = choose(state, 'endure'); continue; }
       assert.match(state.event.id, /^(birth_|fate_)/, 'growing policy must expose any unexpected interruption');
       state = choose(state, state.event.choices.some(item => item.id === 'curiosity') ? 'curiosity' : state.event.choices[0].id);
     } else state = transition(state, value => value.timeline.yearTarget == null ? engine.ageUp(value) : engine.continueAgeUp(value));
@@ -109,7 +111,7 @@ function project(state, id) {
 }
 
 function homelessAdult(seed = 'a-home-made-by-hand') {
-  return grow(engine.createBirthGame({ name: 'Lark', seed, household: 'poor', familySetup: 'homeless' }), 18);
+  return grow(engine.createBirthGame({ name: 'Lark', seed, household: 'poor', familySetup: 'homeless', station: rollBirthCircumstances(seed, 'common', 'human') }), 18);
 }
 
 function shelterSupplies(state) {
@@ -225,7 +227,8 @@ test('parented, orphan, and homeless lives retain actual caregivers and free lea
 });
 
 test('a homeless pupil earns free qualifications, keeps named school memories, and chooses a calling', () => {
-  let state = engine.createBirthGame({ name: 'Lark', seed: 'a-school-with-room', familySetup: 'homeless', household: 'poor' });
+  // Poor and homeless, but common and free: a bound child would not be admitted at all.
+  let state = engine.createBirthGame({ name: 'Lark', seed: 'a-school-with-room', familySetup: 'homeless', household: 'poor', station: rollBirthCircumstances('a-school-with-room', 'common', 'human') });
   state = choose(state, 'care');
   assert.equal(state.family.housing,'shelter','the caregiver arranged shelter during infancy');
   state = grow(state, 6);
@@ -442,7 +445,7 @@ test('new ancestry and hair choices survive real childhood without buying abilit
 });
 
 test('preferences give bounded enjoyment from completed activities, never free edits or repeated clicks', () => {
-  let state = grow(engine.createBirthGame({ name: 'Finch', seed: 'a-small-real-pleasure', familySetup: 'single_parent', household: 'poor', preferences: { pursuit: 'knowledge', socialStyle: 'quiet', value: 'ambition', food: 'sweet' } }), 6);
+  let state = grow(engine.createBirthGame({ name: 'Finch', seed: 'a-small-real-pleasure', familySetup: 'single_parent', household: 'poor', station: rollBirthCircumstances('a-small-real-pleasure', 'common', 'human'), preferences: { pursuit: 'knowledge', socialStyle: 'quiet', value: 'ambition', food: 'sweet' } }), 6);
   state=chargedActivity(state,'school_enroll_community');
   const unaffected = structuredClone(state);
   const alternate = transition(state, value => engine.updatePreferences(value, { pursuit: 'nature', socialStyle: 'warm', value: 'mercy', food: 'plant' }));
