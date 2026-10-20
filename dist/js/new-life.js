@@ -30,13 +30,26 @@ function pastBattle(s) {
   return resolveBattle(s,b);
 }
 
-/** Generate earlier years through actual game actions, then leave the opening birthday to the player. */
-export async function createLifeAtAge(config = {}, { onProgress, shouldCancel } = {}) {
-  const target=normalizeStartAge(config.startAge),appearance=appearanceAtAge(config.appearance,target);
-  const fate=rollLifeCircumstances(config.seed,config.originId,appearance.ancestry),origin=originById(fate.originId);
+const ENDED_EARLY='The earlier life ended before its opening year.';
+const MAX_DRAWS=12;
+/** Generate earlier years through actual game actions, then leave the opening
+ * birthday to the player. The life the player enters is the one that
+ * survived: a childhood death draws another cradle; an adult death turns the
+ * years back a little and casts the dice again, a few times at most. */
+export async function createLifeAtAge(config = {}, hooks = {}) {
+  const draws={count:0};
+  for(;;){
+    try{return await generateLife(config,hooks,draws);}
+    catch(error){if(error?.message!==ENDED_EARLY||draws.count>=MAX_DRAWS)throw error;draws.count++;}
+  }
+}
+async function generateLife(config, { onProgress, shouldCancel } = {}, draws = { count: 0 }) {
+  const attempt=draws.count;
+  const target=normalizeStartAge(config.startAge,18,config.appearance?.ancestry),appearance=appearanceAtAge(config.appearance,target);
+  const fate=rollLifeCircumstances(config.seed,config.originId,appearance.ancestry,attempt),origin=originById(fate.originId);
   const pronouns=['he/him','she/her','they/them'].includes(config.pronouns)?config.pronouns:fate.pronouns;
   const name=typeof config.name==='string'&&config.name.trim()?config.name.trim().slice(0,40):culturalName(fate.seed,'new-life:name',{appearance,pronouns}).name;
-  let s=createBirthGame({...fate,name,pronouns,appearance,startAge:target,difficulty:config.difficulty}),steps=0;
+  let s=createBirthGame({...fate,name,pronouns,appearance,startAge:target,difficulty:config.difficulty,attempt}),steps=0;
   const attempted=new Set(),stalls=new Map();
   const act=id=>{
     let a=getActions(s).find(a=>a.id===id&&!a.disabledReason);
@@ -44,11 +57,21 @@ export async function createLifeAtAge(config = {}, { onProgress, shouldCancel } 
     if(!a)return false;s=chooseAction(s,id);return true;
   };
   const tryOnce=id=>{const key=`${s.age}:${id}`;if(attempted.has(key))return false;attempted.add(key);return act(id);};
+  const snapshots=[];let snapshotAge=-1;
   while(s.age<target) {
     if(shouldCancel?.())return null;
-    if(++steps>3200)throw new Error('The earlier life could not reach its opening year.');
+    if(++steps>3200+400*draws.count)throw new Error('The earlier life could not reach its opening year.');
     if(steps%16===0&&onProgress)await onProgress(s.age,target);
-    if(s.phase==='retired'||s.hero.alive===false)throw new Error('The earlier life ended before its opening year.');
+    if(s.phase==='retired'||s.hero.alive===false){
+      // A grown life that ends before its opening year is turned back a few
+      // years and lived again under new dice; a childhood death is a new cradle.
+      const back=snapshots.findLast(p=>p.age<=s.age-2);
+      if(!back||s.age<18||draws.count>=MAX_DRAWS)throw new Error(ENDED_EARLY);
+      draws.count++;s=structuredClone(back.state);s.fortune.attempt=draws.count;
+      for(const key of [...attempted])if(Number(key.split(':')[0])>=s.age)attempted.delete(key);
+      continue;
+    }
+    if(!s.event&&!s.battle&&s.age>=18&&(s.age%5===0||s.age>=60&&s.age%2===0)&&s.age!==snapshotAge&&s.timeline.yearTarget===null){snapshotAge=s.age;snapshots.push({age:s.age,state:structuredClone(s)});}
     if(s.battle){s=pastBattle(s);continue;}
     if(s.event){
       const key=`${s.event.id}:${s.day}`,count=stalls.get(key)||0;
@@ -67,6 +90,8 @@ export async function createLifeAtAge(config = {}, { onProgress, shouldCancel } 
       const jobs=getActions(s).filter(a=>a.id.startsWith('career_choose_')&&!a.disabledReason&&a.id!=='career_choose_unemployed');
       if(jobs.length&&tryOnce(jobs[seededRoll(s.seed,'past:livelihood',jobs.length)].id))continue;
     }
+    // A sensible past pays what it owes when it can.
+    if(s.age>=18&&(s.householdBudget?.debt||0)>0&&s.hero.gold>=s.householdBudget.debt+40&&tryOnce('budget_repay'))continue;
     const interests=origin.pursuits,interest=interests[seededRoll(s.seed,`past:interest:${s.age}`,interests.length)];
     if(tryOnce(interest))continue;
     if(s.age>=16&&tryOnce('career_work'))continue;
@@ -76,7 +101,8 @@ export async function createLifeAtAge(config = {}, { onProgress, shouldCancel } 
     s=ageUp(s);
   }
   if(shouldCancel?.())return null;
-  if(s.age!==target||s.day!==target*365||s.phase==='retired'||!validateSave(s))throw new Error('The generated life did not match its opening age.');
+  if(s.phase==='retired'||s.hero.alive===false)throw new Error(ENDED_EARLY);
+  if(s.age!==target||s.day!==target*365||!validateSave(s))throw new Error('The generated life did not match its opening age.');
   applyStartingAttributes(s,completeAttributePoints(config.attributePoints,target,s.seed),target);
   applyPersonalityBuild(s,(config.personalityTraits||[]).slice(0,3),{creation:true});
   s.hero.lifeOrigin={version:1,id:fate.originId,startingAge:target};

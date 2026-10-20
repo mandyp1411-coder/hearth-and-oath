@@ -45,14 +45,16 @@ function goToWork(s) {
   if (engine.getActions(s).some(a => a.id === 'atlas_room_workyard' && !a.disabledReason)) s = engine.chooseAction(s, 'atlas_room_workyard');
   return s;
 }
+// A worker pays what they owe when they can; a passive life never does.
+function repay(s) { const owed = s.householdBudget?.debt || 0; if (owed > 0 && s.hero.gold >= owed + 60) { const next = act(s, a => a.id === 'budget_repay'); if (next) s = resolveEvents(next); } return s; }
 const policies = {
   passive: s => s,
-  worker: s => { s = goToWork(s); for (let n = 0; n < 40 && alive(s); n++) { const next = act(s, a => a.id === 'career_work'); if (!next || next.day === s.day) break; s = resolveEvents(next); } return s; },
+  worker: s => { s = goToWork(s); for (let n = 0; n < 40 && alive(s); n++) { const next = act(s, a => a.id === 'career_work'); if (!next || next.day === s.day) break; s = resolveEvents(next); } return repay(s); },
   striver: s => {
     s = goToWork(s);
     for (let n = 0; n < 30 && alive(s); n++) { const next = act(s, a => a.id === 'career_work'); if (!next || next.day === s.day) break; s = resolveEvents(next); }
     for (let n = 0; n < 4 && alive(s); n++) { const next = act(s, a => /^career_practice|^training_|^calling_practice/.test(a.id)); if (!next || next.day === s.day) break; s = resolveEvents(next); }
-    return s;
+    return repay(s);
   },
 };
 
@@ -60,7 +62,7 @@ function measure(s, start, log) {
   const b = s.householdBudget || {};
   return {
     seed: s.seed, alive: alive(s), age: s.age, deathCause: s.health?.deathCause || (alive(s) ? null : 'other'),
-    gold: s.hero.gold, debt: s.hero.debt || 0, joy: s.life?.happiness, stress: s.life?.stress, bodily: s.life?.health, hp: s.hero.hp, maxHp: s.hero.maxHp,
+    gold: s.hero.gold, debt: b.debt || 0, station: s.hero.station?.id || 'none', joy: s.life?.happiness, stress: s.life?.stress, bodily: s.life?.health, hp: s.hero.hp, maxHp: s.hero.maxHp,
     supportedGold: b.supportedGold || 0, billedGold: b.billedGold || 0, conditions: (s.health?.physical?.length || 0) + (s.health?.mental?.length || 0),
     profession: s.hero.profession, wentIntoDebt: log.debt, worstStress: log.worstStress, minGold: log.minGold, yearsPlayed: s.age - start,
   };
@@ -80,7 +82,7 @@ for (const policy of POLICIES) {
       s = finishYear(s);
       log.worstStress = Math.max(log.worstStress, s.life?.stress ?? 0);
       log.minGold = Math.min(log.minGold, s.hero.gold);
-      if ((s.hero.debt || 0) > 0 || (s.householdBudget?.supportedGold || 0) > 0) log.debt = true;
+      if ((s.householdBudget?.debt || 0) > 0 || (s.householdBudget?.supportedGold || 0) > 0) log.debt = true;
     }
     rows.push(measure(s, START, log));
   }
@@ -92,6 +94,7 @@ for (const policy of POLICIES) {
     diedPct: pct(r => !r.alive), medianDeathAge: dead.length ? dead.map(r => r.age).sort((a, b) => a - b)[Math.floor(dead.length / 2)] : null,
     medianGold: med('gold'), medianMinGold: med('minGold'), everShortPct: pct(r => r.wentIntoDebt),
     medianJoy: med('joy'), medianStress: med('stress'), medianWorstStress: med('worstStress'), medianBodily: med('bodily'),
+    byStation: Object.fromEntries([...new Set(rows.map(r => r.station))].sort().map(id => { const g = rows.filter(r => r.station === id), m = k => { const v = g.map(r => r[k]).filter(Number.isFinite).sort((a, b) => a - b); return v.length ? v[Math.floor(v.length / 2)] : null; }; return [id, { lives: g.length, diedPct: Math.round(100 * g.filter(r => !r.alive).length / g.length), medianDeathAge: g.filter(r => !r.alive).map(r => r.age).sort((a, b) => a - b)[Math.floor(g.filter(r => !r.alive).length / 2)] ?? null, medianGold: m('gold'), everShortPct: Math.round(100 * g.filter(r => r.wentIntoDebt).length / g.length), medianDebt: m('debt') }]; })),
     conditionsAtEndPct: pct(r => r.conditions > 0), causes: Object.fromEntries(Object.entries(dead.reduce((m, r) => (m[r.deathCause] = (m[r.deathCause] || 0) + 1, m), {}))),
     rows,
   };
@@ -100,5 +103,6 @@ for (const policy of POLICIES) {
   console.log(`died ${r.diedPct}% (median age at death ${r.medianDeathAge ?? '-'}) · causes ${JSON.stringify(r.causes)}`);
   console.log(`gold median ${r.medianGold} · lowest point median ${r.medianMinGold} · ever short of money ${r.everShortPct}%`);
   console.log(`joy ${r.medianJoy} · stress ${r.medianStress} (worst ${r.medianWorstStress}) · bodily ${r.medianBodily} · with a condition at end ${r.conditionsAtEndPct}%`);
+  for (const [id, g] of Object.entries(r.byStation)) console.log(`  ${id}: ${g.lives} lives · died ${g.diedPct}% (median ${g.medianDeathAge ?? '-'}) · gold ${g.medianGold} · owed at end ${g.medianDebt} · ever short ${g.everShortPct}%`);
 }
 if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify(results, null, 1));

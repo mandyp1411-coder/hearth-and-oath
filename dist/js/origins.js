@@ -1,7 +1,12 @@
 import { seededRoll, generatePersonName } from './world.js';
 import { PREFERENCE_OPTIONS, normalizePreferences } from './preferences.js';
+import { STATIONS, rollStation, rollBirthCircumstances, stationById } from './station.js';
 
-export const MAX_START_AGE = 80;
+import { agingPolicy } from './aging-policy-v25.js';
+// The oldest a life can begin. A people that ages fast cannot enter at
+// eighty: an eighty-year-old goblin is a human at a hundred and ten.
+export const MAX_START_AGE = 120;
+export function maxStartAge(ancestry = 'human') { return Math.min(MAX_START_AGE, agingPolicy({ appearance: { ancestry } }).frail - 10); }
 export const ORIGIN_ANCESTRIES = Object.freeze(['human','elf','dwarf','halfling','orc','goblin','tiefling','beastfolk']);
 const freezeOrigin = origin => Object.freeze({...origin,
   ancestries:Object.freeze(origin.ancestries || []),
@@ -46,9 +51,9 @@ export const STARTING_ORIGINS = Object.freeze([
   {"id": "beastfolk_winterroof", "label": "The Winter Roof", "sigil": "III", "ancestries": ["beastfolk"], "communityName": "Highland wayfarers", "description": "A beastfolk travelling household takes winter shelter in an empty hillside farm. You are born while its scattered owners return to repair the roof. By spring, the two households have agreed to share its care, giving your family a place to return between journeys.", "places": ["mountain", "village"], "families": ["two_parents", "single_parent"], "means": ["poor", "tradesfolk"], "pursuits": ["grow_survival", "grow_family"]},
 ].map(freezeOrigin));
 
-export function normalizeStartAge(value, fallback = 18) {
+export function normalizeStartAge(value, fallback = 18, ancestry = 'human') {
   const n=typeof value==='string'&&value.trim()===''?NaN:Number(value);
-  return Number.isFinite(n)?Math.max(0,Math.min(MAX_START_AGE,Math.round(n))):fallback;
+  return Number.isFinite(n)?Math.max(0,Math.min(maxStartAge(ancestry),Math.round(n))):fallback;
 }
 export function originById(id) {return STARTING_ORIGINS.find(o=>o.id===id)||null;}
 const ancestryOrHuman = value => ORIGIN_ANCESTRIES.includes(value)?value:'human';
@@ -61,15 +66,31 @@ export function originAllowed(id,ancestry='human') {
   const origin=originById(id);
   return Boolean(origin&&(!origin.ancestries.length||origin.ancestries.includes(ancestryOrHuman(ancestry))));
 }
-/** Origin is a story hook. Every unchosen circumstance comes from independent seeded rolls. */
-export function rollLifeCircumstances(seed, requestedOrigin = 'random', ancestry = 'human') {
+/** The stations an origin's story can be laid over, read from the means its
+ * households were written with. Every story fits a poor birth. */
+export function originStations(origin) {
+  const ids=['bound','common'];
+  if(origin.means.includes('tradesfolk'))ids.push('trade');
+  if(origin.means.includes('noble'))ids.push('gentry','noble','royal');
+  return ids;
+}
+/** Origin is a story hook laid over a station that fate rolls by rarity.
+ * Every unchosen circumstance comes from independent seeded rolls. */
+export function rollLifeCircumstances(seed, requestedOrigin = 'random', ancestry = 'human', attempt = 0) {
   const worldSeed=typeof seed==='string'&&seed.trim()?seed.trim().slice(0,48):'silver-fern';
   const race=ancestryOrHuman(ancestry),available=availableOrigins(race);
-  const origin=originAllowed(requestedOrigin,race)&&originById(requestedOrigin)||available[seededRoll(worldSeed,`new-life:origin:${race}`,available.length)];
+  const requested=originAllowed(requestedOrigin,race)&&originById(requestedOrigin)||null;
+  // A chosen story narrows the ladder; an unchosen one is picked to fit the birth.
+  const stationId=rollStation(worldSeed,requested?originStations(requested):STATIONS.map(s=>s.id),attempt?`birth:station:${attempt}`:'birth:station');
+  const fitting=available.filter(o=>originStations(o).includes(stationId));
+  const origin=requested||(fitting.length?fitting:available)[seededRoll(worldSeed,`new-life:origin:${race}`,(fitting.length?fitting:available).length)];
   const pick=(key,values)=>values[seededRoll(worldSeed,`new-life:${origin.id}:${key}`,values.length)];
-  const familySetup=pick('family',origin.families),household=familySetup==='homeless'?'poor':pick('means',origin.means);
+  const station=rollBirthCircumstances(worldSeed,stationId,race,attempt);
+  let familySetup=pick('family',origin.families);
+  if(familySetup==='homeless'&&!['bound','common'].includes(stationId))familySetup='single_parent';
+  const household=stationById(stationId).means;
   const care={two_parents:'Two parents share your early care.',single_parent:'One present parent takes care of you.',orphan:'Guardians from the community take you in.',homeless:'A shelter guardian cares for you while a lasting home is sought.'}[familySetup];
-  return {seed:worldSeed,originId:origin.id,originLabel:origin.label,originDescription:origin.description,
+  return {seed:worldSeed,originId:origin.id,originLabel:origin.label,originDescription:origin.description,station,
     ancestry:race,originAncestries:[...origin.ancestries],originCommunity:origin.communityName,originBirthDescription:`${origin.birthDescription} ${care}`,
     name:generatePersonName(worldSeed,'new-life:name').slice(0,32),
     pronouns:pick('identity',['he/him','she/her','they/them']),

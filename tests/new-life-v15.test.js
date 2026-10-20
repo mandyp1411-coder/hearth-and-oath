@@ -7,8 +7,10 @@ import { portraitLayers, normalizeAppearance } from '../dist/js/avatar.js';
 import { rollLifeCircumstances, normalizeStartAge } from '../dist/js/origins.js';
 import { firstDayGuideVisible } from '../dist/js/first-day-guide.js';
 
-for(const age of [0,2,3,6,9,10,15,16,17,18,27,40,64,65,80])test(`a new life really begins at age ${age}, with a matching past and save`,async()=>{
-  const d={...defaultCreatorDraft(`start-boundary-${age}`),originId:'shrine_foundling',startAge:age},copy=structuredClone(d);
+for(const requested of [0,2,3,6,9,10,15,16,17,18,27,40,64,65,80])test(`a new life really begins at age ${requested}, with a matching past and save`,async()=>{
+  const d={...defaultCreatorDraft(`start-boundary-${requested}`),originId:'shrine_foundling',startAge:requested},copy=structuredClone(d);
+  // A people that ages fast cannot enter as old as a human can.
+  const age=normalizeStartAge(requested,18,d.appearance.ancestry);
   const s=await createLifeAtAge(d),f=rollLifeCircumstances(d.seed,d.originId);
   assert.deepEqual(d,copy);assert.deepEqual(s.hero.firstDayGuide,{version:1,dismissed:false});assert.equal(firstDayGuideVisible(s),true);assert.equal(s.age,age);assert.equal(s.day,age*365);assert.equal(s.timeline.birthDay,0);
   assert.equal(s.timeline.yearHistory.length,age);assert.ok(s.timeline.yearHistory.every(y=>y.age<age&&y.day===y.age*365));
@@ -17,7 +19,8 @@ for(const age of [0,2,3,6,9,10,15,16,17,18,27,40,64,65,80])test(`a new life real
   assert.equal(s.phase,age<18?'childhood':'adult');assert.equal(s.hero.path,'unformed');assert.equal(s.hero.specialization,null);
   assert.equal(s.event.id,age===0?'birth_arrival':age<=18?`birth_year_${age}`:'birth_adult_year');
   assert.ok(s.lineage.people.find(p=>p.source==='hero').deathAge>=age+8);
-  if(age>6)assert.ok(s.education.attendance>0||s.education.progress>0);
+  // Not everyone gets school: a bound child in a house that does not read, or an owned one, is put to work instead.
+  if(age>6){const barred=s.hero.station.freedom==='owned'||s.hero.station.id==='bound'&&!s.family.literate;assert.ok(barred||s.education.attendance>0||s.education.progress>0,`schooled unless barred (${s.hero.station.id}, reads ${s.family.literate})`);}
   if(age>16)assert.notEqual(s.hero.profession,'Unemployed');
   const p=portraitLayers({...s.hero,age});assert.equal(p.years,age);if(age<3)assert.equal(p.hair,null);if(age<18)assert.equal(p.beard,null);if(age>=65)assert.equal(p.baseAtlas,'elder');
   assert.ok(validateSave(s));assert.deepEqual(migrateSave(JSON.parse(JSON.stringify(s))),s,'reload preserves the drawn history and waiting birthday');
@@ -52,5 +55,5 @@ test('new opening metadata is validated without making it compulsory for old sav
   const bad=structuredClone(s);bad.hero.lifeOrigin.id='<script>';assert.equal(validateSave(bad),false);
   bad.hero.lifeOrigin.id='exile';bad.hero.lifeOrigin.startingAge=81;assert.equal(validateSave(bad),false);
   delete bad.hero.lifeOrigin;assert.ok(validateSave(bad));
-  assert.equal(normalizeStartAge('bogus'),18);assert.equal(normalizeStartAge(-9),0);assert.equal(normalizeStartAge(900),80);
+  assert.equal(normalizeStartAge('bogus'),18);assert.equal(normalizeStartAge(-9),0);assert.equal(normalizeStartAge(900),80);assert.equal(normalizeStartAge(900,18,'goblin'),60);assert.equal(normalizeStartAge(900,18,'elf'),120);
 });

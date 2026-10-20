@@ -1,4 +1,5 @@
 import { receiveNotification } from './notifications-v40.js';
+import { stationHealthRisk, stationSeverity, householdPhysician } from './station.js';
 import { observationalInfancy, observationalCareEvent } from './development.js';
 import { agingPolicy } from './aging-policy-v25.js';
 import { seededRoll } from './world.js';
@@ -20,9 +21,12 @@ const MENTAL = {
 };
 const ready = state => !!state.health && state.phase !== 'retired' && !state.event && !state.battle && !state.conversations?.pending && !state.dungeon;
 const conditionById = (state, id) => [...state.health.physical, ...state.health.mental].find(condition => condition.id === id);
-const careFee = state => state.age < 16 ? 0 : Math.max(0, 6 - communitySupport(state).careFeeDiscount);
+// Who pays the healer for a child depends on the house: nobody for the bound
+// and the common (no healer comes), the household for trade and above.
+const childPhysician = state => state.hero.station && state.age < 18 ? householdPhysician(state) : null;
+const careFee = state => childPhysician(state) ? 0 : state.age < 16 ? 0 : Math.max(0, 6 - communitySupport(state).careFeeDiscount);
 const clinicCareDays = state => 30 + communitySupport(state).careDays;
-const careSponsor = state => state.age < 16 ? ' Community-sponsored care is free before age 16.' : communitySupport(state).careFeeDiscount ? ' The funded local clinic covers the consultation fee.' : '';
+const careSponsor = state => childPhysician(state) === 'household' ? ' The house keeps a physician.' : childPhysician(state) === 'paid' ? ' The household pays the healer, and feels it.' : state.age < 16 ? ' Community-sponsored care is free before age 16.' : communitySupport(state).careFeeDiscount ? ' The funded local clinic covers the consultation fee.' : '';
 const option = (id, label, description) => ({ id, label, description });
 function note(state, ctx, title, text, details = {}) {
   state.notice = text;
@@ -51,6 +55,7 @@ function onset(state, type, severity, ctx, circumstance) {
   note(state, ctx, 'A need your life can make room for', `${(PHYSICAL[type] || MENTAL[type]).name}: ${(PHYSICAL[type] || MENTAL[type]).symptoms} Free care and supportive choices remain available.`, { conditionType: type, result: 'onset' });
   queueConcern(state);
 }
+const hardWinterChild = (state, day = state.day) => !!state.hero.station && state.age < 12 && state.hero.station.diet <= 1 && (state.fortune?.hardWinterUntil || 0) >= day;
 function queueConcern(state) {
   if (state.health.pending || state.phase === 'retired') return;
   const condition = prioritizedConditions(state).find(entry => !entry.acknowledged);
@@ -213,7 +218,7 @@ function ageContext(state, condition) {
 function careContext(state, condition) {
   return condition.careUntil > state.day ? `Care is already supported through day ${condition.careUntil}; another session renews support rather than treating this as an untreated new concern.` : 'This concern has no current supported-care window. Free care remains available.';
 }
-const circumstanceText = { outdoors:'It was first noted during a period with outdoor exposure; that is a circumstance, not a confirmed cause.', ordinary:'It was first noted during ordinary daily life.', stress:'It was first noted during sustained high stress.', low_mood:'It was first noted while low joy and continuing stress were recorded.', later_life:'This recurring concern was first noted during a regular bodily-health review.' };
+const circumstanceText = { winter:'It came in a hard winter, in a house with little to fight it with.', outdoors:'It was first noted during a period with outdoor exposure; that is a circumstance, not a confirmed cause.', ordinary:'It was first noted during ordinary daily life.', stress:'It was first noted during sustained high stress.', low_mood:'It was first noted while low joy and continuing stress were recorded.', later_life:'This recurring concern was first noted during a regular bodily-health review.' };
 function symptomProgress(state, condition) {
   const mental = mentalTypes.includes(condition.type), nextDay = condition.lastEffectDay + 14;
   return `${mental ? `Emotional improvement needs continuing care, at least ${condition.type === 'depression' ? 35 : 21} days since onset, joy 40+ and stress 65 or less. Current joy ${state.life?.happiness ?? 0}; stress ${state.life?.stress ?? 0}.` : condition.type === 'chronic' ? 'Supported care can lower severity to 1; this recurring condition remains recorded.' : 'Supported physical reviews can lower severity; HP restoration alone does not clear symptoms.'} Next fortnightly review: day ${nextDay}.`;
@@ -265,7 +270,11 @@ export function flushHealthEvent(state, ctx = {}) {
     option('routine', supported ? 'Continue a gentle daily care routine' : 'Arrange a gentle daily care routine', 'Spend up to 3 actual days on meals, sleep and gentle movement. Restore 6 health, 4 bodily wellbeing and 3 joy; reduce stress by 7. Physical and emotional care lasts 14 days. No fee.'),
     option('continue', 'Name the need and continue for now', 'Acknowledge these symptoms. They remain visible and care remains available; there is no moral or faction penalty.'),
   ];
-  if(state.worldServicesVersion===1){for(let i=choices.length-1;i>=0;i--)if(choices[i].id==='care'&&(state.cartography?.interior?.roomId!=='shrine'||state.cartography?.offsite))choices.splice(i,1);}
+  // A house that keeps a physician does not walk to the shrine for one.
+  if(state.worldServicesVersion===1&&childPhysician(state)!=='household'){for(let i=choices.length-1;i>=0;i--)if(choices[i].id==='care'&&(state.cartography?.interior?.roomId!=='shrine'||state.cartography?.offsite))choices.splice(i,1);}
+  // No healer comes to a door that cannot pay. A child of the bound or the
+  // common is nursed at home, and that is all.
+  if (childPhysician(state) === 'none') for (let i = choices.length - 1; i >= 0; i--) if (choices[i].id === 'care') choices.splice(i, 1);
   const first = pending.kind === 'mental' ? 'support' : condition.type === 'chronic' ? 'routine' : 'rest';
   choices.sort((a,b) => Number(b.id === first) - Number(a.id === first));
   ctx.setEvent?.('health_concern', state.age < 3 ? 'Care in your earliest years' : condition.type === 'chronic' ? 'Making room for recurring symptoms' : pending.kind === 'mental' ? 'Support for the days you are living' : 'Room for the body to recover', pending.kind === 'physical' ? 'Physical health' : 'Emotional health', observationalInfancy(state)?`${data.symptoms} Familiar adults notice your discomfort and arrange rest and quiet care. You are held, soothed and looked after while these days pass.`:body, observationalCareEvent(state,{id:'health_concern',choices}).choices);
@@ -309,6 +318,7 @@ export function applyHealthChoice(state, eventId, pick, ctx = {}) {
   if (state.phase === 'retired') return true;
   if (actual === 0) { state.notice = 'The care session waits for the current calendar need. No treatment fee was spent.'; return true; }
   if (pick === 'care') state.hero.gold -= fee;
+  if (pick === 'care' && childPhysician(state) === 'paid' && state.family) state.family.support = Math.max(0, state.family.support - 4);
   provideCare(state, actionId);
   // Until adulthood a sick child is put to bed whatever the family calls it:
   // comfort for a wound or a fever still brings the rest that treats it.
@@ -331,6 +341,17 @@ function progressConditions(state, ctx) {
       const cared = condition.careUntil >= condition.lastEffectDay;
       const ageOfCondition = condition.lastEffectDay - condition.sinceDay;
       if (kind === 'physical') {
+        // Even nursed, a winter fever at its worst can take a small child from a
+        // thin house. One roll per step, rare, and written with weight.
+        if (cared && condition.severity === 3 && condition.circumstance === 'winter' && !fatalRolled && state.hero.station?.diet === 0 && state.age < 12 && !state.health.deathCause) {
+          fatalRolled = true;
+          if (seededRoll(state.seed, `health:winter:${condition.id}:${condition.lastEffectDay}${cradle(state)}`, 100) < 8) {
+            state.health.deathCause = 'A winter fever';
+            note(state, ctx, 'The end of a lived life', `The fever came in the dark of the year and the house had nothing to fight it with. ${state.hero.name} did not see the thaw.`);
+            ctx.endLife?.(state.health.deathCause);
+            return;
+          }
+        }
         if (cared && condition.type !== 'chronic' && ageOfCondition >= (condition.type === 'injury' ? 7 : 14)) condition.severity -= 1;
         else if (!cared) {
           damage = Math.min(12, damage + condition.severity);
@@ -350,7 +371,7 @@ function progressConditions(state, ctx) {
               // an infection for a year is more likely dead than not; a worn body,
               // the very old and the very young go faster.
               const odds = (condition.type === 'injury' ? 2 : 5) + (bodilyNow < 40 ? 6 : 0) + (state.age >= 60 ? 5 : state.age < 6 ? 5 : 0);
-              if (seededRoll(state.seed, `health:fatal:${condition.id}:${condition.lastEffectDay}`, 100) < odds) {
+              if (seededRoll(state.seed, `health:fatal:${condition.id}:${condition.lastEffectDay}${cradle(state)}`, 100) < odds) {
                 const data = PHYSICAL[condition.type];
                 state.health.deathCause = `${data.name}, left untreated`;
                 note(state, ctx, 'The end of a lived life', `${data.name} ran its course with no one able to stop it. Care, friendship, and every choice made before this day remain part of your chronicle.`);
@@ -436,15 +457,21 @@ export function mortalityChance(state, age, a, bodily) {
   if (state.health?.care?.medicineUntil >= state.day) chance *= 0.85;
   return Math.min(60, chance);
 }
+// A cradle drawn again after a childhood death is another life: its rolls differ.
+const cradle = state => state.fortune?.attempt ? `:${state.fortune.attempt}` : '';
 export function onHealthTime(state, { oldDay, newDay = state.day, outdoors = false } = {}, ctx = {}) {
   if (!state.health || !Number.isFinite(oldDay) || newDay <= oldDay || state.phase === 'retired' || state.health.deathCause) return;
   progressConditions(state, ctx);
   const health = state.health;
   for (let day = health.lastPhysicalCheckDay + 30; day <= newDay; day += 30) {
-    const risk = 3 + (outdoors ? 7 : 0) + ((state.life?.health ?? 80) < 35 ? 7 : 0) + ((state.life?.stress ?? 0) >= 75 ? 5 : 0) - (health.care.restUntil >= day || health.care.medicineUntil >= day ? 3 : 0);
-    if (seededRoll(state.seed, `health:physical:${day}`, 100) < risk) {
+    const risk = 3 + stationHealthRisk(state) + (outdoors ? 7 : 0) + ((state.life?.health ?? 80) < 35 ? 7 : 0) + ((state.life?.stress ?? 0) >= 75 ? 5 : 0) - (health.care.restUntil >= day || health.care.medicineUntil >= day ? 3 : 0);
+    if (seededRoll(state.seed, `health:physical:${day}${cradle(state)}`, 100) < risk) {
       const options = outdoors ? ['injury', 'infection', 'fever'] : ['fever', 'infection'];
-      onset(state, options[seededRoll(state.seed, `health:type:${day}`, options.length)], (state.life?.health ?? 80) < 35 ? 2 : 1, ctx, outdoors ? 'outdoors' : 'ordinary');
+      // A fever that comes in a hard winter, to a child in a house that eats
+      // thin, arrives at its worst and is the one that kills.
+      const winter = hardWinterChild(state, day);
+      const severity = winter ? (state.hero.station.diet === 0 ? 3 : 2) : Math.min(2, ((state.life?.health ?? 80) < 35 ? 2 : 1) + stationSeverity(state));
+      onset(state, options[seededRoll(state.seed, `health:type:${day}`, options.length)], severity, ctx, winter ? 'winter' : outdoors ? 'outdoors' : 'ordinary');
     }
     if (state.age >= 45 && seededRoll(state.seed, `health:chronic:${day}`, 1000) < (state.age >= 70 ? 8 : 3)) onset(state, 'chronic', 1, ctx, 'later_life');
     health.lastPhysicalCheckDay = day;
@@ -471,7 +498,7 @@ export function onHealthTime(state, { oldDay, newDay = state.day, outdoors = fal
       const bodily = state.life?.health ?? 80;
       const chance = state.householdBudget?.debt !== undefined ? mortalityChance(state, age, a, bodily)
         : age >= a.extreme ? Math.min(45, 8 + (age - a.extreme) * 3) : age >= a.late && bodily < 55 ? 6 + Math.min(14, age - a.late) : age >= a.frail && bodily < 15 ? 5 : 0;
-      if (chance && seededRoll(state.seed, `health:mortality:${nextYear}`, 100) < chance) {
+      if (chance && seededRoll(state.seed, `health:mortality:${nextYear}${cradle(state)}`, 100) < chance) {
         const cause = age >= a.late ? 'Natural death in advanced age' : age >= a.frail ? 'Complications of physical frailty in advanced age' : bodily < 40 ? 'A body worn out before its years' : 'Death in old age';
         health.deathCause = cause;
         note(state, ctx, 'The end of a lived life', `${cause}. Care, friendship, and every choice made before this day remain part of your chronicle.`);

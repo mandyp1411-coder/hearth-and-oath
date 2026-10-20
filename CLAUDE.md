@@ -42,6 +42,17 @@ in IndexedDB through the synchronous facade in `save-storage.js`
 - Player-facing text is in the game's voice, not an audit log. No
   "settled separately from the fee", no placeholder records.
 
+## The new edition (v0.60+)
+
+A life made by `createBirthGame` is a new-edition life: `householdBudget.debt`
+is defined (v0.61) and `hero.station` is set (v0.62). Migrated saves have
+neither and keep their old rules; heirs inherit the edition. Rules that
+belong to the edition check one of those two markers rather than a version
+number. `station.js` is what a birth decides; `fortune.js` is luck by season
+(money shocks from 18, hard winters before); `personality.js` carries the
+chosen nature and `hero.marks`, what life wrote on it. Choices that exist
+only for some natures carry `nature: traitId` on the choice.
+
 ## Direction
 
 The v0.59.0 analysis and the owner's design direction live in the Claude
