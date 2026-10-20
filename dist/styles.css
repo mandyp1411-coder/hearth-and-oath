@@ -5089,3 +5089,5 @@ html[data-reading-motion="reduced"] *,html[data-reading-motion="reduced"] *::bef
 .journal-chapter { margin: 34px 0 6px; padding-top: 18px; border-top: 2px solid #5a534a; }
 .journal-chapter .eyebrow { margin: 0; letter-spacing: 0.18em; }
 .action-detail { display: block; color: #8e867b; font: 11px/1.6 var(--mono); margin-top: 6px; }
+.right-now .section-heading .eyebrow { margin: 0; }
+.right-now .quick-actions { margin-top: 10px; }

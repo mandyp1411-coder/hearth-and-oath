@@ -1,3 +1,5 @@
+import { settlementServices } from './world-services.js';
+
 // Voice: the game speaks as a terse, grim chronicle with a dry edge, in the
 // register of its engraved art. This module rewrites what the player reads
 // at the edge of the UI; the engine's own text (with its numbers) is kept
@@ -205,3 +207,31 @@ export function epitaph(s, reason = '') {
   return `${who} ${lines.slice(0, 2).join(' ')}`;
 }
 export function validateEpitaph(v) { return v === undefined || (typeof v === 'string' && v.length > 0 && v.length <= 400); }
+
+// Right now: the three to five things that matter today, written as
+// situations, chosen from what the engine already offers. The full menu
+// stays beneath; this is the page you read first.
+export function whatMatters(s, actions) {
+  if (!edition(s) || !Array.isArray(actions) || s.event || s.battle) return [];
+  const open = id => actions.find(a => (typeof id === 'string' ? a.id === id : id.test(a.id)) && !a.disabledReason);
+  let services = null; const roomFor = kind => { services ||= (() => { try { return settlementServices(s); } catch { return []; } })(); const row = services.find(r => r.kind === kind); return row ? open('atlas_room_' + row.roomId) : null; };
+  const rows = [], take = (a, why) => { if (a && !rows.some(r => r.id === a.id) && rows.length < 5) rows.push({ ...a, why }); };
+  const b = s.householdBudget || {}, life = s.life || {}, health = s.health || {};
+  const sick = (health.physical || []).find(c => c.careUntil <= s.day), low = (health.mental || []).find(c => c.careUntil <= s.day);
+  if (sick) take(open('health_rest'), `${sick.severity >= 2 ? 'You are getting worse' : 'You are not well'}, and nobody has seen to it.`);
+  if (low) take(open('health_support'), 'The mind is not right, and it will not mend alone.');
+  if ((b.debt || 0) > 0 && s.hero.gold >= 20) take(open('budget_repay'), `You owe ${b.debt} gold and the interest is running.`);
+  if ((b.bondedUntil || 0) > s.day) take(open('career_work'), 'Your days belong to the creditor until the bond is worked off.');
+  if (s.age >= 18 && s.hero.profession !== 'Unemployed') take(open('career_work') || roomFor('work'), s.hero.gold < 40 ? `${s.hero.gold} gold in your purse. The work is there.` : 'The work is there.');
+  if (s.age >= 16 && s.hero.profession === 'Unemployed') take(open(/^career_choose_(?!unemployed)/) || open('choose_profession') || roomFor('work'), 'You have no trade. Someone needs hands.');
+  if (s.age >= 6 && s.age < 18 && s.education?.enrolled) take(open('school_attend') || roomFor('school'), 'There is a lesson, and you are not at it.');
+  if (s.age >= 6 && s.age < 18 && !s.education?.enrolled && (s.hero.station?.id !== 'bound' || s.family?.literate) && s.hero.station?.freedom !== 'owned') take(open('school_enroll_community') || open('school_enroll_apprenticeship') || roomFor('school'), 'No school yet. Some doors are still open.');
+  if (s.age >= 6 && s.age < 18 && !s.education?.enrolled && (s.hero.station?.freedom === 'owned' || s.hero.station?.id === 'bound' && !s.family?.literate)) take(open('grow_survival') || open('grow_play') || open(/^upbringing_(practice|discovery)$/), 'No school for the likes of you. The woods and the field, then.');
+  if ((life.stress || 0) >= 60 || (life.health ?? 80) < 50) take(open('life_rest') || open('health_routine'), (life.stress || 0) >= 60 ? 'Your hands shake. A week of nothing would help.' : 'You are worn thin.');
+  if (s.family && s.family.support < 40 && s.age < 18) take(open('family_support') || open(/^family_time_/), 'The house is cold toward you. Say what you need.');
+  if ((life.happiness ?? 60) < 35) take(open('social_gather') || open('pastime_interest') || open(/^leisure_/), 'There has been no joy in a long while.');
+  if (rows.length < 3) take(open(/^talk_/), 'Someone you know is within earshot.');
+  if (rows.length < 3) take(open('social_gather') || open('pastime_interest') || open(/^leisure_/) || open('grow_play'), 'An afternoon with nothing owed on it.');
+  if (rows.length < 3 && s.age >= 18) take(open(/^life_home_/), 'A roof of your own is for sale.');
+  return rows.slice(0, 5);
+}

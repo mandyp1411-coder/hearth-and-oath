@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as engine from '../dist/js/engine.js';
 import { rollBirthCircumstances } from '../dist/js/station.js';
-import { voiceAction, voiceActions, voiceEvent, epitaph, chapterHeading, chapterOf } from '../dist/js/voice.js';
+import { voiceAction, voiceActions, voiceEvent, epitaph, chapterHeading, chapterOf, whatMatters } from '../dist/js/voice.js';
 
 const answer = s => s.event.id === 'health_concern' && s.event.choices.some(c => c.id === 'rest') ? 'rest' : s.event.id === 'hard_winter' ? 'endure' : s.event.choices[0].id;
 function adult(seed, station = 'common') {
@@ -136,4 +136,24 @@ test('the book has chapters, and closes with an epitaph that judges the life', (
   }
   const alive = adult('voice-epitaph'); alive.epitaph = 'Too soon.';
   assert.equal(engine.validateSave(alive), false, 'no epitaph on an open book');
+});
+
+test('right now: three to five things that matter today, chosen from what is offered, written as situations', () => {
+  const s = adult('voice-now');
+  const actions = voiceActions(s, engine.getActions(s));
+  const rows = whatMatters(s, actions);
+  assert.ok(rows.length >= 3 && rows.length <= 5, `${rows.length} rows`);
+  for (const r of rows) { assert.ok(actions.some(a => a.id === r.id && !a.disabledReason), `${r.id} is offered and open`); assert.ok(r.why && r.why.length < 90, r.why); }
+  assert.equal(new Set(rows.map(r => r.id)).size, rows.length, 'no repeats');
+  // What matters changes with the situation.
+  s.householdBudget.debt = 120; s.hero.gold = 200;
+  assert.ok(whatMatters(s, voiceActions(s, engine.getActions(s))).some(r => r.id === 'budget_repay' && /owe 120 gold/.test(r.why)));
+  s.health.physical.push({ id: 'fever-now', type: 'fever', severity: 2, sinceDay: s.day, lastEffectDay: s.day, careUntil: 0, acknowledged: true });
+  const sick = whatMatters(s, voiceActions(s, engine.getActions(s)));
+  assert.equal(sick[0]?.id, 'health_rest'); assert.match(sick[0].why, /getting worse/);
+  // Never during a scene, never for an older life.
+  s.event = { id: 'x', title: 't', category: 'c', body: 'b', choices: [{ id: 'a', label: 'A', description: '' }] };
+  assert.deepEqual(whatMatters(s, actions), []);
+  const old = structuredClone(adult('voice-now')); delete old.hero.station; delete old.householdBudget.debt;
+  assert.deepEqual(whatMatters(old, engine.getActions(old)), []);
 });

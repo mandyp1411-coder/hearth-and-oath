@@ -95,7 +95,7 @@ import { renderPackWorkspace } from './pack-ui-v28.js';
 import { hexAtlas, cityRooms } from './cartography.js';
 import { readDisplay, saveDisplay, applyDisplay, displayPreset, readWorkspace, saveWorkspace } from './display.js';
 import { personalityImpactText, personalityTrait } from './personality.js';
-import { voiceActions, voiceEvent, chapterHeading } from './voice.js';
+import { voiceActions, voiceEvent, chapterHeading, whatMatters } from './voice.js';
 import { renderPersonalityPanel, renderTraitSelection } from './personality-ui.js';
 import { regionalNamingLore } from './names.js';
 import { regionAt } from './realm.js';
@@ -848,7 +848,9 @@ function lifeView() {
   if(ui.section==='years')return lifeFeed();
   if(ui.section==='plans')return routinePlannerPanel()+plans+renderLifeContext(game,actionsForUI(game),ui)+(game.age>=18?householdBudgetPanel(game,ui):'')+(game.age>=16?renderEconomyPlan(game,ui,{goal:economyGoal}):'')+(game.age>=18?`<details class="home-disclosure" data-disclosure="community-works"><summary>Community works</summary>${communityPanel(game,ui)}</details>`:'');
   const recent=currentJournal().filter(j=>j.age===game.age).slice(-3).reverse();
-  return `<div class="life-day-layout"><div class="life-day-story"><div class="life-current" tabindex="0" role="region" aria-label="Current moment">${journeyPanel()}${current||calm}${!current?`<p class="life-chapter-link">${e(lifeChapterView(game).title)} · ${button('Plans &amp; household calendar','workspace-section','life:plans','ghost small')}</p>`:''}${suspendedCard}${lifeHealthNotice()}${projectPanel()||careerPlanPanel()||ongoingActivityPanel()||road}${savedYearPanel()}${obligationsPanel()}${renderLatestExpeditionReceipt(game,ui)}</div>${recent.length?`<section class="recent-moments"><div class="section-heading"><h2>This year</h2>${button('Read your years','workspace-section','life:years','ghost small')}</div>${recent.map(j=>`<article class="remembered-entry"><small>${e(date(j.day))}</small><h3>${e(j.title)}</h3>${paragraphs(j.text)}</article>`).join('')}</section>`:''}${c.ending?`<details class="panel"><summary>${e(c.ending.title)}</summary>${paragraphs(c.ending.summary)}${renderEndingLosses(game,ui)}</details>`:''}</div>${lifeMap()}</div>`;
+  const now=!current&&!game.timeline?.journey?whatMatters(game,actionsForUI(game)):[];
+  const rightNow=now.length?`<section class="panel right-now" data-right-now><div class="section-heading"><h2>Right now</h2><span class="eyebrow">${e(chapterHeading(game.age))}</span></div>${actionCards(now.map(a=>({...a,description:a.why,detail:a.detail||a.description})))}<p class="small-copy">${button('Everything else','tab','activities','ghost small')}</p></section>`:'';
+  return `<div class="life-day-layout"><div class="life-day-story"><div class="life-current" tabindex="0" role="region" aria-label="Current moment">${journeyPanel()}${current||calm}${rightNow}${!current?`<p class="life-chapter-link">${e(lifeChapterView(game).title)} · ${button('Plans &amp; household calendar','workspace-section','life:plans','ghost small')}</p>`:''}${suspendedCard}${lifeHealthNotice()}${projectPanel()||careerPlanPanel()||ongoingActivityPanel()||road}${savedYearPanel()}${obligationsPanel()}${renderLatestExpeditionReceipt(game,ui)}</div>${recent.length?`<section class="recent-moments"><div class="section-heading"><h2>This year</h2>${button('Read your years','workspace-section','life:years','ghost small')}</div>${recent.map(j=>`<article class="remembered-entry"><small>${e(date(j.day))}</small><h3>${e(j.title)}</h3>${paragraphs(j.text)}</article>`).join('')}</section>`:''}${c.ending?`<details class="panel"><summary>${e(c.ending.title)}</summary>${paragraphs(c.ending.summary)}${renderEndingLosses(game,ui)}</details>`:''}</div>${lifeMap()}</div>`;
 
 }
 function activitiesView(){return renderActivities(game,uiHelpers(),{pane:activitiesPane,ongoing:ongoingActivityPanel()});}
