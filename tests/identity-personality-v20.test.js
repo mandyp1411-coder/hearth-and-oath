@@ -73,8 +73,11 @@ test('new NPCs keep their observed complexion, hair family, coat and species thr
   assert.equal(checked,4536);
 });
 
+// On a new-edition life a nature is a trade-off; the attribute points a trait
+// once bought belong to older saves. These two tests play an older life.
+const olderLife=async()=>{const s=structuredClone(await adultLife());delete s.householdBudget.debt;delete s.householdBudget.borrowedGold;delete s.householdBudget.debtInterestPaid;delete s.householdBudget.lastInterestYear;delete s.householdBudget.graceUsed;delete s.hero.station;assert.ok(validateSave(s));return s;};
 test('trait attribute gains are real, are applied once, and survive an export and reload',async()=>{
-  let s=await adultLife(),base=structuredClone(s.hero.attributes);s=choosePersonalityTrait(s,'brave');s=choosePersonalityTrait(s,'curious');
+  let s=await olderLife(),base=structuredClone(s.hero.attributes);s=choosePersonalityTrait(s,'brave');s=choosePersonalityTrait(s,'curious');
   const bonus=traitAttributeBonuses(['brave','curious']);for(const [key,v] of Object.entries(base))assert.equal(s.hero.attributes[key],v+(bonus[key]||0));
   const duplicate=choosePersonalityTrait(s,'brave');assert.deepEqual(duplicate.hero.attributes,s.hero.attributes);assert.equal(duplicate.hero.personality.traits.length,2);
   const opposing=choosePersonalityTrait(s,'cautious');assert.deepEqual(opposing.hero,s.hero);
@@ -123,7 +126,7 @@ test('a remembered grievance makes forgiveness and vengeance playable, with a la
 });
 
 test('a trait strength bonus changes actual battle damage and invalid targets cannot change composure',async()=>{
-  const plain=await adultLife(),brave=choosePersonalityTrait(choosePersonalityTrait(plain,'brave'),'vengeful');
+  const plain=await olderLife(),brave=choosePersonalityTrait(choosePersonalityTrait(plain,'brave'),'vengeful');
   const a=savedEncounter(plain),b=savedEncounter(brave);
   const target=a.battle.actors.find(p=>p.side==='enemy').id;
   const afterA=chooseBattleAction(a,'attack',target),afterB=chooseBattleAction(b,'attack',target);
