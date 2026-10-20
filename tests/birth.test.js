@@ -3,6 +3,7 @@ import { knownCurseMeeting } from './helpers/known-curse-meeting.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as engine from '../dist/js/engine.js';
+import { rollBirthCircumstances } from '../dist/js/station.js';
 import { travelPreview } from '../dist/js/world.js';
 import { travelPlanPreview } from '../dist/js/travel.js';
 
@@ -17,9 +18,11 @@ function choice(state, pick = 'curiosity') {
   return next;
 }
 function grow(seed, age = 18) {
-  let state = engine.createBirthGame({ seed, household: 'poor' });
-  while (state.age < age || state.event) {
-    if (state.event) state = choice(state,state.event.id==='lineage_bereavement'?'private':state.event.id.startsWith('birth_')?'curiosity':'continue');
+  // A common birth: poor, but not the thin house whose winters take small children.
+  let state = engine.createBirthGame({ seed, household: 'poor', station: rollBirthCircumstances(seed, 'common', 'human') });
+  for (let guard = 0; state.age < age || state.event; guard++) {
+    assert.ok(guard < 4000 && state.phase !== 'retired', `the fixture life must reach ${age} (age ${state.age}, ${state.health?.deathCause || state.notice})`);
+    if (state.event) state = choice(state,state.event.id==='lineage_bereavement'?'private':state.event.id==='hard_winter'?'endure':state.event.id.startsWith('birth_')?'curiosity':'continue');
     else {
       const before = state.age;
       state = state.timeline.yearTarget!==null?engine.continueAgeUp(state):engine.ageUp(state);
