@@ -93,6 +93,7 @@ import { initializeTravelEnergy, travelEnergyView, travelEnergyForecast, progres
 import { initializeTravel, setTravelPlan, travelPlanPreview, beginTravelJourney, onTravelLeg, travelActions, applyTravelAction, applyTravelChoice, flushTravelEvent, afterTravelBattle, travelEventIds, validateTravel } from './travel.js';
 import { initializeFortune, onFortuneTime, fortuneIncomeFactor, validateFortune, flushWinterEvent, applyWinterChoice, WINTER_EVENT } from './fortune.js';
 import { STATIONS, stationById, rollStation, rollBirthCircumstances, stationIncome, validateStation } from './station.js';
+import { epitaph, validateEpitaph } from './voice.js';
 import { initializeHouseholdBudget, accrueHouseholdBudget, settleHouseholdBudget, chargeDebtInterest, debtReckoning, applyDebtReckoningChoice, DEBT_RECKONING_EVENT, applyAnnualFocus, annualWorkRatio, householdCostPreview, householdBudgetActions, applyHouseholdBudgetAction, validateHouseholdBudget } from './budget.js';
 import { initializeSociety, societyActions, applySocietyAction, applySocietyChoice, societyEventIds, onSocietyTime, flushSocietyEvent, validateSociety, inheritSociety, societyCustomerChoiceReason } from './society.js';
 import { initializeCommunity, communityActions, applyCommunityAction, applyCommunityChoice, communityEventIds, onCommunityTime, flushCommunityEvent, validateCommunity, inheritCommunity } from './community.js';
@@ -698,6 +699,28 @@ export function attendBloodHunger(original){if(terminalRun(original))return copy
   setEvent(state,'life_hunger','A need before the next season','Vampirism',`Hunger is ${state.hero.condition.hunger}/100. Attend to it here, or refuse another real night. Your other promises remain; opening this decision spends no time.`,[choice('animal','Arrange animal blood','Take one real day without gold or assault.'),...(state.hero.gold>=8?[choice('donor','Find a willing local donor','Take one day and spend 8 gold.')]:[]),choice('pause','Keep the decision for later','Return to your current situation without spending time or feeding.')]);
   return afterAction(state);
 }
+/** Live a season: a quarter of a year, stopping only for things that matter.
+ * The last season of a year runs to the birthday. New-edition lives only. */
+export function liveSeason(original) {if(terminalRun(original))return copy(original);
+  const state = copy(original);
+  if(!state.hero.station||state.age<3)return ageUp(original);
+  if(state.cartography?.pending||state.cartography?.offsite){state.notice='Reach a named place before the season can turn. Continue your journey in Explore.';return state;}
+  if(state.maze||state.rpg?.expedition||state.justice?.prison||state.adventuring?.expedition){state.notice='Complete custody or leave the descent before living on.';return state;}
+  if(experienceModule(state)){state.notice='Finish or withdraw from your current commitment before living on.';return state;}
+  if (!state.timeline) initializeTimeline(state, { migration: true });
+  if(!waiting(state)&&!state.dungeon&&!state.timeline.journey&&!state.workshop?.project&&!state.careers?.batch&&!state.life?.plan)delete state.flags.hungerPauseDay;
+  // A season that was paused on its last day turns now, and the next begins.
+  if (state.timeline.season && state.timeline.yearTarget !== null && state.timeline.yearTarget <= state.day && !waiting(state)) { delete state.timeline.season; state.timeline.yearTarget = null; }
+  if (state.timeline.yearTarget === null) {
+    const born=state.timeline.birthDay||0, birthday=born+(Math.floor((state.day-born)/365)+1)*365, target=Math.min(birthday, state.day+92);
+    if (waiting(state) || state.dungeon || state.timeline.journey || state.workshop?.project || state.careers?.batch || state.life?.plan) { state.notice='Finish the waiting decision before the season can turn.'; return state; }
+    state.timeline.yearStartDay = state.day;
+    state.timeline.yearTarget = target;
+    if (target < birthday) state.timeline.season = true; else delete state.timeline.season;
+  }
+  startAgeYear(state, engineContext(state, { annual: true }));
+  return afterAction(state);
+}
 export function ageUp(original) {if(terminalRun(original))return copy(original);
   const state = copy(original);
   if(state.cartography?.pending||state.cartography?.offsite){state.notice='Reach a named place before turning the year. Continue your journey in Explore.';return state;}
@@ -801,7 +824,8 @@ function nextInterruptionDay(state, {ignoreNeed=null}={}) {
   const days = [];
   if (birthMode(state)) {
     days.push(nextBirthday(state));
-    if (state.timeline?.yearTarget !== null && state.timeline?.yearTarget !== undefined) days.push(Math.max(state.day, state.timeline.yearTarget));
+    // A season's end is not a wall: a care session begun on its last day runs past it, and the season turns after.
+    if (state.timeline?.yearTarget !== null && state.timeline?.yearTarget !== undefined && !state.timeline.season) days.push(Math.max(state.day, state.timeline.yearTarget));
   }
   if (state.hero.condition?.type === 'lycanthrope') days.push(getMoonForecast(state).nextFullMoon);
   if (state.hero.condition?.type === 'vampire' && ignoreNeed!=='vampire') days.push(state.day + Math.max(1, Math.ceil((75 - state.hero.condition.hunger) / bloodHungerRate(state.hero.condition))));
@@ -1763,7 +1787,11 @@ function retire(state, reason='retirement') {
   state.chronicle = life.join('\n\n');
   if(reason!=='retirement')state.chronicle+=`\n\n${hero.name} died at age ${state.age}. ${reason} Their family and the world they changed remain.`;
   state.notice = 'Your chronicle is ready. This life remains saved for reading.';
-  addJournal(state, reason==='retirement'?'A quieter life, freely chosen':'The final page of a life', `This chapter closed at age ${state.age}, on world day ${state.day}. Your story belongs to the choices you made.`, 'chronicle');
+  if (hero.station) {
+    // The book closes with an epitaph that judges the life against what it set out to do.
+    state.epitaph = epitaph(state, reason);
+    addJournal(state, 'The book closes', state.epitaph, 'chronicle');
+  } else addJournal(state, reason==='retirement'?'A quieter life, freely chosen':'The final page of a life', `This chapter closed at age ${state.age}, on world day ${state.day}. Your story belongs to the choices you made.`, 'chronicle');
   if(state.revision>=5)completeLineageHistory(state,reason);
 }
 
@@ -2560,6 +2588,7 @@ export function validateSave(value) {
       if(value.householdBudget!==undefined&&!validateHouseholdBudget(value.householdBudget,value))return false;
       if(!validateFortune(value.fortune,value))return false;
       if(!validateStation(value.hero.station,value))return false;
+      if(!validateEpitaph(value.epitaph)||(value.epitaph!==undefined&&value.phase!=='retired'))return false;
       if(value.society!==undefined&&!validateSociety(value.society,value))return false;
       if(value.community!==undefined&&!validateCommunity(value.community,value))return false;
       if(value.fellowship!==undefined&&!validateFellowship(value.fellowship,value))return false;
