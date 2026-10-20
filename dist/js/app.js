@@ -123,7 +123,7 @@ import { householdView, educationTransferPreview } from './household.js';
 import { workshopView, workshopTier } from './workshop.js';
 import { loreView } from './lore.js';
 import { preferenceFields, preferencesFromForm, preferenceView } from './preferences.js';
-import { careerPage, healthPage, legacyPage, careerBatchPanel } from './dynasty-ui.js';
+import { careerPage, healthPage, legacyPage, careerBatchPanel, householdBudgetPanel } from './dynasty-ui.js';
 import { travelPlanPreview, travelEncounterPerson } from './travel.js';
 import { getAudioSettings, setSoundEnabled, setSoundVolume, playUISound, setMusicEnabled, setMusicVolume, setAudioScene, audioSceneFor, unlockAudio } from './audio.js';
 import { renderCharacterCreator, captureCreatorDraft, randomizeCreatorDraft, defaultCreatorDraft, creatorStepTitles, selectCreatorPortrait, selectCreatorHeritage, rollCreatorName, toggleCreatorTrait, adjustCreatorAttribute, selectCreatorOrigin, normalizeCreatorDraft, randomizeCreatorPortrait, toggleCreatorLock, creatorDependencyChanges } from './creator.js';
@@ -843,7 +843,7 @@ function lifeView() {
   const suspendedCard=game.adultTournament?.stage==='paused'&&!current?renderTournamentCard(game,ui,actionsForUI(game),{potionReason:consumableReason(game,'potions')}):'';
  const plans=suspendedCard+projectPanel()+careerPlanPanel()+ongoingActivityPanel()+road+savedYearPanel()+obligationsPanel()+questReturnPanel();
   if(ui.section==='years')return lifeFeed();
-  if(ui.section==='plans')return routinePlannerPanel()+plans+renderLifeContext(game,actionsForUI(game),ui)+(game.age>=16?renderEconomyPlan(game,ui,{goal:economyGoal}):'')+(game.age>=18?`<details class="home-disclosure" data-disclosure="community-works"><summary>Community works</summary>${communityPanel(game,ui)}</details>`:'');
+  if(ui.section==='plans')return routinePlannerPanel()+plans+renderLifeContext(game,actionsForUI(game),ui)+(game.age>=18?householdBudgetPanel(game,ui):'')+(game.age>=16?renderEconomyPlan(game,ui,{goal:economyGoal}):'')+(game.age>=18?`<details class="home-disclosure" data-disclosure="community-works"><summary>Community works</summary>${communityPanel(game,ui)}</details>`:'');
   const recent=currentJournal().filter(j=>j.age===game.age).slice(-3).reverse();
   return `<div class="life-day-layout"><div class="life-day-story"><div class="life-current" tabindex="0" role="region" aria-label="Current moment">${journeyPanel()}${current||calm}${!current?`<p class="life-chapter-link">${e(lifeChapterView(game).title)} · ${button('Plans &amp; household calendar','workspace-section','life:plans','ghost small')}</p>`:''}${suspendedCard}${lifeHealthNotice()}${projectPanel()||careerPlanPanel()||ongoingActivityPanel()||road}${savedYearPanel()}${obligationsPanel()}${renderLatestExpeditionReceipt(game,ui)}</div>${recent.length?`<section class="recent-moments"><div class="section-heading"><h2>This year</h2>${button('Read your years','workspace-section','life:years','ghost small')}</div>${recent.map(j=>`<article class="remembered-entry"><small>${e(date(j.day))}</small><h3>${e(j.title)}</h3>${paragraphs(j.text)}</article>`).join('')}</section>`:''}${c.ending?`<details class="panel"><summary>${e(c.ending.title)}</summary>${paragraphs(c.ending.summary)}${renderEndingLosses(game,ui)}</details>`:''}</div>${lifeMap()}</div>`;
 
