@@ -877,12 +877,14 @@ function engineContext(state, { annual = false, resolvingNeed=null } = {}) {
     onBirthday: () => {
       if (state.family && state.education) onHouseholdAge(state, engineContext(state));
       chargeDebtInterest(state, engineContext(state));
-      if (!waiting(state)) debtReckoning(state, engineContext(state));
       const bloodPlan=state.hero.condition?.feedingPlan;
   if(bloodPlan&&state.hero.condition.hunger>=65&&!waiting(state)&&!state.justice?.prison&&!state.sanctuaries?.commitment){const id='sanctuary_feed_'+bloodPlan.agreementId,offer=sanctuaryActions(state).find(a=>a.id===id);if(offer&&!offer.disabledReason&&((nextInterruptionDay(state,{ignoreNeed:'vampire'})??state.day+2)>state.day)){applySanctuaryAction(state,id,engineContext(state,{annual:true,resolvingNeed:'vampire'}));if(state.phase==='retired')return copy(state);}else if(!offer||offer.disabledReason){state.hero.condition.feedingPlan=null;addJournal(state,'A standing agreement interrupted',offer?.disabledReason||'The agreed donor is no longer available. No fee or feeding was taken.','condition');}}
   if (state.workshop) refreshWorkshop(state, engineContext(state));
       if (state.conversations) onConversationAge(state, engineContext(state));
       if (state.campaign && !waiting(state) && !state.life?.plan) onCampaignAge(state, engineContext(state));
+      // The lender comes last, so his knock never swallows the year's other
+      // business: a birthday the campaign owes you still arrives.
+      if (!waiting(state)) debtReckoning(state, engineContext(state));
     },
   };
 }
