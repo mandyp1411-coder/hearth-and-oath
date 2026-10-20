@@ -1024,8 +1024,9 @@ function performAction(original, id) {
     if(!handler(state,id,ctx,getContacts(state)))return {...copy(original),notice:'This commitment could not proceed; no time or resources were spent.'};
     if(terminalRun(state))return copy(state);
     if(ctx.completedActionId)applyPreferenceActivity(state,ctx.completedActionId,ctx);
-    // Public room navigation cannot collect a bill from an earlier timed activity.
-    if(!id.startsWith('atlas_room_')&&(!id.startsWith('tournament_')||state.day>actionStartDay)&&(!id.startsWith('repertoire_')||state.day>actionStartDay)&&(!id.startsWith('justice_job_')||state.day>actionStartDay)&&(!id.startsWith('rpg_')||state.day>actionStartDay)&&(!/^(legacycalling_|fellowship_handover_|people_withdraw_)/.test(id)||state.day>actionStartDay))settleHouseholdBudget(state,ctx);
+    // Only an action that spent time can collect a bill; opening a page,
+    // walking a room or reviewing an offer never does.
+    if(state.day>actionStartDay)settleHouseholdBudget(state,ctx);
     recordPlanGold(state,before);
     return afterAction(state);
   }
