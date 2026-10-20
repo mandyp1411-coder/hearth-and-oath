@@ -54,7 +54,8 @@ export function rollBirthCircumstances(seed, stationId, ancestry = 'human', atte
   const literate = roll('literacy', 100) < station.literacy;
   const debt = station.debt[1] ? station.debt[0] + roll('debt', station.debt[1] - station.debt[0] + 1) : 0;
   const ties = [];
-  const name = salt => generatePersonName(seed, `birth:tie:${salt}`);
+  // The people a family knows are mostly its own people.
+  const name = salt => generatePersonName(seed, `birth:tie:${salt}`, { appearance: { ancestry } });
   if (freedom === 'owned') ties.push({ kind: 'owes', name: name('holder'), note: 'holds the family’s bond' });
   else if (station.id === 'bound') ties.push({ kind: 'owes', name: name('lord'), note: 'holds the land your family works' });
   else if (debt) ties.push({ kind: 'owes', name: name('lender'), note: 'lent the household what it could not earn' });
