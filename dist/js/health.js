@@ -319,6 +319,7 @@ export function applyHealthChoice(state, eventId, pick, ctx = {}) {
 }
 
 function progressConditions(state, ctx) {
+  let fatalRolled = false;
   for (const kind of ['physical', 'mental']) for (const condition of [...state.health[kind]]) {
     const periods = Math.floor((state.day - condition.lastEffectDay) / 14);
     if (!periods) continue;
@@ -339,8 +340,11 @@ function progressConditions(state, ctx) {
             condition.severity = Math.min(3, condition.severity + 1);
             if (condition.severity > previousSeverity) condition.acknowledged = false;
             // At its worst and still untreated, a fever or an infection can
-            // kill, and does more easily in a body already worn down.
-            else if (condition.severity === 3 && state.householdBudget?.debt !== undefined && !state.health.deathCause && state.hero.condition?.type !== 'vampire') {
+            // kill, and does more easily in a body already worn down. One
+            // roll per step at most, so a long commitment or a moved clock
+            // cannot deliver a year of danger in one go.
+            else if (condition.severity === 3 && !fatalRolled && state.householdBudget?.debt !== undefined && !state.health.deathCause && state.hero.condition?.type !== 'vampire') {
+              fatalRolled = true;
               const bodilyNow = state.life?.health ?? 80;
               const odds = (condition.type === 'injury' ? 4 : 9) + (bodilyNow < 40 ? 8 : 0) + (state.age >= 60 ? 6 : state.age < 6 ? 6 : 0);
               if (seededRoll(state.seed, `health:fatal:${condition.id}:${condition.lastEffectDay}`, 100) < odds) {
