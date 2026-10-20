@@ -1,5 +1,13 @@
 # Hearth & Oath
 
+Version 0.61.0 is Pressure: the first release where a life can go wrong. It applies to new lives; saves from earlier versions keep their old rules.
+
+- **Money is real.** Living costs went up and lodgings cost rent. What you cannot pay is owed, and owed money grows a tenth a year. At three years of costs the lender comes: sell the house, bind yourself to a year of unpaid labour, plead, or leave in the night. The parish carries a household once, in the first adult year, and never again.
+- **Seasons bring luck, mostly bad.** A thin harvest, a war levy, a theft, a season with no work, a roof, a rent rise, a sick season; less often a windfall or a good year. Waiting out a year earns less than working it.
+- **Mood settles.** Joy and Stress drift toward a level set by your circumstances instead of sitting at 100 and 0. Debt, illness and poverty weigh; a partner, children and comfort lift. At the top of the Stress scale something gives, and how you cope marks you.
+- **People die.** From the elder age the odds climb each year, faster for a worn body or an untreated illness, which can now kill at any age. A comfortable human life ends in its seventies or eighties, not past a hundred. A shift needs some Focus left.
+- **For developers:** `node scripts/balance/run-lives.mjs` plays seeded lives with simple policies and reports the measures the Design Bible targets. Measured from 18 over 90 years: median age at death 101 → 71–75, lifetime gold 60k → 10–12k, resting Joy 100 → about 55.
+
 Version 0.60.0 is the first release of a new edition. It changes nothing about how the game plays yet; it makes the foundation safe and fast for what comes next.
 
 - **Saves no longer have a size ceiling.** Lives are stored in the browser's IndexedDB instead of localStorage, which capped a save at about 5 MB and was reached within one long life. Existing saves are moved over automatically the first time the new version opens.

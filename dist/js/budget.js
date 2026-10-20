@@ -24,9 +24,12 @@ const birthMode=s=>s.timeline?.mode==='birth';
 const adulthood=s=>birthMode(s)?(s.timeline.birthDay||0)+18*365:0;
 export const annualWorkRatio=s=>RATIOS[s.life?.focus]??1;
 
-export function initializeHouseholdBudget(s,{reset=false}={}) {
+// The debt ledger marks a new-edition life. A save migrated from an older
+// version gets a budget without it and keeps the rules it was played under.
+export function initializeHouseholdBudget(s,{reset=false,edition=false}={}) {
   if(s.householdBudget&&!reset)return;
-  s.householdBudget={startedDay:s.day,lastDay:s.day,accruedUnits:0,billedGold:0,paidGold:0,supportedGold:0,lastJournalYear:null,focusDays:Object.fromEntries(HOUSEHOLD_FOCI.map(f=>[f.id,0])),history:[],debt:0,borrowedGold:0,debtInterestPaid:0,lastInterestYear:null,graceUsed:false};
+  s.householdBudget={startedDay:s.day,lastDay:s.day,accruedUnits:0,billedGold:0,paidGold:0,supportedGold:0,lastJournalYear:null,focusDays:Object.fromEntries(HOUSEHOLD_FOCI.map(f=>[f.id,0])),history:[],
+    ...(edition?{debt:0,borrowedGold:0,debtInterestPaid:0,lastInterestYear:null,graceUsed:false}:{})};
 }
 export function householdAnnualCost(s,day=s.day) {
   if(!s.life)return 0;

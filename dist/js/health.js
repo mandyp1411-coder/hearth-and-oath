@@ -306,6 +306,9 @@ export function applyHealthChoice(state, eventId, pick, ctx = {}) {
   if (actual === 0) { state.notice = 'The care session waits for the current calendar need. No treatment fee was spent.'; return true; }
   if (pick === 'care') state.hero.gold -= fee;
   provideCare(state, actionId);
+  // A sick child is put to bed whatever the family calls it: comfort for a
+  // wound or a fever still brings the rest that treats it.
+  if (pick === 'support' && pending.kind === 'physical' && state.age < 10) provideCare(state, 'health_rest');
   condition.acknowledged = true; state.health.pending = null;
   note(state, ctx, observing?'Care around your earliest days':'Support became part of your days', observing?`The adults caring for you made room for ${actual} day${actual===1?'':'s'} of rest and comfort. Familiar hands and voices stayed close while you recovered. No payment came from your belongings.`:`You spent ${actual} actual day${actual === 1 ? '' : 's'} attending to ${((PHYSICAL[condition.type] || MENTAL[condition.type]).name).toLowerCase()}.${pick === 'care' && fee ? ` The healer’s ${fee}-gold fee was paid once.` : ' Care was free.'} The symptoms and continuing care remain visible.${state.health.recovery ? ` This separate session adds no plan attendance; ${state.health.recovery.remainingDays} reserved days remain.` : ''}`);
   return true;

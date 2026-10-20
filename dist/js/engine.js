@@ -668,7 +668,7 @@ export function createBirthGame(config = {}) {
   initializeHousehold(state, { config: resolvedConfig }); initializeFamilyOrigins(state); initializeWorkshop(state);
   initializePreferences(state, { values: config.preferences }); initializeLore(state);
   initializeCareers(state); initializeHealth(state); initializeTravel(state); initializeTravelEnergy(state); initializeMaze(state); initializeSocialLife(state); initializeLineage(state,{startingAge:config.startAge});
-  initializeHouseholdBudget(state);initializeFortune(state);
+  initializeHouseholdBudget(state,{edition:true});initializeFortune(state);
   initializeFamilyDepth(state);initializeSociety(state);initializeCommunity(state);initializeFellowship(state);initializeSanctuaries(state);
   initializeSocial(state);initializePastimes(state);initializeLifeStories(state);
   initializeRealm(state,{fresh:true});initializeJustice(state);initializeAdventuring(state);initializeCartography(state);initializeRegionalWorld(state);initializeRpg(state,{fresh:true},engineContext(state));
@@ -1783,7 +1783,7 @@ function endLife(state, cause) {
 export function continueAsChild(original, childId) {if(terminalRun(original))return copy(original);
   if(original.revision<5||original.phase!=='retired')return {...copy(original),notice:'Close this chapter before continuing as a child.'};
   const next=createSuccessor(original,childId,createBirthGame);
-  if(next){initializeHouseholdBudget(next,{reset:true});initializeConversations(next);inheritRpg(next,original);inheritStoryMazes(next,original);settlePublicRoster(next,{migration:true});}
+  if(next){initializeHouseholdBudget(next,{reset:true,edition:original.householdBudget?.debt!==undefined});if(original.fortune)initializeFortune(next);initializeConversations(next);inheritRpg(next,original);inheritStoryMazes(next,original);settlePublicRoster(next,{migration:true});}
   return next && next !== false && validateSave(next) ? next : {...copy(original),notice:'That child cannot continue this family story.'};
 }
 

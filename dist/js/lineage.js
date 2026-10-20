@@ -582,7 +582,9 @@ export function createSuccessor(original, childId, createBirthGame) {
   }
   s.notice = `${child.name}'s life continues in the same world. No inherited oath, transformation, criminal evidence, or combat class follows them.`;
   initializeHealth(s, { reset: true }); initializeTravel(s, { reset: true });
-  initializeHouseholdBudget(s, { reset: true });
+  // An heir of a new-edition life stays in the new edition, debt ledger and all.
+  initializeHouseholdBudget(s, { reset: true, edition: old.householdBudget?.debt !== undefined });
+  if (s.fortune) s.fortune = { version: 1, lastSeason: Math.floor(s.day / 92), incomeFactor: 1, factorUntil: 0, history: [] };
   inheritCommunity(old,s); inheritSociety(old,s); inheritFellowship(old,s); initializeSanctuaries(s,{reset:true}); initializeFamilyDepth(s);
   inheritSocial(old,s); inheritPastimes(old,s);
   // A successor does not acquire private manuscripts, artistic preparation or personal recognition.

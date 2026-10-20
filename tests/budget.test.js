@@ -7,7 +7,7 @@ import {initializeHouseholdBudget,householdAnnualCost,householdCostPreview,accru
 
 function household(day=18*365,gold=500) {
   const s={day,age:18,phase:'adult',timeline:{mode:'birth',birthDay:0,yearTarget:null},hero:{gold,path:'unformed',skills:{scholarship:0,survival:0}},life:{focus:'livelihood',lifestyle:'frugal',home:{tier:'lodgings'},children:[],people:[],happiness:60,stress:20,health:80,plan:null},health:{care:{restUntil:0,supportUntil:0},physical:[],mental:[]},event:null,battle:null,careers:{batch:null},workshop:{project:null}};
-  initializeHouseholdBudget(s);return s;
+  initializeHouseholdBudget(s,{edition:true});return s;
 }
 const time=(s,days)=>{const before=s.day;s.day+=days;accrueHouseholdBudget(s,before,s.day);};
 
