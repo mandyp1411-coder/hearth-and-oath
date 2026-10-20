@@ -37,7 +37,7 @@ function settle(s){for(let n=0;n<200;n++){
  }throw Error('Fixture did not settle');}
 const base=settle(await createLifeAtAge({seed:'world-focus-eleven',originId:'hearthborn',startAge:22,difficulty:'gentle'}));
 function fresh(){const s=structuredClone(base);s.hero.gold=50000;return s;}
-function ageTo(s,age){while(s.age<age)s=settle(E.ageUp(s));return s;}
+function ageTo(s,age){for(let guard=0;s.age<age;guard++){assert.ok(guard<120&&s.phase!=='retired',`alive to ${age} (age ${s.age}, ${s.health?.deathCause||'alive'})`);s=settle(E.ageUp(s));}return s;}
 function pendingBirthday(s){s=E.ageUp(s);for(let n=0;n<200;n++){if(s.event?.id==='birth_adult_year')return roundtrip(s);if(s.event)s=choose(s,s.event.choices.find(c=>['care','keep','listen','continue'].includes(c.id)&&!c.disabledReason)?.id||s.event.choices.find(c=>!c.disabledReason).id);else if(s.timeline.yearTarget!==null)s=E.continueAgeUp(s);else break;}throw Error('The actual birthday did not open');}
 function open(s,id){const n=act(s,'stories_open_'+id);assert.equal(n.event.id,'stories_chapter');return n;}
 function chapter(s,id,pick='care'){return settle(choose(open(s,id),pick));}

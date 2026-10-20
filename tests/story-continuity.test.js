@@ -12,7 +12,7 @@ import { mountApp } from './helpers/ui-surface.mjs';
 
 function settle(state){
   for(let i=0;i<240;i++){
-    if(state.event){const available=state.event.choices.filter(c=>!c.disabledReason);state=E.chooseEventOption(state,(available.find(c=>['care','continue','later','keep','wait','support'].includes(c.id))||available[0]).id);}
+    if(state.event){const available=state.event.choices.filter(c=>!c.disabledReason);const physical=state.event.id==='health_concern'&&state.health?.pending?.kind==='physical';state=E.chooseEventOption(state,(physical&&available.find(c=>c.id==='rest')||available.find(c=>['care','continue','later','keep','wait','support'].includes(c.id))||available[0]).id);}
     else if(state.conversations?.pending)state=E.replyMessage(state,state.conversations.pending.personId,state.conversations.pending.replies[0].id);
     else if(state.stories?.project)state=E.chooseAction(state,'stories_continue');
     else if(state.timeline?.yearTarget!=null)state=E.continueAgeUp(state);
@@ -30,7 +30,7 @@ function fresh(){
 }
 const roundtrip=s=>{assert.ok(E.validateSave(s));const loaded=E.migrateSave(JSON.parse(JSON.stringify(s)));assert.deepEqual(loaded,s);return loaded;};
 function open(s,id){s=E.chooseAction(s,'stories_open_'+id);assert.equal(s.event?.id,'stories_chapter');return s;}
-function next(s,id){while(s.age<s.stories.arcs.find(a=>a.id===id).nextAge)s=settle(E.ageUp(s));return open(s,id);}
+function next(s,id){for(let guard=0;s.age<s.stories.arcs.find(a=>a.id===id).nextAge;guard++){assert.ok(guard<80&&s.phase!=='retired',`the fixture life must reach the next chapter alive (age ${s.age}, ${s.health?.deathCause||'alive'})`);s=settle(E.ageUp(s));}return open(s,id);}
 function complete(s,pick){return settle(E.chooseEventOption(s,pick));}
 
 test('a credited commission followed by unpaid work returns as a wage grievance, with credit intact',()=>{

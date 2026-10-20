@@ -72,7 +72,7 @@ test('production journal handlers browse all offers and decline the third withou
 test('completed short stories open every saved choice, fee, workday and outcome without recomputing them',()=>{
   let state=fresh();const id=storyInvitations(state)[0].id;
   for(let chapter=0;chapter<3;chapter++){
-    if(chapter)while(state.age<state.stories.arcs.find(a=>a.id===id).nextAge)state=settle(E.ageUp(state));
+    if(chapter)for(let guard=0;state.age<state.stories.arcs.find(a=>a.id===id).nextAge;guard++){assert.ok(guard<80&&state.phase!=='retired',`alive to the next chapter (age ${state.age}, ${state.health?.deathCause||'alive'})`);state=settle(E.ageUp(state));}
     state=beginStory(state,id);roundtrip(state);
   }
   const arc=state.stories.arcs.find(a=>a.id===id);assert.equal(arc.status,'completed');assert.equal(arc.choices.length,3);
@@ -119,7 +119,7 @@ test('one optional tracker supports main, side, personal and radiant quests with
 
 test('a paused personal chapter cannot advance or discard its retained return date and decision',()=>{
   let state=beginStory(fresh()),arc=state.stories.arcs[0];
-  while(state.age<arc.nextAge){state=settle(E.ageUp(state));arc=state.stories.arcs[0];}
+  for(let guard=0;state.age<arc.nextAge;guard++){assert.ok(guard<80&&state.phase!=='retired',`alive to the next chapter (age ${state.age}, ${state.health?.deathCause||'alive'})`);state=settle(E.ageUp(state));arc=state.stories.arcs[0];}
   state=E.chooseAction(state,'journal_pause_story:'+arc.id);const before=structuredClone(state);
   assert.ok(!E.getActions(state).some(a=>a.id==='stories_open_'+arc.id));
   state=E.chooseAction(state,'stories_open_'+arc.id);assert.equal(state.event,null);assert.deepEqual(state.stories,before.stories);roundtrip(state);
