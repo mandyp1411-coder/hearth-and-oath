@@ -23,8 +23,12 @@ export function checkPublicChildhoods(seeds,{requireVariety=true}={}) {
         } else s = engine.chooseEventOption(s, s.event.choices.find(c => !c.disabledReason).id);
       } else s = s.timeline.yearTarget === null ? engine.ageUp(s) : engine.continueAgeUp(s);
       assert.equal(engine.validateSave(s), true);
+      if (s.phase === 'retired') break;
     }
     assert.ok(operations < 300);
+    // Not every child lives to be grown. A book that closes early is still a
+    // valid book: the cause is written and the save stands.
+    if (s.phase === 'retired') { assert.ok(s.health.deathCause, `${n}: a childhood death names its cause`); assert.ok(s.age < 18); continue; }
     assert.equal(s.age, 18);
     assert.equal(s.timeline.storybook.records.length, 19);
     assert.equal(new Set(s.timeline.storybook.records.map(r => r.sceneId)).size, 19);

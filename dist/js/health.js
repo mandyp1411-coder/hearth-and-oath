@@ -168,8 +168,10 @@ export function healthActions(state) {
 function provideCare(state, id) {
   if (id === 'health_rest') {
     recoverHp(state, 10); wellbeing(state, 0, -5, 6);
-    state.health.care.restUntil = Math.max(state.health.care.restUntil, state.day + 21);
-    for (const condition of state.health.physical) condition.careUntil = Math.max(condition.careUntil, state.day + 21);
+    // A child is kept in bed as long as it takes; an adult gives it three weeks.
+    const bed = state.hero.station && state.age < 18 ? 28 : 21;
+    state.health.care.restUntil = Math.max(state.health.care.restUntil, state.day + bed);
+    for (const condition of state.health.physical) condition.careUntil = Math.max(condition.careUntil, state.day + bed);
   } else if (id === 'health_clinic') {
     recoverHp(state, 12); wellbeing(state, 0, -4, 10);
     const duration = clinicCareDays(state);
@@ -430,7 +432,15 @@ function restingStress(state) {
   if ((state.life?.children || []).filter(c => c.alive !== false).length >= 2) level += 4;
   return Math.max(5, Math.min(80, level));
 }
+// A child's body bounces back: between illnesses it heals a little each month
+// toward the health a childhood should have, slower in a house that eats thin.
+function childRecovery(state) {
+  if (!state.life || !state.hero.station || state.age >= 18 || state.health.physical.length) return;
+  const target = state.hero.station.diet === 0 ? 65 : 80;
+  if (state.life.health < target) state.life.health = Math.min(target, state.life.health + (state.hero.station.diet === 0 ? 2 : 3));
+}
 function driftMood(state, day) {
+  childRecovery(state);
   if (!state.life || state.householdBudget?.debt === undefined || state.age < 14) return;
   const joyTarget = restingJoy(state), stressTarget = restingStress(state);
   const joy = state.life.happiness, stress = state.life.stress;

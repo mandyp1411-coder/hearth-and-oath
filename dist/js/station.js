@@ -107,7 +107,7 @@ export function stationDues(s) {
 export function stationHealthRisk(s) {
   const st = s.hero.station;
   if (!st) return 0;
-  const diet = [2, 1, 0, -1][st.diet] ?? 0, roof = [1, 0, 0, 0][st.roof] ?? 0;
+  const diet = [1, 0, 0, -1][st.diet] ?? 0, roof = [1, 0, 0, 0][st.roof] ?? 0;
   return diet + roof + (s.age < 6 && st.diet <= 1 ? 1 : 0);
 }
 /** Who pays the healer for a child: nobody for the bound and the common,
