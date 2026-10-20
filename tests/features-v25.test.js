@@ -125,7 +125,10 @@ test('rare patrons and rangers open real invitations; declining creatures never 
   }
 });
 test('a chosen childhood focus develops through a lived year and never grants an instant skill',async()=>{
-  let s=settle(await createLifeAtAge({seed:'v25-child-focus',startAge:12,difficulty:'gentle'}));const defense=s.hero.skills.defense;s=E.chooseAction(s,'upbringing_practice');assert.equal(s.hero.skills.defense,defense);s=E.ageUp(s);assert.ok(s.upbringing.records.some(r=>r.age===12&&r.focus==='practice'&&r.developed));assert.ok(s.hero.skills.defense>defense);assert.ok(E.validateSave(s));
+  let s=settle(await createLifeAtAge({seed:'v25-child-focus',startAge:12,difficulty:'gentle'}));const defense=s.hero.skills.defense;s=E.chooseAction(s,'upbringing_practice');assert.equal(s.hero.skills.defense,defense);s=E.ageUp(s);
+  // The year may pause for the body or a hard winter; the focus develops through the days actually lived.
+  for(let guard=0;guard<20&&s.age===12;guard++){if(s.event){const pick=s.event.id==='health_concern'&&s.event.choices.some(c=>c.id==='rest')?'rest':s.event.id==='hard_winter'?'endure':s.event.choices.find(c=>!c.disabledReason).id;s=E.chooseEventOption(s,pick);}else s=E.continueAgeUp(s);}
+  assert.ok(s.upbringing.records.some(r=>r.age===12&&r.focus==='practice'&&r.developed));assert.ok(s.hero.skills.defense>defense);assert.ok(E.validateSave(s));
 });
 
 test('older shields and cloaks use proper loadout slots; adding body armor and an amulet preserves both',()=>{
