@@ -36,7 +36,10 @@ const fast = all.filter(f => !SLOW.has(f)).map(f => 'tests/' + f);
 const slow = [...all.filter(f => SLOW.has(f)).map(f => 'tests/' + f), ...stress];
 if (lane === 'list') { console.log(`fast: ${fast.length} files\nslow: ${slow.length} files`); process.exit(0); }
 const files = lane === 'fast' ? fast : slow;
-// Files are independent processes; run a few at once on the fast lane.
-const concurrency = lane === 'fast' ? String(Math.max(2, Math.min(4, (await import('node:os')).cpus().length - 1))) : '1';
+// Files are independent processes; run a few at once on the fast lane when
+// there are cores to spare. On a two-core machine the long integration files
+// starve each other, so stay serial there.
+const cores = (await import('node:os')).cpus().length;
+const concurrency = lane === 'fast' && cores >= 4 ? String(Math.min(4, cores - 1)) : '1';
 const result = spawnSync(process.execPath, ['--test', '--test-concurrency=' + concurrency, ...files], { stdio: 'inherit' });
 process.exit(result.status ?? 1);
