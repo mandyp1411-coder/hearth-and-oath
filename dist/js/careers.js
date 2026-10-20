@@ -251,9 +251,12 @@ export function applyCareerAction(s,id,ctx={}) {
     r.specialty=idSuffix;record(s,ctx,'A professional focus chosen',`${CAREER_SPECIALTIES[idSuffix].name} now guides new ${p.name.toLowerCase()} commissions. Six days and 24 gold were committed; existing customer terms remain unchanged.`);return true;
   }
   if(id==='career_work') {
-    const bonded=(s.householdBudget?.bondedUntil||0)>s.day,wage=bonded?0:Math.floor(professionWage(s)*fortuneIncomeFactor(s));s.hero.gold+=wage;recordCareerWork(s,{days:3,source:'shift',gold:wage},ctx);if(!modern(s))skill(s,p.skill);
+    // Worn down, you work worse: above 70 Stress a shift pays less, and the
+    // customers notice. Only new-edition lives carry this.
+    const worn=s.householdBudget?.debt!==undefined&&(s.life?.stress||0)>70;
+    const bonded=(s.householdBudget?.bondedUntil||0)>s.day,wage=bonded?0:Math.floor(professionWage(s)*fortuneIncomeFactor(s)*(worn?0.7:1));s.hero.gold+=wage;recordCareerWork(s,{days:3,source:'shift',gold:wage},ctx);if(!modern(s))skill(s,p.skill);
     if(s.life){s.life.career.experience+=2;s.life.stress=clamp(s.life.stress+(bonded?4:2));}
-    record(s,ctx,bonded?'Work for the creditor':'Ordinary useful work',bonded?`Three days of ${p.name.toLowerCase()} work, and every coin of it to the creditor. ${Math.max(0,s.householdBudget.bondedUntil-s.day)} days of the bond remain.`:`Three days of ${p.name.toLowerCase()} work earned ${wage} gold in ${place(s).name}.`);return true;
+    record(s,ctx,bonded?'Work for the creditor':'Ordinary useful work',bonded?`Three days of ${p.name.toLowerCase()} work, and every coin of it to the creditor. ${Math.max(0,s.householdBudget.bondedUntil-s.day)} days of the bond remain.`:`Three days of ${p.name.toLowerCase()} work earned ${wage} gold in ${place(s).name}.${worn?' Your hands shook and it showed in the pay.':''}`);return true;
   }
   if(id==='career_practice') {
     if(p.name==='Unemployed' || r.lastPracticeDay!==null && s.day-r.lastPracticeDay<14)return false;

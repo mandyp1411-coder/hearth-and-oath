@@ -70,11 +70,15 @@ test('fortune never rolls in childhood, catches up nothing, and a cost beyond ca
   for (let n = 0; n < 400 && s.age < 18; n++) s = s.event ? engine.chooseEventOption(s, s.event.choices[0].id) : engine.ageUp(s);
   assert.equal(s.fortune.history.length, 0, 'no shocks before adulthood');
   assert.equal(s.fortune.lastSeason, Math.floor(s.day / 92));
+  // A clock moved by many seasons at once rolls nothing.
+  const jumped = structuredClone(s); const { rows: none, ctx: quiet } = journal();
+  const was = jumped.day; jumped.day += 92 * 10; onFortuneTime(jumped, { oldDay: was, newDay: jumped.day }, quiet);
+  assert.equal(none.length, 0); assert.equal(jumped.fortune.lastSeason, Math.floor(jumped.day / 92));
   // Force a shock: find a season whose roll lands, by scanning forward with a copy.
   const copy = structuredClone(s); copy.hero.gold = 5; copy.householdBudget.debt = 0;
   const { rows, ctx } = journal();
-  const oldDay = copy.day; copy.day += 92 * 12;
-  onFortuneTime(copy, { oldDay, newDay: copy.day }, ctx);
+  // Live twelve seasons one boundary at a time (a clock jump of more than a season rolls nothing).
+  for (let n = 0; n < 12; n++) { const oldDay = copy.day; copy.day += 92; onFortuneTime(copy, { oldDay, newDay: copy.day }, ctx); }
   assert.ok(copy.hero.gold >= 0, 'gold never goes negative');
   assert.ok(rows.length > 0, 'twelve seasons produce at least one event');
   assert.ok(copy.householdBudget.debt > 0 || rows.every(r => !/gold/.test(r.text)), 'an unpaid cost is owed');

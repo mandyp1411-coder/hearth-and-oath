@@ -37,7 +37,12 @@ export function onFortuneTime(s, { oldDay, newDay = s.day } = {}, ctx = {}) {
   const f = s.fortune;
   // Childhood seasons pass without a roll; the household's money is not the child's yet.
   if (s.age < 18) { f.lastSeason = Math.floor(newDay / SEASON); return; }
-  for (let season = f.lastSeason + 1; season <= Math.floor(newDay / SEASON); season++) {
+  // One roll per season boundary actually lived through in this step. A clock
+  // moved by more than a season (an import, a long commitment) does not pile
+  // up rolls: the missed seasons are treated as lived quietly.
+  const current = Math.floor(newDay / SEASON);
+  if (current - f.lastSeason > 1) f.lastSeason = current - 1;
+  for (let season = f.lastSeason + 1; season <= current; season++) {
     f.lastSeason = season;
     // One roll in three seasons lands on something; the table decides what.
     if (seededRoll(s.seed, `fortune:season:${season}`, 100) >= 38) continue;

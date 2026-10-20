@@ -2448,6 +2448,8 @@ export function validateSave(value) {
     if (!integer(hero.maxHp, 1, 100000) || !integer(hero.maxMp, 0, 100000) || !finiteRange(hero.hp, 0, hero.maxHp) || !finiteRange(hero.mp, 0, hero.maxMp)) return false;
     if (!plain(hero.attributes) || !ATTRIBUTES.every(key => integer(hero.attributes[key], 1, 10000))) return false;
     if (!plain(hero.skills) || !SKILLS.every(key => integer(hero.skills[key], 0, 10000))) return false;
+    // Marks: what a life has done to a person (a break's coping, later scars and the like).
+    if (hero.marks !== undefined && !(Array.isArray(hero.marks) && hero.marks.length <= 24 && hero.marks.every(m => plain(m) && textField(m.id, 40) && integer(m.day, 0, value.day) && textField(m.source, 40)))) return false;
     if (!validCondition(hero.condition, value.day)) return false;
     if(value.event?.id.startsWith('curse_')&&value.event.id!=='curse_rare_meeting'&&hero.condition===null)return false;
     if (value.revision >= 2) {
