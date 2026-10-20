@@ -53,6 +53,13 @@ number. `station.js` is what a birth decides; `fortune.js` is luck by season
 chosen nature and `hero.marks`, what life wrote on it. Choices that exist
 only for some natures carry `nature: traitId` on the choice.
 
+Test fixtures that are not about birth should pin a station
+(`station: rollBirthCircumstances(seed, 'common', ancestry)`): a bound
+child may die of a winter fever, gets no pocket money and is not schooled,
+and a `household: 'poor'` birth is bound a third of the time. Growing loops
+need a guard and an answer for `hard_winter` (`'endure'`), and a journey
+policy needs `debt_reckoning: 'plead'`.
+
 ## Direction
 
 The v0.59.0 analysis and the owner's design direction live in the Claude
