@@ -58,6 +58,7 @@ function grow(state, target) {
       if (state.event.id === 'health_concern') { state = choose(state, 'continue'); continue; }
       if (state.event.id === 'lineage_bereavement') { state = choose(state, 'private'); continue; }
       if (state.event.id === 'hard_winter') { state = choose(state, 'endure'); continue; }
+      if (state.event.id.startsWith('living_')) { state = choose(state, 'continue'); continue; } // the world takes its course
       assert.match(state.event.id, /^(birth_|fate_)/, 'growing policy must expose any unexpected interruption');
       state = choose(state, state.event.choices.some(item => item.id === 'curiosity') ? 'curiosity' : state.event.choices[0].id);
     } else state = transition(state, value => value.timeline.yearTarget == null ? engine.ageUp(value) : engine.continueAgeUp(value));

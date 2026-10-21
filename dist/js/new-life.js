@@ -10,13 +10,16 @@ import { rollLifeCircumstances, normalizeStartAge, originById } from './origins.
 import { seededRoll } from './world.js';
 import { PROFESSION_CATALOG, civilianEntryReason } from './career-entry.js';
 
-function pastChoice(s) {
+function pastChoice(s,attempt=0) {
   const offered=s.event.choices.filter(c=>!c.disabledReason),id=s.event.id;
   let preferred=id==='health_concern'?(s.health.pending?.kind==='physical'?'rest':'support'):
     id==='plague_letter'?'later':id==='life_budget'?'simplify':id==='deadline_review'?'pause':
     id==='lineage_bereavement'?['share','private','memorial'][seededRoll(s.seed,`past:grief:${s.day}`,3)]:
     id==='career_staff'?'decline':id==='retirement'?'continue':id==='school_exam'?'present':id==='hard_winter'?'endure':id==='schooling_rival'?'contest':id==='schooling_temper'?'endure':id==='living_conscription'?(offered.some(c=>c.id==='pay')?'pay':'continue'):id==='living_strike'?'continue':id==='living_wolves'?(offered.some(c=>c.id==='pay')?'pay':'continue'):id==='living_purge'?'shelter':null;
   const safe=offered.filter(c=>!(id==='family_visit'&&c.id==='gift'&&s.hero.gold<10));
+  if(id==='sanctuary_case_capture')preferred='service';
+  // A choice the scene refused (a fee the purse cannot meet) is not tried twice: the next sitting takes the next door.
+  if(attempt>0)return safe[(seededRoll(s.seed,`past:choice:${id}:${s.age}:${s.day}`,safe.length)+attempt)%safe.length];
   return safe.find(c=>c.id===preferred)||safe[seededRoll(s.seed,`past:choice:${id}:${s.age}:${s.day}`,safe.length)];
 }
 function pastBattle(s) {
@@ -79,7 +82,7 @@ async function generateLife(config, { onProgress, shouldCancel } = {}, draws = {
     if(s.event){
       const key=`${s.event.id}:${s.day}`,count=stalls.get(key)||0;
       if(count>5)throw new Error('The earlier life paused at an unresolved decision.');
-      stalls.set(key,count+1);const c=pastChoice(s);
+      stalls.set(key,count+1);const c=pastChoice(s,count);
       if(!c)throw new Error('The earlier life has no available choice.');
       s=chooseEventOption(s,c.id);continue;
     }
