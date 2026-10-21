@@ -78,21 +78,25 @@ export function schoolingAdmissionReason(s, route) {
   }
   return null;
 }
-/** A wealthy house pays its children's tuition; everyone else pays from the purse. */
-export function canPayTuition(s, route) {
+/** What the school asks for today: the year's fee, unless it is already paid, the
+ * scholarship covers it, or a wealthy house pays for its child. Zero for older saves. */
+export function tuitionDue(s, route) {
+  const k = schooling(s); if (!k) return 0;
   const fee = TUITION[route] || 0;
-  if (!fee || (route === 'academy' && s.education?.scholarship)) return true;
-  if (s.age < 18 && wealthy(s)) return true;
-  return s.hero.gold >= fee;
+  if (!fee || (route === 'academy' && s.education.scholarship) || k.tuitionPaid[route] === s.age) return 0;
+  if (s.age < 18 && wealthy(s)) return 0;
+  return fee;
 }
-/** Tuition is paid once a school year, at enrolment and at the first lesson of each year after. */
-export function payTuition(s, route, ctx = {}) {
+export function canPayTuition(s, route) { return s.hero.gold >= tuitionDue(s, route); }
+/** Tuition is paid once a school year, at enrolment and at the first lesson of each year after.
+ * The fee is the action's displayed cost, so the engine has usually taken it already
+ * (`charged`); this records the year and writes the line. */
+export function payTuition(s, route, ctx = {}, { charged = false } = {}) {
   const k = schooling(s); if (!k) return true;
-  const fee = TUITION[route] || 0;
-  if (!fee || (route === 'academy' && s.education.scholarship) || k.tuitionPaid[route] === s.age) return true;
-  if (s.age < 18 && wealthy(s)) { k.tuitionPaid[route] = s.age; return true; }
-  if (s.hero.gold < fee) return false;
-  s.hero.gold -= fee; k.tuitionPaid[route] = s.age;
+  const fee = tuitionDue(s, route);
+  if (!fee) { if (TUITION[route]) k.tuitionPaid[route] = s.age; return true; }
+  if (!charged) { if (s.hero.gold < fee) return false; s.hero.gold -= fee; }
+  k.tuitionPaid[route] = s.age;
   ctx.journal?.('Tuition', `${fee} gold to the schoolmaster, for the year. Letters are not given away.`, 'education');
   return true;
 }
@@ -197,6 +201,31 @@ export function credentialReason(s, professionId) {
 export function schoolingView(s) {
   const k = schooling(s); if (!k) return null;
   return { literate: k.literate, letters: k.letters, scholarship: k.scholarship, entrance: k.entrance.academy || null, electives: k.electives.map(e => ({ ...e, label: electiveById(e.id)?.label || e.id })), tier: tier2Certificate(s) ? 2 : tier1Certificate(s) ? 1 : 0 };
+}
+
+/** What each school is, on a new life, told as the town would tell it. Null for older saves. */
+export function schoolDescription(s, route) {
+  if (!schooling(s)) return null;
+  const paid = s.age < 18 && wealthy(s);
+  switch (route) {
+    case 'community': return `Letters, numbers and the parish’s own history, in the schoolroom behind the hall. ${TUITION.community} gold a year${paid ? ', which the house pays for its children' : ', from your own purse'}. The certificate is letters.`;
+    case 'shrine': return 'The keeper teaches letters, care and devotion for nothing, and takes one pupil at a time. Whether that is you was decided at six.';
+    case 'academy': return `The grammar school: rhetoric, anatomy, law, the stars, one elective a year beside the core. It expects letters and an entrance examination, and ${TUITION.academy} gold a year unless you hold the scholarship${paid ? ' or the house pays' : ''}.`;
+    case 'apprenticeship': return 'A craft learned at a master’s bench. No fee and no letters needed; years of low pay and a temper to live under.';
+    default: return null;
+  }
+}
+
+/** The one-line state of a schooling, for the school panel. */
+export function schoolingSummary(s) {
+  const k = schooling(s); if (!k) return null;
+  const v = schoolingView(s);
+  const letters = v.literate ? (v.letters === 'tutor' ? 'You read; a tutor saw to it.' : v.letters === 'home' ? 'You read; the house taught you at its own table.' : v.letters === 'school' ? 'You read, because you were schooled.' : v.letters === 'self' ? 'You read, late and hard-won.' : 'You read.') : s.age < 6 ? 'Nobody has taught you your letters yet.' : s.age < 18 ? 'You cannot read. A school would change that, if one will have you and the fee can be found.' : 'You cannot read. The archivist teaches grown people, four afternoons at a time.';
+  const standing = v.tier >= 2 ? ' You hold a grammar school certificate.' : v.tier === 1 ? ' You hold a school certificate.' : '';
+  const taken = v.electives.filter(e => e.grade !== null);
+  const learned = taken.length ? ` Examined in ${taken.map(e => e.label).join(', ')}.` : '';
+  const money = v.scholarship === 'passed' ? ' The scholarship pays your way at the grammar school.' : v.entrance === 'passed' && !tier2Certificate(s) ? ' You passed the grammar school’s entrance examination.' : '';
+  return `${letters}${standing}${learned}${money}`;
 }
 
 export function validateSchooling(k, s) {

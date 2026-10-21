@@ -8,6 +8,7 @@ import { getBattleActions, takeBattleAction } from './combat.js';
 import { appearanceAtAge } from './avatar.js';
 import { rollLifeCircumstances, normalizeStartAge, originById } from './origins.js';
 import { seededRoll } from './world.js';
+import { PROFESSION_CATALOG, civilianEntryReason } from './career-entry.js';
 
 function pastChoice(s) {
   const offered=s.event.choices.filter(c=>!c.disabledReason),id=s.event.id;
@@ -95,8 +96,9 @@ async function generateLife(config, { onProgress, shouldCancel } = {}, draws = {
     if(s.age>=6&&s.age<18&&tryTimes('school_attend',4))continue;
     if(s.age>=10&&s.age<18&&s.education.enrolled&&tryOnce('school_exam'))continue;
     if(s.age>=16&&s.hero.profession==='Unemployed'){
-      const jobs=getActions(s).filter(a=>a.id.startsWith('career_choose_')&&!a.disabledReason&&a.id!=='career_choose_unemployed');
-      if(jobs.length&&tryOnce(jobs[seededRoll(s.seed,'past:livelihood',jobs.length)].id))continue;
+      // The trades that would have this life, wherever it is standing; the walk to the mentor is the action's own.
+      const jobs=PROFESSION_CATALOG.filter(j=>j.name!=='Unemployed'&&!civilianEntryReason(s,{profession:j.name})).map(j=>`career_choose_${j.id}`);
+      if(jobs.length&&tryOnce(jobs[seededRoll(s.seed,'past:livelihood',jobs.length)]))continue;
     }
     // A sensible past pays what it owes when it can.
     if(s.age>=18&&(s.householdBudget?.debt||0)>0&&s.hero.gold>=s.householdBudget.debt+40&&tryOnce('budget_repay'))continue;

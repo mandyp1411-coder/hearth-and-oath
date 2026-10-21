@@ -19,8 +19,8 @@ for(const requested of [0,2,3,6,9,10,15,16,17,18,27,40,64,65,80])test(`a new lif
   assert.equal(s.phase,age<18?'childhood':'adult');assert.equal(s.hero.path,'unformed');assert.equal(s.hero.specialization,null);
   assert.equal(s.event.id,age===0?'birth_arrival':age<=18?`birth_year_${age}`:'birth_adult_year');
   assert.ok(s.lineage.people.find(p=>p.source==='hero').deathAge>=age+8);
-  // Not everyone gets school: a bound child in a house that does not read, or an owned one, is put to work instead.
-  if(age>6){const barred=s.hero.station.freedom==='owned'||s.hero.station.id==='bound'&&!s.family.literate;assert.ok(barred||s.education.attendance>0||s.education.progress>0,`schooled unless barred (${s.hero.station.id}, reads ${s.family.literate})`);}
+  // Not everyone gets school: the bound are put to work, the shrine keeper takes one pupil, and the village school wants its fee.
+  if(age>6){const k=s.education.schooling,barred=s.hero.station.freedom==='owned'||s.hero.station.id==='bound'&&!s.family.literate,unplaced=k.shrinePlace===false&&!['trade','gentry','noble','royal'].includes(s.hero.station.id);assert.ok(barred||unplaced||s.education.attendance>0||s.education.progress>0,`schooled unless barred or unplaced (${s.hero.station.id}, reads ${s.family.literate}, shrine place ${k.shrinePlace})`);}
   if(age>16)assert.notEqual(s.hero.profession,'Unemployed');
   const p=portraitLayers({...s.hero,age});assert.equal(p.years,age);if(age<3)assert.equal(p.hair,null);if(age<18)assert.equal(p.beard,null);if(age>=65)assert.equal(p.baseAtlas,'elder');
   assert.ok(validateSave(s));assert.deepEqual(migrateSave(JSON.parse(JSON.stringify(s))),s,'reload preserves the drawn history and waiting birthday');

@@ -1,5 +1,15 @@
 # Hearth & Oath
 
+Version 0.64.0 is Education, first slice: being lettered is rare, earned and worth something. It applies to new lives; saves from earlier versions keep their old rules.
+
+- **Letters are earned.** A new life cannot read until someone teaches it. A high house has a tutor by eight; a literate trade house teaches at its own table by ten, most of the time; a village or shrine school certificate is letters; a grown person can learn from the archivist, four afternoons at three gold each. The unlettered cannot read on their own, and put their mark to the lender's paper at a rate he did not say aloud.
+- **School has a price and a door.** The shrine teaches for nothing and the keeper takes one pupil, decided once at six (a common child two in five, a bound one one in twelve, a word from a family friend helps). The village school wants ten gold a year, paid by a wealthy house for its children and from the purse by everyone else. The grammar school expects letters, an entrance examination once a year from twelve, and forty gold a year unless you passed the scholarship examination: three places, one sitting in a life.
+- **Aptitude is real.** Intellect, how you have done so far, and nature (the Curious learn faster, the Impatient struggle, Stress drags) move every lesson and every examination.
+- **Electives.** The grammar years offer one elective a year from a seeded four (rhetoric, anatomy, heraldry, accounting, astronomy, theology, Old Elvish, siegecraft, natural philosophy, law), four lessons each, then the master's grade and a skill.
+- **Credentials gate the learned trades.** The healers want letters and a grammar certificate or anatomy; the archive wants the certificate; a cartographer must read; a merchant must read or be born to a trade house; the alchemists want letters and natural philosophy. The smithy, the field and the road never asked.
+- **The past knows it.** A generated life sits the examinations and takes its lessons, so entering at eighteen as a common child you read about half the time, as a bound child almost never, as a trade child often with a grammar certificate, as gentry always.
+- **Still to come in Education:** the institutions of the capitals (university, war college, collegium, seminary, law school), the wider skill list that fades without use, classmates as people, standing for the educated, the apprenticeship bond.
+
 Version 0.63.0 is Voice: the game reads like its art. It applies to new lives; saves from earlier versions keep their old text.
 
 - **Live the season.** A command beside Age up: a quarter of a year that stops only for things that matter. A slight complaint is seen to at home without stopping the calendar; what is getting worse, the mind, a promise coming due and the birthday still ask. The last season of a year runs to the birthday and its page.
