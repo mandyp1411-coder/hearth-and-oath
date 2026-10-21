@@ -10,7 +10,7 @@
 // New-edition lives only (`hero.station`). The realm's own yearly tick keeps
 // its rulers, merchants and prosperity; this module writes into it (a war the
 // courts began, security and prosperity where an event sits) and reads it.
-import { seededRoll, isSettlement } from './world.js';
+import { seededRoll, isSettlement, generatePersonName } from './world.js';
 import { REGION_TEMPLATES } from './realm-content-v18.js';
 import { hasNature, shiftNature } from './personality.js';
 import { startRegionalWar } from './regional-world-v33.js';
@@ -27,7 +27,7 @@ const ANCESTRY_WORD = Object.freeze({ tiefling: 'the horned', goblin: 'the gobli
 const LIMITS = Object.freeze({ actors: 14, events: 12, threads: 12, news: 24 });
 
 // The house convention: 'continue' is always the choice that lets the world take its course.
-export const LIVING_EVENTS = { ids: () => ({ living_conscription: ['pay', 'go', 'continue'], living_strike: ['continue', 'work', 'mediate'], living_wolves: ['hunt', 'pay', 'continue'], living_purge: ['shelter', 'denounce', 'send', 'continue'] }) };
+export const LIVING_EVENTS = { ids: () => ({ living_conscription: ['pay', 'go', 'continue'], living_strike: ['continue', 'work', 'mediate'], living_wolves: ['hunt', 'pay', 'continue'], living_purge: ['shelter', 'denounce', 'send', 'continue'], living_refugees: ['shelter', 'report', 'continue'] }) };
 
 const regionName = id => REGION_TEMPLATES.find(r => r.id === id)?.name || id;
 const neighboursOf = (s, regionId) => { const borders = s.realm?.politics?.borders; if (Array.isArray(borders) && borders.length) { const rows = borders.filter(b => b.includes(regionId)).map(b => b[0] === regionId ? b[1] : b[0]); if (rows.length) return rows; } return NEIGHBOURS[regionId] || []; };
@@ -37,6 +37,7 @@ const sitesIn = (s, regionId, settled = true) => Object.values(s.realm?.sites ||
 const clamp = (n, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, n));
 const note = (ctx, title, text, tag = 'world') => (ctx?.journalLiteral || ctx?.journal)?.(title, text, tag);
 const homeOf = s => s.life?.home?.locationId || s.hero.birthplaceId || 'home';
+const generateFamilyName = (s, salt) => String(generatePersonName(s.seed, `refugees:${salt}`)).split(' ').slice(-1)[0];
 
 // ---------------------------------------------------------------------------
 // Actors and their goals.
@@ -163,8 +164,10 @@ function tradeOf(s, craft) {
   if (s.careers?.active && CRAFT_PROFESSION[craft] === s.hero.profession) return { how: 'commission' };
   return null;
 }
+const THREAD_COOLDOWN = 8; // seasons before the same kind of story comes to the door again
 function openThread(s, season, ev, def, roles, ctx) {
   const l = living(s); if (l.threads.filter(t => !t.closed).length >= LIMITS.threads) return null;
+  if (l.threads.some(t => t.def === def && season - t.season < THREAD_COOLDOWN)) return null;
   l.counters.threads++;
   const t = { id: `th-${l.counters.threads}`, def, eventId: ev.id, roles, season, stage: 'open', choice: null, followUp: null, memory: [], closed: false };
   l.threads.push(t); if (l.threads.length > LIMITS.threads * 2) l.threads.splice(0, 1);
@@ -176,9 +179,13 @@ function routeEvent(s, season, ev, ctx) {
   if (ev.kind === 'levy') { if (ev.regionId === region) applyLevy(s, ev, ctx); return; }
   if (!touches) { pushNews(s, season, ev.text, ev.id); return; }
   let t = null;
-  if (ev.kind === 'war' && s.age >= 8) { const kin = levyKin(s); if (kin) t = openThread(s, season, ev, 'conscription', { kin: { id: kin.id, name: kin.name, relation: presentKin(s).find(x => x.p.id === kin.id)?.m.relationship || 'kin' } }, ctx); }
-  else if (ev.kind === 'strike' && s.age >= 14) { const trade = tradeOf(s, ev.craft); if (trade) t = openThread(s, season, ev, 'strike', { craft: ev.craft, how: trade.how, master: trade.master || null }, ctx); }
-  else if (ev.kind === 'raid' && ev.siteIds.includes(home) && s.age >= 14) { const n = neighbourOf(s); t = openThread(s, season, ev, 'wolves', { neighbour: n ? { id: n.id, name: n.name } : null }, ctx); }
+  if (ev.kind === 'war' && s.age >= 8) {
+    const kin = levyKin(s);
+    if (kin && (ev.regionId === region || ev.against === region)) t = openThread(s, season, ev, 'conscription', { kin: { id: kin.id, name: kin.name, relation: presentKin(s).find(x => x.p.id === kin.id)?.m.relationship || 'kin' } }, ctx);
+    else if (s.age >= 16 && (ev.regionId === region || ev.against === region || ev.spreadTo === region)) { const family = `the ${generateFamilyName(s, ev.id)}s`; t = openThread(s, season, ev, 'refugees', { family, from: placeName(s, ev.siteIds.find(id => regionOf(s, id) !== region) || ev.siteIds[0]) }, ctx); }
+  }
+  else if (ev.kind === 'strike' && s.age >= 14) { const trade = tradeOf(s, ev.craft); if (trade) t = openThread(s, season, ev, 'strike', { craft: ev.craft, how: trade.how, master: trade.master || null }, ctx); else if (s.age >= 16 && s.hero.profession === 'Unemployed' && ev.regionId === region) t = openThread(s, season, ev, 'strike', { craft: ev.craft, how: 'hands', master: null }, ctx); }
+  else if (ev.kind === 'raid' && s.age >= 14 && (ev.siteIds.includes(home) || ev.regionId === region && seededRoll(s.seed, `raid:ask:${ev.id}`, 100) < 40)) { const n = ev.siteIds.includes(home) ? neighbourOf(s) : null; t = openThread(s, season, ev, 'wolves', { neighbour: n ? { id: n.id, name: n.name } : null, village: ev.siteIds.includes(home) ? null : placeName(s, ev.siteIds[0]) }, ctx); }
   else if (ev.kind === 'purge' && s.age >= 12) { const kin = purgeKin(s, ev.target); if (kin) t = openThread(s, season, ev, 'purge', { ancestry: ev.target, kin: kin.person ? { id: kin.person.id, name: kin.person.name, relation: kin.relation } : null, relation: kin.relation }, ctx); }
   if (!t) pushNews(s, season, ev.text, ev.id);
   else note(ctx, 'Word from the road', ev.text, 'world');
@@ -220,7 +227,7 @@ export function flushLivingEvent(s, ctx = {}) {
     ]); return true;
   }
   if (t.def === 'strike') {
-    ctx.setEvent?.('living_strike', 'Tools down', 'The world', `${ev.text || 'The guild has downed tools.'} ${r.how === 'bench' ? `${r.master} has shut the yard and stands with the guild.` : r.how === 'commission' ? 'Your commission cannot be finished while it lasts.' : 'Your trade is the one struck.'} The masters want blacklegs; the strikers want everyone.`, [
+    ctx.setEvent?.('living_strike', 'Tools down', 'The world', `${ev.text || 'The guild has downed tools.'} ${r.how === 'bench' ? `${r.master} has shut the yard and stands with the guild.` : r.how === 'commission' ? 'Your commission cannot be finished while it lasts.' : r.how === 'hands' ? 'You have no trade, and the masters are paying anyone with hands to stand where the guild stood.' : 'Your trade is the one struck.'} The masters want blacklegs; the strikers want everyone.`, [
       { id: 'continue', label: 'Down tools with them', description: 'No wages while it lasts. The street remembers who stood.' },
       { id: 'work', label: 'Work through it', description: 'The masters pay well for it, and the strikers will know your face for years.' },
       { id: 'mediate', label: 'Carry terms between them', description: 'If you can be believed by both. Persuasion.', ...((s.hero.skills?.persuasion || 0) < 4 ? { disabledReason: 'Neither side would listen to you.' } : {}) },
@@ -228,10 +235,17 @@ export function flushLivingEvent(s, ctx = {}) {
   }
   if (t.def === 'wolves') {
     const who = r.neighbour ? `${r.neighbour.name}’s child` : 'a child from the lower houses';
-    ctx.setEvent?.('living_wolves', 'The wolves', 'The world', `The wolves came down early and took ${who} from the edge of ${placeName(s, homeOf(s))}. The village stands in the square with lanterns and asks who will go up the mountain.`, [
+    ctx.setEvent?.('living_wolves', 'The wolves', 'The world', r.village ? `The wolves came down early and took a child from the edge of ${r.village}, a morning down the valley. Their headman has sent to every house with a spear or a dog, and yours is one of them.` : `The wolves came down early and took ${who} from the edge of ${placeName(s, homeOf(s))}. The village stands in the square with lanterns and asks who will go up the mountain.`, [
       { id: 'hunt', label: 'Go up the mountain', description: 'Survival and weapons, against the pack, in the snow. People remember who went.' },
       { id: 'pay', label: 'Pay for hunters: 30 gold', description: 'Men from the next valley who do this for coin.', ...(s.hero.gold < 30 ? { disabledReason: `You have ${s.hero.gold} gold.` } : {}) },
       { id: 'continue', label: 'Stay by the fire', description: 'Someone else will go, or nobody will, and the wolves will know the way now.' },
+    ]); return true;
+  }
+  if (t.def === 'refugees') {
+    ctx.setEvent?.('living_refugees', 'Carts at the gate', 'The world', `${ev.text || 'There is war on the border.'} A family from ${r.from}, ${r.family}, has stopped their cart at your door with what they could carry and a grandmother who cannot walk further. They ask for a roof until the thaw.`, [
+      { id: 'shelter', label: 'Give them the loft', description: 'Fifteen gold of bread and firewood you had not planned for, and a name that will remember yours.' },
+      { id: 'report', label: 'Send for the watch', description: 'Strangers from the enemy’s side, the captain will say, and thank you for it. The street will say something else.' },
+      { id: 'continue', label: 'Keep your door shut', description: 'They will find somewhere, or they will not. It is not your war.' },
     ]); return true;
   }
   if (t.def === 'purge') {
@@ -281,6 +295,12 @@ export function applyLivingChoice(s, eventId, pick, ctx = {}) {
     else if (pick === 'pay' && s.hero.gold >= 30) { s.hero.gold -= 30; ctx.standing?.('villagers', 4); t.memory.push('You paid hunters to go up the mountain.'); note(ctx, 'The wolves', 'Thirty gold to three men from the next valley with dogs and no conversation. They came down with two pelts and left without a word. The village knows who paid.'); }
     else { ctx.standing?.('villagers', -6); t.followUp = { kind: 'wolves_return', season: season + 4 }; t.memory.push('You stayed by the fire when the wolves came.'); note(ctx, 'The wolves', 'You stayed by the fire. Somebody went; somebody always does. The pack knows the way down now.'); }
     if (!t.followUp) t.closed = true; return true;
+  }
+  if (t.def === 'refugees') {
+    if (pick === 'shelter') { s.hero.gold = Math.max(0, s.hero.gold - 15); ctx.standing?.('villagers', 5); if (s.hero.station?.ties && s.hero.station.ties.length < 8) s.hero.station.ties.push({ kind: 'knows', name: r.family, note: 'you gave them a roof when the war put them on the road' }); t.memory.push(`You gave ${r.family} the loft until the thaw.`); note(ctx, 'Carts at the gate', `${r.family[0].toUpperCase()}${r.family.slice(1)} in the loft until the thaw: four more at the table, the grandmother coughing through the wall, and fifteen gold of bread and wood that was going to be something else. They left in spring with a name they will not forget, which is yours.`); }
+    else if (pick === 'report') { ctx.standing?.('order', 4); ctx.standing?.('villagers', -7); stress(6); t.memory.push(`You sent for the watch when ${r.family} came to the door.`); note(ctx, 'Carts at the gate', `The watch took ${r.family} to the hall and then somewhere else. The captain thanked you by name, in the street, which was not a kindness.`); }
+    else { stress(4); ctx.standing?.('villagers', -2); t.memory.push(`You kept your door shut to ${r.family}.`); note(ctx, 'Carts at the gate', `The cart stood at your door until dark and then went on. You heard later they found a byre two villages down, or did not. It was not your war.`); }
+    t.closed = true; return true;
   }
   if (t.def === 'purge') {
     const kin = r.kin;
@@ -332,7 +352,7 @@ export function validateLiving(l, s) {
   if (!l || typeof l !== 'object' || l.version !== 1 || !int(l.lastSeason) || (s && l.lastSeason > seasonOf(s.day))) return false;
   if (!Array.isArray(l.actors) || l.actors.length > LIMITS.actors || !l.actors.every(a => a && ['court', 'guild', 'beasts'].includes(a.kind) && str(a.id, 60) && str(a.name, 160) && REGION_TEMPLATES.some(r => r.id === a.regionId) && (a.goal === null || a.goal && ['reclaim', 'levy', 'purge', 'build', 'contract', 'monopoly', 'descend'].includes(a.goal.kind) && int(a.goal.progress, 400) && int(a.goal.pace, 60)))) return false;
   if (!Array.isArray(l.events) || l.events.length > LIMITS.events || !l.events.every(e => e && str(e.id, 20) && ['war', 'levy', 'purge', 'works', 'strike', 'monopoly', 'raid'].includes(e.kind) && REGION_TEMPLATES.some(r => r.id === e.regionId) && int(e.startSeason) && int(e.endSeason) && e.endSeason >= e.startSeason && Array.isArray(e.siteIds) && e.siteIds.length <= 64 && str(e.text, 600) && typeof e.routed === 'boolean')) return false;
-  if (!Array.isArray(l.threads) || l.threads.length > LIMITS.threads * 2 || !l.threads.every(t => t && str(t.id, 20) && ['conscription', 'strike', 'wolves', 'purge'].includes(t.def) && str(t.eventId, 20) && t.roles && typeof t.roles === 'object' && int(t.season) && ['open', 'chosen'].includes(t.stage) && (t.choice === null || str(t.choice, 20)) && (t.followUp === null || t.followUp && ['return', 'settled', 'wolves_return', 'road'].includes(t.followUp.kind) && int(t.followUp.season)) && Array.isArray(t.memory) && t.memory.length <= 12 && t.memory.every(m => str(m, 300)) && typeof t.closed === 'boolean')) return false;
+  if (!Array.isArray(l.threads) || l.threads.length > LIMITS.threads * 2 || !l.threads.every(t => t && str(t.id, 20) && ['conscription', 'strike', 'wolves', 'purge', 'refugees'].includes(t.def) && str(t.eventId, 20) && t.roles && typeof t.roles === 'object' && int(t.season) && ['open', 'chosen'].includes(t.stage) && (t.choice === null || str(t.choice, 20)) && (t.followUp === null || t.followUp && ['return', 'settled', 'wolves_return', 'road'].includes(t.followUp.kind) && int(t.followUp.season)) && Array.isArray(t.memory) && t.memory.length <= 12 && t.memory.every(m => str(m, 300)) && typeof t.closed === 'boolean')) return false;
   if (!Array.isArray(l.news) || l.news.length > LIMITS.news || !l.news.every(n => n && int(n.season) && str(n.text, 600))) return false;
   if (!l.counters || !int(l.counters.events) || !int(l.counters.threads)) return false;
   if (s?.event?.id?.startsWith('living_') && !l.threads.some(t => t.stage === 'open' && !t.closed && `living_${t.def}` === s.event.id)) return false;
