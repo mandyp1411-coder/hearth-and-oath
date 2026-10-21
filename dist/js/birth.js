@@ -6,6 +6,7 @@ import { addCareerExperience, professionSkill } from './careers.js';
 import { familyAnnualScene, applyFamilyAnnualChoice } from './life.js';
 import { childhoodScene, snapshotChildhoodScene, applyChildhoodScene, validateChildhoodStories } from './childhood-stories.js';
 import { adultYearNarrative } from './adult-year-narrative.js';
+import { birthdayGift, comeOfAge, stationSummary } from './station.js';
 import { rememberAnnualScene, captureAnnualScene, annualSceneAtChoice, validateAnnualScene } from './annual-world-memory.js';
 
 const YEAR = 365;
@@ -475,7 +476,7 @@ export function birthEvent(s, ctx, arrival = false) {
     ? body.replace(/Your guardians decide/g, `${caregiverName} decides`).replace(/Your guardians have little time, but choose/g, `${caregiverName} has little time, but chooses`).replace(/Your guardians trust/g, `${caregiverName} trusts`).replace(/Your guardians/g, caregiverName).replace(/your guardians/g, caregiverName)
     : body;
   ctx.setEvent(arrival ? 'birth_arrival' : age > 18 ? 'birth_adult_year' : `birth_year_${age}`, title, `${getLifeStage(s)} · age ${age}`,
-    `${contextualBody} ${FLAVORS[variant]}${detail}${s.hero.household === 'noble' ? ' Your household has connections and expectations.' : s.hero.household === 'poor' ? ' Your household has little money, but people can offer time and teaching.' : ' Your household knows the value of patient work.'}${household ? ` ${household.summary}` : ''}`, birthChoices(s,arrival?'birth_arrival':`birth_year_${age}`,options));
+    `${contextualBody} ${FLAVORS[variant]}${detail}${s.hero.station ? ` ${stationSummary(s)}` : s.hero.household === 'noble' ? ' Your household has connections and expectations.' : s.hero.household === 'poor' ? ' Your household has little money, but people can offer time and teaching.' : ' Your household knows the value of patient work.'}${household ? ` ${household.summary}` : ''}`, birthChoices(s,arrival?'birth_arrival':`birth_year_${age}`,options));
 }
 export function applyBirthChoice(s, eventId, pick, ctx) {
   if (!(eventId === 'birth_arrival' || /^birth_year_\d+$/.test(eventId) || eventId === 'birth_adult_year')) return false;
@@ -497,7 +498,7 @@ export function applyBirthChoice(s, eventId, pick, ctx) {
     }
     // Household pocket money is separate from the incident, and never buys an
     // enrollment or a calling. The actual scene is what enters the chronicle.
-    if (age >= 6) {const gift=s.hero.household === 'noble' ? 10 : s.hero.household === 'tradesfolk' ? 6 : 3;s.hero.gold+=gift;receiveNotification(s,{kind:'gift',sourceId:'birthday-gift:'+s.age,title:'A Birthday Gift',body:'You received '+gift+' Gold for your birthday.'});}
+    if (age >= 6) {const gift=birthdayGift(s);if(gift){s.hero.gold+=gift;receiveNotification(s,{kind:'gift',sourceId:'birthday-gift:'+s.age,title:'A Birthday Gift',body:'You received '+gift+' Gold for your birthday.'});}if(age===18)comeOfAge(s,ctx);}
     s.timeline.yearHistory.push({ id: s.timeline.birthDay ? `birthday-${s.timeline.birthDay}-${age}` : `birthday-${age}`, age, day: s.day, title: lived.title, summary: lived.outcome, choice: pick });
     s.timeline.yearTarget = null;
     s.timeline.yearStartDay = s.day;
@@ -527,7 +528,7 @@ export function applyBirthChoice(s, eventId, pick, ctx) {
   if (age === 7) { s.flags.childhoodFriend = true; ctx.remember('mira', `At seven, you ${pick === 'care' ? 'defended me when I was blamed for the silver charm' : pick === 'curiosity' ? 'looked for the truth about the missing charm' : 'helped turn an accusation into cooperation'}.`, 12); }
   if (age === 12) { s.flags.scholarship = s.revision >= 4 && s.family?.setup !== 'legacy' ? s.education.scholarship : pick === 'care'; s.flags.apprenticeship = s.revision >= 4 && s.family?.setup !== 'legacy' ? s.education.route === 'apprenticeship' : pick === 'curiosity'; s.flags.childhoodMentor = true; }
   if (age === 15 && !scenario) { s.flags.ancestralMentor = pick === 'curiosity'; s.flags.hiddenPage = pick === 'courage'; }
-  if (age >= 6 && age <= 18) {const gift=s.hero.household === 'noble' ? 10 : s.hero.household === 'tradesfolk' ? 6 : 3;s.hero.gold+=gift;receiveNotification(s,{kind:'gift',sourceId:'birthday-gift:'+s.age,title:'A Birthday Gift',body:'You received '+gift+' Gold for your birthday.'});}
+  if (age >= 6 && age <= 18) {const gift=birthdayGift(s);if(gift){s.hero.gold+=gift;receiveNotification(s,{kind:'gift',sourceId:'birthday-gift:'+s.age,title:'A Birthday Gift',body:'You received '+gift+' Gold for your birthday.'});}if(age===18)comeOfAge(s,ctx);}
   const title = scenario?.title || YEARS[Math.min(age, 18)][0];
   const summary = contentVersion(s) >= 7 && picked?.outcome ? picked.outcome : scenario ? `${picked.label}. ${picked.description}` : `${age < 3 ? s.revision >= 4 && s.family?.setup !== 'legacy' ? `${caregiver(s).name} chose` : 'Your guardians chose' : 'You chose'} to ${s.timeline.childhoodFacts[`year_${age}`]}. ${age >= 3 ? `You developed ${skills.join(' and ')}.` : `Your ${attr} grew through care and experience.`}`;
   s.timeline.yearHistory.push({ id: s.timeline.birthDay ? `birthday-${s.timeline.birthDay}-${age}` : `birthday-${age}`, age, day: s.day, title, summary, choice: pick,...(age>18&&s.timeline.annualScene?{locationId:s.locationId}:{}) });

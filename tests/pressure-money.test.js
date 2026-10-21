@@ -1,11 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as engine from '../dist/js/engine.js';
+import { rollBirthCircumstances } from '../dist/js/station.js';
 import { settleHouseholdBudget, chargeDebtInterest, debtReckoning, applyDebtReckoningChoice, householdAnnualCost, DEBT_INTEREST } from '../dist/js/budget.js';
 import { onFortuneTime, fortuneIncomeFactor } from '../dist/js/fortune.js';
 
 function adult(seed = 'pressure-money') {
-  let s = engine.createBirthGame({ seed });
+  let s = engine.createBirthGame({ seed, station: rollBirthCircumstances(seed, 'common', 'human') });
   for (let n = 0; n < 400 && s.age < 18; n++) s = s.event ? engine.chooseEventOption(s, s.event.choices[0].id) : engine.ageUp(s);
   for (let n = 0; s.event && n < 20; n++) s = engine.chooseEventOption(s, s.event.choices[0].id);
   return s;
@@ -15,8 +16,8 @@ const journal = () => { const rows = []; return { rows, ctx: { journal: (title, 
 test('a shortfall after the first adult year becomes debt, not communal support', () => {
   const s = adult();
   const b = s.householdBudget;
-  assert.equal(b.debt, 0);
-  s.hero.gold = 10; b.accruedUnits = 365 * 100; b.billedGold = 0; b.graceUsed = true; s.age = 20;
+  assert.ok(b.debt >= 0, 'what the family owed at eighteen is written against the heir');
+  b.debt = 0; s.hero.gold = 10; b.accruedUnits = 365 * 100; b.billedGold = 0; b.graceUsed = true; s.age = 20;
   const { rows, ctx } = journal();
   settleHouseholdBudget(s, ctx);
   assert.equal(s.hero.gold, 0);
@@ -29,7 +30,7 @@ test('a shortfall after the first adult year becomes debt, not communal support'
 test('the first adult year is carried once, then never again', () => {
   const s = adult();
   const b = s.householdBudget;
-  s.hero.gold = 0; b.accruedUnits = 365 * 50; b.billedGold = 0;
+  b.debt = 0; s.hero.gold = 0; b.accruedUnits = 365 * 50; b.billedGold = 0;
   settleHouseholdBudget(s, journal().ctx);
   assert.equal(b.supportedGold, 50); assert.equal(b.debt, 0); assert.equal(b.graceUsed, true);
   b.accruedUnits += 365 * 50;
@@ -68,7 +69,7 @@ test('bonded labour clears the debt and pays the creditor instead of you', () =>
 test('fortune never rolls in childhood, catches up nothing, and a cost beyond cash becomes debt', () => {
   let s = engine.createBirthGame({ seed: 'pressure-fortune' });
   for (let n = 0; n < 400 && s.age < 18; n++) s = s.event ? engine.chooseEventOption(s, s.event.choices[0].id) : engine.ageUp(s);
-  assert.equal(s.fortune.history.length, 0, 'no shocks before adulthood');
+  assert.ok(s.fortune.history.every(h => h.id === 'hard_winter'), 'no money shocks before adulthood; only winters');
   assert.equal(s.fortune.lastSeason, Math.floor(s.day / 92));
   // A clock moved by many seasons at once rolls nothing.
   const jumped = structuredClone(s); const { rows: none, ctx: quiet } = journal();

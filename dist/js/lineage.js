@@ -14,6 +14,7 @@ import { initializeHealth } from './health.js';
 import { initializeTravel } from './travel.js';
 import { resetCareerForSuccessor } from './careers.js';
 import { initializeHouseholdBudget } from './budget.js';
+import { heirStation } from './station.js';
 import { inheritCommunity, communitySupport } from './community.js';
 import { inheritSociety } from './society.js';
 import { inheritSocial } from './social.js';
@@ -439,9 +440,9 @@ export function killCurrentCompanionPerson(s, personId, cause, ctx = {}, actualD
   ctx.journal?.('A combat death remembered', `${record.name}: ${cause}. Their death is permanent in this Ironman run.`, 'combat');
   return true;
 }
-export function killNamedPerson(s,localId,cause,ctx={},actualDay=s.day){
+export function killNamedPerson(s,localId,cause,ctx={},actualDay=s.day,wording=null){
   const record=s.lineage?.people.find(p=>(p.id===localId||p.localId===localId)&&p.alive);
-  if(record){if(!Number.isInteger(actualDay)||actualDay<record.bornDay||actualDay>s.day)return false;record.deathAge=Math.max(1,Math.floor((actualDay-record.bornDay)/YEAR));death(s,record,ctx,actualDay);ctx.journal?.('A violent death remembered',`${record.name}: ${cause}. The actual day and family ties remain.`,'condition');return true;}
+  if(record){if(!Number.isInteger(actualDay)||actualDay<record.bornDay||actualDay>s.day)return false;record.deathAge=Math.max(1,Math.floor((actualDay-record.bornDay)/YEAR));death(s,record,ctx,actualDay);ctx.journal?.(wording?.title||'A violent death remembered',wording?.text||`${record.name}: ${cause}. The actual day and family ties remain.`,'condition');return true;}
   const p=s.society?.people.find(p=>p.id===localId&&p.alive!==false);if(!p)return false;p.alive=false;p.status='remembered';p.deathDay=s.day;p.memories||=[];p.memories.push(cause);ctx.journal?.('A named life ended',`${p.name}: ${cause}.`,'condition');return true;
 }
 export function onLineageTime(s, time, context) {
@@ -495,13 +496,13 @@ export function createSuccessor(original, childId, createBirthGame) {
   const parentRecord = old.lineage.people.find(p => p.id === old.dynasty.activePersonId);
   const ownLife=adultChildInheritance(old,old.lineage.people.find(p=>p.id===record.id));
   const childAge = Math.max(0, Math.floor((old.day - child.bornDay) / YEAR));
-  const start = createBirthGame({ name: child.name, pronouns:record.pronouns || child.pronouns, seed: old.seed, origin: old.hero.origin, household: inheritance.homeTier === 'estate' ? 'noble' : inheritance.homeTier === 'lodgings' ? 'poor' : 'tradesfolk', familySetup: 'single_parent', appearance: record.appearance || old.hero.appearance, difficulty: old.difficulty, belief: old.hero.belief, temperament: TRAITS.reduce((best, t) => record.development.traits[t] > record.development.traits[best] ? t : best, 'care') === 'curiosity' ? 'curious' : record.development.traits.courage > record.development.traits.care ? 'ambitious' : 'compassionate', preferences: record.preferences || child.preferences || old.hero.preferences });
+  const start = createBirthGame({ name: child.name, pronouns:record.pronouns || child.pronouns, seed: old.seed, origin: old.hero.origin, station: old.householdBudget?.debt === undefined ? null : heirStation(old, `${old.seed}:heir:${generation}`, (record.appearance || old.hero.appearance)?.ancestry), household: inheritance.homeTier === 'estate' ? 'noble' : inheritance.homeTier === 'lodgings' ? 'poor' : 'tradesfolk', familySetup: 'single_parent', appearance: record.appearance || old.hero.appearance, difficulty: old.difficulty, belief: old.hero.belief, temperament: TRAITS.reduce((best, t) => record.development.traits[t] > record.development.traits[best] ? t : best, 'care') === 'curiosity' ? 'curious' : record.development.traits.courage > record.development.traits.care ? 'ambitious' : 'compassionate', preferences: record.preferences || child.preferences || old.hero.preferences });
   if (!start) return null;
   const s = clone(start);
   if (isIronman(old)) s.ironman = clone(old.ironman);
   s.revision = 5; s.day = old.day; s.age = childAge; s.phase = childAge >= 18 ? 'adult' : 'childhood'; s.event = null; s.battle = null; s.chronicle = null;
   s.timeline.birthDay = child.bornDay; s.timeline.contentVersion = 7; delete s.timeline.nextContentVersion; delete s.timeline.storybook; s.timeline.yearTarget = null; s.timeline.yearStartDay = s.day; s.timeline.yearHistory = []; s.timeline.activityUses = {}; s.timeline.childhoodFacts = {}; s.timeline.journey = null; s.timeline.lastJourney = null;
-  s.hero.name = child.name; s.hero.gold = inheritance.gold; s.hero.potions = old.hero.potions; s.hero.path = 'unformed'; s.hero.specialization = null; s.hero.condition = null; s.hero.profession = 'Unemployed';
+  s.hero.name = child.name; s.hero.gold = inheritance.gold; if (s.hero.station && childAge >= 18) s.hero.station.portionDay = s.day; s.hero.potions = old.hero.potions; s.hero.path = 'unformed'; s.hero.specialization = null; s.hero.condition = null; s.hero.profession = 'Unemployed';
   s.hero.attributes = Object.fromEntries(Object.keys(s.hero.attributes).map(k => [k, 3]));
   s.lineage.heirAccounts=(old.stories?.arcs||[]).filter(a=>a.status==='active').slice(0,8).map(a=>({id:a.id,storyId:a.id,personName:a.personName,sourceGeneration:old.dynasty.generation,excerpt:a.choices.at(-1)?.outcome||'The opening was heard, but no later agreement was completed.',readDay:null}));
   s.hero.upbringing={sourcePersonId:record.id,bornDay:record.bornDay,traits:clone(record.development.traits),skills:clone(record.development.skills),history:clone(record.development.history)};

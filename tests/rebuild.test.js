@@ -92,6 +92,7 @@ function growTo(state, target, preference = []) {
     if (state.event) {
       if (state.event.id === 'health_concern') { state = choose(state, 'continue'); continue; }
       if (state.event.id === 'lineage_bereavement') { state = choose(state, 'private'); continue; }
+      if (state.event.id === 'hard_winter') { state = choose(state, 'endure'); continue; }
       assert.ok(state.event.id.startsWith('birth_') || state.event.id.startsWith('fate_'), `childhood policy cannot hide an unrelated adult scene: ${state.event.id}`);
       moments.push({ id: state.event.id, body: state.event.body, age: state.age });
       state = choose(state, childhoodChoice(state, preference));

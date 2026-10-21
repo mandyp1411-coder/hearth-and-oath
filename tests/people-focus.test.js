@@ -11,7 +11,8 @@ import { mountApp } from './helpers/ui-surface.mjs';
 
 function settle(s){
  for(let i=0;i<240;i++){
-  if(s.event){const c=s.event.choices.filter(c=>!c.disabledReason);s=E.chooseEventOption(s,(c.find(c=>['care','continue','later','keep','wait','support'].includes(c.id))||c[0]).id);}
+  // A sick body is put to bed: a fixture that only ever 'continues' through fevers is worn to nothing by thirty.
+  if(s.event){const c=s.event.choices.filter(c=>!c.disabledReason);s=E.chooseEventOption(s,((s.event.id==='health_concern'&&c.find(c=>c.id==='rest'))||c.find(c=>['care','continue','later','keep','wait','support'].includes(c.id))||c[0]).id);}
   else if(s.conversations?.pending)s=E.replyMessage(s,s.conversations.pending.personId,s.conversations.pending.replies[0].id);
   else if(s.conversations?.project)s=E.chooseAction(s,'conversations_continue');
   else if(s.rpg?.project)s=E.chooseAction(s,'rpg_continue');

@@ -1,5 +1,8 @@
 // Household costs accrue from actual adult days. Imports begin at the saved
 // date, and the ledger never invents expenses for years already played.
+import { stationDues } from './station.js';
+import { seededRoll } from './world.js';
+import { hasNature } from './personality.js';
 import { communityFoodSupportAt, communityFoodIntervals } from './community.js';
 export const HOUSEHOLD_FOCI = [
   {id:'livelihood',label:'Build a livelihood',description:'Keep the ordinary mix of work, family and free time.'},
@@ -41,7 +44,7 @@ export function householdAnnualCost(s,day=s.day) {
   const children=s.life.children.filter(c=>c.alive!==false&&Math.max(0,Math.floor((day-c.bornDay)/365))<18).length;
   const address=s.life.home?.locationId||s.hero.birthplaceId||s.locationId;
   const support=communityFoodSupportAt(s,address,day);
-  return lifestyle.annual+home+children*45+(s.life.focus==='education'?60:0)-Math.min(120,support);
+  return lifestyle.annual+home+children*45+(s.life.focus==='education'?60:0)+stationDues(s)-Math.min(120,support);
 }
 function livingCostUnits(s,start,end) {
   if(end<=start)return 0;
@@ -120,7 +123,7 @@ export function repayDebt(s,amount) {
   return paid;
 }
 /** The lender's patience runs out: an event the player must answer. */
-export const DEBT_RECKONING_EVENT={id:'debt_reckoning',ids:()=>({debt_reckoning:['sell','bond','plead','flee']})};
+export const DEBT_RECKONING_EVENT={id:'debt_reckoning',ids:()=>({debt_reckoning:['sell','bond','plead','flee','forge','defy']})};
 export function debtReckoning(s,ctx={}) {
   const b=s.householdBudget;
   if(!b||!(b.debt>0)||s.event||s.phase==='retired'||s.age<18)return false;
@@ -128,13 +131,20 @@ export function debtReckoning(s,ctx={}) {
   if(b.debt<annual*DEBT_RECKONING_MULTIPLE)return false;
   if(b.lastReckoningYear===Math.floor((s.day-(s.timeline?.birthDay||0))/365))return false;
   const home=s.life.home?.tier&&s.life.home.tier!=='lodgings';
+  // Past six years of costs with nothing to sell, the lender has stopped asking.
+  const desperate=!home&&b.debt>=annual*6;
   const choices=[
-    ...(home?[{id:'sell',label:'Sell the house',description:`Your ${s.life.home.tier} clears ${Math.min(b.debt,HOME_VALUE[s.life.home.tier]||0)} of the debt. You go back to rented lodgings.`}]:[{id:'sell',label:'Sell what you own',description:'Your tools, cloak and anything of value go to the broker for a fraction of their worth.'}]),
+    ...(desperate?[]:home?[{id:'sell',label:'Sell the house',description:`Your ${s.life.home.tier} clears ${Math.min(b.debt,HOME_VALUE[s.life.home.tier]||0)} of the debt. You go back to rented lodgings.`}]:[{id:'sell',label:'Sell what you own',description:'Your tools, cloak and anything of value go to the broker for a fraction of their worth.'}]),
     {id:'bond',label:'Bind yourself to a year of labour',description:'A year of work for the creditor, unpaid. The debt is cleared. You will not choose your days.'},
-    {id:'plead',label:'Plead for time',description:'Another year, at a steeper rate. Sometimes it is granted.'},
+    ...(desperate?[]:[{id:'plead',label:'Plead for time',description:'Another year, at a steeper rate. Sometimes it is granted.'}]),
     {id:'flee',label:'Leave in the night',description:'Walk away from the debt, the town and your name there. The debt does not forget.'},
+    // Some answers exist only for some natures.
+    ...(hasNature(s,'deceitful')&&!desperate?[{id:'forge',label:'Alter the ledger',description:'A few strokes of a pen and half of what you owe was never lent. If the lender can read, he will know whose hand it was.',nature:'deceitful'}]:[]),
+    ...(hasNature(s,'brave')?[{id:'defy',label:'Stand in the door',description:'Let him look at your hands, and the axe beside them. He goes away. He does not forget either.',nature:'brave'}]:[]),
   ];
-  ctx.setEvent?.(DEBT_RECKONING_EVENT.id,'The lender at the door','Money owed',`${b.debt} gold is owed and the lender has stopped waiting. ${home?'He has looked at your house.':'He has looked at your hands.'} Interest alone is ${Math.max(1,Math.floor(b.debt*DEBT_INTEREST))} a year now. He wants an answer before the week is out.`,choices);
+  ctx.setEvent?.(DEBT_RECKONING_EVENT.id,desperate?'The lender, with company':'The lender at the door','Money owed',desperate
+    ?`${b.debt} gold is owed, there is nothing left to sell, and the lender has brought two men with him. He is not asking any more. Your labour, or the road.`
+    :`${b.debt} gold is owed and the lender has stopped waiting. ${home?'He has looked at your house.':'He has looked at your hands.'} Interest alone is ${Math.max(1,Math.floor(b.debt*DEBT_INTEREST))} a year now. He wants an answer before the week is out.`,choices);
   b.lastReckoningYear=Math.floor((s.day-(s.timeline?.birthDay||0))/365);
   return true;
 }
@@ -157,6 +167,19 @@ export function applyDebtReckoningChoice(s,eventId,choice,ctx={}) {
     const granted=(s.hero.skills?.persuasion||0)>=4||(s.life?.career?.reputation||0)>=60;
     if(granted){b.debt+=Math.floor(b.debt*0.15);ctx.journal?.('A year\u2019s grace',`The lender agrees to wait a year, at a harder rate. The debt stands at ${b.debt}.`,'household');}
     else{b.debt+=Math.floor(b.debt*0.15);s.life.stress=Math.min(100,(s.life.stress||0)+15);b.lastReckoningYear=null;ctx.journal?.('Refused',`The lender does not care for your reasons. The rate rises and he will be back.`,'household');}
+    return true;
+  }
+  if(choice==='forge'){
+    if(!hasNature(s,'deceitful'))return false;
+    const caught=seededRoll(s.seed,`debt:forge:${s.day}`,100)<40;
+    if(caught){b.debt+=Math.floor(b.debt*0.25);s.legal.evidence=(s.legal.evidence||0)+2;s.life.stress=Math.min(100,(s.life.stress||0)+15);ctx.standing?.('underworld',1);ctx.journal?.('The hand on the ledger',`The lender could read, and he read your hand. The debt is a quarter larger for the insult, and there is a magistrate who has your name now.`,'household');}
+    else{const cleared=Math.floor(b.debt/2);b.debt-=cleared;ctx.standing?.('underworld',1);ctx.journal?.('A few strokes of a pen',`Half of what you owed was never lent, according to the book. ${cleared} gold gone from the page. The lender signs beneath it without looking twice.`,'household');}
+    return true;
+  }
+  if(choice==='defy'){
+    if(!hasNature(s,'brave'))return false;
+    b.debt+=Math.floor(b.debt*0.2);s.life.stress=Math.max(0,(s.life.stress||0)-10);b.lastReckoningYear=null;
+    ctx.journal?.('The door held',`He looked at your hands and the axe beside them, and he went away. The rate rises for the insult, and he will be back with company.`,'household');
     return true;
   }
   if(choice==='flee'){
@@ -197,10 +220,19 @@ export function applyAnnualFocus(s,days,ctx={}) {
 const ready=s=>!!s.householdBudget&&s.age>=18&&s.phase!=='retired'&&!s.event&&!s.battle&&!s.conversations?.pending&&!s.dungeon&&!s.timeline?.journey&&!s.careers?.batch&&!s.workshop?.project&&!s.life?.plan;
 export function householdBudgetActions(s) {
   if(!ready(s))return [];
-  return [...HOUSEHOLD_FOCI.map(f=>({id:`budget_focus_${f.id}`,label:f.label,description:`${f.description} Ordinary Age up income uses ${Math.round(RATIOS[f.id]*100)}% of the normal working schedule. Dedicated work commitments keep their agreed wages.`,disabledReason:s.life.focus===f.id?'This is your current priority.':undefined})),...HOUSEHOLD_LIFESTYLES.map(l=>({id:`budget_lifestyle_${l.id}`,label:l.label,description:`${l.description} Base provisions: ${l.annual} gold per actual adult year; property, dependent children and scheduled lessons add their visible costs.`,disabledReason:s.life.lifestyle===l.id?'This is your current living standard.':undefined}))].map(a=>({...a,days:0,cost:0,group:'Household priorities'}));
+  const b=s.householdBudget,owed=b.debt||0;
+  // Owed money is paid from what you carry; nothing else pays it down.
+  const repay=b.debt===undefined?[]:[{id:'budget_repay',label:owed?`Pay down what you owe (${Math.min(owed,s.hero.gold)} of ${owed} gold)`:'Pay down what you owe',description:'Hand the lender what you can from what you carry. Interest stops on what is paid.',days:0,cost:0,group:'Household',disabledReason:!owed?'You owe nothing.':s.hero.gold<=0?'You have nothing to pay with.':undefined}];
+  return [...repay,...HOUSEHOLD_FOCI.map(f=>({id:`budget_focus_${f.id}`,label:f.label,description:`${f.description} Ordinary Age up income uses ${Math.round(RATIOS[f.id]*100)}% of the normal working schedule. Dedicated work commitments keep their agreed wages.`,disabledReason:s.life.focus===f.id?'This is your current priority.':undefined})),...HOUSEHOLD_LIFESTYLES.map(l=>({id:`budget_lifestyle_${l.id}`,label:l.label,description:`${l.description} Base provisions: ${l.annual} gold per actual adult year; property, dependent children and scheduled lessons add their visible costs.`,disabledReason:s.life.lifestyle===l.id?'This is your current living standard.':undefined}))].map(a=>({...a,days:0,cost:0,group:'Household priorities'}));
 }
 export function applyHouseholdBudgetAction(s,id,ctx={}) {
   if(!householdBudgetActions(s).some(a=>a.id===id&&!a.disabledReason))return false;
+  if(id==='budget_repay'){
+    const paid=repayDebt(s,s.hero.gold),left=s.householdBudget.debt;
+    s.notice=left?`You paid ${paid} gold against the debt. ${left} remains.`:`You paid the last ${paid} gold of it. You owe nothing.`;
+    ctx.journal?.(left?'Paid down':'Paid off',s.notice,'household');
+    return true;
+  }
   if(id.startsWith('budget_focus_'))s.life.focus=id.slice(13);
   else s.life.lifestyle=id.slice(17);
   s.notice='Your future days follow these household priorities. Changing the plan grants no money, skills or recovery.';

@@ -91,7 +91,8 @@ import { initializeAdventuring, adventureActions, applyAdventureAction, applyAdv
 import { validEnemyIllustration } from './enemies.js';
 import { initializeTravelEnergy, travelEnergyView, travelEnergyForecast, progressTravelStep, campingActions, applyCampingAction, noteTravelRest, validateTravelEnergy } from './travel-energy.js';
 import { initializeTravel, setTravelPlan, travelPlanPreview, beginTravelJourney, onTravelLeg, travelActions, applyTravelAction, applyTravelChoice, flushTravelEvent, afterTravelBattle, travelEventIds, validateTravel } from './travel.js';
-import { initializeFortune, onFortuneTime, fortuneIncomeFactor, validateFortune } from './fortune.js';
+import { initializeFortune, onFortuneTime, fortuneIncomeFactor, validateFortune, flushWinterEvent, applyWinterChoice, WINTER_EVENT } from './fortune.js';
+import { STATIONS, stationById, rollStation, rollBirthCircumstances, stationIncome, validateStation } from './station.js';
 import { initializeHouseholdBudget, accrueHouseholdBudget, settleHouseholdBudget, chargeDebtInterest, debtReckoning, applyDebtReckoningChoice, DEBT_RECKONING_EVENT, applyAnnualFocus, annualWorkRatio, householdCostPreview, householdBudgetActions, applyHouseholdBudgetAction, validateHouseholdBudget } from './budget.js';
 import { initializeSociety, societyActions, applySocietyAction, applySocietyChoice, societyEventIds, onSocietyTime, flushSocietyEvent, validateSociety, inheritSociety, societyCustomerChoiceReason } from './society.js';
 import { initializeCommunity, communityActions, applyCommunityAction, applyCommunityChoice, communityEventIds, onCommunityTime, flushCommunityEvent, validateCommunity, inheritCommunity } from './community.js';
@@ -633,8 +634,16 @@ export function createBirthGame(config = {}) {
   const resolvedConfig = { ...config,name:typeof config.name==='string'&&config.name.trim()?config.name.trim().slice(0,40):naming.name };
   const birthplace = resolveBirthplace(config.birthplace || config.origin || 'village', String(config.seed || 'a-life-in-eldermere'));
   resolvedConfig.origin = birthplace.origin;
-  if (config.household === 'random') resolvedConfig.household = ['poor', 'tradesfolk', 'noble'][seededRoll(String(config.seed || 'a-life-in-eldermere').slice(0, 128), 'household-wealth', 3)];
+  // Station is fate's. A caller that already rolled one (the creator, an
+  // heir) passes it; a bare household narrows the ladder; nothing at all
+  // rolls the whole ladder by rarity.
+  const birthSeed = String(config.seed || 'a-life-in-eldermere').slice(0, 128);
+  const station = config.station === null ? null : config.station && validateStation(config.station, { day: 0 }) ? config.station
+    : rollBirthCircumstances(birthSeed, rollStation(birthSeed, ['poor', 'tradesfolk', 'noble'].includes(config.household) ? STATIONS.filter(st => st.means === config.household).map(st => st.id) : STATIONS.map(st => st.id)), identity.ancestry);
+  if (station) resolvedConfig.household = stationById(station.id).means;
+  else if (config.household === 'random') resolvedConfig.household = ['poor', 'tradesfolk', 'noble'][seededRoll(birthSeed, 'household-wealth', 3)];
   const state = createGame(resolvedConfig);
+  if (station) state.hero.station = { ...station, ties: station.ties.map(t => ({ ...t })) };
   state.hero.firstDayGuide = { version: 1, dismissed: false };
   state.revision = 5;
   state.worldServicesVersion=1;
@@ -666,14 +675,15 @@ export function createBirthGame(config = {}) {
   initializeTimeline(state); initializeProgression(state); initializeConversations(state);state.characterDialogueVersion=28;
   initializeCampaign(state); initializeExploration(state,{fresh:true});
   initializeHousehold(state, { config: resolvedConfig }); initializeFamilyOrigins(state); initializeWorkshop(state);
+  if (state.family && station) { state.family.support = stationById(station.id).support; state.family.literate = station.literate; }
   initializePreferences(state, { values: config.preferences }); initializeLore(state);
   initializeCareers(state); initializeHealth(state); initializeTravel(state); initializeTravelEnergy(state); initializeMaze(state); initializeSocialLife(state); initializeLineage(state,{startingAge:config.startAge});
-  initializeHouseholdBudget(state,{edition:true});initializeFortune(state);
+  initializeHouseholdBudget(state,{edition:true});initializeFortune(state,{attempt:Number.isInteger(config.attempt)&&config.attempt>0&&config.attempt<=12?config.attempt:0});
   initializeFamilyDepth(state);initializeSociety(state);initializeCommunity(state);initializeFellowship(state);initializeSanctuaries(state);
   initializeSocial(state);initializePastimes(state);initializeLifeStories(state);
   initializeRealm(state,{fresh:true});initializeJustice(state);initializeAdventuring(state);initializeCartography(state);initializeRegionalWorld(state);initializeRpg(state,{fresh:true},engineContext(state));
   initializeQuestJournal(state);initializeUpbringing(state);settlePublicRoster(state,{migration:true});
-  addJournal(state, 'A life begins at birth', `${state.hero.name} was born in ${location(state).name}. The morning brought ${worldCalendarContext(state.world,state.day,state.seed).weather}.`, 'origin',{literal:true,meta:{narrativeEdition:30,capturedReceipt:true}});
+  addJournal(state, 'A life begins at birth', `${state.hero.name} was born in ${location(state).name}${station ? ` to ${station.rank}` : ''}. The morning brought ${worldCalendarContext(state.world,state.day,state.seed).weather}.`, 'origin',{literal:true,meta:{narrativeEdition:30,capturedReceipt:true}});
   birthEvent(state, engineContext(state), true);
   const omen = { ember: 'Cold ash warmed your blanket although the hearth was dark.', echo: 'An unpulled bell answered your first cry.', thorn: 'A winter seed sprouted beside your cradle, its roots pointing toward the burial ground.' }[state.campaign.fate];
   if(state.timeline.contentVersion<7)state.event.body += ` ${omen}`;
@@ -831,7 +841,7 @@ function engineContext(state, { annual = false, resolvingNeed=null } = {}) {
     nextInterruptionDay: () => nextInterruptionDay(state),
     pendingNeed: () => pendingNeed(state),
     endLife: cause => endLife(state,cause),
-    killPerson: (id,cause,day=state.day) => killNamedPerson(state,id,cause,engineContext(state),day),
+    killPerson: (id,cause,day=state.day,wording=null) => killNamedPerson(state,id,cause,engineContext(state),day,wording),
     awardLegacySpecialization: classId=>{if(state.progression.learnedClassIds.includes(classId))return false;awardSpecialization(state,classId);return state.hero.specialization===classId&&state.progression.learnedClassIds.includes(classId);},
     resumeLegacyTrial: classId=>trialEvent(state,classId),
     createSuccessor: childId => createSuccessor(state,childId,createBirthGame),
@@ -846,7 +856,8 @@ function engineContext(state, { annual = false, resolvingNeed=null } = {}) {
         // Waiting for the year to turn earns less than working it: the passive
         // wage is 60% of the profession's figure, so shifts matter.
         const bonded=(state.householdBudget?.bondedUntil||0)>beforeDay;
-        const wage=bonded?0:professionAnnualWage(state)*(state.householdBudget?annualWorkRatio(state)*(state.householdBudget.debt===undefined?1:PASSIVE_WAGE_FACTOR):1)*fortuneIncomeFactor(state,beforeDay);
+        // Rents and allowances come whether or not the heir works; a bond takes the wage, not the rents.
+        const wage=(bonded?0:professionAnnualWage(state)*(state.householdBudget?annualWorkRatio(state)*(state.householdBudget.debt===undefined?1:PASSIVE_WAGE_FACTOR):1)*fortuneIncomeFactor(state,beforeDay))+stationIncome(state);
         const income=Math.max(0,Math.floor(state.day*wage/365)-Math.floor(beforeDay*wage/365));
         state.hero.gold+=income;
         state.life.career.experience+=state.hero.profession==='Unemployed'?0:Math.floor(days/10);
@@ -866,12 +877,14 @@ function engineContext(state, { annual = false, resolvingNeed=null } = {}) {
     onBirthday: () => {
       if (state.family && state.education) onHouseholdAge(state, engineContext(state));
       chargeDebtInterest(state, engineContext(state));
-      if (!waiting(state)) debtReckoning(state, engineContext(state));
       const bloodPlan=state.hero.condition?.feedingPlan;
   if(bloodPlan&&state.hero.condition.hunger>=65&&!waiting(state)&&!state.justice?.prison&&!state.sanctuaries?.commitment){const id='sanctuary_feed_'+bloodPlan.agreementId,offer=sanctuaryActions(state).find(a=>a.id===id);if(offer&&!offer.disabledReason&&((nextInterruptionDay(state,{ignoreNeed:'vampire'})??state.day+2)>state.day)){applySanctuaryAction(state,id,engineContext(state,{annual:true,resolvingNeed:'vampire'}));if(state.phase==='retired')return copy(state);}else if(!offer||offer.disabledReason){state.hero.condition.feedingPlan=null;addJournal(state,'A standing agreement interrupted',offer?.disabledReason||'The agreed donor is no longer available. No fee or feeding was taken.','condition');}}
   if (state.workshop) refreshWorkshop(state, engineContext(state));
       if (state.conversations) onConversationAge(state, engineContext(state));
       if (state.campaign && !waiting(state) && !state.life?.plan) onCampaignAge(state, engineContext(state));
+      // The lender comes last, so his knock never swallows the year's other
+      // business: a birthday the campaign owes you still arrives.
+      if (!waiting(state)) debtReckoning(state, engineContext(state));
     },
   };
 }
@@ -944,6 +957,7 @@ function reconcile(state) {
     if(!waiting(state))flushJustice(state,ctx);
     if(!waiting(state))flushTravelEvent(state,ctx);
     if (!waiting(state)) flushHealthEvent(state,ctx);
+    if (!waiting(state)) flushWinterEvent(state,ctx);
     if (!waiting(state)) flushLineageEvent(state,ctx);
     if (!waiting(state)&&!state.justice?.prison) flushSanctuaryEvent(state,ctx);
     if (!waiting(state)) flushFellowshipEvent(state,ctx);
@@ -1431,7 +1445,7 @@ function performEventOption(original, id) {
   const moduleChoices = [ ['tournament_',applyTournamentChoice], ['repertoire_',applyRepertoireChoice], ['origin_',applyOriginChoice], ['yard_',applyYardChoice], ['rpg_',applyRpgChoice],
     ['country_',applyWildernessChoice],['way_',applyFieldChoice],
     ['curse_',applyCurseChoice],
-    ['nature_',applyPersonalityChoice],
+    ['nature_',applyPersonalityChoice],['hard_',applyWinterChoice],
     ['birth_', applyBirthChoice], ['calling_', applyCallingChoice], ['fate_', applyCampaignChoice],
     ['quest_', applyCampaignChoice], ['dungeon_', applyExplorationChoice],
     ['family_', applyHouseholdChoice], ['school_', applyHouseholdChoice], ['lore_', applyLoreChoice],
@@ -2505,7 +2519,7 @@ export function validateSave(value) {
     if (!Array.isArray(value.journal) || !value.journal.length || !value.journal.every(item => plain(item) && textField(item.id, 120) && integer(item.day) && integer(item.age, birthMode(value) ? 0 : 7, 5000) && textField(item.title, 1000) && textField(item.text, 10000) && textField(item.tag, 80) && (item.capturedReceipt===undefined||typeof item.capturedReceipt==='boolean') && (item.generation===undefined||integer(item.generation,1,5000)))) return false;
     if (value.event !== null) {
       const event = value.event;
-      const allowed = { ...EVENT_CHOICES, ...yardEventIds(), ...tournamentEventIds(), ...lifeEventIds(), ...birthEventIds(), ...callingEventIds(), ...campaignEventIds(), ...explorationEventIds(), ...dialogueEventIds(), ...householdEventIds(), ...researchEventIds(), ...originEventIds(), ...loreEventIds(), ...careerEventIds(), ...lineageEventIds(), ...healthEventIds(), ...travelEventIds(),...societyEventIds(),...communityEventIds(),...fellowshipEventIds(),...sanctuaryEventIds(),...socialEventIds(),...pastimeEventIds(),...repertoireEventIds(),...storyEventIds(),...rpgEventIds(),...personalityEventIds(),...justiceEventIds(),...adventureEventIds(),...curseEventIds(),...DEBT_RECKONING_EVENT.ids() };
+      const allowed = { ...EVENT_CHOICES, ...yardEventIds(), ...tournamentEventIds(), ...lifeEventIds(), ...birthEventIds(), ...callingEventIds(), ...campaignEventIds(), ...explorationEventIds(), ...dialogueEventIds(), ...householdEventIds(), ...researchEventIds(), ...originEventIds(), ...loreEventIds(), ...careerEventIds(), ...lineageEventIds(), ...healthEventIds(), ...travelEventIds(),...societyEventIds(),...communityEventIds(),...fellowshipEventIds(),...sanctuaryEventIds(),...socialEventIds(),...pastimeEventIds(),...repertoireEventIds(),...storyEventIds(),...rpgEventIds(),...personalityEventIds(),...justiceEventIds(),...adventureEventIds(),...curseEventIds(),...WINTER_EVENT.ids(), ...DEBT_RECKONING_EVENT.ids() };
       for(const need of ['life_hunger','vampire_feeding'])if(value.sanctuaries&&allowed[need])allowed[need]=[...allowed[need],'agreement'];
       if (!plain(event) || !(Object.hasOwn(allowed, event.id) || event.id === 'lycan_confidant') || ![event.title, event.category, event.body].every(item => textField(item))) return false;
       if (!Array.isArray(event.choices) || !event.choices.length || event.choices.length > 8 || new Set(event.choices.map(item => item?.id)).size !== event.choices.length) return false;
@@ -2545,6 +2559,7 @@ export function validateSave(value) {
       if(!validateHospitality(value)||!validateDaylife(value)||!validateWilderness(value)||!validateSocialLife(value)||!validateMazes(value)||!validateTravelEnergy(value)||!validateCareers(value.careers,value)||!validateLineage(value.lineage,value)||!validateHealth(value.health,value)||!validateTravel(value.travel,value))return false;
       if(value.householdBudget!==undefined&&!validateHouseholdBudget(value.householdBudget,value))return false;
       if(!validateFortune(value.fortune,value))return false;
+      if(!validateStation(value.hero.station,value))return false;
       if(value.society!==undefined&&!validateSociety(value.society,value))return false;
       if(value.community!==undefined&&!validateCommunity(value.community,value))return false;
       if(value.fellowship!==undefined&&!validateFellowship(value.fellowship,value))return false;

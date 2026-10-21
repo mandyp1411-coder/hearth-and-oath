@@ -195,6 +195,16 @@ export function educationTeacher(s) {
 function action(s, id, label, description, days, cost = 0, reason) {
   return { id, label, description, days, cost, group: id.startsWith('school_') ? 'School & education' : 'Family & belonging', ...(reason || s.hero.gold < cost ? { disabledReason: reason || `Requires ${cost} gold; you have ${s.hero.gold}.` } : {}) };
 }
+/** Which schools would admit you is decided at birth. The bound are not
+ * schooled unless someone at home reads and argues for it; the academy does
+ * not take them at all; an owned child's labour is already spoken for. */
+function admissionReason(s, route) {
+  const st = s.hero.station; if (!st) return null;
+  if (st.freedom === 'owned') return 'Your labour is spoken for; the bond does not allow for lessons.';
+  if (st.id === 'bound' && route === 'academy') return 'The academy does not take the bound.';
+  if (st.id === 'bound' && route !== 'apprenticeship' && !s.family?.literate) return 'The field does not wait, and no one at home reads to argue otherwise.';
+  return null;
+}
 function schoolReason(s) {
   const row = schoolRecord(s, s.education.route);
   if (!s.education.enrolled || !row) return 'Enroll in a school or apprenticeship first. Independent reading remains available.';
@@ -224,7 +234,7 @@ export function householdActions(s) {
   if (age < 6) return actions;
   for (const def of ROUTES) {
     const row = schoolRecord(s, def.id), cost = def.id === 'academy' && !e.scholarship ? Math.max(0,20-communitySupport(s,row.locationId).schoolFeeDiscount) : 0;
-    actions.push(action(s, `school_enroll_${def.id}`, `${e.enrolled ? 'Transfer to' : 'Enroll at'} ${row.name}`, `${def.description} Enrollment takes one day${cost?` and ${cost} gold`:''}. ${cost ? 'A free scholarship route is available.' : 'No enrollment fee.'} ${e.enrolled&&e.route!==def.id?transferExplanation(s,def.id):'Choose a route without choosing a combat calling.'}`, 1, cost, age < def.minAge ? `Opens at age ${def.minAge}.` : e.enrolled && e.route === def.id ? 'You are already enrolled here.' : s.locationId !== row.locationId ? `Enrollment takes place at ${location(s, row.locationId)?.name || row.locationId}.` : undefined));
+    actions.push(action(s, `school_enroll_${def.id}`, `${e.enrolled ? 'Transfer to' : 'Enroll at'} ${row.name}`, `${def.description} Enrollment takes one day${cost?` and ${cost} gold`:''}. ${cost ? 'A free scholarship route is available.' : 'No enrollment fee.'} ${e.enrolled&&e.route!==def.id?transferExplanation(s,def.id):'Choose a route without choosing a combat calling.'}`, 1, cost, age < def.minAge ? `Opens at age ${def.minAge}.` : e.enrolled && e.route === def.id ? 'You are already enrolled here.' : admissionReason(s, def.id) || (s.locationId !== row.locationId ? `Enrollment takes place at ${location(s, row.locationId)?.name || row.locationId}.` : undefined)));
   }
   const reason = schoolReason(s), row = schoolRecord(s, e.route);
   if (e.depthVersion === 1) {
@@ -494,6 +504,7 @@ export function validateHousehold(v, s) {
     const validId = id => FAMILY_IDS.includes(id) || s?.revision >= 5 && /^family_(guardian|sibling_[1-9][0-9]?)$/.test(id);
     if (!v || !SETUPS.includes(v.setup) || !['secure', 'shelter', 'unsheltered'].includes(v.housing) || !int(v.support, 0, 100) || !int(v.lastAge, 0, 300) || !validHistory(v.history, s) || s && v.lastAge > yearAge(s)) return false;
     if(v.parentage==='unrecorded'&&v.members.some(m=>m.biological&&m.relationship==='birth parent'&&m.availability!=='unknown'))return false;
+    if(v.literate!==undefined&&typeof v.literate!=='boolean')return false;
     if (!Array.isArray(v.members) || v.members.length < 1 || v.members.length > 6 || !v.members.every(m => m && (m.personId === null || validId(m.personId)) && text(m.name, 100) && m.name.trim() && text(m.relationship, 80) && ['present', 'missing', 'deceased', 'unknown'].includes(m.availability) && typeof m.biological === 'boolean' && (m.availability === 'present' ? m.personId !== null : s?.revision >= 5 && m.availability === 'deceased' ? true : m.personId === null))) return false;
     const ids = v.members.filter(m => m.personId).map(m => m.personId);
     if (new Set(ids).size !== ids.length || !ids.includes('kin')) return false;

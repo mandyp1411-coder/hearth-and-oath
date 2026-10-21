@@ -1,5 +1,6 @@
 import { PORTRAIT_LIBRARY, portraitEntry } from '../dist/js/portrait-library.js';
 import test from 'node:test';
+import { rollBirthCircumstances } from '../dist/js/station.js';
 import { needsReferenceArt } from './helpers/reference-art.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync, statSync } from 'node:fs';
@@ -126,7 +127,8 @@ test('attributes replace all part controls and only permitted creation choices c
 test('eight actual childhood journeys keep saved presets and transition through age-specific illustrations',()=>{
   for(const race of PORTRAIT_RACES){
     const generated=generateCharacter('age-journey-'+race,'hero',{ancestry:race,pronouns:'she/her'});
-    let s=engine.createBirthGame({seed:'age-journey-'+race,pronouns:'she/her',appearance:generated.appearance}),guard=0;
+    // A trade birth: the journeys are about portraits, not about whether a bound child lives to be grown.
+    let s=engine.createBirthGame({seed:'age-journey-'+race,pronouns:'she/her',appearance:generated.appearance,station:rollBirthCircumstances('age-journey-'+race,'trade',race)}),guard=0;
     const id=s.hero.appearance.preset,stages=new Set();
     while((s.age<18||s.event||s.timeline.yearTarget!==null)&&guard++<300){
       stages.add(portraitLayers(s.hero,{age:s.age}).preset.stage);

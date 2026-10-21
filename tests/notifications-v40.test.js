@@ -15,7 +15,8 @@ const fresh=()=>E.migrateSave(structuredClone(fixture.states.base)); // Explicit
 const valid=s=>{assert.ok(E.validateSave(s),s.notice);return s;};
 const stripped=s=>{const n=structuredClone(s);delete n.inbox;return n;};
 let birthday;
-const giftOpening=()=>birthday||=(async()=>createLifeAtAge({seed:'inbox-birthday-40',startAge:6,difficulty:'gentle',appearance:{ancestry:'human'}}))();
+// A bound child gets no pocket money; the gift fixture needs a birth that does.
+const giftOpening=()=>birthday||=(async()=>{for(let n=40;;n++){const s=await createLifeAtAge({seed:`inbox-birthday-${n}`,startAge:6,difficulty:'gentle',appearance:{ancestry:'human'}});if(s.hero.station.id!=='bound')return s;}})();
 
 test('old saves remain untouched until an actual receipt exists, including exports and migration',()=>{
   const s=fresh(),before=structuredClone(s);assert.equal(s.inbox,undefined);assert.deepEqual(notificationsFor(s),[]);assert.equal(unreadNotifications(s),0);assert.equal(markNotificationsRead(s),s);assert.deepEqual(E.migrateSave(s),s);assert.deepEqual(s,before);
