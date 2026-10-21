@@ -3,7 +3,7 @@
 import { stationDues } from './station.js';
 import { seededRoll } from './world.js';
 import { hasNature } from './personality.js';
-import { isLiterate } from './schooling.js';
+import { isLiterate, studyLevel, hasCredential, useStudy } from './schooling.js';
 import { communityFoodSupportAt, communityFoodIntervals } from './community.js';
 export const HOUSEHOLD_FOCI = [
   {id:'livelihood',label:'Build a livelihood',description:'Keep the ordinary mix of work, family and free time.'},
@@ -165,10 +165,13 @@ export function applyDebtReckoningChoice(s,eventId,choice,ctx={}) {
     return true;
   }
   if(choice==='plead'){
-    const granted=(s.hero.skills?.persuasion||0)>=4||(s.life?.career?.reputation||0)>=60;
+    // Someone who has studied the law reads the paper back to the lender, and the rate is the lawful one.
+    const lawyer=hasCredential(s,'clerkship')||studyLevel(s,'law')>=3;
+    const granted=lawyer||(s.hero.skills?.persuasion||0)>=4||(s.life?.career?.reputation||0)>=60;
     // The unlettered sign what they are handed. The paper says more than the lender did.
     const cheated=!isLiterate(s);
-    if(granted){b.debt+=Math.floor(b.debt*(cheated?0.22:0.15));ctx.journal?.('A year\u2019s grace',`The lender agrees to wait a year, at a harder rate.${cheated?' You put your mark to a paper you could not read; the rate on it is not the one he named.':''} The debt stands at ${b.debt}.`,'household');}
+    if(lawyer)useStudy(s,'law');
+    if(granted){b.debt+=Math.floor(b.debt*(cheated?0.22:lawyer?0.1:0.15));ctx.journal?.('A year\u2019s grace',lawyer?`You read the lender his own paper back, with the clause he hoped you would not find, and the rate on the year's grace is the lawful tenth. He will not forget it. The debt stands at ${b.debt}.`:`The lender agrees to wait a year, at a harder rate.${cheated?' You put your mark to a paper you could not read; the rate on it is not the one he named.':''} The debt stands at ${b.debt}.`,'household');}
     else{b.debt+=Math.floor(b.debt*0.15);s.life.stress=Math.min(100,(s.life.stress||0)+15);b.lastReckoningYear=null;ctx.journal?.('Refused',`The lender does not care for your reasons. The rate rises and he will be back.`,'household');}
     return true;
   }

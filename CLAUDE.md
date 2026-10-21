@@ -68,6 +68,15 @@ a legacy save keeps (free school, the service scholarship) is born with
 enrolment and the shrine keeper may not have a place; a fee is always the
 action's displayed `cost`, taken once by the engine.
 
+Two engine facts that bit the schooling handlers: for every action prefix
+not in `performAction`'s `experienceHandlers` list (`school_`, `family_`,
+`career_` …) the engine spends `days` and `cost` before the handler runs,
+so the handler must not spend them again, and must not re-check the purse
+(`blocked()` in household.js ignores the "Requires N gold" reason); and
+after a `school_`/`career_`/`health_` action the engine overwrites the last
+new journal line of that tag with a receipt ("… 2 days passed.") unless the
+line was written with `ctx.journalLiteral` (schooling.js's `note()`).
+
 ## Direction
 
 The v0.59.0 analysis and the owner's design direction live in the Claude

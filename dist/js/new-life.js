@@ -15,7 +15,7 @@ function pastChoice(s) {
   let preferred=id==='health_concern'?(s.health.pending?.kind==='physical'?'rest':'support'):
     id==='plague_letter'?'later':id==='life_budget'?'simplify':id==='deadline_review'?'pause':
     id==='lineage_bereavement'?['share','private','memorial'][seededRoll(s.seed,`past:grief:${s.day}`,3)]:
-    id==='career_staff'?'decline':id==='retirement'?'continue':id==='school_exam'?'present':id==='hard_winter'?'endure':null;
+    id==='career_staff'?'decline':id==='retirement'?'continue':id==='school_exam'?'present':id==='hard_winter'?'endure':id==='schooling_rival'?'contest':id==='schooling_temper'?'endure':null;
   const safe=offered.filter(c=>!(id==='family_visit'&&c.id==='gift'&&s.hero.gold<10));
   return safe.find(c=>c.id===preferred)||safe[seededRoll(s.seed,`past:choice:${id}:${s.age}:${s.day}`,safe.length)];
 }
@@ -93,11 +93,31 @@ async function generateLife(config, { onProgress, shouldCancel } = {}, draws = {
     if(s.age>=12&&s.age<18&&tryOnce('school_entrance'))continue;
     if(s.age>=12&&s.age<18&&s.education.route!=='academy'&&tryOnce('school_enroll_academy'))continue;
     if(s.age>=12&&s.age<18){const elective=getActions(s).find(a=>a.id.startsWith('school_elective_')&&!a.disabledReason);if(elective&&tryOnce(elective.id))continue;}
+    // A child with no school by twelve is put to a master's bench, if one will take the mark.
+    if(s.age>=12&&s.age<15&&!s.education.enrolled&&!s.education.route&&!s.education.qualifications.length&&tryOnce('school_enroll_apprenticeship'))continue;
     if(s.age>=6&&s.age<18&&tryTimes('school_attend',4))continue;
     if(s.age>=10&&s.age<18&&s.education.enrolled&&tryOnce('school_exam'))continue;
-    if(s.age>=16&&s.hero.profession==='Unemployed'){
+    // The institutions of the capitals, for the few with a grammar certificate and a town that has one.
+    if(s.age>=16&&s.age<=22&&!s.education.schooling?.institution){const sits=getActions(s).filter(a=>/^school_sit_/.test(a.id)&&!a.disabledReason);if(sits.length&&tryOnce(sits[seededRoll(s.seed,'past:institution',sits.length)].id))continue;
+      const place=getActions(s).find(a=>/^school_place_/.test(a.id)&&!a.disabledReason);if(place&&tryOnce(place.id))continue;
+      const reads=getActions(s).filter(a=>/^school_read_/.test(a.id)&&!a.disabledReason);if(reads.length&&tryOnce(reads[seededRoll(s.seed,'past:major',reads.length)].id))continue;}
+    if(s.education.schooling?.institution&&!s.education.schooling.institution.degree){if(tryTimes('school_lecture',6))continue;if(tryOnce('school_degree'))continue;}
+    // A student does not take a trade; a graduate takes the one the degree fits, even from another.
+    const studying=s.education.schooling?.institution&&!s.education.schooling.institution.degree;
+    const graduate=s.education.schooling?.credentials?.find(c=>c.kind!=='journeyman'),graduateFit=graduate&&({degree:{medicine:'healer',law:'scholar',history:'scholar',natural_philosophy:'alchemist'}[graduate.major]||'scholar',clerkship:'scholar',commission:'soldier',licence:'alchemist',orders:'scholar'})[graduate.kind];
+    if(graduateFit&&s.hero.profession!=='Unemployed'&&PROFESSION_CATALOG.find(j=>j.id===graduateFit)?.name!==s.hero.profession&&!civilianEntryReason(s,{profession:PROFESSION_CATALOG.find(j=>j.id===graduateFit).name})&&tryOnce(`career_choose_${graduateFit}`))continue;
+    if(s.age>=16&&s.hero.profession==='Unemployed'&&!studying){
       // The trades that would have this life, wherever it is standing; the walk to the mentor is the action's own.
-      const jobs=PROFESSION_CATALOG.filter(j=>j.name!=='Unemployed'&&!civilianEntryReason(s,{profession:j.name})).map(j=>`career_choose_${j.id}`);
+      const served=s.education.schooling?.credentials?.find(c=>c.kind==='journeyman')?.major,craft=served&&PROFESSION_CATALOG.find(j=>j.id===served&&!civilianEntryReason(s,{profession:j.name}));
+      if(craft&&tryOnce(`career_choose_${craft.id}`))continue; // a journeyman takes up the trade the bond taught
+      // What the examinations made you is what you do: a doctor heals, a clerk keeps the archive, an officer soldiers, a licensed mage works the fire.
+      const learned=s.education.schooling?.credentials?.find(c=>c.kind!=='journeyman'),fit=learned&&({degree:{medicine:'healer',law:'scholar',history:'scholar',natural_philosophy:'alchemist'}[learned.major]||'scholar',clerkship:'scholar',commission:'soldier',licence:'alchemist',orders:'scholar'})[learned.kind];
+      const fitJob=fit&&PROFESSION_CATALOG.find(j=>j.id===fit&&!civilianEntryReason(s,{profession:j.name}));
+      if(fitJob&&tryOnce(`career_choose_${fitJob.id}`))continue;
+      const open=PROFESSION_CATALOG.filter(j=>j.name!=='Unemployed'&&!civilianEntryReason(s,{profession:j.name}));
+      // A high house does not send its children down the mine or behind the plough while any other door is open.
+      const gentle=['gentry','noble','royal'].includes(s.hero.station?.id)?open.filter(j=>!['miner','farmer','blacksmith'].includes(j.id)):open;
+      const jobs=(gentle.length?gentle:open).map(j=>`career_choose_${j.id}`);
       if(jobs.length&&tryOnce(jobs[seededRoll(s.seed,'past:livelihood',jobs.length)]))continue;
     }
     // A sensible past pays what it owes when it can.
