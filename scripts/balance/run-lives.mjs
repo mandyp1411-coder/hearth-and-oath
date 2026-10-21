@@ -70,6 +70,7 @@ function measure(s, start, log) {
     gold: s.hero.gold, debt: b.debt || 0, station: s.hero.station?.id || 'none', joy: s.life?.happiness, stress: s.life?.stress, bodily: s.life?.health, hp: s.hero.hp, maxHp: s.hero.maxHp,
     supportedGold: b.supportedGold || 0, billedGold: b.billedGold || 0, conditions: (s.health?.physical?.length || 0) + (s.health?.mental?.length || 0),
     profession: s.hero.profession, wentIntoDebt: log.debt, worstStress: log.worstStress, minGold: log.minGold, yearsPlayed: s.age - start,
+    literate: s.education?.schooling ? s.education.schooling.literate : null, certificate: (s.education?.qualifications || []).some(q => q.route === 'academy') ? 2 : (s.education?.qualifications || []).some(q => q.route !== 'apprenticeship') ? 1 : 0,
   };
 }
 
@@ -100,7 +101,7 @@ for (const policy of POLICIES) {
     diedPct: pct(r => !r.alive), medianDeathAge: dead.length ? dead.map(r => r.age).sort((a, b) => a - b)[Math.floor(dead.length / 2)] : null,
     medianGold: med('gold'), medianMinGold: med('minGold'), everShortPct: pct(r => r.wentIntoDebt),
     medianJoy: med('joy'), medianStress: med('stress'), medianWorstStress: med('worstStress'), medianBodily: med('bodily'),
-    byStation: Object.fromEntries([...new Set(rows.map(r => r.station))].sort().map(id => { const g = rows.filter(r => r.station === id), m = k => { const v = g.map(r => r[k]).filter(Number.isFinite).sort((a, b) => a - b); return v.length ? v[Math.floor(v.length / 2)] : null; }; return [id, { lives: g.length, diedPct: Math.round(100 * g.filter(r => !r.alive).length / g.length), medianDeathAge: g.filter(r => !r.alive).map(r => r.age).sort((a, b) => a - b)[Math.floor(g.filter(r => !r.alive).length / 2)] ?? null, medianGold: m('gold'), everShortPct: Math.round(100 * g.filter(r => r.wentIntoDebt).length / g.length), medianDebt: m('debt') }]; })),
+    byStation: Object.fromEntries([...new Set(rows.map(r => r.station))].sort().map(id => { const g = rows.filter(r => r.station === id), m = k => { const v = g.map(r => r[k]).filter(Number.isFinite).sort((a, b) => a - b); return v.length ? v[Math.floor(v.length / 2)] : null; }; return [id, { lives: g.length, diedPct: Math.round(100 * g.filter(r => !r.alive).length / g.length), medianDeathAge: g.filter(r => !r.alive).map(r => r.age).sort((a, b) => a - b)[Math.floor(g.filter(r => !r.alive).length / 2)] ?? null, medianGold: m('gold'), everShortPct: Math.round(100 * g.filter(r => r.wentIntoDebt).length / g.length), medianDebt: m('debt'), literatePct: g.some(r => r.literate !== null) ? Math.round(100 * g.filter(r => r.literate).length / g.length) : null, schooledPct: Math.round(100 * g.filter(r => r.certificate >= 1).length / g.length), grammarPct: Math.round(100 * g.filter(r => r.certificate >= 2).length / g.length) }]; })),
     conditionsAtEndPct: pct(r => r.conditions > 0), causes: Object.fromEntries(Object.entries(dead.reduce((m, r) => (m[r.deathCause] = (m[r.deathCause] || 0) + 1, m), {}))),
     rows,
   };
@@ -109,6 +110,6 @@ for (const policy of POLICIES) {
   console.log(`died ${r.diedPct}% (median age at death ${r.medianDeathAge ?? '-'}) · causes ${JSON.stringify(r.causes)}`);
   console.log(`gold median ${r.medianGold} · lowest point median ${r.medianMinGold} · ever short of money ${r.everShortPct}%`);
   console.log(`joy ${r.medianJoy} · stress ${r.medianStress} (worst ${r.medianWorstStress}) · bodily ${r.medianBodily} · with a condition at end ${r.conditionsAtEndPct}%`);
-  for (const [id, g] of Object.entries(r.byStation)) console.log(`  ${id}: ${g.lives} lives · died ${g.diedPct}% (median ${g.medianDeathAge ?? '-'}) · gold ${g.medianGold} · owed at end ${g.medianDebt} · ever short ${g.everShortPct}%`);
+  for (const [id, g] of Object.entries(r.byStation)) console.log(`  ${id}: ${g.lives} lives · died ${g.diedPct}% (median ${g.medianDeathAge ?? '-'}) · gold ${g.medianGold} · owed at end ${g.medianDebt} · ever short ${g.everShortPct}%${g.literatePct !== null ? ` · lettered ${g.literatePct}% · schooled ${g.schooledPct}% · grammar ${g.grammarPct}%` : ''}`);
 }
 if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify(results, null, 1));
