@@ -119,6 +119,9 @@ async function generateLife(config, { onProgress, shouldCancel } = {}, draws = {
       // The trades that would have this life, wherever it is standing; the walk to the mentor is the action's own.
       const served=s.education.schooling?.credentials?.find(c=>c.kind==='journeyman')?.major,craft=served&&PROFESSION_CATALOG.find(j=>j.id===served&&!civilianEntryReason(s,{profession:j.name}));
       if(craft&&tryOnce(`career_choose_${craft.id}`))continue; // a journeyman takes up the trade the bond taught
+      // A guild family's child takes the family's trade: the name on the rolls is worth more than a stranger's bench.
+      const family=s.guild?.family&&PROFESSION_CATALOG.find(j=>j.id===s.guild.family&&!civilianEntryReason(s,{profession:j.name}));
+      if(family&&tryOnce(`career_choose_${family.id}`))continue;
       // What the examinations made you is what you do: a doctor heals, a clerk keeps the archive, an officer soldiers, a licensed mage works the fire.
       const learned=s.education.schooling?.credentials?.find(c=>c.kind!=='journeyman'),fit=learned&&({degree:{medicine:'healer',law:'scholar',history:'scholar',natural_philosophy:'alchemist'}[learned.major]||'scholar',clerkship:'scholar',commission:'soldier',licence:'alchemist',orders:'scholar'})[learned.kind];
       const fitJob=fit&&PROFESSION_CATALOG.find(j=>j.id===fit&&!civilianEntryReason(s,{profession:j.name}));
