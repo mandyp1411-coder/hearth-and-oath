@@ -91,7 +91,8 @@ import { initializeAdventuring, adventureActions, applyAdventureAction, applyAdv
 import { validEnemyIllustration } from './enemies.js';
 import { initializeTravelEnergy, travelEnergyView, travelEnergyForecast, progressTravelStep, campingActions, applyCampingAction, noteTravelRest, validateTravelEnergy } from './travel-energy.js';
 import { initializeTravel, setTravelPlan, travelPlanPreview, beginTravelJourney, onTravelLeg, travelActions, applyTravelAction, applyTravelChoice, flushTravelEvent, afterTravelBattle, travelEventIds, validateTravel } from './travel.js';
-import { initializeHouseholdBudget, accrueHouseholdBudget, settleHouseholdBudget, applyAnnualFocus, annualWorkRatio, householdCostPreview, householdBudgetActions, applyHouseholdBudgetAction, validateHouseholdBudget } from './budget.js';
+import { initializeFortune, onFortuneTime, fortuneIncomeFactor, validateFortune } from './fortune.js';
+import { initializeHouseholdBudget, accrueHouseholdBudget, settleHouseholdBudget, chargeDebtInterest, debtReckoning, applyDebtReckoningChoice, DEBT_RECKONING_EVENT, applyAnnualFocus, annualWorkRatio, householdCostPreview, householdBudgetActions, applyHouseholdBudgetAction, validateHouseholdBudget } from './budget.js';
 import { initializeSociety, societyActions, applySocietyAction, applySocietyChoice, societyEventIds, onSocietyTime, flushSocietyEvent, validateSociety, inheritSociety, societyCustomerChoiceReason } from './society.js';
 import { initializeCommunity, communityActions, applyCommunityAction, applyCommunityChoice, communityEventIds, onCommunityTime, flushCommunityEvent, validateCommunity, inheritCommunity } from './community.js';
 import { initializeFellowship, fellowshipActions, applyFellowshipAction, applyFellowshipChoice, fellowshipEventIds, onFellowshipTime, flushFellowshipEvent, validateFellowship, inheritFellowship } from './fellowship.js';
@@ -142,6 +143,7 @@ const birthdayId = state => birthDay(state) ? `birthday-${birthDay(state)}-${sta
 const PATHS = ['warrior', 'mage', 'rogue'];
 const ATTRIBUTES = ['strength', 'agility', 'vitality', 'intellect', 'willpower', 'presence'];
 const SKILLS = ['weapons', 'defense', 'arcana', 'devotion', 'stealth', 'survival', 'scholarship', 'persuasion'];
+const PASSIVE_WAGE_FACTOR = 0.6;
 const TEMPERAMENTS = ['compassionate', 'ambitious', 'curious', 'cautious', 'rebellious'];
 const BELIEFS = ['lantern', 'ancestors', 'wilds', 'secular'];
 const PRONOUNS = ['she/her', 'he/him', 'they/them'];
@@ -305,6 +307,7 @@ function spendDays(state, days, { outdoors = false, night, expeditionDayKind = '
     } else {
       onCommunityTime(state,{oldDay,newDay:state.day},ctx);
       accrueHouseholdBudget(state,oldDay,state.day);
+      onFortuneTime(state,{oldDay,newDay:state.day},ctx);
       onCareerTime(state, days, ctx);
       onLineageTime(state, { oldDay, newDay:state.day, outdoors }, ctx);
       onHealthTime(state, { oldDay, newDay:state.day, outdoors }, ctx);
@@ -665,7 +668,7 @@ export function createBirthGame(config = {}) {
   initializeHousehold(state, { config: resolvedConfig }); initializeFamilyOrigins(state); initializeWorkshop(state);
   initializePreferences(state, { values: config.preferences }); initializeLore(state);
   initializeCareers(state); initializeHealth(state); initializeTravel(state); initializeTravelEnergy(state); initializeMaze(state); initializeSocialLife(state); initializeLineage(state,{startingAge:config.startAge});
-  initializeHouseholdBudget(state);
+  initializeHouseholdBudget(state,{edition:true});initializeFortune(state);
   initializeFamilyDepth(state);initializeSociety(state);initializeCommunity(state);initializeFellowship(state);initializeSanctuaries(state);
   initializeSocial(state);initializePastimes(state);initializeLifeStories(state);
   initializeRealm(state,{fresh:true});initializeJustice(state);initializeAdventuring(state);initializeCartography(state);initializeRegionalWorld(state);initializeRpg(state,{fresh:true},engineContext(state));
@@ -840,7 +843,10 @@ function engineContext(state, { annual = false, resolvingNeed=null } = {}) {
         state.hero.gold+=Math.max(0,Math.floor((state.day-state.timeline.yearStartDay)*rate)-Math.floor((beforeDay-state.timeline.yearStartDay)*rate));
         state.life.career.experience+=state.hero.profession==='Unemployed'?0:Math.floor(days/10);
       } else {
-        const wage=professionAnnualWage(state)*(state.householdBudget?annualWorkRatio(state):1);
+        // Waiting for the year to turn earns less than working it: the passive
+        // wage is 60% of the profession's figure, so shifts matter.
+        const bonded=(state.householdBudget?.bondedUntil||0)>beforeDay;
+        const wage=bonded?0:professionAnnualWage(state)*(state.householdBudget?annualWorkRatio(state)*(state.householdBudget.debt===undefined?1:PASSIVE_WAGE_FACTOR):1)*fortuneIncomeFactor(state,beforeDay);
         const income=Math.max(0,Math.floor(state.day*wage/365)-Math.floor(beforeDay*wage/365));
         state.hero.gold+=income;
         state.life.career.experience+=state.hero.profession==='Unemployed'?0:Math.floor(days/10);
@@ -859,6 +865,8 @@ function engineContext(state, { annual = false, resolvingNeed=null } = {}) {
     touchCampaign: () => { if (state.campaign && !waiting(state)) onCampaignAge(state, engineContext(state)); },
     onBirthday: () => {
       if (state.family && state.education) onHouseholdAge(state, engineContext(state));
+      chargeDebtInterest(state, engineContext(state));
+      if (!waiting(state)) debtReckoning(state, engineContext(state));
       const bloodPlan=state.hero.condition?.feedingPlan;
   if(bloodPlan&&state.hero.condition.hunger>=65&&!waiting(state)&&!state.justice?.prison&&!state.sanctuaries?.commitment){const id='sanctuary_feed_'+bloodPlan.agreementId,offer=sanctuaryActions(state).find(a=>a.id===id);if(offer&&!offer.disabledReason&&((nextInterruptionDay(state,{ignoreNeed:'vampire'})??state.day+2)>state.day)){applySanctuaryAction(state,id,engineContext(state,{annual:true,resolvingNeed:'vampire'}));if(state.phase==='retired')return copy(state);}else if(!offer||offer.disabledReason){state.hero.condition.feedingPlan=null;addJournal(state,'A standing agreement interrupted',offer?.disabledReason||'The agreed donor is no longer available. No fee or feeding was taken.','condition');}}
   if (state.workshop) refreshWorkshop(state, engineContext(state));
@@ -1016,8 +1024,9 @@ function performAction(original, id) {
     if(!handler(state,id,ctx,getContacts(state)))return {...copy(original),notice:'This commitment could not proceed; no time or resources were spent.'};
     if(terminalRun(state))return copy(state);
     if(ctx.completedActionId)applyPreferenceActivity(state,ctx.completedActionId,ctx);
-    // Public room navigation cannot collect a bill from an earlier timed activity.
-    if(!id.startsWith('atlas_room_')&&(!id.startsWith('tournament_')||state.day>actionStartDay)&&(!id.startsWith('repertoire_')||state.day>actionStartDay)&&(!id.startsWith('justice_job_')||state.day>actionStartDay)&&(!id.startsWith('rpg_')||state.day>actionStartDay)&&(!/^(legacycalling_|fellowship_handover_|people_withdraw_)/.test(id)||state.day>actionStartDay))settleHouseholdBudget(state,ctx);
+    // Only an action that spent time can collect a bill; opening a page,
+    // walking a room or reviewing an offer never does.
+    if(state.day>actionStartDay)settleHouseholdBudget(state,ctx);
     recordPlanGold(state,before);
     return afterAction(state);
   }
@@ -1429,7 +1438,7 @@ function performEventOption(original, id) {
     ['career_', applyCareerChoice], ['lineage_', applyLineageChoice], ['health_', applyHealthChoice], ['travel_', applyTravelChoice],
     ['society_',applySocietyChoice],['community_',applyCommunityChoice],['fellowship_',applyFellowshipChoice],['sanctuary_',applySanctuaryChoice],
     ['social_',applySocialChoice],['pastime_',applyPastimeChoice],
-    ['stories_',applyStoryChoice],['justice_',applyJusticeChoice],['adventure_',applyAdventureChoice],
+    ['stories_',applyStoryChoice],['justice_',applyJusticeChoice],['adventure_',applyAdventureChoice],['debt_',applyDebtReckoningChoice],
   ];
   for (const [prefix, handler] of moduleChoices) if (activeEvent.id.startsWith(prefix) && activeEvent.id !== 'family_visit') {
     const before = state.hero.gold;
@@ -1775,7 +1784,7 @@ function endLife(state, cause) {
 export function continueAsChild(original, childId) {if(terminalRun(original))return copy(original);
   if(original.revision<5||original.phase!=='retired')return {...copy(original),notice:'Close this chapter before continuing as a child.'};
   const next=createSuccessor(original,childId,createBirthGame);
-  if(next){initializeHouseholdBudget(next,{reset:true});initializeConversations(next);inheritRpg(next,original);inheritStoryMazes(next,original);settlePublicRoster(next,{migration:true});}
+  if(next){initializeHouseholdBudget(next,{reset:true,edition:original.householdBudget?.debt!==undefined});if(original.fortune)initializeFortune(next);initializeConversations(next);inheritRpg(next,original);inheritStoryMazes(next,original);settlePublicRoster(next,{migration:true});}
   return next && next !== false && validateSave(next) ? next : {...copy(original),notice:'That child cannot continue this family story.'};
 }
 
@@ -2440,6 +2449,8 @@ export function validateSave(value) {
     if (!integer(hero.maxHp, 1, 100000) || !integer(hero.maxMp, 0, 100000) || !finiteRange(hero.hp, 0, hero.maxHp) || !finiteRange(hero.mp, 0, hero.maxMp)) return false;
     if (!plain(hero.attributes) || !ATTRIBUTES.every(key => integer(hero.attributes[key], 1, 10000))) return false;
     if (!plain(hero.skills) || !SKILLS.every(key => integer(hero.skills[key], 0, 10000))) return false;
+    // Marks: what a life has done to a person (a break's coping, later scars and the like).
+    if (hero.marks !== undefined && !(Array.isArray(hero.marks) && hero.marks.length <= 24 && hero.marks.every(m => plain(m) && textField(m.id, 40) && integer(m.day, 0, value.day) && textField(m.source, 40)))) return false;
     if (!validCondition(hero.condition, value.day)) return false;
     if(value.event?.id.startsWith('curse_')&&value.event.id!=='curse_rare_meeting'&&hero.condition===null)return false;
     if (value.revision >= 2) {
@@ -2494,7 +2505,7 @@ export function validateSave(value) {
     if (!Array.isArray(value.journal) || !value.journal.length || !value.journal.every(item => plain(item) && textField(item.id, 120) && integer(item.day) && integer(item.age, birthMode(value) ? 0 : 7, 5000) && textField(item.title, 1000) && textField(item.text, 10000) && textField(item.tag, 80) && (item.capturedReceipt===undefined||typeof item.capturedReceipt==='boolean') && (item.generation===undefined||integer(item.generation,1,5000)))) return false;
     if (value.event !== null) {
       const event = value.event;
-      const allowed = { ...EVENT_CHOICES, ...yardEventIds(), ...tournamentEventIds(), ...lifeEventIds(), ...birthEventIds(), ...callingEventIds(), ...campaignEventIds(), ...explorationEventIds(), ...dialogueEventIds(), ...householdEventIds(), ...researchEventIds(), ...originEventIds(), ...loreEventIds(), ...careerEventIds(), ...lineageEventIds(), ...healthEventIds(), ...travelEventIds(),...societyEventIds(),...communityEventIds(),...fellowshipEventIds(),...sanctuaryEventIds(),...socialEventIds(),...pastimeEventIds(),...repertoireEventIds(),...storyEventIds(),...rpgEventIds(),...personalityEventIds(),...justiceEventIds(),...adventureEventIds(),...curseEventIds() };
+      const allowed = { ...EVENT_CHOICES, ...yardEventIds(), ...tournamentEventIds(), ...lifeEventIds(), ...birthEventIds(), ...callingEventIds(), ...campaignEventIds(), ...explorationEventIds(), ...dialogueEventIds(), ...householdEventIds(), ...researchEventIds(), ...originEventIds(), ...loreEventIds(), ...careerEventIds(), ...lineageEventIds(), ...healthEventIds(), ...travelEventIds(),...societyEventIds(),...communityEventIds(),...fellowshipEventIds(),...sanctuaryEventIds(),...socialEventIds(),...pastimeEventIds(),...repertoireEventIds(),...storyEventIds(),...rpgEventIds(),...personalityEventIds(),...justiceEventIds(),...adventureEventIds(),...curseEventIds(),...DEBT_RECKONING_EVENT.ids() };
       for(const need of ['life_hunger','vampire_feeding'])if(value.sanctuaries&&allowed[need])allowed[need]=[...allowed[need],'agreement'];
       if (!plain(event) || !(Object.hasOwn(allowed, event.id) || event.id === 'lycan_confidant') || ![event.title, event.category, event.body].every(item => textField(item))) return false;
       if (!Array.isArray(event.choices) || !event.choices.length || event.choices.length > 8 || new Set(event.choices.map(item => item?.id)).size !== event.choices.length) return false;
@@ -2533,6 +2544,7 @@ export function validateSave(value) {
     if(value.revision>=5){
       if(!validateHospitality(value)||!validateDaylife(value)||!validateWilderness(value)||!validateSocialLife(value)||!validateMazes(value)||!validateTravelEnergy(value)||!validateCareers(value.careers,value)||!validateLineage(value.lineage,value)||!validateHealth(value.health,value)||!validateTravel(value.travel,value))return false;
       if(value.householdBudget!==undefined&&!validateHouseholdBudget(value.householdBudget,value))return false;
+      if(!validateFortune(value.fortune,value))return false;
       if(value.society!==undefined&&!validateSociety(value.society,value))return false;
       if(value.community!==undefined&&!validateCommunity(value.community,value))return false;
       if(value.fellowship!==undefined&&!validateFellowship(value.fellowship,value))return false;

@@ -7,7 +7,7 @@ import {initializeHouseholdBudget,householdAnnualCost,householdCostPreview,accru
 
 function household(day=18*365,gold=500) {
   const s={day,age:18,phase:'adult',timeline:{mode:'birth',birthDay:0,yearTarget:null},hero:{gold,path:'unformed',skills:{scholarship:0,survival:0}},life:{focus:'livelihood',lifestyle:'frugal',home:{tier:'lodgings'},children:[],people:[],happiness:60,stress:20,health:80,plan:null},health:{care:{restUntil:0,supportUntil:0},physical:[],mental:[]},event:null,battle:null,careers:{batch:null},workshop:{project:null}};
-  initializeHouseholdBudget(s);return s;
+  initializeHouseholdBudget(s,{edition:true});return s;
 }
 const time=(s,days)=>{const before=s.day;s.day+=days;accrueHouseholdBudget(s,before,s.day);};
 
@@ -15,34 +15,34 @@ test('living costs conserve the same actual calendar across many partial periods
   const a=household(),b=household();
   for(const days of [30,30,30,30,30,30,30,30,30,30,30,35]){time(a,days);settleHouseholdBudget(a);}
   time(b,365);settleHouseholdBudget(b);
-  assert.equal(a.hero.gold,380);assert.equal(a.hero.gold,b.hero.gold);
+  assert.equal(a.hero.gold,260);assert.equal(a.hero.gold,b.hero.gold);
   assert.equal(a.householdBudget.accruedUnits,b.householdBudget.accruedUnits);
-  assert.equal(a.householdBudget.paidGold,120);assert.ok(validateHouseholdBudget(a.householdBudget,a));
+  assert.equal(a.householdBudget.paidGold,240);assert.ok(validateHouseholdBudget(a.householdBudget,a));
   const paid=a.hero.gold;settleHouseholdBudget(a);assert.equal(a.hero.gold,paid,'the same elapsed days are billed once');
 });
 
 test('childhood and imported past years accrue no invented costs',()=>{
   const s=household(10*365);time(s,7*365);settleHouseholdBudget(s);assert.equal(s.hero.gold,500);
-  time(s,2*365);settleHouseholdBudget(s);assert.equal(s.householdBudget.paidGold,120,'only the actual adult year is charged');
-  const late=household(80*365);time(late,30);settleHouseholdBudget(late);assert.equal(late.householdBudget.paidGold,9);assert.equal(late.householdBudget.startedDay,80*365);
+  time(s,2*365);settleHouseholdBudget(s);assert.equal(s.householdBudget.paidGold,240,'only the actual adult year is charged');
+  const late=household(80*365);time(late,30);settleHouseholdBudget(late);assert.equal(late.householdBudget.paidGold,19);assert.equal(late.householdBudget.startedDay,80*365);
 });
 
 test('household rates follow dependent children, chosen comfort and actual property',()=>{
   const s=household();s.life.home.tier='cottage';s.life.children=[{bornDay:s.day-7*365,alive:true},{bornDay:s.day-19*365,alive:true},{bornDay:s.day,alive:false}];
-  assert.equal(householdAnnualCost(s),195);
-  assert.equal(householdCostPreview(s,365).additionalCost,195);
+  assert.equal(householdAnnualCost(s),255);
+  assert.equal(householdCostPreview(s,365).additionalCost,255);
   const before=structuredClone(s);assert.ok(applyHouseholdBudgetAction(s,'budget_lifestyle_generous'));
-  assert.equal(s.hero.gold,before.hero.gold);assert.equal(s.day,before.day);assert.equal(householdAnnualCost(s),675);
-  assert.ok(applyHouseholdBudgetAction(s,'budget_focus_education'));assert.equal(householdAnnualCost(s),735);
+  assert.equal(s.hero.gold,before.hero.gold);assert.equal(s.day,before.day);assert.equal(householdAnnualCost(s),795);
+  assert.ok(applyHouseholdBudgetAction(s,'budget_focus_education'));assert.equal(householdAnnualCost(s),855);
   assert.equal(householdBudgetActions(s).find(a=>a.id==='budget_focus_education').disabledReason,'This is your current priority.');
 });
 
 test('a child reaching adulthood midway through work changes only the remaining dependent costs',()=>{
   const a=household(),b=household();
   for(const s of [a,b])s.life.children=[{bornDay:s.day-18*365+100,alive:true}];
-  assert.equal(householdCostPreview(a,365).additionalCost,Math.floor((165*100+120*265)/365));
+  assert.equal(householdCostPreview(a,365).additionalCost,Math.floor((285*100+240*265)/365));
   time(a,365);for(const days of [50,50,65,100,100])time(b,days);
-  assert.equal(a.householdBudget.accruedUnits,165*100+120*265);
+  assert.equal(a.householdBudget.accruedUnits,285*100+240*265);
   assert.equal(a.householdBudget.accruedUnits,b.householdBudget.accruedUnits);
 });
 
@@ -56,17 +56,20 @@ test('community food support bills exact funded days, skips pauses and does not 
     s.community={works:[work,structuredClone(work)]};
   }
   const initial=structuredClone(a);
-  assert.equal(householdCostPreview(a,365).additionalCost,Math.floor((120*365-30*150)/365));
+  assert.equal(householdCostPreview(a,365).additionalCost,Math.floor((240*365-30*150)/365));
   assert.deepEqual(a,initial,'a forecast consumes neither reserve nor elapsed days');
   time(a,365);for(const days of [10,10,50,30,100,100,65])time(b,days);
-  assert.equal(a.householdBudget.accruedUnits,120*365-30*150);
+  assert.equal(a.householdBudget.accruedUnits,240*365-30*150);
   assert.equal(a.householdBudget.accruedUnits,b.householdBudget.accruedUnits);
 });
 
-test('basic need support preserves an insolvent household without debt, forced loss or free luxury',()=>{
+test('an insolvent household is carried once in its first adult year, then owes the rest',()=>{
   const s=household(18*365,3);s.life.lifestyle='generous';s.life.home.tier='cottage';time(s,365);settleHouseholdBudget(s);
-  assert.equal(s.hero.gold,0);assert.equal(s.life.lifestyle,'frugal');assert.equal(s.life.home.tier,'cottage');
-  assert.equal(s.householdBudget.paidGold,3);assert.equal(s.householdBudget.supportedGold,627);
+  assert.equal(s.hero.gold,0);assert.equal(s.life.lifestyle,'frugal');assert.equal(s.life.home.tier,'cottage','no forced sale at the first shortfall');
+  assert.equal(s.householdBudget.paidGold,3);assert.equal(s.householdBudget.supportedGold,747);assert.equal(s.householdBudget.debt,0);
+  s.age=19;time(s,365);settleHouseholdBudget(s);
+  assert.equal(s.householdBudget.supportedGold,747,'the parish carries a household once');
+  assert.equal(s.householdBudget.debt,210,'the second shortfall is owed');
   assert.ok(validateHouseholdBudget(s.householdBudget,s));
 });
 

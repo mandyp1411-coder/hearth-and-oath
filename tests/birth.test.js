@@ -8,7 +8,7 @@ import { travelPlanPreview } from '../dist/js/travel.js';
 
 function choice(state, pick = 'curiosity') {
   if(state.age<3)pick='continue';
-  if(state.event?.id==='health_concern')pick='continue';
+  if(state.event?.id==='health_concern')pick=state.health?.pending?.kind==='physical'&&state.age>=3&&state.event.choices.some(c=>c.id==='rest')?'rest':'continue';
   assert.ok(state.event?.choices.some(c => c.id === pick));
   const before = structuredClone(state);
   const next = engine.chooseEventOption(state, pick);
@@ -163,6 +163,13 @@ test('birth Age up pauses before a known promise and never skips its visible dec
   assert.equal(frozen.day, state.day);
   state = choice(state, 'continue');
   state = engine.continueAgeUp(state);
+  // The year may still pause for the body (a fever, a wound); each pause is a
+  // decision the player answers, never one the clock skips.
+  for (let guard = 0; guard < 12 && state.age === 18; guard++) {
+    assert.equal(state.event?.id, 'health_concern', `an unexpected pause: ${state.event?.id || state.notice}`);
+    state = choice(state, 'continue');
+    if (!state.event) state = engine.continueAgeUp(state);
+  }
   assert.equal(state.age, 19);
   assert.equal(state.obligations[0].missed, true);
   assert.equal(state.event.id, 'birth_adult_year');

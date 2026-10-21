@@ -237,7 +237,7 @@ test('mortality depends on actual advanced age and physical frailty, never merel
 test('health validators reject future clocks, mismatched concerns, invalid conditions and unbounded history', () => {
   const state = life(); condition(state, 'infection'); flushHealthEvent(state, context(state));
   assert.equal(validateHealth(state.health, state), true);
-  assert.deepEqual(Object.keys(healthEventIds()), ['health_concern']);
+  assert.deepEqual(Object.keys(healthEventIds()), ['health_concern', 'health_break']);
   for (const change of [
     value => { value.physical[0].severity = 0; }, value => { value.physical[0].sinceDay = 1; },
     value => { value.physical[0].type = 'evil'; }, value => { value.physical.push({ ...value.physical[0] }); },

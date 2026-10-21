@@ -23,7 +23,7 @@ function condition(s,type,severity=1,{ageDays=0,cared=0,acknowledged=true,circum
 function act(s,id) {
   s=atService(s,id); const a=E.getActions(s).find(a=>a.id===id);assert.ok(a,id);assert.ok(!a.disabledReason,a.disabledReason);return roundtrip(E.chooseAction(s,id)); }
 function openConcern(s,type,severity=1,options={}) { const c=condition(s,type,severity,{...options,acknowledged:false});flushHealthEvent(s,{setEvent(id,title,category,body,choices){s.event={id,title,category,body,choices};}});assert.equal(s.event.id,'health_concern');return c; }
-function nearBirthday() { const s=fresh(); const day=(s.timeline.birthDay||0)+(s.age+1)*365-5;s.day=day;s.health.lastPhysicalCheckDay=day;s.health.lastMentalCheckDay=day;s.health.lastAgeCheckYear=Math.floor(day/365);return roundtrip(s); }
+function nearBirthday() { const s=fresh(); const day=(s.timeline.birthDay||0)+(s.age+1)*365-5;s.day=day;s.health.lastPhysicalCheckDay=day;s.health.lastMentalCheckDay=day;s.health.lastAgeCheckYear=Math.floor(day/365);if(s.fortune)s.fortune.lastSeason=Math.floor((day+5)/92);/* these cases measure recovery fees, not the season's luck */return roundtrip(s); }
 const plainUi={e:String,button:(label,op,id)=>`<button data-op="${op}" data-id="${id}">${label}</button>`,actionCards:rows=>rows.map(a=>`<p>${a.label}: ${a.description}</p>`).join('')};
 
 test('full combat HP and very low bodily wellbeing have distinct effects and a usable care route',()=>{

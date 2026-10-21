@@ -30,7 +30,7 @@ test('a real multi-year personal story preserves the same witness, earlier branc
   const paid=gold-s.hero.gold;assert.ok(paid>=8);s=settle(s);const afterPause=s.hero.gold,billed=s.householdBudget.paidGold;s=engine.chooseAction(s,'stories_continue');assert.equal(s.day-started,6);assert.equal(s.stories.arcs[0].chapter,1);
   assert.equal(afterPause-s.hero.gold,s.householdBudget.paidGold-billed,'continuation does not take another story fee');
   const original=structuredClone(s.stories);s=engine.chooseAction(s,'stories_continue');assert.deepEqual(s.stories,original);
-  while(s.age<27)s=settle(engine.ageUp(s));
+  for(let guard=0;s.age<27;guard++){assert.ok(guard<40&&s.phase!=='retired',`alive to 27 (age ${s.age}, ${s.health?.deathCause||'alive'})`);s=settle(engine.ageUp(s));}
   s=engine.chooseAction(s,'stories_open_two_names');assert.ok(s.event.body.includes('Put both names on the account'));assert.deepEqual(engine.migrateSave(JSON.parse(JSON.stringify(s))),s);
 });
 test('coercion changes the named witness and actual professional record, and can be answered without erasing it',()=>{

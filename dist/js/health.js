@@ -218,8 +218,39 @@ function symptomProgress(state, condition) {
   const mental = mentalTypes.includes(condition.type), nextDay = condition.lastEffectDay + 14;
   return `${mental ? `Emotional improvement needs continuing care, at least ${condition.type === 'depression' ? 35 : 21} days since onset, joy 40+ and stress 65 or less. Current joy ${state.life?.happiness ?? 0}; stress ${state.life?.stress ?? 0}.` : condition.type === 'chronic' ? 'Supported care can lower severity to 1; this recurring condition remains recorded.' : 'Supported physical reviews can lower severity; HP restoration alone does not clear symptoms.'} Next fortnightly review: day ${nextDay}.`;
 }
+const BREAKS = [
+  { id: 'drink', label: 'Drink', mark: 'drinker', text: 'The bottle takes the edge off, and then it takes the mornings.' },
+  { id: 'rage', label: 'Let it out on someone', mark: 'hard', text: 'You find someone smaller than the problem and the problem feels smaller for an hour.' },
+  { id: 'pray', label: 'Pray', mark: 'devout', text: 'You kneel until the shaking stops. Something answers, or the silence does.' },
+  { id: 'withdraw', label: 'Shut the door', mark: 'withdrawn', text: 'You stop answering. The world goes on without you for a while, and you let it.' },
+  { id: 'work', label: 'Work until you cannot think', mark: 'driven', text: 'Hands busy, head empty. It holds, for now.' },
+];
+export function breakEventIds() { return { health_break: BREAKS.map(b => b.id) }; }
+function flushBreak(state, ctx) {
+  const b = state.health.breakPending;
+  if (!b || state.event || state.battle || state.conversations?.pending || state.dungeon || ctx.pendingNeed?.()) return false;
+  const cause = state.householdBudget?.debt > 0 ? 'The debt, the lender, the thin winters.' : (state.health.physical.length ? 'The pain that does not stop.' : 'Everything, all at once, for too long.');
+  ctx.setEvent?.('health_break', 'Something gives', 'A breaking point', `${cause} You have carried it as far as it goes. Tonight it stops, one way or another. What do you reach for?`, BREAKS.map(b => ({ id: b.id, label: b.label, description: b.text })));
+  return !!state.event;
+}
+export function applyBreakChoice(state, eventId, pick, ctx = {}) {
+  if (eventId !== 'health_break') return false;
+  const choice = BREAKS.find(b => b.id === pick);
+  if (!choice || !state.health?.breakPending) return false;
+  if (state.event?.id === eventId) state.event = null;
+  state.health.breakPending = null; state.health.lastBreakDay = state.day;
+  state.hero.marks ||= [];
+  if (!state.hero.marks.some(m => m.id === choice.mark)) state.hero.marks.push({ id: choice.mark, day: state.day, source: 'break' });
+  wellbeing(state, 0, -35, pick === 'drink' ? -6 : 0);
+  if (pick === 'rage') for (const p of (state.life?.people || []).filter(p => p.alive !== false && p.locationId === state.locationId).slice(0, 2)) p.bond = clamp((p.bond || 0) - 10);
+  if (pick === 'withdraw') for (const p of (state.life?.people || []).filter(p => p.alive !== false)) p.bond = clamp((p.bond || 0) - 3);
+  if (pick === 'work' && state.life?.career) state.life.career.experience += 4;
+  note(state, ctx, 'Something gave', `${choice.text} You are marked by it now: ${choice.mark}.`);
+  return true;
+}
 export function flushHealthEvent(state, ctx = {}) {
   if (!state.health || state.phase === 'retired') return false;
+  if (flushBreak(state, ctx)) return true;
   queueConcern(state);
   const pending = state.health.pending;
   if (!pending || state.event || state.battle || state.conversations?.pending || state.dungeon || ctx.pendingNeed?.()) return false;
@@ -248,6 +279,7 @@ export function healthChoiceReason(state, eventId, pick) {
   return '';
 }
 export function applyHealthChoice(state, eventId, pick, ctx = {}) {
+  if (eventId === 'health_break') return applyBreakChoice(state, eventId, pick, ctx);
   const pending = state.health?.pending;
   if (!pending || eventId !== 'health_concern' || !['rest', 'care', 'support', 'routine', 'continue'].includes(pick)) return false;
   const observing=observationalInfancy(state);
@@ -262,6 +294,10 @@ export function applyHealthChoice(state, eventId, pick, ctx = {}) {
   if (pick === 'care' && state.hero.gold < fee) { state.notice = `The healer’s paid plan costs ${fee} gold. Free rest and emotional support remain available.`; flushHealthEvent(state, ctx); return true; }
   if (pick === 'continue') {
     condition.acknowledged = true; state.health.pending = null;
+    // A child does not nurse itself. Until adulthood, whatever the family
+    // calls it, a sick child is put to bed: rest care follows, and only a
+    // body too worn for rest to help is in danger.
+    if (pending.kind === 'physical' && state.age < 18) provideCare(state, 'health_rest');
     note(state, ctx, 'A concern acknowledged', `You named ${((PHYSICAL[condition.type] || MENTAL[condition.type]).name).toLowerCase()} and kept your current commitments. Its symptoms remain visible; you can return for care without a judgment on your character.`);
     return true;
   }
@@ -274,12 +310,16 @@ export function applyHealthChoice(state, eventId, pick, ctx = {}) {
   if (actual === 0) { state.notice = 'The care session waits for the current calendar need. No treatment fee was spent.'; return true; }
   if (pick === 'care') state.hero.gold -= fee;
   provideCare(state, actionId);
+  // Until adulthood a sick child is put to bed whatever the family calls it:
+  // comfort for a wound or a fever still brings the rest that treats it.
+  if (pick === 'support' && pending.kind === 'physical' && state.age < 18) provideCare(state, 'health_rest');
   condition.acknowledged = true; state.health.pending = null;
   note(state, ctx, observing?'Care around your earliest days':'Support became part of your days', observing?`The adults caring for you made room for ${actual} day${actual===1?'':'s'} of rest and comfort. Familiar hands and voices stayed close while you recovered. No payment came from your belongings.`:`You spent ${actual} actual day${actual === 1 ? '' : 's'} attending to ${((PHYSICAL[condition.type] || MENTAL[condition.type]).name).toLowerCase()}.${pick === 'care' && fee ? ` The healer’s ${fee}-gold fee was paid once.` : ' Care was free.'} The symptoms and continuing care remain visible.${state.health.recovery ? ` This separate session adds no plan attendance; ${state.health.recovery.remainingDays} reserved days remain.` : ''}`);
   return true;
 }
 
 function progressConditions(state, ctx) {
+  let fatalRolled = false;
   for (const kind of ['physical', 'mental']) for (const condition of [...state.health[kind]]) {
     const periods = Math.floor((state.day - condition.lastEffectDay) / 14);
     if (!periods) continue;
@@ -299,6 +339,25 @@ function progressConditions(state, ctx) {
             const previousSeverity = condition.severity;
             condition.severity = Math.min(3, condition.severity + 1);
             if (condition.severity > previousSeverity) condition.acknowledged = false;
+            // At its worst and still untreated, a fever or an infection can
+            // kill, and does more easily in a body already worn down. One
+            // roll per step at most, so a long commitment or a moved clock
+            // cannot deliver a year of danger in one go.
+            else if (condition.severity === 3 && !fatalRolled && state.householdBudget?.debt !== undefined && !state.health.deathCause && state.hero.condition?.type !== 'vampire') {
+              fatalRolled = true;
+              const bodilyNow = state.life?.health ?? 80;
+              // Per uncared fortnight at severity 3: a healthy adult who ignores
+              // an infection for a year is more likely dead than not; a worn body,
+              // the very old and the very young go faster.
+              const odds = (condition.type === 'injury' ? 2 : 5) + (bodilyNow < 40 ? 6 : 0) + (state.age >= 60 ? 5 : state.age < 6 ? 5 : 0);
+              if (seededRoll(state.seed, `health:fatal:${condition.id}:${condition.lastEffectDay}`, 100) < odds) {
+                const data = PHYSICAL[condition.type];
+                state.health.deathCause = `${data.name}, left untreated`;
+                note(state, ctx, 'The end of a lived life', `${data.name} ran its course with no one able to stop it. Care, friendship, and every choice made before this day remain part of your chronicle.`);
+                ctx.endLife?.(state.health.deathCause);
+                return;
+              }
+            }
           }
         }
         if (condition.type === 'chronic' && cared) condition.severity = Math.max(1, condition.severity - 1);
@@ -322,12 +381,67 @@ function progressConditions(state, ctx) {
   }
 }
 
+// Mood is not a trophy. Each lived month, Joy settles toward a resting level
+// set by circumstances and Stress toward one set by burdens, so a good season
+// fades and a hard one wears. Only new-edition lives (with a debt ledger)
+// drift; older saves keep the mood their events left them.
+const JOY_FLOOR = 25;
+function restingJoy(state) {
+  const b = state.householdBudget;
+  let level = 55;
+  if (state.life?.lifestyle === 'comfortable') level += 5; else if (state.life?.lifestyle === 'generous') level += 10;
+  if (state.life?.partnerId) level += 6;
+  if ((state.life?.children || []).some(c => c.alive !== false)) level += 4;
+  if (b?.debt > 0) level -= 8;
+  if ((b?.bondedUntil || 0) > state.day) level -= 10;
+  if ((state.life?.health ?? 80) < 40) level -= 8;
+  if ((state.health?.physical?.length || 0) + (state.health?.mental?.length || 0)) level -= 6;
+  return Math.max(JOY_FLOOR, Math.min(85, level));
+}
+function restingStress(state) {
+  const b = state.householdBudget;
+  let level = 15;
+  if (b?.debt > 0) level += 15;
+  if ((b?.bondedUntil || 0) > state.day) level += 15;
+  if ((state.hero?.gold ?? 0) < 20) level += 8;
+  if ((state.life?.health ?? 80) < 40) level += 10;
+  if ((state.health?.physical?.length || 0)) level += 6;
+  if ((state.life?.children || []).filter(c => c.alive !== false).length >= 2) level += 4;
+  return Math.max(5, Math.min(80, level));
+}
+function driftMood(state, day) {
+  if (!state.life || state.householdBudget?.debt === undefined || state.age < 14) return;
+  const joyTarget = restingJoy(state), stressTarget = restingStress(state);
+  const joy = state.life.happiness, stress = state.life.stress;
+  // A fifth of the gap each month: a surge fades over a year, a burden settles in over a season.
+  state.life.happiness = clamp(joy + Math.sign(joyTarget - joy) * Math.max(joy === joyTarget ? 0 : 1, Math.round(Math.abs(joyTarget - joy) / 5)));
+  state.life.stress = clamp(stress + Math.sign(stressTarget - stress) * Math.max(stress === stressTarget ? 0 : 1, Math.round(Math.abs(stressTarget - stress) / 5)));
+  void day;
+}
+// The yearly chance of death from the elder age, per cent. It starts small
+// and climbs; a worn body, an untreated condition and a hard life each steepen
+// it. A comfortable human reaches the 80s often and the 90s rarely; a poor,
+// sick one is lucky to see 70. Tuned against the balance harness.
+export function mortalityChance(state, age, a, bodily) {
+  if (age < a.elder - 5) return 0;
+  const past = age - a.elder;                        // years past the elder age (may be slightly negative)
+  let chance = past < 0 ? 0.5 : 1.5 + past * past * 0.09;  // 1.5% at elder, ~5% ten years on, ~16% twenty on
+  if (bodily < 55) chance *= 1.6;
+  if (bodily < 30) chance *= 1.5;
+  const conditions = (state.health?.physical?.length || 0);
+  if (conditions) chance *= 1 + 0.35 * conditions;
+  if ((state.life?.stress ?? 0) >= 70) chance *= 1.2;
+  if (state.householdBudget?.debt > 0) chance *= 1.1;
+  if (state.life?.lifestyle === 'generous') chance *= 0.85;
+  if (state.health?.care?.medicineUntil >= state.day) chance *= 0.85;
+  return Math.min(60, chance);
+}
 export function onHealthTime(state, { oldDay, newDay = state.day, outdoors = false } = {}, ctx = {}) {
   if (!state.health || !Number.isFinite(oldDay) || newDay <= oldDay || state.phase === 'retired' || state.health.deathCause) return;
   progressConditions(state, ctx);
   const health = state.health;
   for (let day = health.lastPhysicalCheckDay + 30; day <= newDay; day += 30) {
-    const risk = 3 + (outdoors ? 7 : 0) + ((state.life?.health ?? 80) < 35 ? 7 : 0) - (health.care.restUntil >= day || health.care.medicineUntil >= day ? 3 : 0);
+    const risk = 3 + (outdoors ? 7 : 0) + ((state.life?.health ?? 80) < 35 ? 7 : 0) + ((state.life?.stress ?? 0) >= 75 ? 5 : 0) - (health.care.restUntil >= day || health.care.medicineUntil >= day ? 3 : 0);
     if (seededRoll(state.seed, `health:physical:${day}`, 100) < risk) {
       const options = outdoors ? ['injury', 'infection', 'fever'] : ['fever', 'infection'];
       onset(state, options[seededRoll(state.seed, `health:type:${day}`, options.length)], (state.life?.health ?? 80) < 35 ? 2 : 1, ctx, outdoors ? 'outdoors' : 'ordinary');
@@ -336,11 +450,16 @@ export function onHealthTime(state, { oldDay, newDay = state.day, outdoors = fal
     health.lastPhysicalCheckDay = day;
   }
   for (let day = health.lastMentalCheckDay + 30; day <= newDay; day += 30) {
+    // The month is judged on the strain it began with; then the mood drifts.
     const stress = state.life?.stress ?? 20, happiness = state.life?.happiness ?? 60;
+    driftMood(state, day);
     const protectedCare = health.care.supportUntil >= day;
     if (!protectedCare && stress >= 78 && seededRoll(state.seed, `health:distress:${day}`, 100) < 22) onset(state, 'distress', 1, ctx, 'stress');
     if (!protectedCare && stress >= 65 && seededRoll(state.seed, `health:anxiety:${day}`, 100) < 10) onset(state, 'anxiety', 1, ctx, 'stress');
     if (!protectedCare && happiness <= 32 && stress >= 45 && seededRoll(state.seed, `health:depression:${day}`, 100) < 10) onset(state, 'depression', 1, ctx, 'low_mood');
+    // At the top of the scale something gives. The break is answered by the
+    // player, and how they cope stays with them.
+    if (stress >= 100 && state.householdBudget?.debt !== undefined && !health.pending && !health.breakPending && (health.lastBreakDay == null || day - health.lastBreakDay >= 365)) health.breakPending = { offeredDay: day };
     health.lastMentalCheckDay = day;
   }
   const year = Math.floor(newDay / 365);
@@ -350,9 +469,10 @@ export function onHealthTime(state, { oldDay, newDay = state.day, outdoors = fal
       const a=state.health.agePolicy===25?agingPolicy(state.hero):{elder:65,frail:90,late:105,extreme:120};
       if (age >= a.elder) wellbeing(state, 0, 0, -(age >= a.frail ? 2 : 1));
       const bodily = state.life?.health ?? 80;
-      const chance = age >= a.extreme ? Math.min(45, 8 + (age - a.extreme) * 3) : age >= a.late && bodily < 55 ? 6 + Math.min(14, age - a.late) : age >= a.frail && bodily < 15 ? 5 : 0;
+      const chance = state.householdBudget?.debt !== undefined ? mortalityChance(state, age, a, bodily)
+        : age >= a.extreme ? Math.min(45, 8 + (age - a.extreme) * 3) : age >= a.late && bodily < 55 ? 6 + Math.min(14, age - a.late) : age >= a.frail && bodily < 15 ? 5 : 0;
       if (chance && seededRoll(state.seed, `health:mortality:${nextYear}`, 100) < chance) {
-        const cause = age >= a.late ? 'Natural death in advanced age' : 'Complications of physical frailty in advanced age';
+        const cause = age >= a.late ? 'Natural death in advanced age' : age >= a.frail ? 'Complications of physical frailty in advanced age' : bodily < 40 ? 'A body worn out before its years' : 'Death in old age';
         health.deathCause = cause;
         note(state, ctx, 'The end of a lived life', `${cause}. Care, friendship, and every choice made before this day remain part of your chronicle.`);
         ctx.endLife?.(cause);
@@ -363,7 +483,7 @@ export function onHealthTime(state, { oldDay, newDay = state.day, outdoors = fal
   }
   queueConcern(state);
 }
-export function healthEventIds() { return { health_concern: ['rest', 'care', 'support', 'routine', 'continue'] }; }
+export function healthEventIds() { return { health_concern: ['rest', 'care', 'support', 'routine', 'continue'], ...breakEventIds() }; }
 export function healthView(state) {
   const health = state.health, bodilyHealth = state.life?.health ?? 0, h = state.battle?.actors.find(a => a.id === 'hero') || state.hero;
   const describe = (condition, catalog) => ({ ...condition, name:catalog[condition.type].name, symptoms:catalog[condition.type].symptoms, description:catalog[condition.type].description, care:careContext(state, condition), progress:symptomProgress(state, condition) });
@@ -376,6 +496,8 @@ export function healthView(state) {
 const integer = (n, min = 0, max = Number.MAX_SAFE_INTEGER) => Number.isSafeInteger(n) && n >= min && n <= max;
 export function validateHealth(value, state) {
   if (!value || !Array.isArray(value.physical) || value.physical.length > 4 || !Array.isArray(value.mental) || value.mental.length > 3 || !value.care || !['restUntil', 'medicineUntil', 'supportUntil'].every(key => integer(value.care[key])) || !integer(value.lastPhysicalCheckDay) || !integer(value.lastMentalCheckDay) || !integer(value.lastAgeCheckYear) || !Array.isArray(value.history) || value.history.length > 120 || !(value.deathCause === null || typeof value.deathCause === 'string')) return false;
+  if (value.breakPending !== undefined && value.breakPending !== null && !(value.breakPending && integer(value.breakPending.offeredDay))) return false;
+  if (value.lastBreakDay != null && !integer(value.lastBreakDay)) return false;
   const ids = new Set();
   for (const [kind, validTypes] of [['physical', physicalTypes], ['mental', mentalTypes]]) {
     const seen = new Set();

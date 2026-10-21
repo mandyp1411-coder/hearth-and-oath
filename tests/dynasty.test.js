@@ -146,7 +146,7 @@ function settle(state) {
     let pick;
     if (/^(birth_|fate_)/.test(id)) pick = state.event.choices.some(c => c.id === 'care') ? 'care' : 'curiosity';
     else if(id==='society_staff')pick=state.event.choices.some(c=>c.id==='boundary')?'boundary':'prepare';
-    else pick = ({ career_year: 'care', life_birthday: 'people', plague_letter: 'later', deadline_review: 'pause', health_concern: 'support', lineage_bereavement: 'share', society_customer:'decline',society_neighbor:'welcome',society_launch:'independent' })[id];
+    else pick = ({ career_year: 'care', life_birthday: 'people', plague_letter: 'later', deadline_review: 'pause', health_concern: state.health?.pending?.kind === 'physical' ? 'rest' : 'support', health_break: 'pray', debt_reckoning: 'plead', lineage_bereavement: 'share', society_customer:'decline',society_neighbor:'welcome',society_launch:'independent' })[id];
     // This parent prioritizes the already agreed work and their children's
     // schooling: tell customers an honest limit, welcome new neighbors and
     // leave unfunded staff requests open. Funded positive arcs are exercised by
@@ -178,7 +178,7 @@ function finishBatch(state) {
   return state;
 }
 
-function workDays(state,days){const start=state.careers.records[state.hero.profession].workedDays;for(let step=0;step<1500&&state.careers.records[state.hero.profession].workedDays-start<days;step++){state=settle(state);if(state.timeline.yearTarget!==null||state.day+3>state.timeline.birthDay+(state.age+1)*365){state=settle(transition(state,value=>value.timeline.yearTarget!==null?engine.continueAgeUp(value):engine.ageUp(value)));continue;}const before=state.day;state=settle(act(state,'career_work'));assert.ok(state.day>before,'an actual shift advances time');}assert.ok(state.careers.records[state.hero.profession].workedDays-start>=days);return state;}
+function workDays(state,days){const start=state.careers.records[state.hero.profession].workedDays;for(let step=0;step<1500&&state.careers.records[state.hero.profession].workedDays-start<days;step++){state=settle(state);if(state.timeline.yearTarget!==null||state.day+3>=state.timeline.birthDay+(state.age+1)*365){state=settle(transition(state,value=>value.timeline.yearTarget!==null?engine.continueAgeUp(value):engine.ageUp(value)));continue;}const before=state.day;state=settle(act(state,'career_work'));assert.ok(state.day>before,'an actual shift advances time');}assert.ok(state.careers.records[state.hero.profession].workedDays-start>=days);return state;}
 
 function completeCommission(state) {
   let offer;
