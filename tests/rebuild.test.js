@@ -93,6 +93,7 @@ function growTo(state, target, preference = []) {
       if (state.event.id === 'health_concern') { state = choose(state, 'continue'); continue; }
       if (state.event.id === 'lineage_bereavement') { state = choose(state, 'private'); continue; }
       if (state.event.id === 'hard_winter') { state = choose(state, 'endure'); continue; }
+      if (state.event.id.startsWith('living_')) { state = choose(state, 'continue'); continue; } // the world takes its course
       assert.ok(state.event.id.startsWith('birth_') || state.event.id.startsWith('fate_'), `childhood policy cannot hide an unrelated adult scene: ${state.event.id}`);
       moments.push({ id: state.event.id, body: state.event.body, age: state.age });
       state = choose(state, childhoodChoice(state, preference));
@@ -117,7 +118,7 @@ function move(state, id) {
   const startDay = state.day;
   state = transition(state, value => engine.travelTo(value, id));
   let extraDays = 0;
-  const picks = { birth_adult_year:'care',life_hunger:'animal',career_year:'care',lineage_bereavement:'private',travel_messenger:'continue',travel_pilgrims:'continue',travel_grave_robber:'continue',travel_fortune:'continue',travel_wagon:'continue',travel_relic:'continue', travel_lore: 'continue', travel_witness: 'continue', travel_caravan: 'continue', travel_sick_traveler: 'continue', travel_bandits: 'avoid', travel_beasts: 'avoid', travel_weather: 'press', travel_delay: 'continue', health_concern: 'continue' };
+  const picks = { birth_adult_year:'care',life_hunger:'animal',career_year:'care',lineage_bereavement:'private',living_conscription:'continue',living_strike:'continue',living_wolves:'continue',living_purge:'continue',travel_messenger:'continue',travel_pilgrims:'continue',travel_grave_robber:'continue',travel_fortune:'continue',travel_wagon:'continue',travel_relic:'continue', travel_lore: 'continue', travel_witness: 'continue', travel_caravan: 'continue', travel_sick_traveler: 'continue', travel_bandits: 'avoid', travel_beasts: 'avoid', travel_weather: 'press', travel_delay: 'continue', health_concern: 'continue' };
   for (let step = 0; step < 60 && (state.timeline.journey || state.event); step += 1) {
     if (state.event) {
       const pick = picks[state.event.id];
@@ -666,7 +667,7 @@ test('blood hunger interrupts a real road with a usable feeding choice and prese
   assert.deepEqual(state.timeline.journey, journey, 'feeding spends a day but cannot count as road progress');
   assert.ok(state.hero.condition.hunger < 75);
   let detourDays = 0;
-  const roadChoices = { travel_messenger:'continue',travel_pilgrims:'continue',travel_grave_robber:'continue',travel_fortune:'continue',travel_wagon:'continue',travel_relic:'continue', travel_lore: 'continue', travel_witness: 'continue', travel_caravan: 'continue', travel_sick_traveler: 'continue', travel_bandits: 'avoid', travel_beasts: 'avoid', travel_weather: 'press', health_concern: 'continue' };
+  const roadChoices = { living_conscription:'continue',living_strike:'continue',living_wolves:'continue',living_purge:'continue',travel_messenger:'continue',travel_pilgrims:'continue',travel_grave_robber:'continue',travel_fortune:'continue',travel_wagon:'continue',travel_relic:'continue', travel_lore: 'continue', travel_witness: 'continue', travel_caravan: 'continue', travel_sick_traveler: 'continue', travel_bandits: 'avoid', travel_beasts: 'avoid', travel_weather: 'press', health_concern: 'continue' };
   for (let step = 0; step < 40 && (state.timeline.journey || state.event); step += 1) {
     if (state.event) {
       assert.ok(roadChoices[state.event.id], `the road response must explicitly handle ${state.event.id}`);

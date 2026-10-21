@@ -76,7 +76,7 @@ function move(state, id) {
   const startDay = state.day;
   state = transition(state, value => engine.travelTo(value, id));
   let extraDays = 0;
-  const picks = { lycan_fullmoon:'isolate',travel_messenger:'continue',travel_pilgrims:'continue',travel_grave_robber:'continue',travel_fortune:'continue',travel_wagon:'continue',travel_relic:'continue', travel_lore: 'continue', travel_witness: 'continue', travel_caravan: 'continue', travel_sick_traveler: 'continue', travel_bandits: 'avoid', travel_beasts: 'avoid', travel_weather: 'press', travel_delay: 'continue', health_concern: 'continue' };
+  const picks = { lycan_fullmoon:'isolate',living_conscription:'continue',living_strike:'continue',living_wolves:'continue',living_purge:'continue',travel_messenger:'continue',travel_pilgrims:'continue',travel_grave_robber:'continue',travel_fortune:'continue',travel_wagon:'continue',travel_relic:'continue', travel_lore: 'continue', travel_witness: 'continue', travel_caravan: 'continue', travel_sick_traveler: 'continue', travel_bandits: 'avoid', travel_beasts: 'avoid', travel_weather: 'press', travel_delay: 'continue', health_concern: 'continue' };
   for (let step = 0; step < 60 && (state.timeline.journey || state.event); step += 1) {
     if (state.event) {
       const pick = picks[state.event.id];
