@@ -247,6 +247,24 @@ function wantOf(s, season) {
   ev.routed = true; return openThread(s, season, ev, def, roles, {});
 }
 
+/** Bonds fade when ignored: a bond that has not moved in three years loses a little each year, down to a nod in the street. */
+const FADE_YEARS = 3;
+function fadeBonds(s, ctx) {
+  const l = living(s); if (s.age < 18) return;
+  l.bonds ||= {};
+  const seen = new Set();
+  for (const p of peopleOf(s)) {
+    if (!['friend', 'rival', 'relative'].includes(p.role) || !Number.isFinite(p.bond)) continue;
+    seen.add(p.id);
+    const row = l.bonds[p.id];
+    if (!row || row.bond !== p.bond) { l.bonds[p.id] = { bond: p.bond, day: s.day }; continue; }
+    if (s.day - row.day < FADE_YEARS * 365 || p.bond <= 15) continue;
+    const before = p.bond; p.bond = Math.max(15, p.bond - 2); row.bond = p.bond; row.day = s.day - (FADE_YEARS - 1) * 365; // a year from now, another step
+    if (before >= 30 && p.bond < 30) note(ctx, 'A name you used to say', `${p.name}: you have not sent word or sat at the same table in years, and the bond has gone the way of all unmended things. A nod in the street now, and a pause after it.`, 'life');
+  }
+  for (const id of Object.keys(l.bonds)) if (!seen.has(id)) delete l.bonds[id];
+}
+
 // ---------------------------------------------------------------------------
 // The seasonal tick.
 export function onLivingTime(s, { oldDay, newDay }, ctx = {}) {
@@ -266,6 +284,7 @@ export function onLivingTime(s, { oldDay, newDay }, ctx = {}) {
     for (const ev of l.events) if (ev.kind === 'plague' && ev.startSeason === season && !ev.routed) { placeChanges(s, ev); routeEvent(s, season, ev, ctx); }
     for (const ev of l.events) if (ev.kind === 'monopoly' && ev.endSeason === season) guildHall(s, season, ev);
     wantOf(s, season);
+    if (season % 4 === 0) fadeBonds(s, ctx);
     for (const ev of l.events) if (ev.kind === 'war' && ev.endSeason > season) { const war = s.realm.wars.find(w => w.id === ev.warId); if (war && war.status !== 'active') { ev.endSeason = season; pushNews(s, season, `${war.status === 'ended' ? `${regionName(war.victor)} keeps the field` : 'A ceasefire'} between ${regionName(ev.regionId)} and ${regionName(ev.against)}. Both sides bury.`, ev.id); } }
     for (const t of l.threads) if (t.followUp && t.followUp.season <= season && !t.closed) followUp(s, season, t, ctx);
     l.lastSeason = season;
@@ -491,6 +510,7 @@ export function validateLiving(l, s) {
   if (!Array.isArray(l.threads) || l.threads.length > LIMITS.threads * 2 || !l.threads.every(t => t && str(t.id, 20) && ['conscription', 'strike', 'wolves', 'purge', 'refugees', 'rival', 'lie', 'bedside'].includes(t.def) && str(t.eventId, 20) && t.roles && typeof t.roles === 'object' && int(t.season) && ['open', 'chosen'].includes(t.stage) && (t.choice === null || str(t.choice, 20)) && (t.followUp === null || t.followUp && ['return', 'settled', 'wolves_return', 'road', 'rival_settled', 'lie_out', 'sickbed'].includes(t.followUp.kind) && int(t.followUp.season)) && Array.isArray(t.memory) && t.memory.length <= 12 && t.memory.every(m => str(m, 300)) && typeof t.closed === 'boolean' && (t.obligation === undefined || t.obligation === null || str(t.obligation, 60)) && (t.chance === undefined || int(t.chance, 100)))) return false;
   if (!Array.isArray(l.news) || l.news.length > LIMITS.news || !l.news.every(n => n && int(n.season) && str(n.text, 600))) return false;
   if (!l.counters || !int(l.counters.events) || !int(l.counters.threads)) return false;
+  if (l.bonds !== undefined && (!l.bonds || typeof l.bonds !== 'object' || Object.keys(l.bonds).length > 80 || !Object.values(l.bonds).every(r => r && int(r.bond, 100) && Number.isSafeInteger(r.day)))) return false;
   if (s?.event?.id?.startsWith('living_') && !l.threads.some(t => t.stage === 'open' && !t.closed && `living_${t.def}` === s.event.id)) return false;
   return true;
 }
