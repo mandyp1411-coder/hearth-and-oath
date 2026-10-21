@@ -7,6 +7,7 @@ import { seededRoll, generatePersonName, isSettlement } from './world.js';
 import { normalizeAppearance } from './avatar.js';
 import { initializeRelationshipDepth } from './family-depth.js';
 import { communitySupport } from './community.js';
+import { schooling, schoolingAdmissionReason, canPayTuition, payTuition, tuitionDue, onQualification, lessonPerformance, scholarshipExam, entranceExam, electiveOffer, chooseElective, onElectiveLesson, lettersLesson, isLiterate, TUITION, LETTERS_LESSONS, schoolDescription, schoolingSummary } from './schooling.js';
 
 const SETUPS = ['two_parents', 'single_parent', 'orphan', 'homeless', 'legacy'];
 const FAMILY_IDS = ['kin', 'family_parent', 'family_sibling_1', 'family_sibling_2'];
@@ -203,13 +204,15 @@ function admissionReason(s, route) {
   if (st.freedom === 'owned') return 'Your labour is spoken for; the bond does not allow for lessons.';
   if (st.id === 'bound' && route === 'academy') return 'The academy does not take the bound.';
   if (st.id === 'bound' && route !== 'apprenticeship' && !s.family?.literate) return 'The field does not wait, and no one at home reads to argue otherwise.';
-  return null;
+  return schoolingAdmissionReason(s, route);
 }
 function schoolReason(s) {
   const row = schoolRecord(s, s.education.route);
   if (!s.education.enrolled || !row) return 'Enroll in a school or apprenticeship first. Independent reading remains available.';
   if (yearAge(s) < row.minAge) return `This route opens at age ${row.minAge}.`;
   if (s.locationId !== row.locationId) return `Lessons take place at ${location(s, row.locationId)?.name || row.locationId}.`;
+  const k = schooling(s);
+  if (k && tuitionDue(s, s.education.route) > s.hero.gold) return `This year’s tuition is ${TUITION[s.education.route]} gold, and it is not paid.`;
   return null;
 }
 function transferExplanation(s,route) {
@@ -233,8 +236,8 @@ export function householdActions(s) {
   actions.push(action(s, 'family_dilemma', age<6?'A small moment at home':'A decision within your household', age<6?'Choose a familiar story, ask for comfort, or say you need a quiet moment. The adults remain responsible for your care.':'Face a specific household problem involving the people and circumstances you actually have. One dilemma each year; your choice becomes a participant’s memory.', 1, 0, caregiver(s)?.alive === false ? 'Your recorded caregivers have died; their names remain in your legacy.' : f.interactionUses.dilemma ? 'Your household has already faced its special decision this year.' : familyVisitReason(s,caregiver(s))));
   if (age < 6) return actions;
   for (const def of ROUTES) {
-    const row = schoolRecord(s, def.id), cost = def.id === 'academy' && !e.scholarship ? Math.max(0,20-communitySupport(s,row.locationId).schoolFeeDiscount) : 0;
-    actions.push(action(s, `school_enroll_${def.id}`, `${e.enrolled ? 'Transfer to' : 'Enroll at'} ${row.name}`, `${def.description} Enrollment takes one day${cost?` and ${cost} gold`:''}. ${cost ? 'A free scholarship route is available.' : 'No enrollment fee.'} ${e.enrolled&&e.route!==def.id?transferExplanation(s,def.id):'Choose a route without choosing a combat calling.'}`, 1, cost, age < def.minAge ? `Opens at age ${def.minAge}.` : e.enrolled && e.route === def.id ? 'You are already enrolled here.' : admissionReason(s, def.id) || (s.locationId !== row.locationId ? `Enrollment takes place at ${location(s, row.locationId)?.name || row.locationId}.` : undefined)));
+    const row = schoolRecord(s, def.id), k = schooling(s), cost = k ? tuitionDue(s, def.id) : def.id === 'academy' && !e.scholarship ? Math.max(0,20-communitySupport(s,row.locationId).schoolFeeDiscount) : 0;
+    actions.push(action(s, `school_enroll_${def.id}`, `${e.enrolled ? 'Transfer to' : 'Enroll at'} ${row.name}`, k ? `${schoolDescription(s, def.id)} Enrolment takes a day${cost?` and the year’s ${cost} gold`:''}.${e.enrolled&&e.route!==def.id?' '+transferExplanation(s,def.id):''}` : `${def.description} Enrollment takes one day${cost?` and ${cost} gold`:''}. ${cost ? 'A free scholarship route is available.' : 'No enrollment fee.'} ${e.enrolled&&e.route!==def.id?transferExplanation(s,def.id):'Choose a route without choosing a combat calling.'}`, 1, cost, age < def.minAge ? `Opens at age ${def.minAge}.` : e.enrolled && e.route === def.id ? 'You are already enrolled here.' : admissionReason(s, def.id) || (s.locationId !== row.locationId ? `Enrollment takes place at ${location(s, row.locationId)?.name || row.locationId}.` : undefined)));
   }
   const reason = schoolReason(s), row = schoolRecord(s, e.route);
   if (e.depthVersion === 1) {
@@ -244,10 +247,18 @@ export function householdActions(s) {
       actions.push(action(s, `school_project_${project.id}`, project.title, 'Complete a distinct supervised project with school-provided tools, then decide how the work serves people. Gain two course progress through actual practice and a remembered outcome. Once per project each school year.', project.days, 0, reason || (e.progress < 2 ? 'Attend two supervised sessions before undertaking this project.' : done ? 'You already completed this project this school year.' : undefined)));
     }
   }
-  actions.push(action(s, 'school_attend', 'Attend a real lesson and practical session', 'Add one attendance and one course progress, gain the route’s actual skills, and improve performance. Eight supervised sessions per year; no tuition per lesson.', 4, 0, reason || (e.lessonsThisYear >= 8 ? 'You completed eight supervised sessions this year; return next year or read independently.' : undefined)));
+  const yearFee = e.enrolled && schooling(s) ? tuitionDue(s, e.route) : 0;
+  actions.push(action(s, 'school_attend', 'Attend a real lesson and practical session', yearFee ? `Add one attendance and one course progress, gain the route’s actual skills, and improve performance. Eight supervised sessions per year. The first lesson of the year pays the schoolmaster his ${yearFee} gold.` : 'Add one attendance and one course progress, gain the route’s actual skills, and improve performance. Eight supervised sessions per year; no tuition per lesson.', 4, yearFee, reason || (e.lessonsThisYear >= 8 ? 'You completed eight supervised sessions this year; return next year or read independently.' : schooling(s) && electiveOffer(s) ? 'Choose this year’s elective first.' : undefined)));
   actions.push(action(s, 'school_exam', 'Present your term examination', `Four progress opens an attempt; six progress guarantees a pass through preparation. ${row?.qualification || 'A qualification'} records its route, grade, and teacher’s school. One completed exam per year; public exams are free.`, 2, 0, reason || (row && age < row.examAge ? `Examinations for this route open at ${row.examAge}.` : e.examinedYear === age ? 'You completed an examination this year.' : e.qualifications.some(q => q.route === e.route) ? 'You already hold this route’s qualification.' : e.progress < 4 ? `Attend ${4 - e.progress} more sessions to open an attempt.` : undefined)));
   actions.push(action(s, 'school_dilemma', 'A decision among teachers and classmates', 'Respond to a specific school situation. Teacher and classmate memories follow the actual participants; no automatic disclosure of forbidden research.', 1, 0, reason || (f.interactionUses.schoolDilemma ? 'This year’s school dilemma is already remembered.' : undefined)));
-  if (age >= 12) actions.push(action(s, 'school_scholarship', 'Apply for a free service or study scholarship', 'An aptitude interview or a supervised service promise can remove academy enrollment fees. Every household has a route; no combat class is required.', 2, 0, e.scholarship ? 'A scholarship already funds your studies.' : undefined));
+  const k = schooling(s), academy = schoolRecord(s, 'academy');
+  if (k) {
+    if (age >= 12 && age <= 15) actions.push(action(s, 'school_scholarship', 'Sit the scholarship examination', 'Three funded places at the grammar school, forty children, one sitting in a life. A page read aloud, a sum, a question about the old kings.', 2, 0, k.scholarship ? 'There is no second sitting.' : !k.literate ? 'The examination is in writing. You cannot read.' : s.locationId !== academy?.locationId ? `The examination is held at ${location(s, academy?.locationId)?.name || 'the grammar school'}.` : undefined));
+    if (age >= 12 && age < 18) actions.push(action(s, 'school_entrance', 'Sit the grammar school entrance examination', 'Letters, numbers and a little history, before the master. Once a year.', 1, 0, k.entrance.academy === 'passed' ? 'You are already admitted.' : !k.literate ? 'The grammar school does not teach letters; it expects them.' : k.entrance.academyYear === age ? 'You failed this year. Next year, if you dare.' : s.locationId !== academy?.locationId ? `The examination is held at ${location(s, academy?.locationId)?.name || 'the grammar school'}.` : undefined));
+    if (age >= 18 && !k.literate) actions.push(action(s, 'school_letters', 'Learn your letters', `Four afternoons with the archivist and a slate, three gold each. Most grown people never do.`, 4, 3, s.locationId !== schoolRecord(s, 'community')?.locationId ? 'The archivist keeps the slate at the school and archive.' : undefined));
+    const offer = electiveOffer(s);
+    if (offer && !reason) for (const el of offer) actions.push(action(s, `school_elective_${el.id}`, `Elective: ${el.label}`, `${el.line} Four lessons this year, then the master’s grade. Choose one.`, 0, 0));
+  } else if (age >= 12) actions.push(action(s, 'school_scholarship', 'Apply for a free service or study scholarship', 'An aptitude interview or a supervised service promise can remove academy enrollment fees. Every household has a route; no combat class is required.', 2, 0, e.scholarship ? 'A scholarship already funds your studies.' : undefined));
   if (s.obligations.some(o => o.id === 'school_service' && !o.resolved)) actions.push(action(s, 'school_service', 'Complete the promised reading-room service', 'Spend three days helping with supervised reading and supplies. Fulfill the scholarship promise, gain persuasion, and keep your funded place.', 3));
   return actions;
 }
@@ -329,8 +340,36 @@ export function applyHouseholdAction(s, id, ctx) {
     const route = id.slice(14), row = schoolRecord(s, route);
     if (!row || age < row.minAge || s.locationId !== row.locationId || e.enrolled && e.route === route) return false;
     const transfer=activateCourse(s,route);
+    payTuition(s, route, ctx, { charged: true });
     const teacher = educationTeacher(s); teacherMemory(s, `You enrolled at ${row.name} and began with a question of your own.`);
     history(s, 'education', 'A named place to learn', `${row.name} enrolled you with ${teacher.name}. ${transfer.returning?`Your ${e.attendance} recorded sessions, ${e.progress} course progress and ${e.performance}/100 performance resume.`: 'This route begins with zero attended sessions and zero course progress.'} ${transfer.from?`Earlier course preparation is kept; your ${e.lessonsThisYear}/8 annual lessons, ${e.preparationsThisYear}/2 revisions and examination limit are shared across routes.`:''} Your combat identity and independent reading remain your choices.`, ctx); return true;
+  }
+  if (id === 'school_scholarship' && schooling(s)) {
+    if (!householdActions(s).some(a => a.id === id && !a.disabledReason)) return false;
+    if (ctx.spendDays(2) !== 2) return false;
+    const passed = scholarshipExam(s, ctx);
+    s.notice = passed ? 'A place at the grammar school, without a fee. One of three.' : 'You were not one of the three. There is no second sitting.';
+    return true;
+  }
+  if (id === 'school_entrance') {
+    if (!householdActions(s).some(a => a.id === id && !a.disabledReason)) return false;
+    if (ctx.spendDays(1) !== 1) return false;
+    const passed = entranceExam(s, ctx);
+    s.notice = passed ? 'Admitted, if the fee is paid.' : 'Turned away. Next year, if you dare.';
+    return true;
+  }
+  if (id === 'school_letters') {
+    if (!householdActions(s).some(a => a.id === id && !a.disabledReason)) return false;
+    if (s.hero.gold < 3 || ctx.spendDays(4) !== 4) return false;
+    s.hero.gold -= 3; lettersLesson(s, ctx);
+    s.notice = isLiterate(s) ? 'You can read.' : `Lesson ${schooling(s).lettersLessons} of ${LETTERS_LESSONS} with the archivist.`;
+    return true;
+  }
+  if (id.startsWith('school_elective_')) {
+    if (!householdActions(s).some(a => a.id === id && !a.disabledReason)) return false;
+    if (!chooseElective(s, id.slice('school_elective_'.length), ctx)) return false;
+    s.notice = 'Chosen. Four lessons, then the master’s grade.';
+    return true;
   }
   if (id === 'school_scholarship') {
     if (age < 12 || e.scholarship) return false;
@@ -359,8 +398,10 @@ export function applyHouseholdAction(s, id, ctx) {
   }
   if (id === 'school_attend') {
     if (e.lessonsThisYear >= 8) return false;
+    payTuition(s, e.route, ctx, { charged: true });
     ensureCourseBook(s);recordCourseAttendance(s);
-    e.lessonsThisYear++; e.attendanceThisYear++; e.attendance++; e.progress++; e.performance = clamp(e.performance + 4);
+    e.lessonsThisYear++; e.attendanceThisYear++; e.attendance++; e.progress++; e.performance = clamp(e.performance + (schooling(s) ? lessonPerformance(s) : 4));
+    onElectiveLesson(s, ctx);
     skill(s, row.skills[0]); skill(s, row.skills[1]);
     s.flags.education = (s.flags.education || 0) + 1;
     teacherMemory(s, `At age ${age}, you took part in a real ${row.label.toLowerCase()} lesson.`);
@@ -428,7 +469,7 @@ export function applyHouseholdChoice(s, eventId, pick, ctx) {
     e.examinedYear = age;
     if (e.progress < 6) { e.performance = clamp(e.performance - 5); history(s, 'education', 'A revision plan, not an erased education', 'The examination showed gaps in your preparation. No qualification was granted, and no learned skill was erased. Return with six progress in a future term.', ctx); return true; }
     const row = schoolRecord(s, e.route), grade = clamp(60 + Math.floor(e.performance / 4) + Math.floor(f.support / 10), 60, 100);
-    if (!e.qualifications.some(q => q.route === e.route)) e.qualifications.push({ id: `${e.route}-certificate`, label: row.qualification, route: e.route, schoolId: row.id, grade, day: s.day, age });
+    if (!e.qualifications.some(q => q.route === e.route)) { e.qualifications.push({ id: `${e.route}-certificate`, label: row.qualification, route: e.route, schoolId: row.id, grade, day: s.day, age }); onQualification(s, e.route, ctx); }
     if (e.route === 'academy') s.flags.certified = true;
     if (e.route === 'community') s.flags.literacyCertificate = true;
     if (e.route === 'shrine') s.flags.devotionalCertificate = true;
@@ -483,7 +524,8 @@ export function householdContext(s) {
   const missing = f.members.filter(m => m.availability !== 'present');
   const familySummary = `${setupLabel(f)}: ${present}.${missing.length ? ` ${missing.map(m => `${m.name}: ${m.availability}`).join('; ')}. These people are not offered as living contacts.` : ''}`;
   const housingSummary = `${HOUSING_LABELS[f.housing]}; household support ${f.support}/100.`;
-  const schoolSummary = e.enrolled ? `Enrolled at ${schoolRecord(s, e.route).name}, with ${e.attendance} actual sessions attended.` : yearAge(s)<6?'Named schools open at six. Before then, shared stories, pictures and counting are age-appropriate learning; they do not award school attendance.':'Not currently enrolled; free schools open at six, and independent reading remains a choice.';
+  const edition = schoolingSummary(s);
+  const schoolSummary = edition ? `${e.enrolled ? `Enrolled at ${schoolRecord(s, e.route).name}, ${e.attendance} lessons so far. ` : ''}${edition}` : e.enrolled ? `Enrolled at ${schoolRecord(s, e.route).name}, with ${e.attendance} actual sessions attended.` : yearAge(s)<6?'Named schools open at six. Before then, shared stories, pictures and counting are age-appropriate learning; they do not award school attendance.':'Not currently enrolled; free schools open at six, and independent reading remains a choice.';
   return { summary: `${familySummary} ${housingSummary} ${schoolSummary}`, caregiverName: caregiver(s).name, familySummary, schoolSummary, housingSummary };
 }
 
@@ -491,7 +533,7 @@ export function householdView(s) {
   const context = householdContext(s), f = s.family, e = s.education;
   if (!f || !e) return { family: { setupLabel: 'Recorded household', housingLabel: 'Recorded home', summary: '', support: 0, members: [], history: [] }, education: { schoolName: 'No enrollment recorded', routeLabel: 'Independent learning', summary: '', enrolled: false, attendance: 0, progress: 0, performance: 50, scholarship: false, qualifications: [], history: [], routes: [] } };
   const available = householdActions(s);
-  return { family: { setupLabel: setupLabel(f), housingLabel: HOUSING_LABELS[f.housing], summary: context.familySummary, support: f.support, members: f.members.map(m => { const p = m.personId ? actor(s, m.personId) : null; return { ...m, age: p?.age ?? null, bond: p?.bond ?? null, ...(p?.appearance ? { appearance: p.appearance, pronouns:p.pronouns } : {}) }; }), history: f.history }, education: { schoolName: e.route ? schoolRecord(s, e.route).name : 'No current enrollment', routeLabel: ROUTES.find(r => r.id === e.route)?.label || 'Independent learning', summary: context.schoolSummary, enrolled: e.enrolled, attendance: e.attendance, progress: e.progress, performance: e.performance, scholarship: e.scholarship, qualifications: e.qualifications, history: e.history, courses:courseRecords(s), teacher: educationTeacher(s), depth: educationDepthView(s), routes: ROUTES.map(r => { const row = schoolRecord(s, r.id), actual = available.find(a => a.id === `school_enroll_${r.id}`); return { id: r.id, name: row.name, description: r.description+(e.enrolled&&e.route!==r.id?' '+transferExplanation(s,r.id):''), minAge: r.minAge, actionId: `school_enroll_${r.id}`, ...(actual?.disabledReason ? { disabledReason: actual.disabledReason } : yearAge(s) < r.minAge ? { disabledReason: `Opens at age ${r.minAge}.` } : {}) }; }) } };
+  return { family: { setupLabel: setupLabel(f), housingLabel: HOUSING_LABELS[f.housing], summary: context.familySummary, support: f.support, members: f.members.map(m => { const p = m.personId ? actor(s, m.personId) : null; return { ...m, age: p?.age ?? null, bond: p?.bond ?? null, ...(p?.appearance ? { appearance: p.appearance, pronouns:p.pronouns } : {}) }; }), history: f.history }, education: { schoolName: e.route ? schoolRecord(s, e.route).name : 'No current enrollment', routeLabel: ROUTES.find(r => r.id === e.route)?.label || 'Independent learning', summary: context.schoolSummary, enrolled: e.enrolled, attendance: e.attendance, progress: e.progress, performance: e.performance, scholarship: e.scholarship, qualifications: e.qualifications, history: e.history, courses:courseRecords(s), teacher: educationTeacher(s), depth: educationDepthView(s), routes: ROUTES.map(r => { const row = schoolRecord(s, r.id), actual = available.find(a => a.id === `school_enroll_${r.id}`); return { id: r.id, name: row.name, description: (schoolDescription(s, r.id) || r.description)+(e.enrolled&&e.route!==r.id?' '+transferExplanation(s,r.id):''), minAge: r.minAge, actionId: `school_enroll_${r.id}`, ...(actual?.disabledReason ? { disabledReason: actual.disabledReason } : yearAge(s) < r.minAge ? { disabledReason: `Opens at age ${r.minAge}.` } : {}) }; }) } };
 }
 
 export function householdEventIds() { return { family_dilemma: ['help', 'ask', 'boundary'], school_dilemma: ['help', 'ask', 'boundary'], school_exam: ['present', 'revise', 'defer'], school_scholarship: ['study', 'service', 'wait'], school_project: ['research', 'care', 'practical'], school_path: ['inquiry', 'service', 'practical'] }; }

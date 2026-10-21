@@ -20,7 +20,9 @@ import { mountApp } from './helpers/ui-surface.mjs';
 // not extra audited lives, a human survey, browser geometry or balance telemetry.
 function clear(s){for(let i=0;s.event&&i<80;i++){const c=s.event.choices.find(c=>['care','later','keep','continue','pause','leave','rest','support','defer'].includes(c.id)&&!c.disabledReason)||s.event.choices.find(c=>!c.disabledReason);s=E.chooseEventOption(s,c.id);}assert.equal(s.event,null);return s;}
 const bases=new Map();for(const age of [3,6,12,18])bases.set(age,clear(await createLifeAtAge({seed:'growth-focus-ten',originId:'hearthborn',startAge:age,difficulty:'gentle'})));
-function fresh(age=6){const s=structuredClone(bases.get(age));s.hero.gold=1000;return s;}
+// These fixtures test the course machinery (transfers, limits, the course book), not admission: the pupil has letters,
+// the keeper's place and a pass at the grammar school's door, and the purse for any fee (v0.64 decides those elsewhere).
+function fresh(age=6){const s=structuredClone(bases.get(age));s.hero.gold=1000;const k=s.education.schooling;if(k){k.shrinePlace=true;if(!k.literate){k.literate=true;k.letters='home';}k.entrance.academy='passed';}return s;}
 function roundtrip(s){assert.ok(E.validateSave(s),'whole life remains valid');assert.deepEqual(E.migrateSave(JSON.parse(JSON.stringify(s))),s);}
 function act(s,id){
   s=atService(s,id);const a=E.getActions(s).find(a=>a.id===id);assert.ok(a,id);assert.equal(a.disabledReason,undefined,a.disabledReason);const n=E.chooseAction(s,id);roundtrip(n);return clear(n);}
@@ -120,7 +122,7 @@ test('a transfer resumes the exact earlier attendance, preparation and performan
  let s=school(fresh(12));s=act(s,'school_attend');s=act(s,'school_attend');s.education.performance=43;const before={attendance:s.education.attendance,progress:s.education.progress,performance:s.education.performance,year:s.education.year},skills=structuredClone(s.hero.skills),gold=s.hero.gold;s=school(s,'shrine');assert.equal(s.education.attendance,0);assert.equal(s.education.progress,0);assert.ok(courseRecords(s).some(r=>r.route==='community'&&!r.active&&r.progress===before.progress));roundtrip(s);s=school(s,'community');for(const key of Object.keys(before))assert.equal(s.education[key],before[key]);assert.deepEqual(s.hero.skills,skills);assert.equal(s.hero.gold,gold);assert.equal(s.education.lessonsThisYear,2);roundtrip(s);
 });
 test('transfer previews disclose destination preparation, time, fees and shared annual limits without mutation',()=>{
- let s=school(fresh(12));s=act(s,'school_attend');const before=structuredClone(s),q=educationTransferPreview(s,'academy');assert.equal(q.cost,20);assert.equal(q.days,1);assert.equal(q.prepared.progress,0);assert.match(q.explanation,/stay with that route/);assert.match(q.explanation,/limits do not reset/);assert.deepEqual(s,before);
+ let s=school(fresh(12));s=act(s,'school_attend');const before=structuredClone(s),q=educationTransferPreview(s,'academy');assert.equal(q.cost,s.education.schooling?40:20);assert.equal(q.days,1);assert.equal(q.prepared.progress,0);assert.match(q.explanation,/stay with that route/);assert.match(q.explanation,/limits do not reset/);assert.deepEqual(s,before);
 });
 test('transferring back after reload does not reset lesson, revision, exam or qualification limits',()=>{
  let s=school(fresh(12));for(let n=0;n<8;n++)s=act(s,'school_attend');s.education.preparationsThisYear=2;s.education.examinedYear=s.age;const quals=structuredClone(s.education.qualifications);s=school(s,'shrine');s=E.migrateSave(JSON.parse(JSON.stringify(s)));s=school(s,'community');assert.equal(s.education.lessonsThisYear,8);assert.equal(s.education.preparationsThisYear,2);assert.equal(s.education.examinedYear,s.age);assert.deepEqual(s.education.qualifications,quals);assert.ok(householdActions(s).find(a=>a.id==='school_attend').disabledReason);roundtrip(s);

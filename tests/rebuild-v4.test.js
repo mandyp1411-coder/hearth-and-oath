@@ -110,8 +110,8 @@ function project(state, id) {
   return next;
 }
 
-function homelessAdult(seed = 'a-home-made-by-hand') {
-  return grow(engine.createBirthGame({ name: 'Lark', seed, household: 'poor', familySetup: 'homeless', station: rollBirthCircumstances(seed, 'common', 'human') }), 18);
+function homelessAdult(seed = 'a-home-made-by-hand', station = rollBirthCircumstances(seed, 'common', 'human')) {
+  return grow(engine.createBirthGame({ name: 'Lark', seed, household: 'poor', familySetup: 'homeless', station }), 18);
 }
 
 function shelterSupplies(state) {
@@ -227,8 +227,9 @@ test('parented, orphan, and homeless lives retain actual caregivers and free lea
 });
 
 test('a homeless pupil earns free qualifications, keeps named school memories, and chooses a calling', () => {
-  // Poor and homeless, but common and free: a bound child would not be admitted at all.
-  let state = engine.createBirthGame({ name: 'Lark', seed: 'a-school-with-room', familySetup: 'homeless', household: 'poor', station: rollBirthCircumstances('a-school-with-room', 'common', 'human') });
+  // The rules a legacy save keeps: free school, a scholarship by service, letters for everyone. A new life pays tuition and
+  // sits examinations instead (tests/education-v64.test.js), so this fixture is born without a station.
+  let state = engine.createBirthGame({ name: 'Lark', seed: 'a-school-with-room', familySetup: 'homeless', household: 'poor', station: null });
   state = choose(state, 'care');
   assert.equal(state.family.housing,'shelter','the caregiver arranged shelter during infancy');
   state = grow(state, 6);
@@ -380,7 +381,8 @@ test('a full moon pauses a committed building after one day and save/load resume
 });
 
 test('a school promise interrupts a project without duplicate fees or phantom completion', () => {
-  let state = shelterSupplies(homelessAdult('a-roof-and-a-kept-promise'));
+  // The service promise belongs to the legacy scholarship; a new life sits an examination instead, so this life is born without a station.
+  let state = shelterSupplies(homelessAdult('a-roof-and-a-kept-promise', null));
   state = chargedActivity(state, 'school_scholarship');
   state = choose(state, 'service');
   const dueDay = state.obligations.find(item => item.id === 'school_service').dueDay;
@@ -446,6 +448,7 @@ test('new ancestry and hair choices survive real childhood without buying abilit
 
 test('preferences give bounded enjoyment from completed activities, never free edits or repeated clicks', () => {
   let state = grow(engine.createBirthGame({ name: 'Finch', seed: 'a-small-real-pleasure', familySetup: 'single_parent', household: 'poor', station: rollBirthCircumstances('a-small-real-pleasure', 'common', 'human'), preferences: { pursuit: 'knowledge', socialStyle: 'quiet', value: 'ambition', food: 'sweet' } }), 6);
+  state.hero.gold += 10; // the village school wants its fee on a new life; this test is about what the lessons are worth to the child
   state=chargedActivity(state,'school_enroll_community');
   const unaffected = structuredClone(state);
   const alternate = transition(state, value => engine.updatePreferences(value, { pursuit: 'nature', socialStyle: 'warm', value: 'mercy', food: 'plant' }));

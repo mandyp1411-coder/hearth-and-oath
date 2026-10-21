@@ -25,7 +25,7 @@ const base=settle(await createLifeAtAge({seed:'continuity-focus-three',startAge:
 function fresh(){
   const s=structuredClone(base);s.hero.gold=10000;
   // Controlled prior employment/affordability fixture; not an additional audited life.
-  s.hero.profession='Blacksmith';Object.assign(s.careers.records.Blacksmith,{workedDays:180,paidWorkedDays:180,experience:180,mastery:1,reputation:40});
+  s.hero.profession='Blacksmith';Object.assign(s.careers.records.Blacksmith,{workedDays:180,paidWorkedDays:180,unpaidWorkedDays:0,experience:180,mastery:1,reputation:40});
   assert.ok(E.validateSave(s));return s;
 }
 const roundtrip=s=>{assert.ok(E.validateSave(s));const loaded=E.migrateSave(JSON.parse(JSON.stringify(s)));assert.deepEqual(loaded,s);return loaded;};

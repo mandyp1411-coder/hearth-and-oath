@@ -1,4 +1,5 @@
 import { settlementServices } from './world-services.js';
+import { schooling, isLiterate, tuitionDue, electiveOffer } from './schooling.js';
 
 // Voice: the game speaks as a terse, grim chronicle with a dry edge, in the
 // register of its engraved art. This module rewrites what the player reads
@@ -59,7 +60,9 @@ const EXACT = {
   school_exam: ['Sit the examination', 'Two days. The result is written down and kept.'],
   school_path: ['Choose what you study', 'Inquiry, service, or the practical.'],
   school_dilemma: ['Trouble at school', 'Among teachers and classmates, something needs an answer.'],
-  school_scholarship: ['Ask for a scholarship', 'A place without a fee, for those who can argue for one.'],
+  school_scholarship: ['Sit the scholarship examination', 'Three places, forty children, one sitting in a life.'],
+  school_entrance: ['Sit the entrance examination', 'Letters, numbers and a little history, before the master.'],
+  school_letters: ['Learn your letters', 'Four afternoons with the archivist and a slate. Most grown people never do.'],
   school_service: ['Keep the reading-room promise', 'Three days of shelving and quiet.'],
   family_support: ['Ask for what you need', 'A conversation with the person who raises you.'],
   family_shelter: ['Find a roof', 'Somewhere with walls, for now.'],
@@ -99,6 +102,7 @@ const PATTERNS = [
   [/^career_choose_(?!unemployed)/, (s, a) => [a.label.replace(/^(Become|Train as|Apprentice as) /, 'Apprentice as '), 'Years of someone else’s orders, and a trade at the end of them.']],
   [/^school_enroll_/, (s, a) => [a.label.replace(/^Enroll at /, 'Enrol at ').replace(/^Transfer to /, 'Move to '), 'If they will take you.']],
   [/^school_project_/, (s, a) => [a.label, 'Supervised work with the school’s tools, and a result that is kept.']],
+  [/^school_elective_/, (s, a) => [a.label, a.description.split(' Four lessons')[0]]],
   [/^lineage_continue_/, (s, a) => [a.label, 'The next volume.']],
 ];
 
@@ -224,8 +228,14 @@ export function whatMatters(s, actions) {
   if ((b.bondedUntil || 0) > s.day) take(open('career_work'), 'Your days belong to the creditor until the bond is worked off.');
   if (s.age >= 18 && s.hero.profession !== 'Unemployed') take(open('career_work') || roomFor('work'), s.hero.gold < 40 ? `${s.hero.gold} gold in your purse. The work is there.` : 'The work is there.');
   if (s.age >= 16 && s.hero.profession === 'Unemployed') take(open(/^career_choose_(?!unemployed)/) || open('choose_profession') || roomFor('work'), 'You have no trade. Someone needs hands.');
-  if (s.age >= 6 && s.age < 18 && s.education?.enrolled) take(open('school_attend') || roomFor('school'), 'There is a lesson, and you are not at it.');
-  if (s.age >= 6 && s.age < 18 && !s.education?.enrolled && (s.hero.station?.id !== 'bound' || s.family?.literate) && s.hero.station?.freedom !== 'owned') take(open('school_enroll_community') || open('school_enroll_apprenticeship') || roomFor('school'), 'No school yet. Some doors are still open.');
+  const k = schooling(s);
+  if (k && s.age >= 12 && s.age < 18 && s.education?.enrolled && electiveOffer(s)) take(open(/^school_elective_/), 'The master wants to know what you will study this year.');
+  if (k && s.age >= 12 && s.age <= 15 && k.scholarship === null) take(open('school_scholarship'), 'Three places at the grammar school, and one sitting in a life.');
+  if (k && s.age >= 12 && s.age < 18 && k.literate && k.entrance.academy !== 'passed' && k.entrance.academyYear !== s.age) take(open('school_entrance'), 'The grammar school examines at its door, once a year.');
+  if (s.age >= 6 && s.age < 18 && s.education?.enrolled) { const fee = k ? tuitionDue(s, s.education.route) : 0; take(open('school_attend') || roomFor('school'), fee ? `The schoolmaster wants his ${fee} gold before the first lesson of the year.` : 'There is a lesson, and you are not at it.'); }
+  if (k && s.age >= 6 && s.age < 18 && !s.education?.enrolled && k.shrinePlace === false && s.hero.gold < tuitionDue(s, 'community') && s.hero.station?.freedom !== 'owned') take(open('school_enroll_apprenticeship') || open('grow_read') || open('grow_survival') || open('grow_play'), 'The keeper has his pupil and the schoolmaster wants his fee. No school this year.');
+  if (s.age >= 6 && s.age < 18 && !s.education?.enrolled && (s.hero.station?.id !== 'bound' || s.family?.literate) && s.hero.station?.freedom !== 'owned') take(open('school_enroll_shrine') || open('school_enroll_community') || open('school_enroll_apprenticeship') || roomFor('school'), 'No school yet. Some doors are still open.');
+  if (k && s.age >= 18 && !isLiterate(s) && s.hero.gold >= 3) take(open('school_letters') || roomFor('school'), 'You cannot read. The archivist teaches grown people, for a little.');
   if (s.age >= 6 && s.age < 18 && !s.education?.enrolled && (s.hero.station?.freedom === 'owned' || s.hero.station?.id === 'bound' && !s.family?.literate)) take(open('grow_survival') || open('grow_play') || open(/^upbringing_(practice|discovery)$/), 'No school for the likes of you. The woods and the field, then.');
   if ((life.stress || 0) >= 60 || (life.health ?? 80) < 50) take(open('life_rest') || open('health_routine'), (life.stress || 0) >= 60 ? 'Your hands shake. A week of nothing would help.' : 'You are worn thin.');
   if (s.family && s.family.support < 40 && s.age < 18) take(open('family_support') || open(/^family_time_/), 'The house is cold toward you. Say what you need.');

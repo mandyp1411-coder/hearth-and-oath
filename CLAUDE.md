@@ -53,12 +53,20 @@ number. `station.js` is what a birth decides; `fortune.js` is luck by season
 chosen nature and `hero.marks`, what life wrote on it. Choices that exist
 only for some natures carry `nature: traitId` on the choice.
 
+`schooling.js` (v0.64) is letters, tuition, the examinations, electives
+and the credentials that gate the learned trades; `education.schooling`
+exists only on edition lives and `isLiterate` is true without it.
+
 Test fixtures that are not about birth should pin a station
 (`station: rollBirthCircumstances(seed, 'common', ancestry)`): a bound
 child may die of a winter fever, gets no pocket money and is not schooled,
 and a `household: 'poor'` birth is bound a third of the time. Growing loops
 need a guard and an answer for `hard_winter` (`'endure'`), and a journey
-policy needs `debt_reckoning: 'plead'`.
+policy needs `debt_reckoning: 'plead'`. A fixture that documents the rules
+a legacy save keeps (free school, the service scholarship) is born with
+`station: null`. On an edition life the village school wants 10 gold at
+enrolment and the shrine keeper may not have a place; a fee is always the
+action's displayed `cost`, taken once by the engine.
 
 ## Direction
 
