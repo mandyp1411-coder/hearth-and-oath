@@ -6,6 +6,7 @@ import { householdActions } from '../dist/js/household.js';
 import { isLiterate, schoolingView, canPayTuition, credentialReason, ELECTIVES, scholarshipExam, entranceExam, chooseElective, onElectiveLesson, electiveOffer, lessonPerformance, validateSchooling } from '../dist/js/schooling.js';
 import { civilianEntryReason } from '../dist/js/career-entry.js';
 import { applyPersonalityBuild } from '../dist/js/personality.js';
+import { whatMatters } from '../dist/js/voice.js';
 
 const answer = s => s.event.id === 'health_concern' && s.event.choices.some(c => c.id === 'rest') ? 'rest' : s.event.id === 'hard_winter' ? 'endure' : s.event.id === 'school_exam' ? 'present' : s.event.choices[0].id;
 function born(seed, station, extra = {}) { return engine.createBirthGame({ seed, station: { ...rollBirthCircumstances(seed, station, 'human'), ...extra } }); }
@@ -46,6 +47,9 @@ test('tuition: the village school wants ten gold a year, a wealthy house pays fo
   assert.match(enrol?.disabledReason || '', /ten gold a year|wants 10 gold|Enrollment takes place|field does not wait/);
   poor.hero.gold = 12;
   assert.equal(canPayTuition(poor, 'community'), true);
+  // The fee is the action's cost, taken once by the engine; the lesson that opens a new school year carries the next one.
+  const open = householdActions(poor).find(a => a.id === 'school_enroll_community');
+  if (open && !open.disabledReason) assert.equal(open.cost, 10);
   const rich = grow(born('tuition-trade', 'trade'), 7);
   if (rich.phase !== 'retired') { rich.hero.gold = 0; assert.equal(canPayTuition(rich, 'community'), true, 'the house pays'); }
 });
@@ -131,6 +135,7 @@ test('the unlettered cannot read on their own, and sign what they are handed', (
   s.hero.gold = 20;
   const letters = householdActions(s).find(a => a.id === 'school_letters');
   assert.ok(letters, 'learn your letters is offered to an unlettered adult');
+  assert.ok(whatMatters(s, engine.getActions(s)).some(r => /cannot read/.test(r.why)), 'the Right now panel says so');
   assert.equal(engine.validateSave(s), true);
 });
 
