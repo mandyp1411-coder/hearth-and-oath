@@ -3,11 +3,11 @@ import { settlementServices, serviceAccepts, serviceWalkPath } from './world-ser
 import { applyPersonalityBuild } from './personality.js';
 import { applyStartingAttributes, completeAttributePoints } from './starting-attributes.js';
 import { culturalName } from './names.js';
-import { createBirthGame, getActions, chooseAction, chooseEventOption, ageUp, continueAgeUp, replyMessage, validateSave, resolveBattle } from './engine.js';
+import { createBirthGame, getActions, chooseAction, chooseEventOption, ageUp, continueAgeUp, replyMessage, validateSave, resolveBattle, travelTo, continueJourney } from './engine.js';
 import { getBattleActions, takeBattleAction } from './combat.js';
 import { appearanceAtAge } from './avatar.js';
 import { rollLifeCircumstances, normalizeStartAge, originById } from './origins.js';
-import { seededRoll } from './world.js';
+import { seededRoll, isSettlement, travelPreview } from './world.js';
 import { PROFESSION_CATALOG, civilianEntryReason } from './career-entry.js';
 
 function pastChoice(s,attempt=0) {
@@ -15,7 +15,7 @@ function pastChoice(s,attempt=0) {
   let preferred=id==='health_concern'?(s.health.pending?.kind==='physical'?'rest':'support'):
     id==='plague_letter'?'later':id==='life_budget'?'simplify':id==='deadline_review'?'pause':
     id==='lineage_bereavement'?['share','private','memorial'][seededRoll(s.seed,`past:grief:${s.day}`,3)]:
-    id==='career_staff'?'decline':id==='retirement'?'continue':id==='school_exam'?'present':id==='hard_winter'?'endure':id==='schooling_rival'?'contest':id==='schooling_temper'?'endure':id==='living_conscription'?(offered.some(c=>c.id==='pay')?'pay':'continue'):id==='living_strike'?'continue':id==='living_wolves'?(offered.some(c=>c.id==='pay')?'pay':'continue'):id==='living_purge'?'shelter':id==='living_refugees'?(s.hero.gold>=40?'shelter':'continue'):id==='living_rival'||id==='living_lie'?'continue':id==='living_bedside'?(offered.some(c=>c.id==='nurse')?'nurse':s.hero.gold>=40?'send':'write'):null;
+    id==='career_staff'?'decline':id==='retirement'?'continue':id==='school_exam'?'present':id==='hard_winter'?'endure':id==='schooling_rival'?'contest':id==='schooling_temper'?'endure':id==='living_conscription'?(offered.some(c=>c.id==='pay')?'pay':'continue'):id==='living_strike'?'continue':id==='living_wolves'?(offered.some(c=>c.id==='pay')?'pay':'continue'):id==='living_purge'?'shelter':id==='living_refugees'?(s.hero.gold>=40?'shelter':'continue'):id==='travel_bandits'||id==='travel_beasts'?'avoid':id==='travel_weather'?'shelter':id.startsWith('travel_')?'continue':id==='living_rival'||id==='living_lie'?'continue':id==='living_bedside'?(offered.some(c=>c.id==='nurse')?'nurse':s.hero.gold>=40?'send':'write'):null;
   const safe=offered.filter(c=>!(id==='family_visit'&&c.id==='gift'&&s.hero.gold<10));
   if(id==='sanctuary_case_capture')preferred='service';
   // A choice the scene refused (a fee the purse cannot meet) is not tried twice: the next sitting takes the next door.
@@ -87,6 +87,12 @@ async function generateLife(config, { onProgress, shouldCancel } = {}, draws = {
       s=chooseEventOption(s,c.id);continue;
     }
     if(s.conversations?.pending){const p=s.conversations.pending,c=p.replies[seededRoll(s.seed,`past:reply:${p.nodeId}:${s.age}`,p.replies.length)];s=replyMessage(s,p.personId,c.id);continue;}
+    // On the road the past rests when it is tired: a night in the open before the next day's walk.
+    if(s.timeline?.journey){if(s.hero.mp<Math.ceil(s.hero.maxMp*.3)){const camp=getActions(s).find(a=>a.id==='trail_camp'&&!a.disabledReason);if(camp){s=chooseAction(s,'trail_camp');continue;}}s=continueJourney(s);continue;}
+    // A life born at a brook, a forest, a marsh or a gate walks to the nearest town at fourteen: the school and the trades are there, and so is the rest of its past.
+    if(s.age>=14&&s.age<40&&!isSettlement(s.world,s.locationId)&&!attempted.has('town')){attempted.add('town');
+      const towns=s.world.locations.filter(p=>isSettlement(s.world,p.id)&&!/^(seat|reach)-/.test(p.id)).map(p=>({id:p.id,q:travelPreview(s,p.id)})).filter(x=>x.q&&!x.q.disabledReason).sort((a,b)=>(a.q.days||99)-(b.q.days||99));
+      if(towns.length){s=travelTo(s,towns[0].id);continue;}}
     // Recovery consumes actual days. It is not a granted health refill or a paid reward.
     if(s.life.health<70||s.hero.hp<s.hero.maxHp*.65||s.life.stress>55){if(act('health_routine'))continue;}
     if(s.timeline.yearTarget!==null){s=continueAgeUp(s);continue;}

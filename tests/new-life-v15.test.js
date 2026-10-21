@@ -32,7 +32,7 @@ test('the same generated opening is deterministic and its next birthday stays pl
   let s=chooseEventOption(a,a.event.choices[0].id);s=ageUp(s);
   for(let i=0;i<100&&s.age===20;i++){
     if(s.event){const id=s.event.id==='health_concern'?'support':s.event.choices[0].id;s=chooseEventOption(s,id);}
-    else {const {continueAgeUp}=await import('../dist/js/engine.js');s=continueAgeUp(s);}
+    else {const {continueAgeUp}=await import('../dist/js/engine.js');s=s.timeline.yearTarget===null?ageUp(s):continueAgeUp(s);} // a story queued by the past's own work can wait at the door before the year begins
   }
   assert.equal(s.age,21);assert.equal(s.day,21*365);assert.ok(validateSave(s));
 });

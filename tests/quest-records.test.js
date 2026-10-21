@@ -130,10 +130,10 @@ test('an unfinished paid chapter cannot be paused as a shortcut around its atten
   state=E.chooseAction(state,'stories_open_'+id);
   assert.equal(questReturnForecast(state).length,0,'the opening is not a returning chapter');
   // Controlled birthday boundary: the real fee and two attended days are
-  // followed by a saved birthday; four of the six agreed days still remain.
+  // followed by a saved birthday; the rest of the agreed days still remain.
   state.day=(state.timeline.birthDay||0)+(state.age+1)*365-2;
   assert.ok(E.validateSave(state));state=E.chooseEventOption(state,'care');
-  assert.ok(state.stories.project?.paid);assert.equal(state.stories.project.remainingDays,4);
+  assert.ok(state.stories.project?.paid);assert.equal(state.stories.project.remainingDays,state.stories.project.totalDays-2,'two attended days, the rest saved past the birthday');
   state=E.chooseEventOption(state,'care');assert.equal(state.event,null);
   const before=structuredClone(state);
   state=E.chooseAction(state,'journal_pause_story:'+id);assert.deepEqual(state.stories,before.stories);

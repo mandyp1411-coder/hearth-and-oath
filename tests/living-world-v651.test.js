@@ -161,3 +161,30 @@ test('the generated past answers its own people and the lanes stay valid; the vi
   const bad = structuredClone(s); bad.living.threads.push({ id: 'x', def: 'gossip', eventId: 'e', roles: {}, season: 0, stage: 'open', choice: null, followUp: null, memory: [], closed: false });
   assert.equal(validateLiving(bad.living, bad), false);
 });
+
+test('bonds fade when ignored: three years without a change costs a little each year, down to a nod in the street', () => {
+  const s = born('lw2-fade'); s.age = 30; s.day = 30 * 365; s.phase = 'adult';
+  const f = friend(s); if (!f) return;
+  f.bond = 40; const { rows, ctx } = mock();
+  s.living.lastSeason = seasonOf(s.day) - 1;
+  const year = () => { const old = s.day; s.day += 4 * SEASON_DAYS; s.living.lastSeason = seasonOf(old); onLivingTime(s, { oldDay: old, newDay: s.day }, ctx); };
+  year(); assert.equal(f.bond, 40, 'the first look only remembers');
+  year(); year(); assert.equal(f.bond, 40, 'inside three years nothing fades');
+  year(); assert.equal(f.bond, 38, 'the third year costs two');
+  for (let n = 0; n < 6; n++) year();
+  assert.ok(f.bond < 30 && f.bond >= 15, `kept fading: ${f.bond}`);
+  assert.ok(rows.some(r => r.title === 'A name you used to say'));
+  f.bond = 60; year(); year(); year(); year(); assert.ok(f.bond >= 58, 'a bond that moved starts the clock again');
+  assert.equal(validateLiving(s.living, s), true);
+});
+
+test('a life born at a marsh, a forest or a gate walks to the nearest town at fourteen and has a trade at eighteen', async () => {
+  for (const seed of ['edu-5', 'edu-0', 'edu-7']) {
+    const s = await createLifeAtAge({ seed, startAge: 18 });
+    assert.equal(engine.validateSave(s), true);
+    if (!/^(home|city|brook|coast|tower|camp|citadel|sanctuary|border|mill|island|crossroads|monastery|orchard|fenhold|wells|haven|port|foundry)$/.test(s.hero.birthplaceId)) {
+      assert.notEqual(s.hero.profession, 'Unemployed', `${seed}: born at ${s.hero.birthplaceId}, now at ${s.locationId}`);
+      assert.ok(s.journal.some(j => /You Set Out|set out for/.test(j.title + j.text)), 'the road is in the book');
+    }
+  }
+});

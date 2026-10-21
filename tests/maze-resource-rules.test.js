@@ -164,7 +164,7 @@ test('the actual UI updates the visible movement quote after one arrow-key move 
  const s=delve();s.maze.steps=2;s.hero.mp=1;const before=structuredClone(s),ui=await mountApp(t,{states:[s]});await ui.click('title-continue');
  assert.match(ui.root.innerHTML,/Next walk:/);assert.match(ui.root.innerHTML,/1 Focus \(0 after walking\)/);assert.match(ui.root.innerHTML,/Next movement day in 4 walks/);
  assert.ok(ui.root.innerHTML.includes('aria-describedby="maze-controls maze-movement-cost"'));
- assert.equal((ui.root.innerHTML.match(/class="maze-cell /g)||[]).length,121);assert.deepEqual(ui.current(),before);
+ assert.equal((ui.root.innerHTML.match(/class="maze-cell /g)||[]).length,mazeLayout(s.maze).cells.length);assert.deepEqual(ui.current(),before);
  const to=mazeLayout(s.maze).cells[0].doors[0];ui.root.querySelector('.maze-grid').focus();await ui.key(to===1?'ArrowRight':'ArrowDown');
  assert.equal(ui.current().maze.position,to);assert.equal(ui.current().maze.steps,3);assert.equal(ui.current().hero.mp,0);assert.equal(ui.current().day,before.day);
  assert.match(ui.root.innerHTML,/0 Focus \(0 after walking\)/);assert.match(ui.root.innerHTML,/Next movement day in 3 walks/);

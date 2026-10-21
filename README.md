@@ -1,5 +1,10 @@
 # Hearth & Oath
 
+Version 0.65.2 is The living world, third slice: bonds that fade, and the road to town for the lives born outside one. New lives only.
+
+- **Bonds fade when ignored.** A friend, a rival or a relative you have not sent word to or sat at a table with in three years loses a little each year, down to a nod in the street; any change at all, up or down, starts the clock again. The book notes it once, when a name you used to say goes.
+- **The road at fourteen.** A life born at a brook, a forest, a marsh or a gate used to reach eighteen with no school and no trade, because the school and the trades are in town and the generated past never walked there. Now it does, at fourteen, resting in the open when it is tired: a shrine school late, a bench, a trade. Two in five generated lives were born outside a town.
+
 Version 0.65.1 is The living world, second slice: people with wants of their own, the carts that follow a war and the sickness they carry, and places that change. New lives only.
 
 - **People have wants.** Once in a while someone you know acts on one. A rival sets up across the square in your trade and charges half: match them, out-work them, show the town the shoddy work (if the town will listen), or let it choose; two seasons later the bench across the square closes or stays. A friend comes to the door after dark and asks you to say they were with you: say it (and one time in three it comes out on you both, and the second lie comes easier), refuse it and watch the friendship go out of their face, or say nothing. A parent takes to bed: at home, nurse them, pay a physician, or leave it to the others; away, drop everything and go (sixty days to reach the bedside, kept by arriving and missed by the calendar), send money, write, or finish what you are doing. A season later they sit up and ask what day it is, or they do not.
