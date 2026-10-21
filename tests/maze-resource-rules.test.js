@@ -115,7 +115,7 @@ test('modern entry selection preserves authored records, regional saved descents
 
 let base=await createLifeAtAge({seed:'maze-resource-rules',startAge:18,difficulty:'gentle'});
 function drain(s){for(let n=0;s.event&&n<100;n++)s=E.chooseEventOption(s,(s.event.choices.find(c=>['continue','keep','care','pause','leave','later','friends'].includes(c.id)&&!c.disabledReason)||s.event.choices.find(c=>!c.disabledReason)).id);return s;}
-base=drain(base);
+base=drain(base);delete base.delves; // these fixtures are about the maze; an edition life goes to the delve otherwise
 function roundtrip(s){assert.ok(E.validateSave(s),s.notice);assert.deepEqual(E.migrateSave(JSON.parse(JSON.stringify(s))),s);return s;}
 function delve(){const s=structuredClone(base);s.adventuring.rations=2;return roundtrip(E.chooseAction(s,'adventure_descend'));}
 function contractBoard(){
@@ -131,7 +131,7 @@ test('new maze entry text describes variable expedition lengths without a single
  Object.assign(c,{flavorId:flavor.id,type:flavor.type,targetType:flavor.targetType,status:'active',acceptedDay:s.day,destinationId:s.locationId});
  const rows=adventureActions(s),offer=rows.find(a=>a.id==='adventure_pursue_'+c.id);
  assert.match(offer.description,/saved maze, not a single encounter/);assert.doesNotMatch(offer.description,/A tier .* encounter/);
- const route=rows.find(a=>a.id==='adventure_resolve_'+c.id);assert.ok(route,'a known bandit contract has a peaceful field route');const legacy=structuredClone(s);delete legacy.mazeBook;
+ const route=rows.find(a=>a.id==='adventure_resolve_'+c.id);assert.ok(route,'a known bandit contract has a peaceful field route');const legacy=structuredClone(s);delete legacy.mazeBook;delete legacy.delves;
  const legacyRows=adventureActions(legacy);assert.match(legacyRows.find(a=>a.id===offer.id).description,/encounter/);
  assert.deepEqual(legacyRows.find(a=>a.id===route?.id),route,'existing peaceful field quote is unchanged');
  assert.deepEqual(before.hero,s.hero);

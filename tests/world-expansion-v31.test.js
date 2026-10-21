@@ -22,7 +22,7 @@ import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 let base=await createLifeAtAge({seed:'world-expansion-release',startAge:22,difficulty:'gentle'});
 function drain(s){for(let n=0;s.event&&n<100;n++)s=E.chooseEventOption(s,(s.event.choices.find(c=>['continue','keep','care','pause','leave','later','friends'].includes(c.id)&&!c.disabledReason)||s.event.choices.find(c=>!c.disabledReason)).id);return s;}
-base=drain(base);assert.ok(E.validateSave(base));const fresh=()=>structuredClone(base);
+base=drain(base);delete base.delves;assert.ok(E.validateSave(base));const fresh=()=>structuredClone(base); // these fixtures are about the maze; an edition life goes to the delve otherwise
 function at(s,id,room='gate'){s.locationId=id;s.cartography.pending=null;s.cartography.offsite=false;s.cartography.interior=null;syncCartography(s);return cityRooms(s).length?walk(s,room):s;}
 function walk(s,room){const path=settlementWalkPath(s,room);assert.ok(path,'real connected walking path');for(const id of path)s=E.chooseAction(s,'atlas_room_'+id);return s;}
 function valid(s){assert.ok(E.validateSave(s),s.notice);return s;}
@@ -91,7 +91,7 @@ test('maze actions cannot start work, travel, trade or age up from underground',
  const s=delve(fresh()),before=resources(s);for(const id of ['career_work','realm_potion','life_home_cottage','fun_pairs'])assert.deepEqual(resources(E.chooseAction(s,id)),before);assert.deepEqual(resources(E.travelTo(s,'home')),before);assert.deepEqual(resources(E.ageUp(s)),before);
 });
 test('older saved journeys retain their paid terms while receiving the new travel interface',()=>{
- let s=fresh();delete s.trail;delete s.socialLife;delete s.maze;delete s.mazeBook;const old=JSON.parse(JSON.stringify(s));assert.ok(E.validateSave(old));const next=E.migrateSave(old);assert.ok(next&&next.trail&&next.socialLife&&next.mazeBook);assert.equal(next.hero.gold,s.hero.gold);assert.equal(next.day,s.day);assert.equal(next.hero.name,s.hero.name);assert.equal(next.hero.mp,s.hero.mp);
+ let s=fresh();delete s.trail;delete s.socialLife;delete s.maze;delete s.mazeBook;delete s.delves;const old=JSON.parse(JSON.stringify(s));assert.ok(E.validateSave(old));const next=E.migrateSave(old);assert.ok(next&&next.trail&&next.socialLife&&next.mazeBook);assert.equal(next.hero.gold,s.hero.gold);assert.equal(next.day,s.day);assert.equal(next.hero.name,s.hero.name);assert.equal(next.hero.mp,s.hero.mp);
 });
 test('continuing at zero Focus can end a life, while the same rested traveller survives',()=>{
  let s=fresh(),n=6;while(seededRoll(s.seed,`trail:${s.dynasty.generation}:${n+1}:fatal`,10000)>=400)n++;s.trail.daysWithoutRest=n;s.trail.daysTravelled=n;s.hero.mp=0;const target=s.world.locations.find(p=>p.id!==s.locationId&&!travelPlanPreview(s,p.id).disabledReason);assert.ok(target);const rested=structuredClone(s);rested.hero.mp=rested.hero.maxMp;const death=E.travelTo(s,target.id);assert.equal(death.phase,'retired');assert.match(death.lineage.heroDeath.cause,/exhaustion/);valid(death);const safe=E.travelTo(rested,target.id);assert.notEqual(safe.phase,'retired');valid(safe);

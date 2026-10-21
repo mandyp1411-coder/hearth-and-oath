@@ -159,7 +159,7 @@ function drain(s) {
   for (let n = 0; s.event && n < 100; n++) s = E.chooseEventOption(s, (s.event.choices.find(c => ['continue', 'keep', 'care', 'pause', 'leave', 'later', 'friends'].includes(c.id) && !c.disabledReason) || s.event.choices.find(c => !c.disabledReason)).id);
   return s;
 }
-base = drain(base);
+base = drain(base); delete base.delves; // the maze camp, not the delve
 function roundtrip(s) { assert.ok(E.validateSave(s), s.notice); assert.deepEqual(E.migrateSave(JSON.parse(JSON.stringify(s))), s); return s; }
 function delve() {
   const s = structuredClone(base); s.hero.gold = 2000; s.hero.skills.stealth = 100; s.hero.skills.persuasion = 100; s.hero.skills.survival = 100; s.adventuring.rations = 2;
