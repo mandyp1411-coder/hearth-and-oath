@@ -56,6 +56,16 @@ only for some natures carry `nature: traitId` on the choice.
 `schooling.js` (v0.64) is letters, tuition, the examinations, electives
 and the credentials that gate the learned trades; `education.schooling`
 exists only on edition lives and `isLiterate` is true without it.
+`living-world.js` (v0.65) is the actors with goals, the seasonal tick,
+the events they make and the threads that route an event to someone the
+player knows; `state.living` exists only on edition lives. It drives the
+regional world (`regional-world-v33.js`: wars, fronts, deployments,
+settlements) rather than duplicating it — on a living world the courts
+start the wars (`startRegionalWar`) and the calendar's border tension and
+luck's war tax are off. New threads follow the pattern: a `pending`-like
+open thread, `flushLivingEvent` makes the scene, `applyLivingChoice`
+answers it, `followUp` comes back later, `LIVING_EVENTS.ids()` registers
+the ids, `validateLiving` the shape.
 
 Test fixtures that are not about birth should pin a station
 (`station: rollBirthCircumstances(seed, 'common', ancestry)`): a bound
