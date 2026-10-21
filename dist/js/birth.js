@@ -557,7 +557,14 @@ export function startAgeYear(s, ctx) {
   }
   return continueAgeYear(s, ctx);
 }
+function turnSeason(s, ctx) {
+  // A season that stops short of the birthday turns quietly: no scene, no
+  // page, and nothing left on the calendar to wait for, so whatever paused
+  // the last day of it can spend its days freely.
+  delete s.timeline.season; s.timeline.yearTarget = null; s.timeline.yearStartDay = s.day; s.notice = 'The season turned.'; ctx.onSeason?.();
+}
 export function continueAgeYear(s, ctx) {
+  if (s.timeline.season && s.timeline.yearTarget !== null && s.day >= s.timeline.yearTarget && s.phase !== 'retired') { turnSeason(s, ctx); return true; }
   if (pending(s) || s.phase === 'retired') { s.notice = 'Your year is waiting for the current decision. Time has not advanced.'; return false; }
   const target = s.timeline.yearTarget;
   if (target === null) { s.notice = 'Choose Age up to begin the next year.'; return false; }
@@ -581,6 +588,8 @@ export function continueAgeYear(s, ctx) {
     if (s.phase === 'retired' || s.hero.alive === false || ctx.pendingNeed() || pending(s)) return true;
   }
   if (s.day === target) {
+    // A season that stops short of the birthday turns quietly: no scene, no page.
+    if (s.timeline.season) { turnSeason(s, ctx); return true; }
     if (s.timeline.mode === 'birth') birthEvent(s, ctx);
     else {
       const age = s.age;
@@ -600,7 +609,7 @@ const int = (x, min = 0, max = 1000000) => Number.isSafeInteger(x) && x >= min &
 const text = (x, max = 5000) => typeof x === 'string' && x.length <= max;
 export function validateTimeline(t, s) {
   if(!validateAnnualScene(t?.annualScene,s))return false;
-  if (!obj(t) || !['birth', 'legacy'].includes(t.mode) || !(t.birthDay===undefined || int(t.birthDay,0,s.day)) || !(t.contentVersion===undefined || [4,6,7].includes(t.contentVersion)) || !(t.nextContentVersion===undefined || [6,7].includes(t.nextContentVersion)) || !(t.roleplayVersion===undefined || t.roleplayVersion===1) || !(t.nextRoleplayVersion===undefined || t.nextRoleplayVersion===1) || !int(t.yearStartDay) || t.yearStartDay > s.day || !(t.yearTarget === null || int(t.yearTarget, s.day) && (t.yearTarget-(t.birthDay || 0)) % YEAR === 0 && t.yearTarget - t.yearStartDay <= YEAR)) return false;
+  if (!obj(t) || !['birth', 'legacy'].includes(t.mode) || !(t.birthDay===undefined || int(t.birthDay,0,s.day)) || !(t.contentVersion===undefined || [4,6,7].includes(t.contentVersion)) || !(t.nextContentVersion===undefined || [6,7].includes(t.nextContentVersion)) || !(t.roleplayVersion===undefined || t.roleplayVersion===1) || !(t.nextRoleplayVersion===undefined || t.nextRoleplayVersion===1) || !int(t.yearStartDay) || t.yearStartDay > s.day || !(t.yearTarget === null || int(t.yearTarget, t.season === true ? t.yearStartDay : s.day) && (t.season === true || (t.yearTarget-(t.birthDay || 0)) % YEAR === 0) && t.yearTarget - t.yearStartDay <= YEAR) || (t.season !== undefined && (t.season !== true || t.yearTarget === null))) return false;
   if (!validateChildhoodStories(t.storybook, s)) return false;
   if (!obj(t.activityUses) || !Object.entries(t.activityUses).every(([k, v]) => /^\d+:grow_[a-z_]+$/.test(k) && int(v, 0, 2)) || !obj(t.childhoodFacts) || !Object.entries(t.childhoodFacts).every(([k, v]) => /^year_\d+(_detail)?$/.test(k) && text(v, 500))) return false;
   if (!Array.isArray(t.yearHistory) || t.yearHistory.length > 5000 || !t.yearHistory.every(y => obj(y) && text(y.id, 120) && int(y.age, 0, 5000) && int(y.day, 0, s.day) && text(y.title, 500) && text(y.summary, 5000) && text(y.choice, 80)) || new Set(t.yearHistory.map(y => y.id)).size !== t.yearHistory.length) return false;

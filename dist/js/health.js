@@ -52,8 +52,17 @@ function onset(state, type, severity, ctx, circumstance) {
   if (recent && state.day - recent.day < 90) return;
   const condition = { id: `${type}-${state.day}`, type, severity, sinceDay: state.day, lastEffectDay: state.day, careUntil: 0, acknowledged: false, ...(circumstance ? { circumstance } : {}) };
   state.health[kind].push(condition);
+  // One health moment a season: while a season is being lived, a slight
+  // physical complaint is seen to at home the day it starts.
+  if (nursedAtHome(state, kind, condition)) { nurse(state, condition, ctx); return; }
   note(state, ctx, 'A need your life can make room for', `${(PHYSICAL[type] || MENTAL[type]).name}: ${(PHYSICAL[type] || MENTAL[type]).symptoms} Free care and supportive choices remain available.`, { conditionType: type, result: 'onset' });
   queueConcern(state);
+}
+const nursedAtHome = (state, kind, condition) => !!state.timeline?.season && state.timeline.yearTarget !== null && kind === 'physical' && condition.severity <= 1 && condition.type !== 'chronic' && state.age >= 3;
+function nurse(state, condition, ctx) {
+  condition.careUntil = Math.max(condition.careUntil, state.day + 21); condition.acknowledged = true;
+  if (state.health.pending?.conditionId === condition.id) state.health.pending = null;
+  note(state, ctx, 'Seen to at home', `${PHYSICAL[condition.type].name}: a few days in bed and it passed. The season went on around you.`, { conditionType: condition.type, result: 'nursed' });
 }
 const hardWinterChild = (state, day = state.day) => !!state.hero.station && state.age < 12 && state.hero.station.diet <= 1 && (state.fortune?.hardWinterUntil || 0) >= day;
 function queueConcern(state) {
@@ -263,6 +272,10 @@ export function flushHealthEvent(state, ctx = {}) {
   if (!pending || state.event || state.battle || state.conversations?.pending || state.dungeon || ctx.pendingNeed?.()) return false;
   const condition = conditionById(state, pending.conditionId);
   if (!condition) { state.health.pending = null; return false; }
+  // One health moment a season. While a season is being lived, a slight
+  // physical complaint is seen to at home without stopping the calendar;
+  // only what is getting worse, or the mind, asks for an answer.
+  if (nursedAtHome(state, pending.kind, condition)) { nurse(state, condition, ctx); return false; }
   const data = PHYSICAL[condition.type] || MENTAL[condition.type], supported = condition.careUntil > state.day;
   const body = `${data.name}, severity ${condition.severity}/3. ${data.symptoms} ${ageContext(state, condition)} ${circumstanceText[condition.circumstance] || 'The original cause was not recorded.'} ${careContext(state, condition)} ${symptomProgress(state, condition)}${state.health.recovery ? ` Your recovery plan has ${state.health.recovery.attendedDays}/${state.health.recovery.totalDays} attended days. This separate care session will not count as plan attendance.` : ''}`;
   const choices = [
@@ -544,7 +557,7 @@ export function validateHealth(value, state) {
     }
   }
   if (state && (value.lastPhysicalCheckDay > state.day || value.lastMentalCheckDay > state.day || value.lastAgeCheckYear > Math.floor(state.day / 365))) return false;
-  if (!value.history.every(entry => entry && typeof entry.id === 'string' && integer(entry.day) && (!state || entry.day <= state.day) && typeof entry.title === 'string' && typeof entry.text === 'string' && (entry.conditionType === undefined || [...physicalTypes, ...mentalTypes].includes(entry.conditionType)) && (entry.careDays === undefined || integer(entry.careDays, 0, entry.attendedDays)) && (entry.result === undefined || ['onset', 'recovered','plan_started','plan_attended','plan_completed','plan_canceled'].includes(entry.result)))) return false;
+  if (!value.history.every(entry => entry && typeof entry.id === 'string' && integer(entry.day) && (!state || entry.day <= state.day) && typeof entry.title === 'string' && typeof entry.text === 'string' && (entry.conditionType === undefined || [...physicalTypes, ...mentalTypes].includes(entry.conditionType)) && (entry.careDays === undefined || integer(entry.careDays, 0, entry.attendedDays)) && (entry.result === undefined || ['onset', 'recovered','nursed','plan_started','plan_attended','plan_completed','plan_canceled'].includes(entry.result)))) return false;
   if(value.recovery!=null){const p=value.recovery;if(!p||!['free','guided'].includes(p.kind)||![14,28,56].includes(p.totalDays)||!integer(p.remainingDays,1,p.totalDays)||!integer(p.attendedDays,0,p.totalDays)||(p.careDays!==undefined&&!integer(p.careDays,0,p.attendedDays))||p.attendedDays+p.remainingDays!==p.totalDays||!integer(p.startedDay)||state&&p.startedDay>state.day||!integer(p.fee,0,100)||typeof p.paid!=='boolean'||typeof p.title!=='string'||state&&!state.world.locations.some(l=>l.id===p.locationId))return false;}
   if (value.pending === null) return true;
   const pending = value.pending;

@@ -1,6 +1,6 @@
 const key='hearth-and-oath:display:v1';
 const defaults={scale:1,font:'serif',singleKeyShortcuts:true};
-export function normalizeDisplay(v={}){const n=Number(v.scale);return {scale:Number.isFinite(n)?Math.max(1,Math.min(1.5,n)):1,font:v.font==='plain'?'plain':'serif',singleKeyShortcuts:v.singleKeyShortcuts!==false,...(v.reducedMotion===true?{reducedMotion:true}:{})};}
+export function normalizeDisplay(v={}){const n=Number(v.scale);return {scale:Number.isFinite(n)?Math.max(1,Math.min(1.5,n)):1,font:v.font==='plain'?'plain':'serif',singleKeyShortcuts:v.singleKeyShortcuts!==false,...(v.showNumbers===true?{showNumbers:true}:{}),...(v.reducedMotion===true?{reducedMotion:true}:{})};}
 export function displayPreset(id){return normalizeDisplay(id==='clear'?{scale:1.3,font:'plain',singleKeyShortcuts:false,reducedMotion:true}:id==='quiet'?{scale:1.1,font:'serif',singleKeyShortcuts:false,reducedMotion:true}:defaults);}
 export function readDisplay(storage=globalThis.localStorage){try{return normalizeDisplay(JSON.parse(storage?.getItem(key)||'{}'));}catch{return {...defaults};}}
 export function saveDisplay(value,storage=globalThis.localStorage){const settings=normalizeDisplay(value);try{storage?.setItem(key,JSON.stringify(settings));}catch{}return settings;}

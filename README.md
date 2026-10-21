@@ -1,5 +1,13 @@
 # Hearth & Oath
 
+Version 0.63.0 is Voice: the game reads like its art. It applies to new lives; saves from earlier versions keep their old text.
+
+- **Live the season.** A command beside Age up: a quarter of a year that stops only for things that matter. A slight complaint is seen to at home without stopping the calendar; what is getting worse, the mind, a promise coming due and the birthday still ask. The last season of a year runs to the birthday and its page.
+- **One voice.** The actions and scenes every life meets are told as situations, in the register of the engraved art, instead of as ledgers: "Work a shift — Three days of it. The pay comes after." "A fever. It is getting worse. Nobody has seen to it yet." The figures are still there, behind *Show the numbers* in the reading settings. Nothing about what a choice does has changed.
+- **Right now.** The Life page opens with the three to five things that matter today — a body getting worse, money owed, the work, a child's lesson or the lack of one, a cold house — written as situations, with everything else beneath.
+- **The book.** The journal reads under chapter headings by age band (The cradle, The yard, The threshold, The road, The work, The weight, The long evening), and a closed book carries an epitaph that judges the life against what it set out to do: "Kalis Meratti, of Ore Pass. The winter took them. They died owing Mavuno Navessa."
+- **For developers:** `node scripts/balance/run-lives.mjs --season` lives by season and reports stops a year.
+
 Version 0.62.0 is Birth and nature: two children born the same year in the same town now live different lives. It applies to new lives; saves from earlier versions keep their old rules.
 
 - **Station is fate's.** You choose ancestry, looks, name, pronouns and nature. Station is rolled by rarity: bound or destitute about 35 births in a hundred, common and free 40, trade 17, gentry 6, noble under 2, royal blood under one in two hundred. Each people has its own ladder (a clanless dwarven family, an elder elven line, the Nest-mother's line).

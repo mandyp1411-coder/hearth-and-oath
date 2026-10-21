@@ -14,18 +14,23 @@ const arg = (name, fallback) => { const i = process.argv.indexOf('--' + name); r
 const LIVES = Number(arg('lives', 24)), START = Number(arg('start', 18)), YEARS = Number(arg('years', 60));
 const POLICIES = String(arg('policy', 'passive,worker')).split(',');
 const JSON_OUT = arg('json', null);
+// --season lives the year a season at a time (new-edition lives), counting the stops.
+const SEASONS = process.argv.includes('--season');
 
 const alive = s => s.phase !== 'retired' && s.hero.alive !== false;
 function resolveEvents(s, max = 60) { for (let n = 0; s.event && n < max; n++) s = engine.chooseEventOption(s, s.event.choices[0].id); return s; }
+let stops = 0;
 function finishYear(s) {
   const age = s.age;
   for (let guard = 0; guard < 80 && alive(s) && s.age === age; guard++) {
+    if (s.event) stops++;
     s = resolveEvents(s);
     if (!alive(s) || s.age !== age) break;
-    const next = engine.ageUp(s);
+    const next = SEASONS && engine.liveSeason ? engine.liveSeason(s) : engine.ageUp(s);
     if (next.day === s.day && !next.event && next.age === s.age) { s = next; break; } // stuck: a waiting state we do not resolve
     s = next;
   }
+  if (s.event) stops++;
   return resolveEvents(s);
 }
 function act(s, predicate) {
@@ -72,6 +77,7 @@ const results = {};
 for (const policy of POLICIES) {
   const rows = [];
   const t0 = performance.now();
+  stops = 0; let yearsLived = 0;
   for (let i = 0; i < LIVES; i++) {
     const seed = `balance-${policy}-${i}`;
     let s = await createLifeAtAge({ seed, startAge: START });
@@ -79,7 +85,7 @@ for (const policy of POLICIES) {
     const log = { debt: false, worstStress: 0, minGold: s.hero.gold };
     for (let y = 0; y < YEARS && alive(s); y++) {
       s = policies[policy](s);
-      s = finishYear(s);
+      s = finishYear(s); yearsLived++;
       log.worstStress = Math.max(log.worstStress, s.life?.stress ?? 0);
       log.minGold = Math.min(log.minGold, s.hero.gold);
       if ((s.householdBudget?.debt || 0) > 0 || (s.householdBudget?.supportedGold || 0) > 0) log.debt = true;
@@ -90,7 +96,7 @@ for (const policy of POLICIES) {
   const pct = f => Math.round(100 * rows.filter(f).length / n);
   const dead = rows.filter(r => !r.alive);
   results[policy] = {
-    lives: n, seconds: Math.round((performance.now() - t0) / 1000),
+    lives: n, seconds: Math.round((performance.now() - t0) / 1000), stopsPerYear: yearsLived ? Math.round(10 * stops / yearsLived) / 10 : null,
     diedPct: pct(r => !r.alive), medianDeathAge: dead.length ? dead.map(r => r.age).sort((a, b) => a - b)[Math.floor(dead.length / 2)] : null,
     medianGold: med('gold'), medianMinGold: med('minGold'), everShortPct: pct(r => r.wentIntoDebt),
     medianJoy: med('joy'), medianStress: med('stress'), medianWorstStress: med('worstStress'), medianBodily: med('bodily'),
@@ -99,7 +105,7 @@ for (const policy of POLICIES) {
     rows,
   };
   const r = results[policy];
-  console.log(`\n== ${policy}: ${n} lives from ${START} for up to ${YEARS} years (${r.seconds}s)`);
+  console.log(`\n== ${policy}${SEASONS ? ' (by season)' : ''}: ${n} lives from ${START} for up to ${YEARS} years (${r.seconds}s) · ${r.stopsPerYear} stops a year`);
   console.log(`died ${r.diedPct}% (median age at death ${r.medianDeathAge ?? '-'}) · causes ${JSON.stringify(r.causes)}`);
   console.log(`gold median ${r.medianGold} · lowest point median ${r.medianMinGold} · ever short of money ${r.everShortPct}%`);
   console.log(`joy ${r.medianJoy} · stress ${r.medianStress} (worst ${r.medianWorstStress}) · bodily ${r.medianBodily} · with a condition at end ${r.conditionsAtEndPct}%`);
