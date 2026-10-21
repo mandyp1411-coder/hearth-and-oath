@@ -49,7 +49,7 @@ test('interest is charged once a year and the lender comes at three years of cos
   let event = null;
   assert.equal(debtReckoning(s, { setEvent: (id, title, category, body, choices) => { event = { id, title, choices }; } }), true);
   assert.equal(event.id, 'debt_reckoning');
-  assert.deepEqual(event.choices.map(c => c.id), ['sell', 'bond', 'plead', 'flee']);
+  assert.deepEqual(event.choices.filter(c => !c.nature).map(c => c.id), ['sell', 'bond', 'plead', 'flee']); // a nature life wrote on this hero (a lie that came out, v0.65.1) may add its own answer
 });
 
 test('bonded labour clears the debt and pays the creditor instead of you', () => {
