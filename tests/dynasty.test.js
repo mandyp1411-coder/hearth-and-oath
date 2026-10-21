@@ -237,7 +237,9 @@ function partnerAndChildren(state) {
 }
 
 function smithLife() {
-  let state = engine.createBirthGame({ name: 'Vesper Hearthkeeper', seed: 'two-lives-at-the-forge', birthplace: 'village', household: 'poor', familySetup: 'homeless', appearance: { ancestry: 'dwarf' } });
+  // A free village school for a penniless child is the rule a legacy save keeps (on a new life the schoolmaster wants
+  // ten gold and the shrine keeper has one place, tests/education-v64.test.js); this fixture is born without a station.
+  let state = engine.createBirthGame({ name: 'Vesper Hearthkeeper', seed: 'two-lives-at-the-forge', birthplace: 'village', household: 'poor', familySetup: 'homeless', appearance: { ancestry: 'dwarf' }, station: null });
   state = choose(state, 'care');
   assert.equal(state.family.housing,'shelter');
   state = grow(state, 6);

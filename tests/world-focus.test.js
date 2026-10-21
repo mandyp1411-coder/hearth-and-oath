@@ -47,7 +47,7 @@ function escapeFixture(){let s=fresh();s.hero.skills.stealth=20;s.hero.attribute
  for(let i=0;seededRoll(s.seed,`case-flight-local-case-${s.sanctuaries.sequence+1}-${s.day}`,100)>=90&&i<20;i++)s=settle(act(s,'life_rest'));
  const c=report(s);s=act(s,'sanctuary_review_'+s.locationId);s=choose(s,'escape');assert.equal(s.sanctuaries.cases.find(v=>v.id===c.id).status,'fugitive');return s;
 }
-function serviceFixture(){let s=ageTo(fresh(),30);s=settle(act(s,'career_choose_blacksmith'));for(let n=0;n<50;n++)s=settle(act(s,'career_work'));assert.ok(s.careers.records.Blacksmith.workedDays>=150);const start=s.age,ids=['night_door','own_key','winter_commons'];for(const id of ids)s=chapter(s,id);s=ageTo(s,start+1);for(const id of ids)s=chapter(s,id);s=ageTo(s,start+3);for(const [i,id]of ids.entries())s=chapter(s,id,['care','enterprise','coercion'][i]);return roundtrip(s);}
+function serviceFixture(){let s=ageTo(fresh(),30);if(s.hero.profession!=='Blacksmith')s=settle(act(s,'career_choose_blacksmith'));for(let n=0;n<50;n++)s=settle(act(s,'career_work'));assert.ok(s.careers.records.Blacksmith.workedDays>=150);const start=s.age,ids=['night_door','own_key','winter_commons'];for(const id of ids)s=chapter(s,id);s=ageTo(s,start+1);for(const id of ids)s=chapter(s,id);s=ageTo(s,start+3);for(const [i,id]of ids.entries())s=chapter(s,id,['care','enterprise','coercion'][i]);return roundtrip(s);}
 const serviceBase=serviceFixture();
 function forgeryFixture(){let s=chapter(fresh(),'hearth_letter');s=ageTo(s,23);s=open(s,'hearth_letter');assert.match(s.event.choices.find(c=>c.id==='coercion').description,/forgery allegation/);return settle(choose(s,'coercion'));}
 const forgeryBase=forgeryFixture();
