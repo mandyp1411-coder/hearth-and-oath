@@ -1,4 +1,5 @@
 import { seededRoll, isSettlement } from './world.js';
+import { isLiterate } from './schooling.js';
 import { rememberResident, projectLifePerson } from './world-people-v31.js';
 
 export const MISDEEDS=Object.freeze([
@@ -40,7 +41,7 @@ export function daylifeActions(s,contacts=[]){
  }
  if(s.age>=6&&local){
   rows.push(offer('leisure_walk','Take a Walk','Spend a day following the paths around town. Gain 4 Joy and reduce Stress by 5.',1,0,used('walk')));
-  if(s.age>=12)rows.push(offer('leisure_read','Read on Your Own','Settle down with a borrowed book for a day. Practice scholarship and reduce Stress by 3.',1,0,used('read')));
+  if(s.age>=12)rows.push(offer('leisure_read','Read on Your Own','Settle down with a borrowed book for a day. Practice scholarship and reduce Stress by 3.',1,0,!isLiterate(s)?'You cannot read.':used('read')));
   if(s.age>=18)rows.push(offer('leisure_drink','Have Drinks at the Tavern','Spend 4 Gold and an evening at the tavern. Gain 8 Joy, reduce Stress by 6 and lose 6 Focus. Another round while tipsy costs Health.',1,4,room(s)!=='tavern'?'Go to the Tavern first.':s.hero.gold<4?'Requires 4 Gold.':used('drink')));
   const circle=people.filter(p=>p.bond>=40&&(s.conversations?.meetings?.[p.id]||s.life.people.some(x=>x.id===p.id)||s.socialLife.met[p.id]));
   if(circle.length)rows.push(offer('leisure_circle','Hang Out with Your Circle','Share a meal, a walk or games with '+circle.slice(0,4).map(p=>p.name).join(', ')+'. Gain 7 Joy and reduce Stress by 5. This outing starts no conversation or courtship.',1,0,used('circle')));

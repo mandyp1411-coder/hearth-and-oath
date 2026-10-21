@@ -94,6 +94,7 @@ import { initializeTravel, setTravelPlan, travelPlanPreview, beginTravelJourney,
 import { initializeFortune, onFortuneTime, fortuneIncomeFactor, validateFortune, flushWinterEvent, applyWinterChoice, WINTER_EVENT } from './fortune.js';
 import { STATIONS, stationById, rollStation, rollBirthCircumstances, stationIncome, validateStation } from './station.js';
 import { epitaph, validateEpitaph } from './voice.js';
+import { initializeSchooling, onSchoolingBirthday, validateSchooling } from './schooling.js';
 import { initializeHouseholdBudget, accrueHouseholdBudget, settleHouseholdBudget, chargeDebtInterest, debtReckoning, applyDebtReckoningChoice, DEBT_RECKONING_EVENT, applyAnnualFocus, annualWorkRatio, householdCostPreview, householdBudgetActions, applyHouseholdBudgetAction, validateHouseholdBudget } from './budget.js';
 import { initializeSociety, societyActions, applySocietyAction, applySocietyChoice, societyEventIds, onSocietyTime, flushSocietyEvent, validateSociety, inheritSociety, societyCustomerChoiceReason } from './society.js';
 import { initializeCommunity, communityActions, applyCommunityAction, applyCommunityChoice, communityEventIds, onCommunityTime, flushCommunityEvent, validateCommunity, inheritCommunity } from './community.js';
@@ -677,6 +678,7 @@ export function createBirthGame(config = {}) {
   initializeCampaign(state); initializeExploration(state,{fresh:true});
   initializeHousehold(state, { config: resolvedConfig }); initializeFamilyOrigins(state); initializeWorkshop(state);
   if (state.family && station) { state.family.support = stationById(station.id).support; state.family.literate = station.literate; }
+  initializeSchooling(state);
   initializePreferences(state, { values: config.preferences }); initializeLore(state);
   initializeCareers(state); initializeHealth(state); initializeTravel(state); initializeTravelEnergy(state); initializeMaze(state); initializeSocialLife(state); initializeLineage(state,{startingAge:config.startAge});
   initializeHouseholdBudget(state,{edition:true});initializeFortune(state,{attempt:Number.isInteger(config.attempt)&&config.attempt>0&&config.attempt<=12?config.attempt:0});
@@ -900,6 +902,7 @@ function engineContext(state, { annual = false, resolvingNeed=null } = {}) {
     touchCampaign: () => { if (state.campaign && !waiting(state)) onCampaignAge(state, engineContext(state)); },
     onBirthday: () => {
       if (state.family && state.education) onHouseholdAge(state, engineContext(state));
+      onSchoolingBirthday(state, engineContext(state));
       chargeDebtInterest(state, engineContext(state));
       const bloodPlan=state.hero.condition?.feedingPlan;
   if(bloodPlan&&state.hero.condition.hunger>=65&&!waiting(state)&&!state.justice?.prison&&!state.sanctuaries?.commitment){const id='sanctuary_feed_'+bloodPlan.agreementId,offer=sanctuaryActions(state).find(a=>a.id===id);if(offer&&!offer.disabledReason&&((nextInterruptionDay(state,{ignoreNeed:'vampire'})??state.day+2)>state.day)){applySanctuaryAction(state,id,engineContext(state,{annual:true,resolvingNeed:'vampire'}));if(state.phase==='retired')return copy(state);}else if(!offer||offer.disabledReason){state.hero.condition.feedingPlan=null;addJournal(state,'A standing agreement interrupted',offer?.disabledReason||'The agreed donor is no longer available. No fee or feeding was taken.','condition');}}
@@ -2589,6 +2592,7 @@ export function validateSave(value) {
       if(!validateFortune(value.fortune,value))return false;
       if(!validateStation(value.hero.station,value))return false;
       if(!validateEpitaph(value.epitaph)||(value.epitaph!==undefined&&value.phase!=='retired'))return false;
+      if(value.education&&!validateSchooling(value.education.schooling,value))return false;
       if(value.society!==undefined&&!validateSociety(value.society,value))return false;
       if(value.community!==undefined&&!validateCommunity(value.community,value))return false;
       if(value.fellowship!==undefined&&!validateFellowship(value.fellowship,value))return false;

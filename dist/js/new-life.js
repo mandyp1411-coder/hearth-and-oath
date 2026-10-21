@@ -14,7 +14,7 @@ function pastChoice(s) {
   let preferred=id==='health_concern'?(s.health.pending?.kind==='physical'?'rest':'support'):
     id==='plague_letter'?'later':id==='life_budget'?'simplify':id==='deadline_review'?'pause':
     id==='lineage_bereavement'?['share','private','memorial'][seededRoll(s.seed,`past:grief:${s.day}`,3)]:
-    id==='career_staff'?'decline':id==='retirement'?'continue':null;
+    id==='career_staff'?'decline':id==='retirement'?'continue':id==='school_exam'?'present':id==='hard_winter'?'endure':null;
   const safe=offered.filter(c=>!(id==='family_visit'&&c.id==='gift'&&s.hero.gold<10));
   return safe.find(c=>c.id===preferred)||safe[seededRoll(s.seed,`past:choice:${id}:${s.age}:${s.day}`,safe.length)];
 }
@@ -57,6 +57,8 @@ async function generateLife(config, { onProgress, shouldCancel } = {}, draws = {
     if(!a)return false;s=chooseAction(s,id);return true;
   };
   const tryOnce=id=>{const key=`${s.age}:${id}`;if(attempted.has(key))return false;attempted.add(key);return act(id);};
+  // Some things a year asks for more than once: lessons are four a year, not one.
+  const tryTimes=(id,times)=>{for(let k=0;k<times;k++){const key=`${s.age}:${id}:${k}`;if(attempted.has(key))continue;attempted.add(key);return act(id);}return false;};
   const snapshots=[];let snapshotAge=-1;
   while(s.age<target) {
     if(shouldCancel?.())return null;
@@ -84,8 +86,14 @@ async function generateLife(config, { onProgress, shouldCancel } = {}, draws = {
     // Recovery consumes actual days. It is not a granted health refill or a paid reward.
     if(s.life.health<70||s.hero.hp<s.hero.maxHp*.65||s.life.stress>55){if(act('health_routine'))continue;}
     if(s.timeline.yearTarget!==null){s=continueAgeUp(s);continue;}
-    if(s.age>=6&&!s.education.enrolled&&tryOnce(`school_enroll_${fate.originId==='shrine_foundling'?'shrine':'community'}`))continue;
-    if(s.age>=6&&s.age<18&&tryOnce('school_attend'))continue;
+    // School is for those who can pay or are chosen: the shrine first (free, if the keeper takes you), then the village school, then the grammar school by examination.
+    if(s.age>=6&&!s.education.enrolled&&(tryOnce('school_enroll_shrine')||tryOnce('school_enroll_community')))continue;
+    if(s.age>=12&&s.age<=15&&tryOnce('school_scholarship'))continue;
+    if(s.age>=12&&s.age<18&&tryOnce('school_entrance'))continue;
+    if(s.age>=12&&s.age<18&&s.education.route!=='academy'&&tryOnce('school_enroll_academy'))continue;
+    if(s.age>=12&&s.age<18){const elective=getActions(s).find(a=>a.id.startsWith('school_elective_')&&!a.disabledReason);if(elective&&tryOnce(elective.id))continue;}
+    if(s.age>=6&&s.age<18&&tryTimes('school_attend',4))continue;
+    if(s.age>=10&&s.age<18&&s.education.enrolled&&tryOnce('school_exam'))continue;
     if(s.age>=16&&s.hero.profession==='Unemployed'){
       const jobs=getActions(s).filter(a=>a.id.startsWith('career_choose_')&&!a.disabledReason&&a.id!=='career_choose_unemployed');
       if(jobs.length&&tryOnce(jobs[seededRoll(s.seed,'past:livelihood',jobs.length)].id))continue;

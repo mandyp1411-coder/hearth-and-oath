@@ -1,3 +1,4 @@
+import { credentialReason } from './schooling.js';
 import { isSettlement } from './world.js';
 
 const good=(id,name,materials,days,pay,extra={})=>({id,name,materials,days,pay,...extra});
@@ -33,5 +34,6 @@ export function civilianProfessionEntryReason({profession, age, operating} = {})
 }
 
 export function civilianEntryReason(s, {profession, age = s.age, locationId = s.locationId} = {}) {
-  return civilianProfessionEntryReason({profession,age,operating:isSettlement(s.world,locationId)});
+  // On a new life the learned trades ask for letters and schooling; older saves keep open entry.
+  return civilianProfessionEntryReason({profession,age,operating:isSettlement(s.world,locationId)}) || credentialReason(s, getProfession(profession)?.id);
 }

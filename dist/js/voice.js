@@ -59,7 +59,9 @@ const EXACT = {
   school_exam: ['Sit the examination', 'Two days. The result is written down and kept.'],
   school_path: ['Choose what you study', 'Inquiry, service, or the practical.'],
   school_dilemma: ['Trouble at school', 'Among teachers and classmates, something needs an answer.'],
-  school_scholarship: ['Ask for a scholarship', 'A place without a fee, for those who can argue for one.'],
+  school_scholarship: ['Sit the scholarship examination', 'Three places, forty children, one sitting in a life.'],
+  school_entrance: ['Sit the entrance examination', 'Letters, numbers and a little history, before the master.'],
+  school_letters: ['Learn your letters', 'Four afternoons with the archivist and a slate. Most grown people never do.'],
   school_service: ['Keep the reading-room promise', 'Three days of shelving and quiet.'],
   family_support: ['Ask for what you need', 'A conversation with the person who raises you.'],
   family_shelter: ['Find a roof', 'Somewhere with walls, for now.'],
@@ -99,6 +101,7 @@ const PATTERNS = [
   [/^career_choose_(?!unemployed)/, (s, a) => [a.label.replace(/^(Become|Train as|Apprentice as) /, 'Apprentice as '), 'Years of someone else’s orders, and a trade at the end of them.']],
   [/^school_enroll_/, (s, a) => [a.label.replace(/^Enroll at /, 'Enrol at ').replace(/^Transfer to /, 'Move to '), 'If they will take you.']],
   [/^school_project_/, (s, a) => [a.label, 'Supervised work with the school’s tools, and a result that is kept.']],
+  [/^school_elective_/, (s, a) => [a.label, a.description.split(' Four lessons')[0]]],
   [/^lineage_continue_/, (s, a) => [a.label, 'The next volume.']],
 ];
 
