@@ -169,7 +169,7 @@ test('birth Age up pauses before a known promise and never skips its visible dec
   // The year may still pause for the body (a fever, a wound); each pause is a
   // decision the player answers, never one the clock skips.
   for (let guard = 0; guard < 12 && state.age === 18; guard++) {
-    assert.equal(state.event?.id, 'health_concern', `an unexpected pause: ${state.event?.id || state.notice}`);
+    assert.ok(state.event?.id === 'health_concern' || state.event?.id?.startsWith('living_'), `an unexpected pause: ${state.event?.id || state.notice}`); // the world can come to the door mid-year too (v0.65)
     state = choice(state, 'continue');
     if (!state.event) state = engine.continueAgeUp(state);
   }

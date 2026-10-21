@@ -1,5 +1,12 @@
 # Hearth & Oath
 
+Version 0.65.1 is The living world, second slice: people with wants of their own, the carts that follow a war and the sickness they carry, and places that change. New lives only.
+
+- **People have wants.** Once in a while someone you know acts on one. A rival sets up across the square in your trade and charges half: match them, out-work them, show the town the shoddy work (if the town will listen), or let it choose; two seasons later the bench across the square closes or stays. A friend comes to the door after dark and asks you to say they were with you: say it (and one time in three it comes out on you both, and the second lie comes easier), refuse it and watch the friendship go out of their face, or say nothing. A parent takes to bed: at home, nurse them, pay a physician, or leave it to the others; away, drop everything and go (sixty days to reach the bedside, kept by arriving and missed by the calendar), send money, write, or finish what you are doing. A season later they sit up and ask what day it is, or they do not.
+- **Carts from the border.** Refugees follow a war into the next region, bread is dearer and the byres are full, and one cart in four carries the sickness: lime on the doorsteps for three seasons, and a sickbed in your own house.
+- **Places change.** The wolves, a strike, marked doors, scaffolding on the square, the carts, the sickness and the guild's mark are all written where the place view reads them, for as long as the place remembers; a monopoly held to its end raises the guild's hall on the square.
+- **Still to come in the living world:** bonds that fade when ignored, the curses rebuilt on the thread engine, monster hunts that are dungeons, and the lives born outside a settlement.
+
 Version 0.65.0 is The living world, first slice: stories happen everywhere, and reach you through your own people. New lives only.
 
 - **Actors with goals.** The six courts, three guilds whose reach is the whole map, and two wolf packs in the hills each hold a goal and advance it every season whether or not you are looking: a court's claim on a neighbour's town, a levy, a purge of one people, a new hall; a guild's contract or its monopoly; the pack's descent, fastest in a hard winter. Goals take years; the calendar no longer starts wars on its own.
