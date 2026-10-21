@@ -65,7 +65,7 @@ function newGoal(s, actor, season) {
     const sites = Object.values(s.realm?.sites || {}).filter(x => named(x.id) && isSettlement(s.world, x.id)).map(x => x.id);
     return { kind, target: kind === 'contract' ? sites[seededRoll(s.seed, `goal:site:${actor.id}:${season}`, Math.max(1, sites.length))] || null : actor.craft, progress: 0, pace: 3 + roll(4) };
   }
-  return { kind: 'descend', target: null, progress: 0, pace: 1 + roll(2) }; // the wolves: slow, until a hard winter
+  return { kind: 'descend', target: null, progress: 0, pace: 1 + roll(2) }; // the wolves: slow, until a hard winter (+10 a winter season)
 }
 export function initializeLivingWorld(s) {
   if (!edition(s) || !s.realm || s.living) return;
@@ -201,9 +201,10 @@ function tradeOf(s, craft) {
   return null;
 }
 const THREAD_COOLDOWN = 8; // seasons before the same kind of story comes to the door again
+const COOLDOWNS = Object.freeze({ wolves: 16, refugees: 12 }); // the ones the map makes often
 function openThread(s, season, ev, def, roles, ctx) {
   const l = living(s); if (l.threads.filter(t => !t.closed).length >= LIMITS.threads) return null;
-  if (l.threads.some(t => t.def === def && season - t.season < THREAD_COOLDOWN)) return null;
+  if (l.threads.some(t => t.def === def && season - t.season < (COOLDOWNS[def] || THREAD_COOLDOWN))) return null;
   l.counters.threads++;
   const t = { id: `th-${l.counters.threads}`, def, eventId: ev.id, roles, season, stage: 'open', choice: null, followUp: null, memory: [], closed: false };
   l.threads.push(t); if (l.threads.length > LIMITS.threads * 2) l.threads.splice(0, 1);
@@ -222,7 +223,7 @@ function routeEvent(s, season, ev, ctx) {
   else if (ev.kind === 'refugees' && s.age >= 16 && ev.regionId === region) { const family = `the ${generateFamilyName(s, ev.id)}s`; t = openThread(s, season, ev, 'refugees', { family, from: ev.from }, ctx); }
   else if (ev.kind === 'plague' && s.age >= 12 && ev.regionId === region) { const kin = presentKin(s).map(x => x.p).find(p => kinAge(s, p) >= 40) || presentKin(s).map(x => x.p)[0]; if (kin) t = openThread(s, season, ev, 'bedside', { kin: { id: kin.id, name: kin.name, relation: presentKin(s).find(x => x.p.id === kin.id)?.m.relationship || 'kin' }, cause: 'plague', away: false }, ctx); else { s.hero.hp = Math.max(1, s.hero.hp - Math.round(s.hero.maxHp * 0.2)); if (s.life) s.life.stress = clamp((s.life.stress || 0) + 8); note(ctx, 'The sickness', 'The sickness went through the house and left you thin and shaking for a month. Nobody came to the door, which was the kindness.', 'health'); } }
   else if (ev.kind === 'strike' && s.age >= 14) { const trade = tradeOf(s, ev.craft); if (trade) t = openThread(s, season, ev, 'strike', { craft: ev.craft, how: trade.how, master: trade.master || null }, ctx); else if (s.age >= 16 && s.hero.profession === 'Unemployed' && ev.regionId === region) t = openThread(s, season, ev, 'strike', { craft: ev.craft, how: 'hands', master: null }, ctx); }
-  else if (ev.kind === 'raid' && s.age >= 14 && (ev.siteIds.includes(home) || ev.regionId === region && seededRoll(s.seed, `raid:ask:${ev.id}`, 100) < 40)) { const n = ev.siteIds.includes(home) ? neighbourOf(s) : null; t = openThread(s, season, ev, 'wolves', { neighbour: n ? { id: n.id, name: n.name } : null, village: ev.siteIds.includes(home) ? null : placeName(s, ev.siteIds[0]) }, ctx); }
+  else if (ev.kind === 'raid' && s.age >= 14 && (ev.siteIds.includes(home) || ev.regionId === region && seededRoll(s.seed, `raid:ask:${ev.id}`, 100) < 25)) { const n = ev.siteIds.includes(home) ? neighbourOf(s) : null; t = openThread(s, season, ev, 'wolves', { neighbour: n ? { id: n.id, name: n.name } : null, village: ev.siteIds.includes(home) ? null : placeName(s, ev.siteIds[0]) }, ctx); }
   else if (ev.kind === 'purge' && s.age >= 12) { const kin = purgeKin(s, ev.target); if (kin) t = openThread(s, season, ev, 'purge', { ancestry: ev.target, kin: kin.person ? { id: kin.person.id, name: kin.person.name, relation: kin.relation } : null, relation: kin.relation }, ctx); }
   if (!t) pushNews(s, season, ev.text, ev.id);
   else note(ctx, 'Word from the road', ev.text, 'world');
@@ -255,7 +256,7 @@ export function onLivingTime(s, { oldDay, newDay }, ctx = {}) {
   for (let season = l.lastSeason + 1; season <= to; season++) {
     // Goals advance. The wolves move fastest when winter comes early.
     const done = [];
-    for (const a of l.actors) { const g = a.goal; if (!g) { a.goal = newGoal(s, a, season); continue; } g.progress += g.pace + (a.kind === 'beasts' && season % 4 === WINTER ? 14 : 0) + seededRoll(s.seed, `tick:${a.id}:${season}`, 8); if (g.progress >= 100) done.push(a); }
+    for (const a of l.actors) { const g = a.goal; if (!g) { a.goal = newGoal(s, a, season); continue; } g.progress += g.pace + (a.kind === 'beasts' && season % 4 === WINTER ? 10 : 0) + seededRoll(s.seed, `tick:${a.id}:${season}`, 8); if (g.progress >= 100) done.push(a); }
     const fresh = [];
     for (const a of done) { const ev = resolveGoal(s, season, a, ctx); if (ev) fresh.push(ev); }
     for (const ev of l.events) { if (ev.endSeason <= season) continue; markEvent(s, ev); if (spreadEvent(s, season, ev) && !ev.routed) routeEvent(s, season, ev, ctx); }
