@@ -111,7 +111,7 @@ test('annual memory from a known different settlement does not impersonate this 
 });
 
 test('one saved war grievance appears in its announcement, later account and realm view without a second cause roll',()=>{
- const s=fresh(),old=s.day;delete s.realm.politics;s.realm.wars=s.realm.wars.filter(w=>w.politicalVersion!==33);/* Controlled pre-politics cadence; modern political wars are outside this module fixture. */s.day=24*365;s.age=24;onRealmTime(s,old,s.day,context(s));const war=s.realm.wars.find(w=>w.id==='war-24');assert.ok(war);const announcement=s.realm.history.find(h=>h.text.includes('enter open conflict')&&h.text.includes(war.grievance));assert.ok(announcement);onRpgTime(s,{oldDay:old,newDay:s.day},context(s));assert.equal(s.rpg.warAccounts.find(a=>a.warId===war.id).cause,war.grievance);assert.ok(validateRealm(s.realm,s));
+ const s=fresh(),old=s.day;delete s.realm.politics;delete s.living;s.realm.wars=s.realm.wars.filter(w=>w.politicalVersion!==33);/* Controlled pre-politics cadence; modern political wars and the living world's courts are outside this module fixture. */s.day=24*365;s.age=24;onRealmTime(s,old,s.day,context(s));const war=s.realm.wars.find(w=>w.id==='war-24');assert.ok(war);const announcement=s.realm.history.find(h=>h.text.includes('enter open conflict')&&h.text.includes(war.grievance));assert.ok(announcement);onRpgTime(s,{oldDay:old,newDay:s.day},context(s));assert.equal(s.rpg.warAccounts.find(a=>a.warId===war.id).cause,war.grievance);assert.ok(validateRealm(s.realm,s));
 });
 test('old war causes and their already-written announcements are not retroactively rewritten',()=>{
  const s=fresh(),before=structuredClone(s.realm),loaded=E.migrateSave(JSON.parse(JSON.stringify(s)));assert.deepEqual(loaded.realm,before);
