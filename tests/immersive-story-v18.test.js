@@ -10,6 +10,8 @@ import * as engine from '../dist/js/engine.js';
 const races=['human','elf','dwarf','halfling','orc','goblin','tiefling','beastfolk'];
 const skills=['weapons','defense','arcana','devotion','stealth','survival','scholarship','persuasion'];
 async function grown(race='human',age=22){const seed='immersive-v18-'+race;return createLifeAtAge({seed,startAge:age,originId:race==='human'?'human_bellward':'hearthborn',appearance:generateCharacter(seed,'creator',{ancestry:race,pronouns:'they/them'}).appearance});}
+// The generated past walks to town at fourteen; the stories of a life's birthplace wait at the birthplace.
+function homeward(s){if(s.locationId===s.hero.birthplaceId||IMMERSIVE_LIFE_STORIES.some(d=>engine.getActions(s).some(a=>a.id==='stories_open_'+d.id)))return s;s=engine.travelTo(s,s.hero.birthplaceId);for(let g=0;g<300&&s.timeline?.journey;g++){if(s.event){s=settle(s);continue;}if(s.hero.mp<Math.ceil(s.hero.maxMp*.3)&&engine.getActions(s).some(a=>a.id==='trail_camp'&&!a.disabledReason)){s=engine.chooseAction(s,'trail_camp');continue;}s=engine.continueJourney(s);}return settle(s);}
 function settle(s){for(let guard=0;guard<100&&s.event;guard++){const offered=s.event.choices.filter(c=>!c.disabledReason);const chosen=offered.find(c=>c.id==='continue'||c.id==='support'||c.id==='simplify'||c.id==='later'||c.id==='wait')||offered[0];s=engine.chooseEventOption(s,chosen.id);}assert.equal(s.event,null);return s;}
 
 test('new authored stories are valid three-chapter definitions and all atmosphere entries have unique identities',()=>{
@@ -33,7 +35,7 @@ test('eligibility and scene queries are pure and named atmosphere actors are ali
 });
 
 test('a new supernatural chapter keeps its exact pending scene on reload and earns only its attended work',async()=>{
-  let s=settle(await grown()),actions=engine.getActions(s);const definition=IMMERSIVE_LIFE_STORIES.find(d=>actions.some(a=>a.id==='stories_open_'+d.id));assert.ok(definition);
+  let s=homeward(settle(await grown())),actions=engine.getActions(s);const definition=IMMERSIVE_LIFE_STORIES.find(d=>actions.some(a=>a.id==='stories_open_'+d.id));assert.ok(definition);
   const before=structuredClone(s);s=engine.chooseAction(s,'stories_open_'+definition.id);assert.deepEqual(before,settle(structuredClone(before)));
   assert.equal(s.event.id,'stories_chapter');assert.ok(s.stories.pending);assert.ok(engine.validateSave(s));
   const pending=structuredClone(s);s=engine.migrateSave(JSON.parse(JSON.stringify(s)));assert.deepEqual(s,pending);
