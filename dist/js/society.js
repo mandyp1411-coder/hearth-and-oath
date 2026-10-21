@@ -1,6 +1,6 @@
 import { agingPolicy } from './aging-policy-v25.js';
 import { generateCharacter } from './characters.js';
-import { seededRoll, generatePersonName, isSettlement, worldCalendarContext } from './world.js';
+import { seededRoll, generatePersonName, isSettlement, worldCalendarContext, withArticle } from './world.js';
 
 // People enter the ledger when they actually meet this household. Calendar
 // changes are prospective: importing a save never invents earlier meetings.
@@ -145,7 +145,7 @@ export function onSocietyTime(s,{oldDay,newDay},ctx={}) {
         else {
           p.profession=PROFESSIONS[seededRoll(s.seed,`society-peer-work:${p.id}:${milestone}`,PROFESSIONS.length)];actual.occupation=p.profession.toLowerCase();
           if(alternatives.length>1 && seededRoll(s.seed,`society-peer-move:${p.id}:${milestone}`,3)===0){p.locationId=alternatives[seededRoll(s.seed,`society-peer-destination:${p.id}:${milestone}`,alternatives.length)].id;actual.locationId=p.locationId;}
-          p.goal=`Build a ${p.profession.toLowerCase()} life in ${place(s,p.locationId)?.name || 'their chosen settlement'}, while keeping old connections.`;
+          p.goal=`Build ${withArticle(p.profession.toLowerCase())} life in ${place(s,p.locationId)?.name || 'their chosen settlement'}, while keeping old connections.`;
         }
         remember(p,`At ${p.age}, I ${p.status==='retired'?'left paid work':`chose ${p.profession.toLowerCase()} work`} in ${place(s,p.locationId)?.name || 'the community'}.`);
         journal(s,ctx,'A familiar person chose another chapter',`${p.name} ${p.status==='retired'?'retired from paid work':`now practices ${p.profession.toLowerCase()} work`} in ${place(s,p.locationId)?.name || 'their community'}. Their work changes without asking you to choose it for them; correspondence and earlier memories remain.`);
@@ -282,7 +282,7 @@ export function flushSocietyEvent(s,ctx={}) {
     title='The door is ready to bear another name';body=`Fourteen actual days of preparation have passed. The tools and lease funded for ${p.name} are ready in ${place(s,p.locationId)?.name}. Their future is a relationship to negotiate, rather than a reward to equip.`;
     offered=choices(['independent','Give the key and let their own name lead','They leave your paid staff, become an independent maker and keep your support in memory. No income is siphoned back to you.'],['partner','Agree on two independent doors and shared methods','They establish their own workplace; both names remain in a cooperative teaching record. No passive payment or duplicate business appears.'],['study','Let them choose further study before opening','They leave active staff for a funded period of study, with the reserved preparation remembered. Their decision is not silently reversed.']);
   } else {
-    title='Someone the old years did not know';body=`${p.name}, a ${p.profession.toLowerCase()}, has begun a household in ${place(s,p.locationId)?.name}. ${p.goal} Beyond the evening shutters, the bells count a year that belongs to neither your childhood nor theirs. An old life can still make room for a new person.`;
+    title='Someone the old years did not know';body=`${p.name}, ${withArticle(p.profession.toLowerCase())}, has begun a household in ${place(s,p.locationId)?.name}. ${p.goal} Beyond the evening shutters, the bells count a year that belongs to neither your childhood nor theirs. An old life can still make room for a new person.`;
     offered=choices(['welcome','Offer a place in your circle','Remember a welcome between two adults. The conversation opens without a gift, class requirement or forced romance.'],['work','Ask about the work they chose','Learn their personal ambition and make a professional connection; no automatic job or commission is awarded.'],['private','Keep a kind boundary','They remain a real neighbor without becoming a close friend. No universal reputation penalty.']);
   }
   ctx.setEvent?.(q.eventId,title,'Lives around your own',body,offered);return true;

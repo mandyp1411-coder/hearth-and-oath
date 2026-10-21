@@ -174,7 +174,7 @@ function compatibleFamily(anchor,family,heritage){
       && (!['dark','light','mixed'].includes(anchor.furTone)||family.furTone===anchor.furTone)
       && (anchor.morphology!=='other'||!anchor.speciesFamily||anchor.speciesFamily==='uncertain'||family.speciesFamily===anchor.speciesFamily));
 }
-const modernFamilyCache=new Map(),familySelectionCache=new Map();
+const modernFamilyCache=new Map(),familySelectionCache=new Map(),familySelectionPreCache=new Map();
 const expandedMatureKeys=new Set(MATURE_PORTRAIT_ATLASES_V40.flatMap(a=>a.entries.map(e=>`${a.id}:${String(e.cell).padStart(2,'0')}`)));
 const expandedLifecycleKeys=new Set(LIFECYCLE_PORTRAIT_ATLASES_V40.flatMap(a=>a.entries.map(e=>`${a.id}:${String(e.cell).padStart(2,'0')}`)));
 function expandedMaturePortrait(anchor,heritage,seed){
@@ -209,19 +209,29 @@ export function legacyCursePortraitFamily(appearance,{age}={}){
   return pool.length?pool[hash((anchor.key||appearance.preset)+':curse-identity')%pool.length]:null;
 }
 function familySelections(family,appearance,heritage){
+  // The anchor depends only on the family's adult face plus the hair tone
+  // fallback, so a cheap pre-key avoids recomputing the phenotype for every
+  // candidate family on every generated NPC.
+  const preKey=[family.id,appearance.hair,heritage.id].join(':');
+  const pre=familySelectionPreCache.get(preKey);if(pre)return pre;
   const anchor=portraitPhenotype({...appearance,ancestry:family.ancestry,portraitSelections:{adult:family.selections.adult}}),key=[family.id,anchor.hairTone,heritage.id].join(':');
-  if(familySelectionCache.has(key))return familySelectionCache.get(key);
+  if(familySelectionCache.has(key)){const hit=familySelectionCache.get(key);familySelectionPreCache.set(preKey,hit);return hit;}
   const selections={...family.selections};
   for(const stage of youngStages)if(!selections[stage]){
     const pool=lifecyclePool(anchor,stage);if(pool.length)selections[stage]=pool[hash(family.id+':'+stage)%pool.length].key;
   }
   if(!family.modern){const modern=modernFamilyForAnchor(anchor,heritage);if(modern)for(const stage of ['mature','older'])selections[stage]=modern.selections[stage];}
   for(const stage of ['mature','older','elder']){const actual=exactAgeForAdult(anchor,stage,heritage);if(actual)selections[stage]=actual.key;}
-  const result=Object.freeze(selections);familySelectionCache.set(key,result);return result;
+  const result=Object.freeze(selections);familySelectionCache.set(key,result);familySelectionPreCache.set(preKey,result);return result;
 }
+const npcPoolCache=new Map();
 function linkedNpcAppearance(appearance,seed,heritage,{archetype,preferHair,modernOnly=false}={}){
-  let pool=(modernOnly?MODERN_PORTRAIT_FAMILIES:PORTRAIT_FAMILIES).filter(f=>f.ancestry===appearance.ancestry&&f.presentation===appearance.portraitPresentation&&f.compatibleHeritages.includes(heritage.id)
-    && PORTRAIT_STAGES.every(stage=>familySelections(f,appearance,heritage)[stage.id]));
+  // The eligible family pool depends only on ancestry, presentation, heritage,
+  // hair (through familySelections) and the catalog chosen, never on the NPC.
+  const poolKey=[modernOnly?'m':'a',appearance.ancestry,appearance.portraitPresentation,heritage.id,appearance.hair].join(':');
+  let pool=npcPoolCache.get(poolKey);
+  if(!pool){pool=Object.freeze((modernOnly?MODERN_PORTRAIT_FAMILIES:PORTRAIT_FAMILIES).filter(f=>f.ancestry===appearance.ancestry&&f.presentation===appearance.portraitPresentation&&f.compatibleHeritages.includes(heritage.id)
+    && PORTRAIT_STAGES.every(stage=>familySelections(f,appearance,heritage)[stage.id])));npcPoolCache.set(poolKey,pool);}
   if(preferHair){const same=pool.filter(f=>f.hairTone===preferHair);if(same.length)pool=same;}
   pool=pool.flatMap(f=>f.modern?[f,f]:[f]).flatMap(f=>f.archetype===archetype?[f,f,f]:[f]);if(!pool.length)return null;
   const family=pool[hash(seed+':linked-family')%pool.length];

@@ -719,7 +719,7 @@ textarea { resize: vertical; min-height: 100px; }
   .bottom-nav { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); position: fixed; z-index: 45; bottom: 0; left: 0; right: 0; padding: 0 5px env(safe-area-inset-bottom); min-height: 66px; background: #121110f5; border-top: 1px solid #635a4d; backdrop-filter: blur(12px); }
   .bottom-nav button { min-width: 0; min-height: 65px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 9px 0; color: #a99f91; background: transparent; border: 0; border-top: 2px solid transparent; }
   .bottom-nav button > span:first-child { font-size: 21px; line-height: 1; }
-  .bottom-nav button > span:last-child { font: 9px/1.6 var(--mono); text-transform: uppercase; letter-spacing: .2px; }
+  .bottom-nav button > span:last-child { font: 9px/1.6 var(--mono); text-transform: uppercase; letter-spacing: .2px; white-space: nowrap; }
   .bottom-nav button.active { background: #2c2924; color: #d1c6b7; border-top-color: #aa9d8b; }
   .life-tools { display: grid; grid-template-columns: 1.35fr 1fr .7fr; gap: 6px; padding-bottom: 17px; margin-bottom: 21px; border-bottom: 1px solid #47423c; }
   .life-tools .button { font-size: 11px; padding: 8px 5px; white-space: nowrap; }
@@ -1031,6 +1031,8 @@ input[type=radio]:checked,input[type=checkbox]:checked { background: radial-grad
   .bar-caption { font-size: 9px; letter-spacing: .4px; gap: 5px; }
   .bar-caption strong { font-size: 9px; }
   .bar-track { height: 5px; }
+  /* The fixed bottom bar already carries Menu; the command bar's copy would sit right above it. */
+  .game-commandbar .command-menu-button { display: none; }
   .mobile-command-dock { display: block; position: fixed; bottom: 0; left: 0; right: 0; z-index: 45; padding: 0 0 env(safe-area-inset-bottom); background: #151412f9; border-top: 1px solid #6f665b; box-shadow: 0 -9px 28px #08070699; backdrop-filter: blur(12px); }
   .command-age-row { display: flex; align-items: center; gap: 16px; min-height: 72px; padding: 12px 22px 11px; border-bottom: 1px solid #46433e; }
   .command-age-button.button { flex: 0 0 145px; min-height: 47px; display: flex; justify-content: space-between; gap: 15px; padding: 10px 15px; color: #e5d4b7; background: #934e3b; border: 1px solid #bd7657; font: 600 23px/1.1 var(--serif); }
@@ -4659,7 +4661,9 @@ body.game-mode .header-inbox { position:relative; flex:0 0 44px; }
 .notification-toast-open strong { font:500 17px/1.35 var(--serif); }
 .notification-toast-open > span { color:#aaa394; font:12px/1.6 var(--sans); }
 .notification-dismiss { position:absolute; top:6px; right:5px; width:34px; height:34px; border:0; background:transparent; color:#b0a68e; font:22px var(--serif); cursor:pointer; }
-@media(max-width:650px){.notification-toast-stack { right:16px; bottom:138px; }.notification-toast:not(:first-child) { display:none; }.inbox-drawer { padding:32px 20px; }}
+.notification-toast-more { margin:0; text-align:right; pointer-events:auto; }
+.notification-toast-more .link-button { font:11px/1.6 var(--mono); letter-spacing:.6px; text-transform:uppercase; color:#a99b77; background:transparent; border:0; padding:4px 2px; cursor:pointer; text-decoration:underline dotted; }
+@media(max-width:650px){.notification-toast-stack { right:16px; bottom:138px; }.inbox-drawer { padding:32px 20px; }}
 @media(prefers-reduced-motion:reduce){.notification-toast { animation:none; }}
 .inbox-tools { display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:12px; }
 .inbox-tools .button { padding-inline:0; min-height:38px; }

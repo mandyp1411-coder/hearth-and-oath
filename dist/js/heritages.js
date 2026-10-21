@@ -50,8 +50,19 @@ export const HERITAGES = Object.freeze([
   ...beast.map(([id,name,morphology,description,custom]) => Object.freeze({id, ancestry:'beastfolk', name, morphology, description, custom})),
 ]);
 export const HERITAGE_IDS = Object.freeze([...new Set(HERITAGES.map(h => h.id))]);
-export function availableHeritages(ancestry='human') { return HERITAGES.filter(h => h.ancestry===ancestry); }
-export function heritageById(id, ancestry='human') { return availableHeritages(ancestry).find(h => h.id===id)||null; }
+// Both lookups sit on the portrait-selection hot path (thousands of calls per
+// generated NPC), so they are memoized over the frozen catalog.
+const heritagesByAncestry = new Map(), heritageIndex = new Map();
+export function availableHeritages(ancestry='human') {
+  let rows = heritagesByAncestry.get(ancestry);
+  if (!rows) { rows = Object.freeze(HERITAGES.filter(h => h.ancestry===ancestry)); heritagesByAncestry.set(ancestry, rows); }
+  return rows;
+}
+export function heritageById(id, ancestry='human') {
+  const key = ancestry+'\u001f'+id;
+  if (!heritageIndex.has(key)) heritageIndex.set(key, availableHeritages(ancestry).find(h => h.id===id)||null);
+  return heritageIndex.get(key);
+}
 export function heritageAllowsPortrait(heritage, portrait) {
   return Boolean(heritage && portrait?.ancestry===heritage.ancestry
     && (!heritage.complexion || !portrait.complexion || portrait.complexion==='unknown' || portrait.complexion===heritage.complexion)

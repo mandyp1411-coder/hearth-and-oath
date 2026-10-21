@@ -57,11 +57,17 @@ for (const entry of modules) {
     (_, symbols, dependency) => `const {${symbols.replace(/\b(\w+)\s+as\s+(\w+)\b/g, '$1: $2')}} = ${moduleVariable(dependency)};`);
   source = source.replace(/^export\s+/gm, '');
   const result = names.length ? `return {${names.join(',')}};` : '';
-  bundle += `${module === 'app' ? '' : `const ${moduleVariable(module)} = `}(() => {\n${source}\n${result}\n})();\n`;
+  // The entry awaits its save database before rendering, so it runs as an
+  // async IIFE awaited at the top level of the inline module script.
+  bundle += module === 'app'
+    ? `await (async () => {\n${source}\n})();\n`
+    : `const ${moduleVariable(module)} = (() => {\n${source}\n${result}\n})();\n`;
 }
 // Parse the translated module graph before embedding the large media payload.
 // This catches alias/import conversion errors without needing a browser session.
-new Script(bundle, { filename: 'hearth-and-oath-offline.js' });
+// The bundle uses top-level await (a module script), so check its syntax
+// inside an async function body, which accepts the same constructs.
+new Script(`(async () => {\n${bundle}\n})`, { filename: 'hearth-and-oath-offline.js' });
 // Complete illustrated portraits: embed every catalog atlas for the standalone game.
 const portraitAssets=new Set([...bundle.matchAll(/["']\.\/(art\/(?:presets|foes)\/[^"']+\.avif)["']/g)].map(match=>match[1]));
 if(portraitAssets.size!==221+expansionAssets.size||[...expansionAssets].some(p=>!portraitAssets.has(p)))throw new Error(`Expected 221 established character/enemy atlases and all ${expansionAssets.size} expansion atlases; found ${portraitAssets.size}.`);

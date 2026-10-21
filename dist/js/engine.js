@@ -49,7 +49,7 @@ import { initializeCartography, syncCartography, inheritCartography, cartography
 import { culturalName } from './names.js';
 import { generateCharacter } from './characters.js';
 import { originById, MAX_START_AGE } from './origins.js';
-import { generateWorld, seededRoll, validateWorld, expandWorld, travelPreview, resolveBirthplace, generatePersonName, isSettlement, worldCalendarContext } from './world.js';
+import { generateWorld, seededRoll, validateWorld, expandWorld, travelPreview, resolveBirthplace, generatePersonName, isSettlement, worldCalendarContext, withArticle } from './world.js';
 import { createBattle, takeBattleAction, getBattleActions, combatProfile } from './combat.js';
 import { initializePersonality, initializePersonalityDecision, personalityActions, applyPersonalityAction, applyPersonalityChoice, personalityEventIds, applyPersonalityBuild, applyPersonalityImpact, personalitySelectionReason, personalityImpact, validatePersonality } from './personality.js';
 import { validateStartingAttributes } from './starting-attributes.js';
@@ -164,9 +164,16 @@ const setEvent = (state, id, title, category, body, choices) => {
   if(/(?:^|_)letter(?:$|_)/.test(id))receiveNotification(state,{kind:'letter',sourceId:'event-letter:'+id+':'+state.day,title:state.event.title.slice(0,160),body:state.event.body.slice(0,2400)});
   if(state.narrativeEdition===30&&state.timeline?.annualScene&&id==='birth_adult_year'){state.timeline.annualScene.title=state.event.title;state.timeline.annualScene.body=state.event.body;}
 };
+// Entries written by the current narrative edition are stamped so the edition
+// upgrade (narrative-edition.js) leaves their words alone. Only prose from
+// older saves lacks the stamp and is rewritten from its recorded facts. The
+// few event ids with an authored current-edition rewrite stay unstamped so
+// that wording still applies.
+const EDITION_REWRITTEN_EVENTS = new Set(['person_died', 'home_displaced', 'households_displaced']);
 const addJournal = (state, title, text, tag = 'life', {literal=false,meta={}}={}) => {
   const format=literal?text=>String(text??''):text=>personalNames(state,text);
-  state.journal.push({ id: `entry-${state.journal.length + 1}`, day: state.day, age: state.age, title:format(title), text:format(text), tag,...meta,...(state.narrativeEdition===30&&(tag==='combat'||title==='A Trade Across the Counter')?{narrativeEdition:30}:{}), ...(state.revision>=5?{generation:state.dynasty?.generation||1}:{}) });
+  const stamp=state.narrativeEdition===30&&!EDITION_REWRITTEN_EVENTS.has(meta?.eventId);
+  state.journal.push({ id: `entry-${state.journal.length + 1}`, day: state.day, age: state.age, title:format(title), text:format(text), tag,...meta,...(stamp?{narrativeEdition:30}:{}), ...(state.revision>=5?{generation:state.dynasty?.generation||1}:{}) });
 };
 const recordPlanGold = (state, before) => {
   if (!state.life?.plan) return;
@@ -817,7 +824,7 @@ function engineContext(state, { annual = false, resolvingNeed=null } = {}) {
     witnesses: () => witnesses(state),
     setEvent: (id, title, category, body, choices) => setEvent(state, id, title, category, body, choices),
     setResearchEvent: snapshot => { if (preserveResearchEvent(state,snapshot)) state.event=editionEvent(state,copy(snapshot)); },
-    afterAction: () => afterAction(state),
+    afterAction: () => { reconcile(state); },
     nextInterruptionDay: () => nextInterruptionDay(state),
     pendingNeed: () => pendingNeed(state),
     endLife: cause => endLife(state,cause),
@@ -898,8 +905,9 @@ function moonEvent(state) {
     ]);
 }
 
-function afterAction(state) {
-  if (terminalRun(state)) return copy(state);
+/** Reconcile the state in place after an action: derived records, pauses, notices. */
+function reconcile(state) {
+  if (terminalRun(state)) return state;
   refreshNarrativeRecords(state);
   respectPersonalBoundaries(state);
   initializeQuestJournal(state);
@@ -908,7 +916,7 @@ function afterAction(state) {
   settlePublicRoster(state);reconcileTournament(state);
   for(const r of Object.values(state.realm?.politics?.regions||{}))if(r.capitalId&&!state.cartography.sites[r.capitalId])markSiteKnowledge(state,r.capitalId,'Rumored','A regional capital printed on your atlas');
   for(const q of regionalQuestRows(state))if(q.locationId&&!state.cartography.sites[q.locationId])markSiteKnowledge(state,q.locationId,'Rumored','Your accepted regional quest');
-  if (state.phase === 'retired') return copy(state);
+  if (state.phase === 'retired') return state;
   const bloodPlan=state.hero.condition?.feedingPlan;
   if(bloodPlan&&state.hero.condition.hunger>=65&&!waiting(state)&&!state.justice?.prison&&!state.sanctuaries?.commitment){const id='sanctuary_feed_'+bloodPlan.agreementId,offer=sanctuaryActions(state).find(a=>a.id===id);if(offer&&!offer.disabledReason&&((nextInterruptionDay(state,{ignoreNeed:'vampire'})??state.day+2)>state.day)){applySanctuaryAction(state,id,engineContext(state,{annual:true,resolvingNeed:'vampire'}));if(state.phase==='retired')return copy(state);}else if(!offer||offer.disabledReason){state.hero.condition.feedingPlan=null;addJournal(state,'A standing agreement interrupted',offer?.disabledReason||'The agreed donor is no longer available. No fee or feeding was taken.','condition');}}
   if (state.workshop) refreshWorkshop(state, engineContext(state));
@@ -943,8 +951,10 @@ function afterAction(state) {
   reconcileTournament(state);
   if(state.event?.id.startsWith('birth_'))state.notice=observationalInfancy(state)?'Continue watching your early years when you are ready.':'Make your birthday choice before the year can continue.';
   refreshNarrativeRecords(state);
-  return copy(state);
+  return state;
 }
+/** Public-command tail: reconcile, then return a detached copy. */
+function afterAction(state) { return copy(reconcile(state)); }
 
 
 // Apply nature only to a committed choice, never a failed or disabled command.
@@ -1691,7 +1701,7 @@ function retire(state, reason='retirement') {
   const life = [
     `${hero.name}’s chronicle`,
     `Born in ${state.world.locations.find(p=>p.id===hero.birthplaceId)?.name || (hero.origin === 'city' ? city(state).name : home(state).name)} to a ${hero.household === 'poor' ? 'struggling' : hero.household === 'noble' ? 'noble' : 'working'} household, your childhood and education shaped a life of your own.`,
-    `At age ${state.age}, you closed this chapter as ${hero.profession === 'Unemployed' ? 'a person still free to find a calling' : `a ${hero.profession.toLowerCase()}`}${hero.specialization ? `, with the training of a ${hero.specialization}` : ''}. Your ambition was “${hero.ambition}.”`,
+    `At age ${state.age}, you closed this chapter as ${hero.profession === 'Unemployed' ? 'a person still free to find a calling' : `${withArticle(hero.profession.toLowerCase())}`}${hero.specialization ? `, with the training of a ${hero.specialization}` : ''}. Your ambition was “${hero.ambition}.”`,
   ];
   if (state.flags.villageSaved) life.push(`You helped ${home(state).name} survive Ashfall fever through ${state.flags.remedyMethod === 'ancestral' ? 'ancestral testimony' : 'careful moonroot fieldwork'}. ${state.flags.publicNecromancy ? 'The neighbors know how the cure was found.' : 'The public account leaves some of the method private.'}`);
   else life.push(`The region’s fever remained part of the world you lived in. You gave ${state.flags.clinicShifts} clinic shift${state.flags.clinicShifts === 1 ? '' : 's'} to its people.`);
@@ -2003,7 +2013,7 @@ function resumeRoad(state) {
   if (!j) return state;
   const ctx = engineContext(state, { annual: true });
   while (j.legIndex < j.route.length - 1 && !waiting(state)) {
-    if (pendingNeed(state)) { afterAction(state); break; }
+    if (pendingNeed(state)) { reconcile(state); break; }
     const from = j.route[j.legIndex], to = j.route[j.legIndex + 1];
     const road = state.world.roads.find(r => [r.from, r.to].includes(from) && [r.from, r.to].includes(to));
     const legIndex=j.legIndex, leg=j.legs?.[legIndex], totalDays=leg?.totalDays??road.days;
@@ -2026,7 +2036,7 @@ function resumeRoad(state) {
         addJournal(state, 'A road taken', state.notice, 'travel');
       }
     }
-    afterAction(state);
+    reconcile(state);
     if(j.energyVersion===1||actual===0&&j.legIndex===legIndex||!state.timeline.journey||waiting(state))break;
   }
   if(state.timeline.journey&&!waiting(state))state.notice=j.energyVersion===1?'You stop beside the trail. Continue walking, or make camp to recover Focus.':'Your journey pauses for a visible need. Resolve it, then continue the same road.';

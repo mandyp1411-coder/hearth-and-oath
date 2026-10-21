@@ -728,7 +728,7 @@ textarea { resize: vertical; min-height: 100px; }
   .bottom-nav { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); position: fixed; z-index: 45; bottom: 0; left: 0; right: 0; padding: 0 5px env(safe-area-inset-bottom); min-height: 66px; background: #121110f5; border-top: 1px solid #635a4d; backdrop-filter: blur(12px); }
   .bottom-nav button { min-width: 0; min-height: 65px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 9px 0; color: #a99f91; background: transparent; border: 0; border-top: 2px solid transparent; }
   .bottom-nav button > span:first-child { font-size: 21px; line-height: 1; }
-  .bottom-nav button > span:last-child { font: 9px/1.6 var(--mono); text-transform: uppercase; letter-spacing: .2px; }
+  .bottom-nav button > span:last-child { font: 9px/1.6 var(--mono); text-transform: uppercase; letter-spacing: .2px; white-space: nowrap; }
   .bottom-nav button.active { background: #2c2924; color: #d1c6b7; border-top-color: #aa9d8b; }
   .life-tools { display: grid; grid-template-columns: 1.35fr 1fr .7fr; gap: 6px; padding-bottom: 17px; margin-bottom: 21px; border-bottom: 1px solid #47423c; }
   .life-tools .button { font-size: 11px; padding: 8px 5px; white-space: nowrap; }
@@ -1040,6 +1040,8 @@ input[type=radio]:checked,input[type=checkbox]:checked { background: radial-grad
   .bar-caption { font-size: 9px; letter-spacing: .4px; gap: 5px; }
   .bar-caption strong { font-size: 9px; }
   .bar-track { height: 5px; }
+  /* The fixed bottom bar already carries Menu; the command bar's copy would sit right above it. */
+  .game-commandbar .command-menu-button { display: none; }
   .mobile-command-dock { display: block; position: fixed; bottom: 0; left: 0; right: 0; z-index: 45; padding: 0 0 env(safe-area-inset-bottom); background: #151412f9; border-top: 1px solid #6f665b; box-shadow: 0 -9px 28px #08070699; backdrop-filter: blur(12px); }
   .command-age-row { display: flex; align-items: center; gap: 16px; min-height: 72px; padding: 12px 22px 11px; border-bottom: 1px solid #46433e; }
   .command-age-button.button { flex: 0 0 145px; min-height: 47px; display: flex; justify-content: space-between; gap: 15px; padding: 10px 15px; color: #e5d4b7; background: #934e3b; border: 1px solid #bd7657; font: 600 23px/1.1 var(--serif); }
@@ -4668,7 +4670,9 @@ body.game-mode .header-inbox { position:relative; flex:0 0 44px; }
 .notification-toast-open strong { font:500 17px/1.35 var(--serif); }
 .notification-toast-open > span { color:#aaa394; font:12px/1.6 var(--sans); }
 .notification-dismiss { position:absolute; top:6px; right:5px; width:34px; height:34px; border:0; background:transparent; color:#b0a68e; font:22px var(--serif); cursor:pointer; }
-@media(max-width:650px){.notification-toast-stack { right:16px; bottom:138px; }.notification-toast:not(:first-child) { display:none; }.inbox-drawer { padding:32px 20px; }}
+.notification-toast-more { margin:0; text-align:right; pointer-events:auto; }
+.notification-toast-more .link-button { font:11px/1.6 var(--mono); letter-spacing:.6px; text-transform:uppercase; color:#a99b77; background:transparent; border:0; padding:4px 2px; cursor:pointer; text-decoration:underline dotted; }
+@media(max-width:650px){.notification-toast-stack { right:16px; bottom:138px; }.inbox-drawer { padding:32px 20px; }}
 @media(prefers-reduced-motion:reduce){.notification-toast { animation:none; }}
 .inbox-tools { display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:12px; }
 .inbox-tools .button { padding-inline:0; min-height:38px; }
@@ -5211,6 +5215,15 @@ function expandRegionalGeography(world,seed,{roll,name}){
   const culture=REGIONAL_CULTURES.find(r=>r.id===region.id),services=i===5?['archive','guide']:i>5?['guide','herbs']:['hearth','market','guide',...(i===0?['smith','academy','order']:i===4?['shrine']:[])];
   const place={id,type,regionId:region.id,name:name(seed,id,region.id),travelDays:2+roll(seed,id+'days',4),safety:2+roll(seed,id+'safety',4),services,description:i===0?`The seat of the ${culture.government.toLowerCase()}. Its ${culture.court.toLowerCase()} hears petitions from across the region.`:i===5?'An abandoned stronghold stands beside a disused road. Its lower chambers remain unexplored.':i>5?'Paths leave the settled country for a wild and sparsely traveled reach.':`A community of ${culture.culture.toLowerCase()}. ${culture.custom}`,necromancyLaw:['permitted','regulated','forbidden'][roll(seed,id+'law',3)],status:'thriving'};
   world.locations.push(place);map.nodes.push({id,x:p[0],y:p[1]});
+ }
+ // Names are independent rolls, so two places in one world could share one
+ // ("Frost Reach" twice). Re-roll later duplicates deterministically, trying a
+ // few salted ids before accepting the collision. Only new worlds reach here.
+ const taken=new Set();
+ for(const place of world.locations){
+  let candidate=place.name;
+  for(let attempt=1;taken.has(candidate.toLowerCase())&&attempt<=6;attempt++)candidate=name(seed,`${place.id}:alt${attempt}`,place.regionId);
+  place.name=candidate;taken.add(candidate.toLowerCase());
  }
  return world;
 }
@@ -6220,7 +6233,9 @@ function defaultNamingIdentity(seed,id){return defaultNamingIdentityV31(seed,id)
 function culturalName(seed='hearth',id='person',options={}){return culturalNameV31(seed,id,options);}
 function namingLore(ancestry,heritage){return namingLoreV31(ancestry,heritage);}
 function regionalNamingLore(id){return REGION_NAME_LORE_V20[id]||REGION_NAME_LORE_V20.rainward;}
-function culturalPlaceName(seed,id,regionId){const p=regionalNamingLore(regionId),pick=(salt,values)=>values[roll(seed,`place:${id}:${salt}`,values.length)];return pick('format',p.placeFormats).replace('{root}',pick('root',p.placeRoots)).replace('{ending}',pick('ending',p.placeEndings));}
+function culturalPlaceName(seed,id,regionId){const p=regionalNamingLore(regionId),pick=(salt,values)=>values[roll(seed,`place:${id}:${salt}`,values.length)];const format=pick('format',p.placeFormats),ending=pick('ending',p.placeEndings);
+// An ending that stands as its own word is a proper noun ("Frost Span"), not a suffix ("Frostspan").
+return format.replace('{root}',pick('root',p.placeRoots)).replace('{ending}',/ \{ending\}/.test(format)?ending.charAt(0).toUpperCase()+ending.slice(1):ending);}
 
 function familyNameOf(person){if(person?.naming?.name===person?.name)return person.naming.family;const parts=String(person?.name||'').trim().split(/\s+/),of=parts.indexOf('of');return of>=0?parts.slice(of).join(' '):parts.length>1?parts.at(-1):'';}
 
@@ -6302,6 +6317,8 @@ function worldCalendarContext(world, day=0, seed='hearth',regionId=world?.enviro
 
 
 /** A stable, independent roll. The upper bound is exclusive. */
+/** "a"/"an" by the word's first sound; `withArticle('alchemist')` → "an alchemist". */
+function withArticle(word){const w=String(word??'').trim();return w?`${/^(?:[aeiou]|hour|heir|honest|honou?r)/i.test(w)?'an':'a'} ${w}`:'';}
 function seededRoll(seed, salt, range) {
   const limit = Math.floor(Number(range));
   if (!Number.isFinite(limit) || limit <= 0) return 0;
@@ -6783,7 +6800,7 @@ function validateAtlas(atlas,map) {
   return true;
 }
 
-return {BIRTHPLACES,expandWorld,findRoute,generatePersonName,generateWorld,isSettlement,resolveBirthplace,seededRoll,travelPreview,validateWorld,worldCalendarContext,worldNamingLore};
+return {BIRTHPLACES,expandWorld,findRoute,generatePersonName,generateWorld,isSettlement,resolveBirthplace,seededRoll,travelPreview,validateWorld,withArticle,worldCalendarContext,worldNamingLore};
 })();
 const __adult_child_view = (() => {
 const { isSettlement } = __world;
@@ -107247,8 +107264,19 @@ const HERITAGES = Object.freeze([
   ...beast.map(([id,name,morphology,description,custom]) => Object.freeze({id, ancestry:'beastfolk', name, morphology, description, custom})),
 ]);
 const HERITAGE_IDS = Object.freeze([...new Set(HERITAGES.map(h => h.id))]);
-function availableHeritages(ancestry='human') { return HERITAGES.filter(h => h.ancestry===ancestry); }
-function heritageById(id, ancestry='human') { return availableHeritages(ancestry).find(h => h.id===id)||null; }
+// Both lookups sit on the portrait-selection hot path (thousands of calls per
+// generated NPC), so they are memoized over the frozen catalog.
+const heritagesByAncestry = new Map(), heritageIndex = new Map();
+function availableHeritages(ancestry='human') {
+  let rows = heritagesByAncestry.get(ancestry);
+  if (!rows) { rows = Object.freeze(HERITAGES.filter(h => h.ancestry===ancestry)); heritagesByAncestry.set(ancestry, rows); }
+  return rows;
+}
+function heritageById(id, ancestry='human') {
+  const key = ancestry+'\u001f'+id;
+  if (!heritageIndex.has(key)) heritageIndex.set(key, availableHeritages(ancestry).find(h => h.id===id)||null);
+  return heritageIndex.get(key);
+}
 function heritageAllowsPortrait(heritage, portrait) {
   return Boolean(heritage && portrait?.ancestry===heritage.ancestry
     && (!heritage.complexion || !portrait.complexion || portrait.complexion==='unknown' || portrait.complexion===heritage.complexion)
@@ -107433,7 +107461,7 @@ function compatibleFamily(anchor,family,heritage){
       && (!['dark','light','mixed'].includes(anchor.furTone)||family.furTone===anchor.furTone)
       && (anchor.morphology!=='other'||!anchor.speciesFamily||anchor.speciesFamily==='uncertain'||family.speciesFamily===anchor.speciesFamily));
 }
-const modernFamilyCache=new Map(),familySelectionCache=new Map();
+const modernFamilyCache=new Map(),familySelectionCache=new Map(),familySelectionPreCache=new Map();
 const expandedMatureKeys=new Set(MATURE_PORTRAIT_ATLASES_V40.flatMap(a=>a.entries.map(e=>`${a.id}:${String(e.cell).padStart(2,'0')}`)));
 const expandedLifecycleKeys=new Set(LIFECYCLE_PORTRAIT_ATLASES_V40.flatMap(a=>a.entries.map(e=>`${a.id}:${String(e.cell).padStart(2,'0')}`)));
 function expandedMaturePortrait(anchor,heritage,seed){
@@ -107468,19 +107496,29 @@ function legacyCursePortraitFamily(appearance,{age}={}){
   return pool.length?pool[hash((anchor.key||appearance.preset)+':curse-identity')%pool.length]:null;
 }
 function familySelections(family,appearance,heritage){
+  // The anchor depends only on the family's adult face plus the hair tone
+  // fallback, so a cheap pre-key avoids recomputing the phenotype for every
+  // candidate family on every generated NPC.
+  const preKey=[family.id,appearance.hair,heritage.id].join(':');
+  const pre=familySelectionPreCache.get(preKey);if(pre)return pre;
   const anchor=portraitPhenotype({...appearance,ancestry:family.ancestry,portraitSelections:{adult:family.selections.adult}}),key=[family.id,anchor.hairTone,heritage.id].join(':');
-  if(familySelectionCache.has(key))return familySelectionCache.get(key);
+  if(familySelectionCache.has(key)){const hit=familySelectionCache.get(key);familySelectionPreCache.set(preKey,hit);return hit;}
   const selections={...family.selections};
   for(const stage of youngStages)if(!selections[stage]){
     const pool=lifecyclePool(anchor,stage);if(pool.length)selections[stage]=pool[hash(family.id+':'+stage)%pool.length].key;
   }
   if(!family.modern){const modern=modernFamilyForAnchor(anchor,heritage);if(modern)for(const stage of ['mature','older'])selections[stage]=modern.selections[stage];}
   for(const stage of ['mature','older','elder']){const actual=exactAgeForAdult(anchor,stage,heritage);if(actual)selections[stage]=actual.key;}
-  const result=Object.freeze(selections);familySelectionCache.set(key,result);return result;
+  const result=Object.freeze(selections);familySelectionCache.set(key,result);familySelectionPreCache.set(preKey,result);return result;
 }
+const npcPoolCache=new Map();
 function linkedNpcAppearance(appearance,seed,heritage,{archetype,preferHair,modernOnly=false}={}){
-  let pool=(modernOnly?MODERN_PORTRAIT_FAMILIES:PORTRAIT_FAMILIES).filter(f=>f.ancestry===appearance.ancestry&&f.presentation===appearance.portraitPresentation&&f.compatibleHeritages.includes(heritage.id)
-    && PORTRAIT_STAGES.every(stage=>familySelections(f,appearance,heritage)[stage.id]));
+  // The eligible family pool depends only on ancestry, presentation, heritage,
+  // hair (through familySelections) and the catalog chosen, never on the NPC.
+  const poolKey=[modernOnly?'m':'a',appearance.ancestry,appearance.portraitPresentation,heritage.id,appearance.hair].join(':');
+  let pool=npcPoolCache.get(poolKey);
+  if(!pool){pool=Object.freeze((modernOnly?MODERN_PORTRAIT_FAMILIES:PORTRAIT_FAMILIES).filter(f=>f.ancestry===appearance.ancestry&&f.presentation===appearance.portraitPresentation&&f.compatibleHeritages.includes(heritage.id)
+    && PORTRAIT_STAGES.every(stage=>familySelections(f,appearance,heritage)[stage.id])));npcPoolCache.set(poolKey,pool);}
   if(preferHair){const same=pool.filter(f=>f.hairTone===preferHair);if(same.length)pool=same;}
   pool=pool.flatMap(f=>f.modern?[f,f]:[f]).flatMap(f=>f.archetype===archetype?[f,f,f]:[f]);if(!pool.length)return null;
   const family=pool[hash(seed+':linked-family')%pool.length];
@@ -112609,7 +112647,7 @@ return {ARTISAN_PATTERNS,BUILDING_CATALOG,applyWorkshopAction,buildingBenefits,c
 const __society = (() => {
 const { agingPolicy } = __aging_policy_v25;
 const { generateCharacter } = __characters;
-const { seededRoll, generatePersonName, isSettlement, worldCalendarContext } = __world;
+const { seededRoll, generatePersonName, isSettlement, worldCalendarContext, withArticle } = __world;
 // People enter the ledger when they actually meet this household. Calendar
 // changes are prospective: importing a save never invents earlier meetings.
 const PROFESSIONS=['Blacksmith','Farmer','Alchemist','Innkeeper','Miner','Bard','Cartographer','Healer','Scholar','Herbalist','Merchant','Soldier'];
@@ -112753,7 +112791,7 @@ function onSocietyTime(s,{oldDay,newDay},ctx={}) {
         else {
           p.profession=PROFESSIONS[seededRoll(s.seed,`society-peer-work:${p.id}:${milestone}`,PROFESSIONS.length)];actual.occupation=p.profession.toLowerCase();
           if(alternatives.length>1 && seededRoll(s.seed,`society-peer-move:${p.id}:${milestone}`,3)===0){p.locationId=alternatives[seededRoll(s.seed,`society-peer-destination:${p.id}:${milestone}`,alternatives.length)].id;actual.locationId=p.locationId;}
-          p.goal=`Build a ${p.profession.toLowerCase()} life in ${place(s,p.locationId)?.name || 'their chosen settlement'}, while keeping old connections.`;
+          p.goal=`Build ${withArticle(p.profession.toLowerCase())} life in ${place(s,p.locationId)?.name || 'their chosen settlement'}, while keeping old connections.`;
         }
         remember(p,`At ${p.age}, I ${p.status==='retired'?'left paid work':`chose ${p.profession.toLowerCase()} work`} in ${place(s,p.locationId)?.name || 'the community'}.`);
         journal(s,ctx,'A familiar person chose another chapter',`${p.name} ${p.status==='retired'?'retired from paid work':`now practices ${p.profession.toLowerCase()} work`} in ${place(s,p.locationId)?.name || 'their community'}. Their work changes without asking you to choose it for them; correspondence and earlier memories remain.`);
@@ -112890,7 +112928,7 @@ function flushSocietyEvent(s,ctx={}) {
     title='The door is ready to bear another name';body=`Fourteen actual days of preparation have passed. The tools and lease funded for ${p.name} are ready in ${place(s,p.locationId)?.name}. Their future is a relationship to negotiate, rather than a reward to equip.`;
     offered=choices(['independent','Give the key and let their own name lead','They leave your paid staff, become an independent maker and keep your support in memory. No income is siphoned back to you.'],['partner','Agree on two independent doors and shared methods','They establish their own workplace; both names remain in a cooperative teaching record. No passive payment or duplicate business appears.'],['study','Let them choose further study before opening','They leave active staff for a funded period of study, with the reserved preparation remembered. Their decision is not silently reversed.']);
   } else {
-    title='Someone the old years did not know';body=`${p.name}, a ${p.profession.toLowerCase()}, has begun a household in ${place(s,p.locationId)?.name}. ${p.goal} Beyond the evening shutters, the bells count a year that belongs to neither your childhood nor theirs. An old life can still make room for a new person.`;
+    title='Someone the old years did not know';body=`${p.name}, ${withArticle(p.profession.toLowerCase())}, has begun a household in ${place(s,p.locationId)?.name}. ${p.goal} Beyond the evening shutters, the bells count a year that belongs to neither your childhood nor theirs. An old life can still make room for a new person.`;
     offered=choices(['welcome','Offer a place in your circle','Remember a welcome between two adults. The conversation opens without a gift, class requirement or forced romance.'],['work','Ask about the work they chose','Learn their personal ambition and make a professional connection; no automatic job or commission is awarded.'],['private','Keep a kind boundary','They remain a real neighbor without becoming a close friend. No universal reputation penalty.']);
   }
   ctx.setEvent?.(q.eventId,title,'Lives around your own',body,offered);return true;
@@ -112989,7 +113027,7 @@ return {MODERN_CAREER_LEVELS,PROFESSION_CATALOG,civilianEntryReason,civilianProf
 })();
 const __careers = (() => {
 const { generateCharacter } = __characters;
-const { seededRoll, generatePersonName, worldCalendarContext, isSettlement } = __world;
+const { seededRoll, generatePersonName, worldCalendarContext, isSettlement, withArticle } = __world;
 const { GEAR_CATALOG, MATERIAL_IDS } = __gear;
 const { MATERIAL_PRICES, returnQuote } = __economy_values;
 const { CAREER_SPECIALTIES, captureCareerDevelopment, careerReviewTerms, careerDevelopmentText, validCareerDevelopment } = __career_development;
@@ -113147,8 +113185,8 @@ function careerActions(s) {
   const c=s.careers,r=ledger(s),p=current(s);
   if(c.batch)return [action(s,'career_batch_continue',`Continue ${c.batch.title.toLowerCase()}`,`${c.batch.remainingDays} real work days remain. Only completed days earn wages; the same job, wage agreement, and progress resume.`,0,0,!open(place(s,c.batch.locationId))?'This workplace is unavailable; cancel the commitment.':s.locationId!==c.batch.locationId?'Return to the workplace before continuing.':null,{durationDays:c.batch.remainingDays}),action(s,'career_batch_cancel','Release the remaining work commitment','Keep wages already earned; no future days or income are granted. Reserved masterwork materials remain consumed.',0)];
   if(!settlement(s))return [];
-  const actions=PROFESSION_CATALOG.filter(job=>job.name!==p.name).map(job=>action(s,`career_choose_${job.id}`,job.name==='Unemployed'?'Return to flexible local labor':`Learn the work of a ${job.name.toLowerCase()}`,`${job.description} A named local mentor offers an accessible introduction. Your combat identity stays independent; previous career records are retained.`,1));
-  actions.push(action(s,'career_work',`Work as ${p.name==='Unemployed'?'a local laborer':`a ${p.name.toLowerCase()}`}`,`Three days of safe local work earn ${professionWage(s)} gold and 3 professional experience. At fourteen actual work days, ${modern(s)&&p.skill?`${p.skill} improves by 1; `:''}smiths gain crafting practice, miners gain ore, and growers gather one remedy bundle. The same actual-day learning applies to saved commitments and shop work. No battle or class is required.`,3));
+  const actions=PROFESSION_CATALOG.filter(job=>job.name!==p.name).map(job=>action(s,`career_choose_${job.id}`,job.name==='Unemployed'?'Return to flexible local labor':`Learn the work of ${withArticle(job.name.toLowerCase())}`,`${job.description} A named local mentor offers an accessible introduction. Your combat identity stays independent; previous career records are retained.`,1));
+  actions.push(action(s,'career_work',`Work as ${p.name==='Unemployed'?'a local laborer':withArticle(p.name.toLowerCase())}`,`Three days of safe local work earn ${professionWage(s)} gold and 3 professional experience. At fourteen actual work days, ${modern(s)&&p.skill?`${p.skill} improves by 1; `:''}smiths gain crafting practice, miners gain ore, and growers gather one remedy bundle. The same actual-day learning applies to saved commitments and shop work. No battle or class is required.`,3));
   actions.push(action(s,'career_practice','Practice a difficult part of your profession','Gain 6 professional experience and one relevant skill through supervised practice. Smiths also gain 1 crafting. Once every 14 days.',3,4,p.name==='Unemployed'?'Choose a profession first.':r.lastPracticeDay!==null && s.day-r.lastPracticeDay<14?`Another lesson opens in ${14-(s.day-r.lastPracticeDay)} days.`:null));
   for(const duration of [30,365]) {
     const budget=s.householdBudget?` At your present living standard, these days accrue about ${householdCostPreview(s,duration).additionalCost} gold in household costs; changes in your household can change that rate.`:'';
@@ -117289,10 +117327,4 @@ const COMPANION_IDENTITIES=Object.freeze({
  orrin:{role:'scholar and translator',concern:'The account left in the margin',ask:'Which reading are you trying to preserve?',answer:'The one somebody thought too ordinary to copy. Soup can be history. So can a reader’s objection.',share:'Tell me something your teachers left out. I will resist making a footnote of you.',boundary:'You may disagree with a reading. Its reader still gets a name.',updates:['I have two translations and one very hungry bell. Neither settles the other.','The learner’s laugh was a question the lesson needed.','I want copies people can read without buying a patron’s version of the past.','A marginal note can be worth more than the edition it corrects.','I can restore a footnote without hunting the person who wrote it.','The next learner has a question I cannot answer yet. That is a useful beginning.']},
  kest:{role:'scout and courier',concern:'A safe road with a private end',ask:'What makes a route safe for the person using it?',answer:'An adult guide, a checked crossing, and an end to the job. Knowing a route does not entitle us to sell its travelers.',share:'Tell me where you would go if nobody was following. You can leave the destination out.',boundary:'Ask before sharing my route. Ask again before sharing anybody else’s.',updates:['A signature is evidence of old work. It is not proof of where somebody lives now.','The dog on the child’s map is enormous. I want an adult to check the bridge.','A courier route should not need children running through danger.','The wage tally deserves its own hearing, separate from the captain’s hunt.','I will keep a copy where the household can reach it.','The watch has an end to its shift. So do I.']},
  sable:{role:'healer and clinic keeper',concern:'The end of a healing shift',ask:'Which part of the clinic needs help, and which needs quiet?',answer:'Clean linen needs hands. A patient’s account needs permission. The healer needs sleep before kindness becomes another unpaid shift.',share:'Tell me how you rest. I keep giving other people advice I forget to take.',boundary:'My closed door is part of the care, not a failure of it.',updates:['There is a bowl waiting after midnight. I would like to finish it while it is warm.','I want the queue to have a rota, so the next shift can end.','Linen can carry a donor’s name. A waiting patient should not carry their debt.','A recovery can remain private and still be worth celebrating.','The patient decides which part of the recovery becomes a story.','I have a last shift and a life after it. Neither belongs to the party.']},
- tovin:{role:'veteran and civilian watchkeeper',concern:'Work beyond the old company',ask:'What do you want the watch to protect now?',answer:'A bakery door that can shut at night. Wages people can claim without threatening a child. I have had enough standards to march behind.',share:'Tell me about work that left you tired in a good way. Mine has not always done that.',boundary:'A watch is a paid shift. It is not a private retinue.',updates:['The old token proves a wage claim. The paymaster’s child signed none of it.','The flour sack needs a guard who can leave when asked.','A room for mending straps would be more useful than another banner.','I want an inventory the claimants can inspect before anybody takes a share.','The drawing can stay by the chest. The contents still belong to the people named.','I can keep an ordinary door without becoming somebody’s standing army.']},
- vesper:{role:'bard and keeper of competing verses',concern:'A song without an owner',ask:'Which verse should the audience hear?',answer:'Let them hear that there are two. Leave the family unnamed if they ask. A good ending does not need to win somebody else’s life.',share:'Sing me the wrong version you grew up with. I promise to ask before borrowing it.',boundary:'You can pay for a performance. You cannot buy the singer’s next answer.',updates:['A mother is named in the verse. I need her permission before I need applause.','The rival can sing. I would rather answer with a verse than a locked tavern.','A teaching room needs room for the version its keeper dislikes.','The family’s account does not fit the victory refrain. That is the refrain’s problem.','I want the notebook to keep the unfinished part too.','Someone else can finish the tune. Keeping it was never the same as owning it.']},
-});
-const companionRole=p=>COMPANION_IDENTITIES[p.id]?.role||({warrior:'protector',mage:'scholar',rogue:'scout',healer:'healer',bard:'bard'}[p.role]||p.role||'companion');
-const CORE_IDENTITIES={
- kin:{concern:'Time beside your own life',ask:'What would you choose for an afternoon of your own?',answer:'A little room for my own work, and company that asks how it went. Raising you was part of my life. It was never all I was.',share:'Tell me the part of your day you would have told me when you were small.',boundary:'We can care for one another without choosing each other’s future.',updates:['I would like a conversation about something besides what either of us ought to do.']},
- fellow:{concern:'A practice that bears my name',ask:'Which part of the work feels like yours?',answer:'The part I can explain without repeating somebody else’s answer. I want to get good enough to sign it, then have an evening left over.',share:'Tell me what you are still learning. I am tired of pretending everybody else is finished.',bound
+ tovin:{role:'

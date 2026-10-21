@@ -11,5 +11,9 @@ export function renderInbox(s,ui,{selectedId,soundEnabled=true,page=0}={}){
 }
 export function renderNotificationToasts(rows,ui,{hidden=false}={}){
   const {e}=ui;
-  return `<aside class="notification-toast-stack" aria-label="New Notifications" aria-live="polite"${hidden?' inert aria-hidden="true"':''}>${rows.map(n=>`<article class="notification-toast"><button type="button" class="notification-toast-open" data-op="notification-toast-open" data-id="${e(n.id)}"><small>${names[n.kind]}</small><strong>${e(n.title)}</strong><span>${e(n.body.length>140?n.body.slice(0,137)+'…':n.body)}</span></button><button type="button" class="notification-dismiss" data-op="notice-dismiss" data-id="${e(n.id)}" aria-label="Dismiss ${e(n.title)}">×</button></article>`).join('')}</aside>`;
+  // One quiet corner card at a time. The rest are already waiting in the
+  // inbox; a short line says so instead of stacking cards over the page.
+  const shown=rows.slice(0,1),more=rows.length-shown.length;
+  const tail=more>0?`<p class="notification-toast-more"><button type="button" class="link-button" data-op="notifications">${more} more ${more===1?'notice':'notices'} in your inbox</button></p>`:'';
+  return `<aside class="notification-toast-stack" aria-label="New Notifications" aria-live="polite"${hidden?' inert aria-hidden="true"':''}>${shown.map(n=>`<article class="notification-toast"><button type="button" class="notification-toast-open" data-op="notification-toast-open" data-id="${e(n.id)}"><small>${names[n.kind]}</small><strong>${e(n.title)}</strong><span>${e(n.body.length>140?n.body.slice(0,137)+'…':n.body)}</span></button><button type="button" class="notification-dismiss" data-op="notice-dismiss" data-id="${e(n.id)}" aria-label="Dismiss ${e(n.title)}">×</button></article>`).join('')}${tail}</aside>`;
 }

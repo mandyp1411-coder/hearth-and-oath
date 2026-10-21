@@ -1,10 +1,13 @@
 {
   "name": "hearth-and-oath",
-  "version": "0.59.0",
+  "version": "0.60.0",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.js",
+    "test:fast": "node scripts/test-lanes.mjs fast",
+    "test:slow": "node scripts/test-lanes.mjs slow",
+    "bench": "node scripts/bench/engine-bench.mjs",
     "build": "node scripts/build-offline.mjs && node scripts/package-hosting-v57.mjs",
     "start": "python3 -m http.server 3000 --directory dist",
     "release:check": "node scripts/validate-release.mjs"

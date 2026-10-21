@@ -1,5 +1,12 @@
 # Hearth & Oath
 
+Version 0.60.0 is the first release of a new edition. It changes nothing about how the game plays yet; it makes the foundation safe and fast for what comes next.
+
+- **Saves no longer have a size ceiling.** Lives are stored in the browser's IndexedDB instead of localStorage, which capped a save at about 5 MB and was reached within one long life. Existing saves are moved over automatically the first time the new version opens.
+- **The engine is 6–10× faster.** Starting a life at 18 takes 8 seconds instead of 49; a year of Age up takes a quarter of a second instead of nearly three. Every generated outcome is identical to before.
+- **Fixes:** history entries no longer turn into "This marks an earlier event" placeholders; worlds no longer contain two places with the same name; "a alchemist" and lowercase weather sentences; one corner notice at a time instead of three stacked; phone navigation labels fit on one line.
+- **For developers:** `npm run test:fast` (minutes) and `npm run test:slow` (the long cohorts) replace one multi-hour run; `npm run bench` times the engine; tests that need the unshipped `reference-art/` folder skip themselves. See `CLAUDE.md` for the working rules and `docs/design-direction` in the project notes for where the game is going.
+
 Version 0.59.0 implements the two attached UI/game audits: connected life planning, story-record integrity, contextual relationships, recovery access, expedition lengths and presentation fixes. See [the implementation crosswalk and verification boundaries](docs/implementation-v0590.md).
 
 Version 0.47.0 avoids re-migrating unchanged durable save snapshots while retaining actual storage reads, incoming validation, cross-tab conflict checks, backups and exact unsaved export. It preserves every life and history. Controlled Node-only save-store measurements improved the targeted three-life/three-backup workload; they are not browser-speed promises. This bounded release covers roadmap item 15. See [the measurements and safety record](docs/save-performance-roadmap-15.md) and [integrated verification](docs/release-v0470.md).

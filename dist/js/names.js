@@ -8,6 +8,8 @@ export function defaultNamingIdentity(seed,id){return defaultNamingIdentityV31(s
 export function culturalName(seed='hearth',id='person',options={}){return culturalNameV31(seed,id,options);}
 export function namingLore(ancestry,heritage){return namingLoreV31(ancestry,heritage);}
 export function regionalNamingLore(id){return REGION_NAME_LORE_V20[id]||REGION_NAME_LORE_V20.rainward;}
-export function culturalPlaceName(seed,id,regionId){const p=regionalNamingLore(regionId),pick=(salt,values)=>values[roll(seed,`place:${id}:${salt}`,values.length)];return pick('format',p.placeFormats).replace('{root}',pick('root',p.placeRoots)).replace('{ending}',pick('ending',p.placeEndings));}
+export function culturalPlaceName(seed,id,regionId){const p=regionalNamingLore(regionId),pick=(salt,values)=>values[roll(seed,`place:${id}:${salt}`,values.length)];const format=pick('format',p.placeFormats),ending=pick('ending',p.placeEndings);
+// An ending that stands as its own word is a proper noun ("Frost Span"), not a suffix ("Frostspan").
+return format.replace('{root}',pick('root',p.placeRoots)).replace('{ending}',/ \{ending\}/.test(format)?ending.charAt(0).toUpperCase()+ending.slice(1):ending);}
 
 export function familyNameOf(person){if(person?.naming?.name===person?.name)return person.naming.family;const parts=String(person?.name||'').trim().split(/\s+/),of=parts.indexOf('of');return of>=0?parts.slice(of).join(' '):parts.length>1?parts.at(-1):'';}

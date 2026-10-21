@@ -1,4 +1,4 @@
-import {seededRoll} from './world.js';
+import {seededRoll, withArticle } from './world.js';
 
 const chapters=Object.freeze({
   infant:[
@@ -80,7 +80,7 @@ function circumstanceLine(state,p,relation){
   if(state.life?.stress>=65)return 'If the days feel crowded, let this page wait. There is no deadline for a reply.';
   if(state.age<18&&state.education?.enrolled)return 'I hope your lessons leave you curious, and that someone makes time for the questions outside them.';
   if(p.locationId&&state.locationId&&p.locationId!==state.locationId)return 'Distance makes me glad of a page that can travel between us. Write when it suits you; I can be patient.';
-  if(family&&p.occupation&&p.occupation!=='schoolchild')return `My work as a ${p.occupation} gives me plenty to think about, but I wanted to make room for your birthday too.`;
+  if(family&&p.occupation&&p.occupation!=='schoolchild')return `My work as ${withArticle(p.occupation)} gives me plenty to think about, but I wanted to make room for your birthday too.`;
   if(p.disposition==='bold')return 'If you have a new idea, I hope you give yourself a fair chance to try it.';
   if(p.disposition==='reserved'||p.disposition==='quiet')return 'I am better with a few honest words than a grand speech. These will have to do for today.';
   return '';
