@@ -215,7 +215,7 @@ test('parented, orphan, and homeless lives retain actual caregivers and free lea
     assert.ok(householdView(state).education.schoolName.includes(state.world.locations.find(place => place.id === 'home').name));
     state = grow(state, 18);
     assert.equal(state.hero.path, 'unformed');
-    for (const person of state.life.people.filter(contact => contact.role === 'relative')) {
+    for (const person of state.life.people.filter(contact => contact.role === 'relative' && contact.alive !== false)) { // the living world can take a relative (v0.65); the dead keep the age they died at
       assert.equal(person.age, person.baseAge + state.age);
       assert.equal(engine.getActions(state).some(item => item.id === `life_court_${person.id}`), false, 'every actual parent, sibling, and guardian is excluded from courtship');
       const refused = transition(state, value => engine.chooseAction(value, `life_court_${person.id}`));
