@@ -15,7 +15,7 @@ function pastChoice(s) {
   let preferred=id==='health_concern'?(s.health.pending?.kind==='physical'?'rest':'support'):
     id==='plague_letter'?'later':id==='life_budget'?'simplify':id==='deadline_review'?'pause':
     id==='lineage_bereavement'?['share','private','memorial'][seededRoll(s.seed,`past:grief:${s.day}`,3)]:
-    id==='career_staff'?'decline':id==='retirement'?'continue':id==='school_exam'?'present':id==='hard_winter'?'endure':null;
+    id==='career_staff'?'decline':id==='retirement'?'continue':id==='school_exam'?'present':id==='hard_winter'?'endure':id==='schooling_rival'?'contest':id==='schooling_temper'?'endure':null;
   const safe=offered.filter(c=>!(id==='family_visit'&&c.id==='gift'&&s.hero.gold<10));
   return safe.find(c=>c.id===preferred)||safe[seededRoll(s.seed,`past:choice:${id}:${s.age}:${s.day}`,safe.length)];
 }
@@ -93,10 +93,19 @@ async function generateLife(config, { onProgress, shouldCancel } = {}, draws = {
     if(s.age>=12&&s.age<18&&tryOnce('school_entrance'))continue;
     if(s.age>=12&&s.age<18&&s.education.route!=='academy'&&tryOnce('school_enroll_academy'))continue;
     if(s.age>=12&&s.age<18){const elective=getActions(s).find(a=>a.id.startsWith('school_elective_')&&!a.disabledReason);if(elective&&tryOnce(elective.id))continue;}
+    // A child with no school by twelve is put to a master's bench, if one will take the mark.
+    if(s.age>=12&&s.age<15&&!s.education.enrolled&&!s.education.route&&!s.education.qualifications.length&&tryOnce('school_enroll_apprenticeship'))continue;
     if(s.age>=6&&s.age<18&&tryTimes('school_attend',4))continue;
     if(s.age>=10&&s.age<18&&s.education.enrolled&&tryOnce('school_exam'))continue;
+    // The institutions of the capitals, for the few with a grammar certificate and a town that has one.
+    if(s.age>=16&&s.age<=22&&!s.education.schooling?.institution){const sits=getActions(s).filter(a=>/^school_sit_/.test(a.id)&&!a.disabledReason);if(sits.length&&tryOnce(sits[seededRoll(s.seed,'past:institution',sits.length)].id))continue;
+      const place=getActions(s).find(a=>/^school_place_/.test(a.id)&&!a.disabledReason);if(place&&tryOnce(place.id))continue;
+      const reads=getActions(s).filter(a=>/^school_read_/.test(a.id)&&!a.disabledReason);if(reads.length&&tryOnce(reads[seededRoll(s.seed,'past:major',reads.length)].id))continue;}
+    if(s.education.schooling?.institution&&!s.education.schooling.institution.degree){if(tryTimes('school_lecture',6))continue;if(tryOnce('school_degree'))continue;}
     if(s.age>=16&&s.hero.profession==='Unemployed'){
       // The trades that would have this life, wherever it is standing; the walk to the mentor is the action's own.
+      const served=s.education.schooling?.credentials?.find(c=>c.kind==='journeyman')?.major,craft=served&&PROFESSION_CATALOG.find(j=>j.id===served&&!civilianEntryReason(s,{profession:j.name}));
+      if(craft&&tryOnce(`career_choose_${craft.id}`))continue; // a journeyman takes up the trade the bond taught
       const jobs=PROFESSION_CATALOG.filter(j=>j.name!=='Unemployed'&&!civilianEntryReason(s,{profession:j.name})).map(j=>`career_choose_${j.id}`);
       if(jobs.length&&tryOnce(jobs[seededRoll(s.seed,'past:livelihood',jobs.length)]))continue;
     }

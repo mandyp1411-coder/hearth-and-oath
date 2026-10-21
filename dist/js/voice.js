@@ -1,5 +1,5 @@
 import { settlementServices } from './world-services.js';
-import { schooling, isLiterate, tuitionDue, electiveOffer } from './schooling.js';
+import { schooling, isLiterate, tuitionDue, electiveOffer, institutionYearDue } from './schooling.js';
 
 // Voice: the game speaks as a terse, grim chronicle with a dry edge, in the
 // register of its engraved art. This module rewrites what the player reads
@@ -63,6 +63,9 @@ const EXACT = {
   school_scholarship: ['Sit the scholarship examination', 'Three places, forty children, one sitting in a life.'],
   school_entrance: ['Sit the entrance examination', 'Letters, numbers and a little history, before the master.'],
   school_letters: ['Learn your letters', 'Four afternoons with the archivist and a slate. Most grown people never do.'],
+  school_lecture: ['Hear a lecture', 'Five days in the capital, understanding more than last time.'],
+  school_degree: ['Sit the final examination', 'Three examiners, a long table, three years of your life on it.'],
+  school_break_bond: ['Buy back your bond', 'Thirty gold on the bench and the paper torn. Cheaper than walking out.'],
   school_service: ['Keep the reading-room promise', 'Three days of shelving and quiet.'],
   family_support: ['Ask for what you need', 'A conversation with the person who raises you.'],
   family_shelter: ['Find a roof', 'Somewhere with walls, for now.'],
@@ -103,6 +106,9 @@ const PATTERNS = [
   [/^school_enroll_/, (s, a) => [a.label.replace(/^Enroll at /, 'Enrol at ').replace(/^Transfer to /, 'Move to '), 'If they will take you.']],
   [/^school_project_/, (s, a) => [a.label, 'Supervised work with the school’s tools, and a result that is kept.']],
   [/^school_elective_/, (s, a) => [a.label, a.description.split(' Four lessons')[0]]],
+  [/^school_sit_/, (s, a) => [a.label.replace(/^Sit the entrance examination of /, 'Sit the entrance of '), 'Once a year, before three examiners. The fee for the sitting is not returned.']],
+  [/^school_place_/, (s, a) => [a.label.replace(/^Sit for the one free place at /, 'Sit for the free place at '), 'One place a year for someone who cannot pay. Everyone who cannot pay sits for it.']],
+  [/^school_read_/, (s, a) => [a.label.replace(/^Be read into /, 'Be read into '), a.description.split('. ').slice(-1)[0]]],
   [/^lineage_continue_/, (s, a) => [a.label, 'The next volume.']],
 ];
 
@@ -236,6 +242,9 @@ export function whatMatters(s, actions) {
   if (k && s.age >= 6 && s.age < 18 && !s.education?.enrolled && k.shrinePlace === false && s.hero.gold < tuitionDue(s, 'community') && s.hero.station?.freedom !== 'owned') take(open('school_enroll_apprenticeship') || open('grow_read') || open('grow_survival') || open('grow_play'), 'The keeper has his pupil and the schoolmaster wants his fee. No school this year.');
   if (s.age >= 6 && s.age < 18 && !s.education?.enrolled && (s.hero.station?.id !== 'bound' || s.family?.literate) && s.hero.station?.freedom !== 'owned') take(open('school_enroll_shrine') || open('school_enroll_community') || open('school_enroll_apprenticeship') || roomFor('school'), 'No school yet. Some doors are still open.');
   if (k && s.age >= 18 && !isLiterate(s) && s.hero.gold >= 3) take(open('school_letters') || roomFor('school'), 'You cannot read. The archivist teaches grown people, for a little.');
+  if (k?.institution && !k.institution.degree) { const fee = institutionYearDue(s); take(open('school_degree') || open('school_lecture'), open('school_degree') ? 'The examiners sit this year. Three years of your life on the table.' : fee ? `The bursar wants ${fee} gold before the year’s first lecture.` : 'There are lectures you have not heard.'); }
+  if (k?.bond && !k.bond.broken && !k.bond.done) take(open('school_attend'), `${k.bond.master}’s bench, and ${Math.max(1, Math.ceil((k.bond.until - s.day) / 365))} more year${Math.ceil((k.bond.until - s.day) / 365) === 1 ? '' : 's'} of the bond.`);
+  if (k && s.age >= 16 && s.age <= 30 && !k.institution) take(open(/^school_read_/) || open(/^school_sit_/), open(/^school_read_/) ? 'An institution will have you, if the fee is found.' : 'The capitals examine at their doors. You hold the certificate they ask for.');
   if (s.age >= 6 && s.age < 18 && !s.education?.enrolled && (s.hero.station?.freedom === 'owned' || s.hero.station?.id === 'bound' && !s.family?.literate)) take(open('grow_survival') || open('grow_play') || open(/^upbringing_(practice|discovery)$/), 'No school for the likes of you. The woods and the field, then.');
   if ((life.stress || 0) >= 60 || (life.health ?? 80) < 50) take(open('life_rest') || open('health_routine'), (life.stress || 0) >= 60 ? 'Your hands shake. A week of nothing would help.' : 'You are worn thin.');
   if (s.family && s.family.support < 40 && s.age < 18) take(open('family_support') || open(/^family_time_/), 'The house is cold toward you. Say what you need.');

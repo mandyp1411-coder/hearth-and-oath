@@ -5091,3 +5091,10 @@ html[data-reading-motion="reduced"] *,html[data-reading-motion="reduced"] *::bef
 .action-detail { display: block; color: #8e867b; font: 11px/1.6 var(--mono); margin-top: 6px; }
 .right-now .section-heading .eyebrow { margin: 0; }
 .right-now .quick-actions { margin-top: 10px; }
+
+/* v0.64.1 · the school page's second slice: institution, bond, credentials, studies, the bench */
+.schooling-panel { display: grid; gap: 10px; margin: 12px 0; }
+.schooling-row { border-top: 1px solid var(--line, rgba(255,255,255,.08)); padding-top: 10px; }
+.schooling-row .eyebrow { margin-bottom: 4px; }
+.schooling-row p { margin: 4px 0; }
+.schooling-row .badge.muted { opacity: .6; }

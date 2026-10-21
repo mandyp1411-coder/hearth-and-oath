@@ -94,7 +94,7 @@ import { initializeTravel, setTravelPlan, travelPlanPreview, beginTravelJourney,
 import { initializeFortune, onFortuneTime, fortuneIncomeFactor, validateFortune, flushWinterEvent, applyWinterChoice, WINTER_EVENT } from './fortune.js';
 import { STATIONS, stationById, rollStation, rollBirthCircumstances, stationIncome, validateStation } from './station.js';
 import { epitaph, validateEpitaph } from './voice.js';
-import { initializeSchooling, onSchoolingBirthday, validateSchooling } from './schooling.js';
+import { initializeSchooling, onSchoolingBirthday, onSchoolingYear, validateSchooling, flushSchoolingEvent, applySchoolingChoice, SCHOOLING_EVENTS } from './schooling.js';
 import { initializeHouseholdBudget, accrueHouseholdBudget, settleHouseholdBudget, chargeDebtInterest, debtReckoning, applyDebtReckoningChoice, DEBT_RECKONING_EVENT, applyAnnualFocus, annualWorkRatio, householdCostPreview, householdBudgetActions, applyHouseholdBudgetAction, validateHouseholdBudget } from './budget.js';
 import { initializeSociety, societyActions, applySocietyAction, applySocietyChoice, societyEventIds, onSocietyTime, flushSocietyEvent, validateSociety, inheritSociety, societyCustomerChoiceReason } from './society.js';
 import { initializeCommunity, communityActions, applyCommunityAction, applyCommunityChoice, communityEventIds, onCommunityTime, flushCommunityEvent, validateCommunity, inheritCommunity } from './community.js';
@@ -902,7 +902,7 @@ function engineContext(state, { annual = false, resolvingNeed=null } = {}) {
     touchCampaign: () => { if (state.campaign && !waiting(state)) onCampaignAge(state, engineContext(state)); },
     onBirthday: () => {
       if (state.family && state.education) onHouseholdAge(state, engineContext(state));
-      onSchoolingBirthday(state, engineContext(state));
+      onSchoolingBirthday(state, engineContext(state)); onSchoolingYear(state, engineContext(state));
       chargeDebtInterest(state, engineContext(state));
       const bloodPlan=state.hero.condition?.feedingPlan;
   if(bloodPlan&&state.hero.condition.hunger>=65&&!waiting(state)&&!state.justice?.prison&&!state.sanctuaries?.commitment){const id='sanctuary_feed_'+bloodPlan.agreementId,offer=sanctuaryActions(state).find(a=>a.id===id);if(offer&&!offer.disabledReason&&((nextInterruptionDay(state,{ignoreNeed:'vampire'})??state.day+2)>state.day)){applySanctuaryAction(state,id,engineContext(state,{annual:true,resolvingNeed:'vampire'}));if(state.phase==='retired')return copy(state);}else if(!offer||offer.disabledReason){state.hero.condition.feedingPlan=null;addJournal(state,'A standing agreement interrupted',offer?.disabledReason||'The agreed donor is no longer available. No fee or feeding was taken.','condition');}}
@@ -985,6 +985,7 @@ function reconcile(state) {
     if(!waiting(state))flushTravelEvent(state,ctx);
     if (!waiting(state)) flushHealthEvent(state,ctx);
     if (!waiting(state)) flushWinterEvent(state,ctx);
+    if (!waiting(state)) flushSchoolingEvent(state,ctx);
     if (!waiting(state)) flushLineageEvent(state,ctx);
     if (!waiting(state)&&!state.justice?.prison) flushSanctuaryEvent(state,ctx);
     if (!waiting(state)) flushFellowshipEvent(state,ctx);
@@ -1472,7 +1473,7 @@ function performEventOption(original, id) {
   const moduleChoices = [ ['tournament_',applyTournamentChoice], ['repertoire_',applyRepertoireChoice], ['origin_',applyOriginChoice], ['yard_',applyYardChoice], ['rpg_',applyRpgChoice],
     ['country_',applyWildernessChoice],['way_',applyFieldChoice],
     ['curse_',applyCurseChoice],
-    ['nature_',applyPersonalityChoice],['hard_',applyWinterChoice],
+    ['nature_',applyPersonalityChoice],['hard_',applyWinterChoice],['schooling_',applySchoolingChoice],
     ['birth_', applyBirthChoice], ['calling_', applyCallingChoice], ['fate_', applyCampaignChoice],
     ['quest_', applyCampaignChoice], ['dungeon_', applyExplorationChoice],
     ['family_', applyHouseholdChoice], ['school_', applyHouseholdChoice], ['lore_', applyLoreChoice],
@@ -2381,7 +2382,7 @@ const EVENT_CHOICES = {
   annual_deadline_review: ['pause', 'continue'],
 };
 const FLAG_NUMBERS = ['childhoodStage', 'actionsTaken', 'education', 'clinicShifts', 'training', 'plagueStage', 'herbs', 'battlesStarted', 'activeMoonDay', 'hungerPauseDay'];
-const FLAG_BOOLEANS = ['familyOriginInterest','roadSafe', 'travelByNight', 'hungerWarning', 'scholarshipMissed', 'researchOverdue', 'oathServiceMissed', 'plagueDelay', 'companionRequestSeen', 'certified', 'oathBroken', 'scholarship', 'apprenticeship', 'childhoodMentor', 'childhoodFriend', 'trustedTeacher', 'ancestralMentor', 'hiddenPage', 'shrineRestored', 'researchBorrowed', 'researchReturned', 'forbiddenResearch', 'fieldResearch', 'knowsAncestralRite', 'archiveRecovered', 'soulBound', 'lethalCommission', 'miraWithdrawn', 'familyHelped', 'familySupported', 'familyRefuge', 'conditionDisclosed', 'conditionDiscovered', 'vampireAccepted', 'vampireDeclined', 'vampireCured', 'licensedReport', 'publicNecromancy', 'miraKnowsResearch', 'miraKnowsCondition', 'villageSaved', 'springClue', 'lycanAccepted', 'lycanDeclined', 'lycanCured', 'lycanDiscovered'];
+const FLAG_BOOLEANS = ['familyOriginInterest','roadSafe', 'travelByNight', 'hungerWarning', 'scholarshipMissed', 'researchOverdue', 'oathServiceMissed', 'plagueDelay', 'companionRequestSeen', 'certified', 'oathBroken', 'scholarship', 'apprenticeship', 'childhoodMentor', 'childhoodFriend', 'trustedTeacher', 'ancestralMentor', 'hiddenPage', 'shrineRestored', 'researchBorrowed', 'researchReturned', 'forbiddenResearch', 'fieldResearch', 'knowsAncestralRite', 'archiveRecovered', 'soulBound', 'lethalCommission', 'miraWithdrawn', 'familyHelped', 'familySupported', 'familyRefuge', 'conditionDisclosed', 'conditionDiscovered', 'vampireAccepted', 'vampireDeclined', 'vampireCured', 'licensedReport', 'publicNecromancy', 'miraKnowsResearch', 'miraKnowsCondition', 'villageSaved', 'springClue', 'lycanAccepted', 'lycanDeclined', 'lycanCured', 'lycanDiscovered', 'mageLicence', 'ordained'];
 const integer = (value, min = 0, max = 1000000) => Number.isInteger(value) && value >= min && value <= max;
 const plain = value => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 const textField = (value, maximum = 20000) => typeof value === 'string' && value.length <= maximum;
@@ -2550,7 +2551,7 @@ export function validateSave(value) {
     if (!Array.isArray(value.journal) || !value.journal.length || !value.journal.every(item => plain(item) && textField(item.id, 120) && integer(item.day) && integer(item.age, birthMode(value) ? 0 : 7, 5000) && textField(item.title, 1000) && textField(item.text, 10000) && textField(item.tag, 80) && (item.capturedReceipt===undefined||typeof item.capturedReceipt==='boolean') && (item.generation===undefined||integer(item.generation,1,5000)))) return false;
     if (value.event !== null) {
       const event = value.event;
-      const allowed = { ...EVENT_CHOICES, ...yardEventIds(), ...tournamentEventIds(), ...lifeEventIds(), ...birthEventIds(), ...callingEventIds(), ...campaignEventIds(), ...explorationEventIds(), ...dialogueEventIds(), ...householdEventIds(), ...researchEventIds(), ...originEventIds(), ...loreEventIds(), ...careerEventIds(), ...lineageEventIds(), ...healthEventIds(), ...travelEventIds(),...societyEventIds(),...communityEventIds(),...fellowshipEventIds(),...sanctuaryEventIds(),...socialEventIds(),...pastimeEventIds(),...repertoireEventIds(),...storyEventIds(),...rpgEventIds(),...personalityEventIds(),...justiceEventIds(),...adventureEventIds(),...curseEventIds(),...WINTER_EVENT.ids(), ...DEBT_RECKONING_EVENT.ids() };
+      const allowed = { ...EVENT_CHOICES, ...yardEventIds(), ...tournamentEventIds(), ...lifeEventIds(), ...birthEventIds(), ...callingEventIds(), ...campaignEventIds(), ...explorationEventIds(), ...dialogueEventIds(), ...householdEventIds(), ...researchEventIds(), ...originEventIds(), ...loreEventIds(), ...careerEventIds(), ...lineageEventIds(), ...healthEventIds(), ...travelEventIds(),...societyEventIds(),...communityEventIds(),...fellowshipEventIds(),...sanctuaryEventIds(),...socialEventIds(),...pastimeEventIds(),...repertoireEventIds(),...storyEventIds(),...rpgEventIds(),...personalityEventIds(),...justiceEventIds(),...adventureEventIds(),...curseEventIds(),...WINTER_EVENT.ids(), ...DEBT_RECKONING_EVENT.ids(), ...SCHOOLING_EVENTS.ids() };
       for(const need of ['life_hunger','vampire_feeding'])if(value.sanctuaries&&allowed[need])allowed[need]=[...allowed[need],'agreement'];
       if (!plain(event) || !(Object.hasOwn(allowed, event.id) || event.id === 'lycan_confidant') || ![event.title, event.category, event.body].every(item => textField(item))) return false;
       if (!Array.isArray(event.choices) || !event.choices.length || event.choices.length > 8 || new Set(event.choices.map(item => item?.id)).size !== event.choices.length) return false;
