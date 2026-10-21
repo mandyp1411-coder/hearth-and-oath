@@ -5098,3 +5098,9 @@ html[data-reading-motion="reduced"] *,html[data-reading-motion="reduced"] *::bef
 .schooling-row .eyebrow { margin-bottom: 4px; }
 .schooling-row p { margin: 4px 0; }
 .schooling-row .badge.muted { opacity: .6; }
+
+/* v0.65 · the world as it reaches this life */
+.world-panel .world-event { margin: 6px 0; }
+.world-panel .world-event small { opacity: .7; }
+.world-panel .world-threads { border-top: 1px solid var(--line, rgba(255,255,255,.08)); margin-top: 8px; padding-top: 6px; }
+.world-panel .world-news summary { cursor: pointer; opacity: .8; }

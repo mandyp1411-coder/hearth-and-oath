@@ -15,7 +15,7 @@ function pastChoice(s) {
   let preferred=id==='health_concern'?(s.health.pending?.kind==='physical'?'rest':'support'):
     id==='plague_letter'?'later':id==='life_budget'?'simplify':id==='deadline_review'?'pause':
     id==='lineage_bereavement'?['share','private','memorial'][seededRoll(s.seed,`past:grief:${s.day}`,3)]:
-    id==='career_staff'?'decline':id==='retirement'?'continue':id==='school_exam'?'present':id==='hard_winter'?'endure':id==='schooling_rival'?'contest':id==='schooling_temper'?'endure':null;
+    id==='career_staff'?'decline':id==='retirement'?'continue':id==='school_exam'?'present':id==='hard_winter'?'endure':id==='schooling_rival'?'contest':id==='schooling_temper'?'endure':id==='living_conscription'?(offered.some(c=>c.id==='pay')?'pay':'let'):id==='living_strike'?'strike':id==='living_wolves'?(offered.some(c=>c.id==='pay')?'pay':'stay'):id==='living_purge'?'shelter':null;
   const safe=offered.filter(c=>!(id==='family_visit'&&c.id==='gift'&&s.hero.gold<10));
   return safe.find(c=>c.id===preferred)||safe[seededRoll(s.seed,`past:choice:${id}:${s.age}:${s.day}`,safe.length)];
 }

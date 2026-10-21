@@ -95,6 +95,7 @@ import { initializeFortune, onFortuneTime, fortuneIncomeFactor, validateFortune,
 import { STATIONS, stationById, rollStation, rollBirthCircumstances, stationIncome, validateStation } from './station.js';
 import { epitaph, validateEpitaph } from './voice.js';
 import { initializeSchooling, onSchoolingBirthday, onSchoolingYear, validateSchooling, flushSchoolingEvent, applySchoolingChoice, SCHOOLING_EVENTS } from './schooling.js';
+import { initializeLivingWorld, onLivingTime, flushLivingEvent, applyLivingChoice, validateLiving, LIVING_EVENTS } from './living-world.js';
 import { initializeHouseholdBudget, accrueHouseholdBudget, settleHouseholdBudget, chargeDebtInterest, debtReckoning, applyDebtReckoningChoice, DEBT_RECKONING_EVENT, applyAnnualFocus, annualWorkRatio, householdCostPreview, householdBudgetActions, applyHouseholdBudgetAction, validateHouseholdBudget } from './budget.js';
 import { initializeSociety, societyActions, applySocietyAction, applySocietyChoice, societyEventIds, onSocietyTime, flushSocietyEvent, validateSociety, inheritSociety, societyCustomerChoiceReason } from './society.js';
 import { initializeCommunity, communityActions, applyCommunityAction, applyCommunityChoice, communityEventIds, onCommunityTime, flushCommunityEvent, validateCommunity, inheritCommunity } from './community.js';
@@ -321,7 +322,7 @@ function spendDays(state, days, { outdoors = false, night, expeditionDayKind = '
       onSocialTime(state,{oldDay,newDay:state.day},ctx);
       onPastimeTime(state,{oldDay,newDay:state.day},ctx);
       const worldClockContext=childClock?{...ctx,onSettlementAvailability:event=>recordAdultChildSiteChange(childClock,event)}:ctx;
-      onRegionalTime(state,oldDay,state.day,worldClockContext);onRealmTime(state,oldDay,state.day,worldClockContext);initializeRegionalWorld(state);onRpgTime(state,{oldDay,newDay:state.day},ctx);onJusticeTime(state,days,ctx);onAdventuringTime(state);
+      onRegionalTime(state,oldDay,state.day,worldClockContext);onRealmTime(state,oldDay,state.day,worldClockContext);onLivingTime(state,{oldDay,newDay:state.day},ctx);initializeRegionalWorld(state);onRpgTime(state,{oldDay,newDay:state.day},ctx);onJusticeTime(state,days,ctx);onAdventuringTime(state);
       settleAdultChildClock(state,childClock);
       recordLifeAtmosphere(state,oldDay,state.day,(title,text,tag,options)=>addJournal(state,title,text,tag,options));
     }
@@ -684,7 +685,7 @@ export function createBirthGame(config = {}) {
   initializeHouseholdBudget(state,{edition:true});initializeFortune(state,{attempt:Number.isInteger(config.attempt)&&config.attempt>0&&config.attempt<=12?config.attempt:0});
   initializeFamilyDepth(state);initializeSociety(state);initializeCommunity(state);initializeFellowship(state);initializeSanctuaries(state);
   initializeSocial(state);initializePastimes(state);initializeLifeStories(state);
-  initializeRealm(state,{fresh:true});initializeJustice(state);initializeAdventuring(state);initializeCartography(state);initializeRegionalWorld(state);initializeRpg(state,{fresh:true},engineContext(state));
+  initializeRealm(state,{fresh:true});initializeLivingWorld(state);initializeJustice(state);initializeAdventuring(state);initializeCartography(state);initializeRegionalWorld(state);initializeRpg(state,{fresh:true},engineContext(state));
   initializeQuestJournal(state);initializeUpbringing(state);settlePublicRoster(state,{migration:true});
   addJournal(state, 'A life begins at birth', `${state.hero.name} was born in ${location(state).name}${station ? ` to ${station.rank}` : ''}. The morning brought ${worldCalendarContext(state.world,state.day,state.seed).weather}.`, 'origin',{literal:true,meta:{narrativeEdition:30,capturedReceipt:true}});
   birthEvent(state, engineContext(state), true);
@@ -986,6 +987,7 @@ function reconcile(state) {
     if (!waiting(state)) flushHealthEvent(state,ctx);
     if (!waiting(state)) flushWinterEvent(state,ctx);
     if (!waiting(state)) flushSchoolingEvent(state,ctx);
+    if (!waiting(state)) flushLivingEvent(state,ctx);
     if (!waiting(state)) flushLineageEvent(state,ctx);
     if (!waiting(state)&&!state.justice?.prison) flushSanctuaryEvent(state,ctx);
     if (!waiting(state)) flushFellowshipEvent(state,ctx);
@@ -1473,7 +1475,7 @@ function performEventOption(original, id) {
   const moduleChoices = [ ['tournament_',applyTournamentChoice], ['repertoire_',applyRepertoireChoice], ['origin_',applyOriginChoice], ['yard_',applyYardChoice], ['rpg_',applyRpgChoice],
     ['country_',applyWildernessChoice],['way_',applyFieldChoice],
     ['curse_',applyCurseChoice],
-    ['nature_',applyPersonalityChoice],['hard_',applyWinterChoice],['schooling_',applySchoolingChoice],
+    ['nature_',applyPersonalityChoice],['hard_',applyWinterChoice],['schooling_',applySchoolingChoice],['living_',applyLivingChoice],
     ['birth_', applyBirthChoice], ['calling_', applyCallingChoice], ['fate_', applyCampaignChoice],
     ['quest_', applyCampaignChoice], ['dungeon_', applyExplorationChoice],
     ['family_', applyHouseholdChoice], ['school_', applyHouseholdChoice], ['lore_', applyLoreChoice],
@@ -2551,7 +2553,7 @@ export function validateSave(value) {
     if (!Array.isArray(value.journal) || !value.journal.length || !value.journal.every(item => plain(item) && textField(item.id, 120) && integer(item.day) && integer(item.age, birthMode(value) ? 0 : 7, 5000) && textField(item.title, 1000) && textField(item.text, 10000) && textField(item.tag, 80) && (item.capturedReceipt===undefined||typeof item.capturedReceipt==='boolean') && (item.generation===undefined||integer(item.generation,1,5000)))) return false;
     if (value.event !== null) {
       const event = value.event;
-      const allowed = { ...EVENT_CHOICES, ...yardEventIds(), ...tournamentEventIds(), ...lifeEventIds(), ...birthEventIds(), ...callingEventIds(), ...campaignEventIds(), ...explorationEventIds(), ...dialogueEventIds(), ...householdEventIds(), ...researchEventIds(), ...originEventIds(), ...loreEventIds(), ...careerEventIds(), ...lineageEventIds(), ...healthEventIds(), ...travelEventIds(),...societyEventIds(),...communityEventIds(),...fellowshipEventIds(),...sanctuaryEventIds(),...socialEventIds(),...pastimeEventIds(),...repertoireEventIds(),...storyEventIds(),...rpgEventIds(),...personalityEventIds(),...justiceEventIds(),...adventureEventIds(),...curseEventIds(),...WINTER_EVENT.ids(), ...DEBT_RECKONING_EVENT.ids(), ...SCHOOLING_EVENTS.ids() };
+      const allowed = { ...EVENT_CHOICES, ...yardEventIds(), ...tournamentEventIds(), ...lifeEventIds(), ...birthEventIds(), ...callingEventIds(), ...campaignEventIds(), ...explorationEventIds(), ...dialogueEventIds(), ...householdEventIds(), ...researchEventIds(), ...originEventIds(), ...loreEventIds(), ...careerEventIds(), ...lineageEventIds(), ...healthEventIds(), ...travelEventIds(),...societyEventIds(),...communityEventIds(),...fellowshipEventIds(),...sanctuaryEventIds(),...socialEventIds(),...pastimeEventIds(),...repertoireEventIds(),...storyEventIds(),...rpgEventIds(),...personalityEventIds(),...justiceEventIds(),...adventureEventIds(),...curseEventIds(),...WINTER_EVENT.ids(), ...DEBT_RECKONING_EVENT.ids(), ...SCHOOLING_EVENTS.ids(), ...LIVING_EVENTS.ids() };
       for(const need of ['life_hunger','vampire_feeding'])if(value.sanctuaries&&allowed[need])allowed[need]=[...allowed[need],'agreement'];
       if (!plain(event) || !(Object.hasOwn(allowed, event.id) || event.id === 'lycan_confidant') || ![event.title, event.category, event.body].every(item => textField(item))) return false;
       if (!Array.isArray(event.choices) || !event.choices.length || event.choices.length > 8 || new Set(event.choices.map(item => item?.id)).size !== event.choices.length) return false;
@@ -2594,6 +2596,7 @@ export function validateSave(value) {
       if(!validateStation(value.hero.station,value))return false;
       if(!validateEpitaph(value.epitaph)||(value.epitaph!==undefined&&value.phase!=='retired'))return false;
       if(value.education&&!validateSchooling(value.education.schooling,value))return false;
+      if(!validateLiving(value.living,value))return false;
       if(value.society!==undefined&&!validateSociety(value.society,value))return false;
       if(value.community!==undefined&&!validateCommunity(value.community,value))return false;
       if(value.fellowship!==undefined&&!validateFellowship(value.fellowship,value))return false;
