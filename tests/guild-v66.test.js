@@ -270,3 +270,24 @@ test('the page: the hall sits under Work & School with its actions, its people a
   await surface.click('tab', 'life');
   assert.match(surface.root.innerHTML, /seasons of dues owed to the hall/);
 });
+
+test('an heir of a new-edition life takes up the same living world and the old book, through the public engine', async () => {
+  const { syncCartography } = await import('../dist/js/cartography.js');
+  const { settlementWalkPath } = await import('../dist/js/exploration-ui.js');
+  const pickHeir = s => (s.event.choices.find(c => ['rest', 'endure', 'present', 'continue', 'contest', 'plead', 'refuse', 'adopt', 'settle'].includes(c.id) && !c.disabledReason) || s.event.choices.find(c => !c.disabledReason)).id;
+  const settleHeir = s => { for (let n = 0; n < 40 && (s.event || s.timeline?.yearTarget !== null) && s.phase !== 'retired'; n++) s = s.event ? engine.chooseEventOption(s, pickHeir(s)) : engine.continueAgeUp(s); return s; };
+  const growHeir = (s, to) => { for (let n = 0; n < 400 && s.age < to && s.phase !== 'retired'; n++) s = s.event ? engine.chooseEventOption(s, pickHeir(s)) : engine.ageUp(s); return settleHeir(s); };
+  const pub = (s, id) => { if (id.startsWith('life_home_')) { s = structuredClone(s); syncCartography(s); for (const room of settlementWalkPath(s, 'homes')) s = engine.chooseAction(s, 'atlas_room_' + room); } const a = engine.getActions(s).find(a => a.id === id); return a && !a.disabledReason ? settleHeir(engine.chooseAction(s, id)) : null; };
+  let s = member(); if (!s) return;
+  s = growHeir(s, 24); if (s.phase === 'retired' || !s.guild.member) return; s.hero.gold = 900; s.life.health = 90;
+  s = pub(s, 'life_home_cottage'); if (!s) return; s = pub(s, 'life_family'); if (!s || !s.life.children.length) return;
+  s.guild.member.rank = 'master'; s.guild.member.masterSince = s.day;
+  s = growHeir(s, 30); if (s.phase === 'retired' || !s.guild.member) return;
+  s = pub(s, 'retire'); if (!s || s.phase !== 'retired') return;
+  const next = engine.continueAsChild(s, s.life.children[0].id);
+  assert.equal(next.dynasty.generation, 2); assert.equal(engine.validateSave(next), true);
+  assert.equal(next.living.lastSeason, seasonOf(next.day), 'the living world is inherited, not born again');
+  assert.deepEqual(next.living.actors.map(a => a.id), s.living.actors.map(a => a.id)); assert.equal(next.living.threads.length, 0); assert.ok(next.living.news.length);
+  assert.equal(next.guild.heir.craft, 'miner'); assert.equal(next.guild.heir.from, s.hero.name); assert.equal(next.guild.family, 'miner'); assert.equal(next.guild.lastSeason, seasonOf(next.day));
+  const year = engine.ageUp(next); assert.equal(engine.validateSave(year), true); assert.ok(year.living.counters.events - next.living.counters.events <= 12, 'one year of the world, not two hundred seasons of it');
+});
