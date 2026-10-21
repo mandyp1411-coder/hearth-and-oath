@@ -96,6 +96,7 @@ import { STATIONS, stationById, rollStation, rollBirthCircumstances, stationInco
 import { epitaph, validateEpitaph } from './voice.js';
 import { initializeSchooling, onSchoolingBirthday, onSchoolingYear, validateSchooling, flushSchoolingEvent, applySchoolingChoice, SCHOOLING_EVENTS } from './schooling.js';
 import { initializeLivingWorld, onLivingTime, flushLivingEvent, applyLivingChoice, validateLiving, LIVING_EVENTS } from './living-world.js';
+import { initializeGuild, onGuildTime, guildActions, applyGuildAction, applyGuildGates, flushGuildEvent, applyGuildChoice, validateGuild, GUILD_EVENTS } from './guild.js';
 import { initializeHouseholdBudget, accrueHouseholdBudget, settleHouseholdBudget, chargeDebtInterest, debtReckoning, applyDebtReckoningChoice, DEBT_RECKONING_EVENT, applyAnnualFocus, annualWorkRatio, householdCostPreview, householdBudgetActions, applyHouseholdBudgetAction, validateHouseholdBudget } from './budget.js';
 import { initializeSociety, societyActions, applySocietyAction, applySocietyChoice, societyEventIds, onSocietyTime, flushSocietyEvent, validateSociety, inheritSociety, societyCustomerChoiceReason } from './society.js';
 import { initializeCommunity, communityActions, applyCommunityAction, applyCommunityChoice, communityEventIds, onCommunityTime, flushCommunityEvent, validateCommunity, inheritCommunity } from './community.js';
@@ -322,7 +323,7 @@ function spendDays(state, days, { outdoors = false, night, expeditionDayKind = '
       onSocialTime(state,{oldDay,newDay:state.day},ctx);
       onPastimeTime(state,{oldDay,newDay:state.day},ctx);
       const worldClockContext=childClock?{...ctx,onSettlementAvailability:event=>recordAdultChildSiteChange(childClock,event)}:ctx;
-      onRegionalTime(state,oldDay,state.day,worldClockContext);onRealmTime(state,oldDay,state.day,worldClockContext);onLivingTime(state,{oldDay,newDay:state.day},ctx);initializeRegionalWorld(state);onRpgTime(state,{oldDay,newDay:state.day},ctx);onJusticeTime(state,days,ctx);onAdventuringTime(state);
+      onRegionalTime(state,oldDay,state.day,worldClockContext);onRealmTime(state,oldDay,state.day,worldClockContext);onLivingTime(state,{oldDay,newDay:state.day},ctx);onGuildTime(state,{oldDay,newDay:state.day},ctx);initializeRegionalWorld(state);onRpgTime(state,{oldDay,newDay:state.day},ctx);onJusticeTime(state,days,ctx);onAdventuringTime(state);
       settleAdultChildClock(state,childClock);
       recordLifeAtmosphere(state,oldDay,state.day,(title,text,tag,options)=>addJournal(state,title,text,tag,options));
     }
@@ -510,8 +511,8 @@ function unfilteredActions(state) {
     if (state.campaign && state.phase === 'adult' && !state.life?.plan) actions.push(...campaignActions(state));
     if (state.age >= 16 && state.phase === 'adult' && state.dungeon === null) actions.push(...explorationActions(state));
     if (state.revision >= 4) actions.push(...researchActions(state),...householdActions(state), ...originActions(state), ...workshopActions(state), ...loreActions(state));
-    if (state.revision >= 5) actions.push(...careerActions(state), ...lineageActions(state), ...healthActions(state), ...householdBudgetActions(state),...experienceActions(state),...yardActions(state));
-    return [...actions,...questJournalActions(state,campaignView(state).quests),...upbringingActions(state)];
+    if (state.revision >= 5) actions.push(...careerActions(state), ...lineageActions(state), ...healthActions(state), ...householdBudgetActions(state),...experienceActions(state),...yardActions(state),...guildActions(state));
+    return applyGuildGates(state,[...actions,...questJournalActions(state,campaignView(state).quests),...upbringingActions(state)]);
   }
   const actions = [...fieldActions(state),...curseActions(state),...cartographyActions(state),...getAgeActivities(state),...personalityActions(state), ...dialogueActions(state),...realmActions(state),...regionalActions(state),...adventureActions(state),...justiceActions(state)];
   if (state.age >= 16) {
@@ -528,7 +529,8 @@ function unfilteredActions(state) {
   }
   actions.push(...campaignActions(state));
   if (state.revision >= 4) actions.push(...researchActions(state),...householdActions(state), ...originActions(state), ...workshopActions(state), ...loreActions(state));
-  if (state.revision >= 5) actions.push(...careerActions(state), ...lineageActions(state), ...healthActions(state), ...householdBudgetActions(state),...experienceActions(state),...yardActions(state));
+  if (state.revision >= 5) actions.push(...careerActions(state), ...lineageActions(state), ...healthActions(state), ...householdBudgetActions(state),...experienceActions(state),...yardActions(state),...guildActions(state));
+  applyGuildGates(state,actions);
   for (const row of actions) if (!/^(tournament_|research_|polity_|atlas_|stories_|recovery_|workshop_|society_|community_|fellowship_|sanctuary_|lineage_adoption_|social_|pastime_)/.test(row.id) && row.days > 0 && state.day + row.days >= nextBirthday(state)) row.disabledReason = 'Your next birthday is due. Choose Age up before starting this activity.';
   return [...actions,...questJournalActions(state,campaignView(state).quests),...upbringingActions(state)];
 }
@@ -559,7 +561,7 @@ export function getActions(state){
  const visible=owner?unfilteredActions(state):rows;
  if(state?.worldServicesVersion!==1)return visible;
  const services=settlementServices(state);
- return visible.map(a=>{if(state.trail&&['health_rest','life_rest'].includes(a.id))a={...a,description:a.description+' Rest also restores '+(a.id==='life_rest'?'all':'up to three quarters of your')+' Focus.'};let reason=serviceAccessReason(state,a.id,services);if(/^(talk_|confide_)/.test(a.id)){const id=a.id.replace(/^(talk_quest_|talk_|confide_)/,''),p=contacts.find(p=>p.id===id);if(p?.roomId&&p.roomId!==(state.cartography?.interior?.roomId||'gate'))reason='Meet this person in their part of the settlement.';}const match=/^life_(visit|gift|court|commit|separate|endcourt|values)_(.+)$/.exec(a.id);if(match){const p=contacts.find(p=>p.id===match[2]);if(!p||p.available===false||p.locationId!==state.locationId||p.roomId&&p.roomId!==(state.cartography?.interior?.roomId||'gate'))reason='Meet this person where they actually are.';else if(state.socialLife&&['court','commit'].includes(match[1]))reason=romanceReason(state,p)||reason;}return reason?{...a,disabledReason:reason}:a;});
+ return applyGuildGates(state,visible.map(a=>{if(state.trail&&['health_rest','life_rest'].includes(a.id))a={...a,description:a.description+' Rest also restores '+(a.id==='life_rest'?'all':'up to three quarters of your')+' Focus.'};let reason=serviceAccessReason(state,a.id,services);if(/^(talk_|confide_)/.test(a.id)){const id=a.id.replace(/^(talk_quest_|talk_|confide_)/,''),p=contacts.find(p=>p.id===id);if(p?.roomId&&p.roomId!==(state.cartography?.interior?.roomId||'gate'))reason='Meet this person in their part of the settlement.';}const match=/^life_(visit|gift|court|commit|separate|endcourt|values)_(.+)$/.exec(a.id);if(match){const p=contacts.find(p=>p.id===match[2]);if(!p||p.available===false||p.locationId!==state.locationId||p.roomId&&p.roomId!==(state.cartography?.interior?.roomId||'gate'))reason='Meet this person where they actually are.';else if(state.socialLife&&['court','commit'].includes(match[1]))reason=romanceReason(state,p)||reason;}return reason?{...a,disabledReason:reason}:a;}));
 }
 export function visitService(original,id){if(terminalRun(original))return copy(original);
  if(observationalInfancy(original))return {...copy(original),notice:infantAgencyReason(original)};
@@ -685,7 +687,7 @@ export function createBirthGame(config = {}) {
   initializeHouseholdBudget(state,{edition:true});initializeFortune(state,{attempt:Number.isInteger(config.attempt)&&config.attempt>0&&config.attempt<=12?config.attempt:0});
   initializeFamilyDepth(state);initializeSociety(state);initializeCommunity(state);initializeFellowship(state);initializeSanctuaries(state);
   initializeSocial(state);initializePastimes(state);initializeLifeStories(state);
-  initializeRealm(state,{fresh:true});initializeLivingWorld(state);initializeJustice(state);initializeAdventuring(state);initializeCartography(state);initializeRegionalWorld(state);initializeRpg(state,{fresh:true},engineContext(state));
+  initializeRealm(state,{fresh:true});initializeLivingWorld(state);initializeGuild(state);initializeJustice(state);initializeAdventuring(state);initializeCartography(state);initializeRegionalWorld(state);initializeRpg(state,{fresh:true},engineContext(state));
   initializeQuestJournal(state);initializeUpbringing(state);settlePublicRoster(state,{migration:true});
   addJournal(state, 'A life begins at birth', `${state.hero.name} was born in ${location(state).name}${station ? ` to ${station.rank}` : ''}. The morning brought ${worldCalendarContext(state.world,state.day,state.seed).weather}.`, 'origin',{literal:true,meta:{narrativeEdition:30,capturedReceipt:true}});
   birthEvent(state, engineContext(state), true);
@@ -988,6 +990,7 @@ function reconcile(state) {
     if (!waiting(state)) flushWinterEvent(state,ctx);
     if (!waiting(state)) flushSchoolingEvent(state,ctx);
     if (!waiting(state)) flushLivingEvent(state,ctx);
+    if (!waiting(state)) flushGuildEvent(state,ctx);
     if (!waiting(state)) flushLineageEvent(state,ctx);
     if (!waiting(state)&&!state.justice?.prison) flushSanctuaryEvent(state,ctx);
     if (!waiting(state)) flushFellowshipEvent(state,ctx);
@@ -1103,7 +1106,7 @@ function performAction(original, id) {
     ['calling_', applyCallingAction], ['talk_', applyDialogueAction],['confide_',applyDialogueAction],
     ['family_', applyHouseholdAction], ['school_', applyHouseholdAction], ['lore_', applyLoreAction],
     ['career_', applyCareerAction], ['lineage_', applyLineageAction], ['health_', applyHealthAction], ['travel_', applyTravelAction],
-    ['budget_', applyHouseholdBudgetAction],
+    ['budget_', applyHouseholdBudgetAction], ['guild_', applyGuildAction],
   ];
   for (const [prefix, handler] of handlers) if (id.startsWith(prefix)) {
     if (handler(state, id, engineContext(state,{annual:id.startsWith('travel_')}))) { if(terminalRun(state))return copy(state);enjoyCompleted(); recordPlanGold(state, goldAfterFee); return afterAction(state); }
@@ -1475,7 +1478,7 @@ function performEventOption(original, id) {
   const moduleChoices = [ ['tournament_',applyTournamentChoice], ['repertoire_',applyRepertoireChoice], ['origin_',applyOriginChoice], ['yard_',applyYardChoice], ['rpg_',applyRpgChoice],
     ['country_',applyWildernessChoice],['way_',applyFieldChoice],
     ['curse_',applyCurseChoice],
-    ['nature_',applyPersonalityChoice],['hard_',applyWinterChoice],['schooling_',applySchoolingChoice],['living_',applyLivingChoice],
+    ['nature_',applyPersonalityChoice],['hard_',applyWinterChoice],['schooling_',applySchoolingChoice],['living_',applyLivingChoice],['guild_',applyGuildChoice],
     ['birth_', applyBirthChoice], ['calling_', applyCallingChoice], ['fate_', applyCampaignChoice],
     ['quest_', applyCampaignChoice], ['dungeon_', applyExplorationChoice],
     ['family_', applyHouseholdChoice], ['school_', applyHouseholdChoice], ['lore_', applyLoreChoice],
@@ -2553,7 +2556,7 @@ export function validateSave(value) {
     if (!Array.isArray(value.journal) || !value.journal.length || !value.journal.every(item => plain(item) && textField(item.id, 120) && integer(item.day) && integer(item.age, birthMode(value) ? 0 : 7, 5000) && textField(item.title, 1000) && textField(item.text, 10000) && textField(item.tag, 80) && (item.capturedReceipt===undefined||typeof item.capturedReceipt==='boolean') && (item.generation===undefined||integer(item.generation,1,5000)))) return false;
     if (value.event !== null) {
       const event = value.event;
-      const allowed = { ...EVENT_CHOICES, ...yardEventIds(), ...tournamentEventIds(), ...lifeEventIds(), ...birthEventIds(), ...callingEventIds(), ...campaignEventIds(), ...explorationEventIds(), ...dialogueEventIds(), ...householdEventIds(), ...researchEventIds(), ...originEventIds(), ...loreEventIds(), ...careerEventIds(), ...lineageEventIds(), ...healthEventIds(), ...travelEventIds(),...societyEventIds(),...communityEventIds(),...fellowshipEventIds(),...sanctuaryEventIds(),...socialEventIds(),...pastimeEventIds(),...repertoireEventIds(),...storyEventIds(),...rpgEventIds(),...personalityEventIds(),...justiceEventIds(),...adventureEventIds(),...curseEventIds(),...WINTER_EVENT.ids(), ...DEBT_RECKONING_EVENT.ids(), ...SCHOOLING_EVENTS.ids(), ...LIVING_EVENTS.ids() };
+      const allowed = { ...EVENT_CHOICES, ...yardEventIds(), ...tournamentEventIds(), ...lifeEventIds(), ...birthEventIds(), ...callingEventIds(), ...campaignEventIds(), ...explorationEventIds(), ...dialogueEventIds(), ...householdEventIds(), ...researchEventIds(), ...originEventIds(), ...loreEventIds(), ...careerEventIds(), ...lineageEventIds(), ...healthEventIds(), ...travelEventIds(),...societyEventIds(),...communityEventIds(),...fellowshipEventIds(),...sanctuaryEventIds(),...socialEventIds(),...pastimeEventIds(),...repertoireEventIds(),...storyEventIds(),...rpgEventIds(),...personalityEventIds(),...justiceEventIds(),...adventureEventIds(),...curseEventIds(),...WINTER_EVENT.ids(), ...DEBT_RECKONING_EVENT.ids(), ...SCHOOLING_EVENTS.ids(), ...LIVING_EVENTS.ids(),...GUILD_EVENTS.ids() };
       for(const need of ['life_hunger','vampire_feeding'])if(value.sanctuaries&&allowed[need])allowed[need]=[...allowed[need],'agreement'];
       if (!plain(event) || !(Object.hasOwn(allowed, event.id) || event.id === 'lycan_confidant') || ![event.title, event.category, event.body].every(item => textField(item))) return false;
       if (!Array.isArray(event.choices) || !event.choices.length || event.choices.length > 8 || new Set(event.choices.map(item => item?.id)).size !== event.choices.length) return false;
@@ -2597,6 +2600,7 @@ export function validateSave(value) {
       if(!validateEpitaph(value.epitaph)||(value.epitaph!==undefined&&value.phase!=='retired'))return false;
       if(value.education&&!validateSchooling(value.education.schooling,value))return false;
       if(!validateLiving(value.living,value))return false;
+      if(!validateGuild(value.guild,value))return false;
       if(value.society!==undefined&&!validateSociety(value.society,value))return false;
       if(value.community!==undefined&&!validateCommunity(value.community,value))return false;
       if(value.fellowship!==undefined&&!validateFellowship(value.fellowship,value))return false;

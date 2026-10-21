@@ -1,5 +1,6 @@
 import { settlementServices } from './world-services.js';
 import { schooling, isLiterate, tuitionDue, electiveOffer, institutionYearDue } from './schooling.js';
+import { member as guildMember, BUY_IN } from './guild.js';
 
 // Voice: the game speaks as a terse, grim chronicle with a dry edge, in the
 // register of its engraved art. This module rewrites what the player reads
@@ -67,6 +68,14 @@ const EXACT = {
   school_degree: ['Sit the final examination', 'Three examiners, a long table, three years of your life on it.'],
   school_break_bond: ['Buy back your bond', 'Thirty gold on the bench and the paper torn. Cheaper than walking out.'],
   school_service: ['Keep the reading-room promise', 'Three days of shelving and quiet.'],
+  guild_join: ['Put your name on the rolls', 'A day at the hall. The dues start with the season.'],
+  guild_buy_in: ['Buy a place on the rolls', 'Eighty gold on the table. They will remember what you paid.'],
+  guild_dues: ['Settle your dues', 'What the hall is owed, into the chest.'],
+  guild_assignment: ['Do the hall’s work', 'Six days, the hall’s pay, the warden’s book.'],
+  guild_wander: ['Work a season on the road', 'Six days at a strange bench, for the book.'],
+  guild_masterpiece: ['Make your masterpiece', 'Fourteen days with the door shut. Then the wardens.'],
+  guild_apprentice: ['Take an apprentice', 'A child from the lower houses, three years at your bench.'],
+  guild_leave: ['Walk out of the hall', 'Your name off the rolls, and the hall’s long memory.'],
   family_support: ['Ask for what you need', 'A conversation with the person who raises you.'],
   family_shelter: ['Find a roof', 'Somewhere with walls, for now.'],
   family_dilemma: ['Trouble at home', 'Something in the house needs an answer.'],
@@ -244,6 +253,12 @@ export function whatMatters(s, actions) {
   if (k && s.age >= 18 && !isLiterate(s) && s.hero.gold >= 3) take(open('school_letters') || roomFor('school'), 'You cannot read. The archivist teaches grown people, for a little.');
   if (k?.institution && !k.institution.degree) { const fee = institutionYearDue(s); take(open('school_degree') || open('school_lecture'), open('school_degree') ? 'The examiners sit this year. Three years of your life on the table.' : fee ? `The bursar wants ${fee} gold before the year’s first lecture.` : 'There are lectures you have not heard.'); }
   if (k?.bond && !k.bond.broken && !k.bond.done) take(open('school_attend'), `${k.bond.master}’s bench, and ${Math.max(1, Math.ceil((k.bond.until - s.day) / 365))} more year${Math.ceil((k.bond.until - s.day) / 365) === 1 ? '' : 's'} of the bond.`);
+  const gm = guildMember(s);
+  if (gm?.dues.arrears >= 2) take(open('guild_dues'), `${gm.dues.arrears} seasons of dues owed to the hall. At four the name comes off the rolls.`);
+  if (gm?.assignment && !gm.assignment.done) take(open('guild_assignment'), 'The hall has given you its work for the year, and the warden keeps a book.');
+  if (gm?.rank === 'journeyman' && gm.wander.done) take(open('guild_masterpiece'), 'The road years are served. The wardens will look at a masterpiece.');
+  if (!gm && s.guild && s.age >= 16) take(open('guild_join'), 'The hall has a place for your name, if you take up the trade.');
+  if (!gm && s.guild && s.age >= 18 && s.hero.gold >= BUY_IN * 2) take(open('guild_buy_in'), `The hall sells places at ${BUY_IN} gold, to those whose work it has seen.`);
   if (k && s.age >= 16 && s.age <= 30 && !k.institution) take(open(/^school_read_/) || open(/^school_sit_/), open(/^school_read_/) ? 'An institution will have you, if the fee is found.' : 'The capitals examine at their doors. You hold the certificate they ask for.');
   if (s.age >= 6 && s.age < 18 && !s.education?.enrolled && (s.hero.station?.freedom === 'owned' || s.hero.station?.id === 'bound' && !s.family?.literate)) take(open('grow_survival') || open('grow_play') || open(/^upbringing_(practice|discovery)$/), 'No school for the likes of you. The woods and the field, then.');
   if ((life.stress || 0) >= 60 || (life.health ?? 80) < 50) take(open('life_rest') || open('health_routine'), (life.stress || 0) >= 60 ? 'Your hands shake. A week of nothing would help.' : 'You are worn thin.');

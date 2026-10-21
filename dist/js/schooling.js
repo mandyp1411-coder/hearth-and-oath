@@ -10,6 +10,7 @@
 // the apprenticeship as a bond with a master rather than a free course.
 import { seededRoll, generatePersonName } from './world.js';
 import { hasNature } from './personality.js';
+import { addStationTie } from './station.js';
 
 export const TIERS = Object.freeze({ community: 1, shrine: 1, apprenticeship: 1, academy: 2 });
 // Tuition a school year, in gold. The shrine teaches for nothing, and chooses.
@@ -539,7 +540,7 @@ export function breakBond(s, ctx = {}, how = 'paid') {
   b.broken = { day: s.day, how };
   if (s.education.route === 'apprenticeship') { s.education.enrolled = false; }
   if (how === 'paid') { note(ctx, 'The bond, bought back', `Thirty gold on ${b.master}’s bench and your paper torn in two. ${b.master} says nothing, which is the worst thing ${b.master} could have said.`, 'education'); ctx.standing?.('villagers', -3); }
-  else { s.hero.station?.ties?.push({ kind: 'hates', name: b.master, note: 'an apprentice who walked out of the yard' }); ctx.standing?.('villagers', -10); note(ctx, 'The bond, broken', `You walked out of ${b.master}’s yard with the bond unserved. The guild will hear it by the week’s end, and no master in this town will take your mark again.`, 'education'); }
+  else { addStationTie(s, { kind: 'hates', name: b.master, note: 'an apprentice who walked out of the yard' }); ctx.standing?.('villagers', -10); note(ctx, 'The bond, broken', `You walked out of ${b.master}’s yard with the bond unserved. The guild will hear it by the week’s end, and no master in this town will take your mark again.`, 'education'); }
   return true;
 }
 /** Three years served: the certificate, and a journeyman's start in the craft. */

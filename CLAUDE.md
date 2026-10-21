@@ -67,6 +67,22 @@ open thread, `flushLivingEvent` makes the scene, `applyLivingChoice`
 answers it, `followUp` comes back later, `LIVING_EVENTS.ids()` registers
 the ids, `validateLiving` the shape.
 
+`guild.js` (v0.66) is the first path built with the whole anatomy (the
+Bible's table: ways in, daily life, its own people, its own stories, the
+world reacts, ways out, legacy); `state.guild` exists only on edition
+lives. It reads the living world (the three guild actors, their strikes
+and monopolies) and adds the member's side: `guild.member` with rank,
+standing, dues, the road years, the assignment, the rival, the warden, the
+apprentice; `guild.past` for a struck or abandoned name; `guild.heir` for
+the name an heir inherits (`inheritGuild` in lineage's `createSuccessor`).
+Its threads follow living-world's pattern with `GUILD_EVENTS`. The engine
+applies `applyGuildGates` after the service gate so the monopoly's reason
+wins over "Visit X at the Market". A family's ties go through
+`addStationTie` (station.js, ten at most, the creditor kept); the validator
+caps them at `TIES_MAX`. The next path should copy guild.js's shape rather
+than living-world's: one state object, one `onXTime` seasonal tick, one
+`applyXGates`, one `inheritX`.
+
 Test fixtures that are not about birth should pin a station
 (`station: rollBirthCircumstances(seed, 'common', ancestry)`): a bound
 child may die of a winter fever, gets no pocket money and is not schooled,
