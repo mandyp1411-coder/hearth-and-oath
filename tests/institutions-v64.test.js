@@ -8,6 +8,7 @@ import { travelPreview } from '../dist/js/world.js';
 import { applyPersonalityBuild } from '../dist/js/personality.js';
 import { whatMatters } from '../dist/js/voice.js';
 import { applyDebtReckoningChoice, DEBT_RECKONING_EVENT } from '../dist/js/budget.js';
+import { mountApp } from './helpers/ui-surface.mjs';
 import { INSTITUTIONS, SUBJECTS, schoolingView, institutionLocation, institutionDoorReason, institutionEntrance, institutionScholarship, institutionPatron, studyLevel, advanceStudy, fadeStudies, useStudy, classmateFates, credentialReason, hasCredential, bondReason, validateSchooling, STUDY_FADE_YEARS } from '../dist/js/schooling.js';
 
 // Fixtures use the public engine wherever the thing under test is reachable through it;
@@ -255,4 +256,27 @@ test('the Right now panel and the voice know the institutions and the bench', ()
   let b = grow(born('bond-voice', 'common'), 12); if (b.phase === 'retired' || b.education.enrolled) return;
   b = settle(act(b, 'school_enroll_apprenticeship'));
   assert.ok(whatMatters(b, engine.getActions(b)).some(r => /bench, and \d more year/.test(r.why)));
+});
+
+test('the school page shows the institution, the bond, the bench and what the examinations made you; the character sheet names the credential', async t => {
+  const s = graduate('inst-ui'); if (!s) return;
+  const k = s.education.schooling;
+  k.institution = { id: 'university', major: 'medicine', from: 16, lessons: 7, lessonsThisYear: 1, year: s.age, tuitionPaid: s.age, patron: null, scholarship: false, degree: null, sat: null };
+  k.classmates.push({ id: 'classmate-0', name: 'Orrin Vale', subject: 'law', nature: 'proud', standing: 2, bornDay: s.day - 16 * 365, fate: null, contests: [{ age: 13, subject: 'law', won: true, pick: 'contest' }], memories: ['You beat them to the law prize at 13.'] });
+  k.credentials.push({ kind: 'journeyman', institution: 'apprenticeship', major: 'miner', age: 15, grade: 70 });
+  k.bond = { craft: 'miner', master: 'Master Pell', from: s.day - 4 * 365, fromAge: 12, until: s.day - 365, lessons: 12, broken: null, temper: 0, done: true };
+  advanceStudy(s, 'medicine', 4);
+  assert.equal(engine.validateSave(s), true);
+  const surface = await mountApp(t, { states: [s] });
+  await surface.click('title-continue');
+  await surface.click('tab', 'activities');
+  await surface.click('activities-pane', 'work');
+  const html = surface.root.innerHTML;
+  assert.match(html, /THE UNIVERSITY/); assert.match(html, /Medicine, year 1 of 3/);
+  assert.match(html, /data-id="school_lecture"/, 'the lecture is offered under Work & School');
+  assert.match(html, /THE BOND/); assert.match(html, /journeyman miner/);
+  assert.match(html, /THE BENCH/); assert.match(html, /Orrin Vale/); assert.match(html, /They think well of you/);
+  assert.match(html, /STUDIES/); assert.match(html, /Medicine 4/);
+  await surface.click('tab', 'character');
+  assert.match(surface.root.innerHTML, /journeyman miner/);
 });
