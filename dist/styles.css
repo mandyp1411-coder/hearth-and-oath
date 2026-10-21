@@ -5098,6 +5098,7 @@ html[data-reading-motion="reduced"] *,html[data-reading-motion="reduced"] *::bef
 .schooling-row .eyebrow { margin-bottom: 4px; }
 .schooling-row p { margin: 4px 0; }
 .schooling-row .badge.muted { opacity: .6; }
+.guild-block { margin-top: 8px; }
 
 /* v0.65 · the world as it reaches this life */
 .world-panel .world-event { margin: 6px 0; }

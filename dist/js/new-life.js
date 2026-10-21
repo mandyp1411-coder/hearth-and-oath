@@ -15,7 +15,7 @@ function pastChoice(s,attempt=0) {
   let preferred=id==='health_concern'?(s.health.pending?.kind==='physical'?'rest':'support'):
     id==='plague_letter'?'later':id==='life_budget'?'simplify':id==='deadline_review'?'pause':
     id==='lineage_bereavement'?['share','private','memorial'][seededRoll(s.seed,`past:grief:${s.day}`,3)]:
-    id==='career_staff'?'decline':id==='retirement'?'continue':id==='school_exam'?'present':id==='hard_winter'?'endure':id==='schooling_rival'?'contest':id==='schooling_temper'?'endure':id==='living_conscription'?(offered.some(c=>c.id==='pay')?'pay':'continue'):id==='living_strike'?'continue':id==='living_wolves'?(offered.some(c=>c.id==='pay')?'pay':'continue'):id==='living_purge'?'shelter':id==='living_refugees'?(s.hero.gold>=40?'shelter':'continue'):id==='travel_bandits'||id==='travel_beasts'?'avoid':id==='travel_weather'?'shelter':id.startsWith('travel_')?'continue':id==='living_rival'||id==='living_lie'?'continue':id==='living_bedside'?(offered.some(c=>c.id==='nurse')?'nurse':s.hero.gold>=40?'send':'write'):null;
+    id==='career_staff'?'decline':id==='retirement'?'continue':id==='school_exam'?'present':id==='hard_winter'?'endure':id==='schooling_rival'?'contest':id==='schooling_temper'?'endure':id==='living_conscription'?(offered.some(c=>c.id==='pay')?'pay':'continue'):id==='living_strike'?'continue':id==='living_wolves'?(offered.some(c=>c.id==='pay')?'pay':'continue'):id==='living_purge'?'shelter':id==='living_refugees'?(s.hero.gold>=40?'shelter':'continue'):id==='travel_bandits'||id==='travel_beasts'?'avoid':id==='travel_weather'?'shelter':id.startsWith('travel_')?'continue':id==='living_rival'||id==='living_lie'?'continue':id==='living_bedside'?(offered.some(c=>c.id==='nurse')?'nurse':s.hero.gold>=40?'send':'write'):id==='guild_invite'?'accept':id==='guild_secret'?'refuse':id==='guild_succession'?(offered.some(c=>c.id==='stand')?'stand':'continue'):id==='guild_protege'?'speak':id==='guild_arrears'?(offered.some(c=>c.id==='pay')?'pay':'time'):id==='guild_judgement'?'present':id.startsWith('guild_')?'continue':null;
   const safe=offered.filter(c=>!(id==='family_visit'&&c.id==='gift'&&s.hero.gold<10));
   if(id==='sanctuary_case_capture')preferred='service';
   // A choice the scene refused (a fee the purse cannot meet) is not tried twice: the next sitting takes the next door.
@@ -119,6 +119,9 @@ async function generateLife(config, { onProgress, shouldCancel } = {}, draws = {
       // The trades that would have this life, wherever it is standing; the walk to the mentor is the action's own.
       const served=s.education.schooling?.credentials?.find(c=>c.kind==='journeyman')?.major,craft=served&&PROFESSION_CATALOG.find(j=>j.id===served&&!civilianEntryReason(s,{profession:j.name}));
       if(craft&&tryOnce(`career_choose_${craft.id}`))continue; // a journeyman takes up the trade the bond taught
+      // A guild family's child takes the family's trade: the name on the rolls is worth more than a stranger's bench.
+      const family=s.guild?.family&&PROFESSION_CATALOG.find(j=>j.id===s.guild.family&&!civilianEntryReason(s,{profession:j.name}));
+      if(family&&tryOnce(`career_choose_${family.id}`))continue;
       // What the examinations made you is what you do: a doctor heals, a clerk keeps the archive, an officer soldiers, a licensed mage works the fire.
       const learned=s.education.schooling?.credentials?.find(c=>c.kind!=='journeyman'),fit=learned&&({degree:{medicine:'healer',law:'scholar',history:'scholar',natural_philosophy:'alchemist'}[learned.major]||'scholar',clerkship:'scholar',commission:'soldier',licence:'alchemist',orders:'scholar'})[learned.kind];
       const fitJob=fit&&PROFESSION_CATALOG.find(j=>j.id===fit&&!civilianEntryReason(s,{profession:j.name}));
@@ -129,6 +132,11 @@ async function generateLife(config, { onProgress, shouldCancel } = {}, draws = {
       const jobs=(gentle.length?gentle:open).map(j=>`career_choose_${j.id}`);
       if(jobs.length&&tryOnce(jobs[seededRoll(s.seed,'past:livelihood',jobs.length)]))continue;
     }
+    // The hall: a name on the rolls if the family or the master gives one, the dues and the hall's work after.
+    if(s.age>=16&&!s.guild?.member&&tryOnce('guild_join'))continue;
+    if(s.age>=20&&!s.guild?.member&&s.hero.gold>=200&&seededRoll(s.seed,'past:buy-in',2)===0&&tryOnce('guild_buy_in'))continue;
+    if(s.guild?.member?.dues.arrears&&tryOnce('guild_dues'))continue;
+    if(s.guild?.member?.assignment&&!s.guild.member.assignment.done&&tryOnce('guild_assignment'))continue;
     // A sensible past pays what it owes when it can.
     if(s.age>=18&&(s.householdBudget?.debt||0)>0&&s.hero.gold>=s.householdBudget.debt+40&&tryOnce('budget_repay'))continue;
     const interests=origin.pursuits,interest=interests[seededRoll(s.seed,`past:interest:${s.age}`,interests.length)];

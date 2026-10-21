@@ -12,6 +12,7 @@ import { MISDEEDS, crimeCheck } from './daylife-v35.js';
 import {ownedHomeHere,homeRestReason} from './home-recovery-v38.js';
 import {personalServicesPanel} from './personal-services.js';
 import { schoolingView } from './schooling.js';
+import { guildView } from './guild.js';
 
 /** The second slice of schooling on the school page: the institution, the studies, the bench, the two from the bench beside you, and what the examinations made you. */
 export function schoolingPanel(game,e){
@@ -26,9 +27,30 @@ export function schoolingPanel(game,e){
 }
 
 
+/** The guild on the school page: the rolls, the dues, the hall's work, the road years, the people at the hall, and what the hall remembers. */
+export function guildPanel(game,e){
+  const v=guildView(game); if(!v) return '';
+  const parts=[], m=v.member;
+  if(m){
+    parts.push(`<div class="schooling-row"><span class="eyebrow">${e(m.name.replace(/^the /,'').toUpperCase())}</span><p>${e(`${m.rank[0].toUpperCase()}${m.rank.slice(1)}, ${m.years<1?'this year':m.years+' year'+(m.years===1?'':'s')} on the rolls, ${{born:'born to it',apprenticed:'by the master’s word',bought:'bought in',recruited:'at the hall’s asking',inherited:'by the name in the old book'}[m.how]}. The hall keeps its rolls at ${m.seat}. Your standing there is ${m.standingWord}.${m.dues?` Dues ${m.dues} gold a season${m.arrears?`, ${m.arrears} owed`:''}.`:' No dues at your rank.'}`)}</p>${m.rank==='journeyman'?`<p>${e(m.wander.done?'The road years are served.':`The road years: ${m.wander.seasons} of ${m.wander.need} seasons served in other regions’ halls.`)}${m.masterpiece?e(` ${m.masterpiece.name[0].toUpperCase()}${m.masterpiece.name.slice(1)}: ${m.masterpiece.judged?'looked at and refused':'waiting on the wardens'}.`):''}</p>`:''}${m.assignment?`<p>${e(`The hall’s work: ${m.assignment.what} at ${m.assignment.place}, ${m.assignment.pay} gold.${m.assignment.overdue?' Overdue.':''}`)}</p>`:''}</div>`);
+    parts.push(`<div class="schooling-row"><span class="eyebrow">THE HALL</span><p><strong>${e(m.warden)}</strong>, ${e(m.rank==='warden'||m.rank==='guildmaster'?'yourself, warden':'warden')}.${m.sponsor?` <strong>${e(m.sponsor)}</strong>, whose ${m.how==='inherited'?'name':'word'} put you on the rolls.`:''}${m.rival?` <strong>${e(m.rival.name)}</strong> at the next bench: ${m.rival.won} prize${m.rival.won===1?'':'s'} to you, ${m.rival.lost} to them.`:''}${m.apprentice?` <strong>${e(m.apprentice.name)}</strong>, your apprentice, ${m.apprentice.years<1?'new to the bench':m.apprentice.years+' year'+(m.apprentice.years===1?'':'s')+' at it'}.`:''}</p></div>`);
+  } else if(v.heir) parts.push(`<div class="schooling-row"><span class="eyebrow">THE OLD BOOK</span><p>${e(`${v.heir.from}’s name is on the rolls of ${v.heir.name}. Take up the trade and the hall will find it.`)}</p></div>`);
+  else if(v.family) parts.push(`<div class="schooling-row"><span class="eyebrow">THE FAMILY’S TABLE</span><p>${e(`The family has a name at ${v.family.name}. Take up the trade and it is yours.`)}</p></div>`);
+  if(v.past.length) parts.push(`<div class="schooling-row"><span class="eyebrow">STRUCK OUT</span>${v.past.map(p=>`<p>${e(`${p.name[0].toUpperCase()}${p.name.slice(1)}: ${p.rank}, ${p.left==='expelled'?'struck from the rolls':'walked out'}.`)}</p>`).join('')}</div>`);
+  const memories=v.threads.flatMap(t=>t.memory).concat(v.history.map(h=>h.text)).slice(-4);
+  if(memories.length&&m) parts.push(`<div class="schooling-row"><span class="eyebrow">WHAT THE HALL REMEMBERS</span>${memories.map(x=>`<p>${e(x)}</p>`).join('')}</div>`);
+  return parts.length?`<div class="schooling-panel guild-panel">${parts.join('')}</div>`:'';
+}
+
 export const ACTIVITY_TABS=[['daily','Everyday'],['work','Work & School'],['recovery','Recovery'],['training','Training'],['fun','Social & Fun'],['crime','Crime & Mischief']];
 export function compactActivityRows(actions,ui,s=null){if(!actions.length)return '';return `<div class="compact-activities interaction-options">${actions.map(a=>interactionChoice(ui,{label:a.label,op:'activity',id:a.id,description:a.description,meta:activityQuote(a,s),costDetails:actionCostDetails(s,a),disabledReason:a.disabledReason})).join('')}</div>`;}
 /** The institutions of the capitals and the bond are not a teacher's room: their actions sit here, under Work & School. */
+/** The hall's own actions sit under Work & School too: the rolls, the dues, the hall's work, the road, the masterpiece. */
+function guildBlock(all,ui,s){
+  const rows=all.filter(a=>/^guild_/.test(a.id));
+  if(!rows.length)return '';
+  return `<div class="capitals-block guild-block"><p class="activity-intro">${ui.e(s.guild?.member?'The hall has you on its rolls.':'The hall keeps its rolls at the capital.')}</p>${compactActivityRows(rows,ui,s)}</div>`;
+}
 function capitalsBlock(all,ui,s){
   const rows=all.filter(a=>/^school_(sit_|place_|read_|lecture$|degree$|break_bond$)/.test(a.id));
   if(!rows.length)return '';
@@ -58,7 +80,7 @@ export function renderActivities(s,ui,{pane='daily',ongoing=''}={}){
 
  const pairs=renderRunestones(s,ui,all);
  let content='';
- if(pane==='work')content=`<p class="activity-intro">${s.age<18?'Visit a teacher for lessons or a steward for available work.':s.hero.profession==='Unemployed'?'Visit a work steward to find employment.':'Your profession: '+e(s.hero.profession)+(s.hero.profession==='Scholar'&&ownedHomeHere(s)?'. Copy and research at your own home, or visit a steward for commissions.':'. Go to your workplace for shifts and commissions.')}</p>${shortcuts(s.age<18?(s.hero.profession!=='Unemployed'?['school','work']:['school']):s.education?.enrolled?['school','work']:['work'])}${s.age<18||s.education?.enrolled?schoolShortcuts():''}${capitalsBlock(all,ui,s)}${schoolingPanel(s,e)}${s.hero.profession==='Scholar'&&ownedHomeHere(s)&&(s.cartography?.interior?.roomId==='homes')?compactActivityRows(all.filter(a=>a.id==='career_work').map(a=>({...a,label:'Copy and Research at Home'})),ui,s):''}${ongoing}`;
+ if(pane==='work')content=`<p class="activity-intro">${s.age<18?'Visit a teacher for lessons or a steward for available work.':s.hero.profession==='Unemployed'?'Visit a work steward to find employment.':'Your profession: '+e(s.hero.profession)+(s.hero.profession==='Scholar'&&ownedHomeHere(s)?'. Copy and research at your own home, or visit a steward for commissions.':'. Go to your workplace for shifts and commissions.')}</p>${shortcuts(s.age<18?(s.hero.profession!=='Unemployed'?['school','work']:['school']):s.education?.enrolled?['school','work']:['work'])}${s.age<18||s.education?.enrolled?schoolShortcuts():''}${capitalsBlock(all,ui,s)}${schoolingPanel(s,e)}${guildBlock(all,ui,s)}${guildPanel(s,e)}${s.hero.profession==='Scholar'&&ownedHomeHere(s)&&(s.cartography?.interior?.roomId==='homes')?compactActivityRows(all.filter(a=>a.id==='career_work').map(a=>({...a,label:'Copy and Research at Home'})),ui,s):''}${ongoing}`;
  else if(pane==='recovery'){const v=travelEnergyView(s),homeReason=ownedHomeHere(s)?homeRestReason(s,{visiting:true}):null,home=ownedHomeHere(s)?interactionChoice(ui,{label:'Go Home and Rest',op:'activity-home',meta:activityQuote({days:1,cost:0},s),costDetails:actionCostDetails(s,{days:1,cost:0}),description:'Rest in your own bed to restore all Focus and ease 8 Stress.',disabledReason:homeReason}):'';content=`<p class="activity-intro">Health ${s.hero.hp}/${s.hero.maxHp} · Focus ${v.focus}/${v.max}. Rest at home, visit the doctor, use supplies in Inventory, or make camp on your journey.</p>${renderStatusReference(s,ui,{context:'recovery'})}${home}${shortcuts(['doctor','inn'])}${compactActivityRows(all.filter(a=>a.id==='trail_camp'||/^health_(rest|support|routine)$/.test(a.id)),ui,s)}${recoveryPanel(s,ui)}${ongoing}`;}
  else if(pane==='training')content=renderTournamentCard(s,ui,all,{potionReason:consumableReason(s,'potions')})+compactActivityRows(all.filter(a=>a.id==='tournament_invite'),ui,s)+compactActivityRows(all.filter(a=>/^(yard_|train$|life_exercise$|grow_(weapons|defense|arcana|stealth|survival)|rpg_practice_|rpg_train_)/.test(a.id)),ui,s)+shortcuts(s.age>=18?['watch','mentor']:['mentor']);
  else if(pane==='crime'){

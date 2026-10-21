@@ -151,12 +151,22 @@ export function stationSummary(s) {
     st.nameWeight === 'feared' ? 'Your name is known before you are, and not always kindly.' : st.nameWeight === 'weighted' ? 'Your name opens doors; it also closes some.' : st.nameWeight === 'marked' ? 'Your name is marked, and some will beat you for it.' : ''].filter(Boolean).join(' ');
 }
 
+/** A life adds to the family's ties as it goes: a name that hates yours, a name that owes you a roof. Ten at most; the oldest that is not a creditor makes room. */
+export const TIES_MAX = 10;
+export function addStationTie(s, tie) {
+  const ties = s?.hero?.station?.ties; if (!ties || !tie || !['owes', 'knows', 'hates'].includes(tie.kind)) return false;
+  if (ties.some(t => t.kind === tie.kind && t.name === tie.name)) return false;
+  ties.push({ kind: tie.kind, name: String(tie.name).slice(0, 60), note: String(tie.note || '').slice(0, 120) });
+  if (ties.length > TIES_MAX) { const at = ties.findIndex(t => t.kind !== 'owes'); ties.splice(at >= 0 ? at : 0, 1); }
+  return true;
+}
+
 export function validateStation(v, s) {
   if (v === undefined) return true;
   if (!v || typeof v !== 'object' || v.version !== 1 || !stationById(v.id)) return false;
   if (typeof v.rank !== 'string' || v.rank.length > 60 || !['free', 'bound', 'owned'].includes(v.freedom) || typeof v.literate !== 'boolean') return false;
   if (!Number.isSafeInteger(v.debt) || v.debt < 0 || v.debt > 1000 || ![0, 1, 2, 3].includes(v.diet) || ![0, 1, 2, 3].includes(v.roof)) return false;
   if (!['none', 'known', 'weighted', 'feared', 'marked'].includes(v.nameWeight)) return false;
-  return Array.isArray(v.ties) && v.ties.length <= 6 && v.ties.every(t => t && ['owes', 'knows', 'hates'].includes(t.kind) && typeof t.name === 'string' && t.name.length <= 60 && typeof t.note === 'string' && t.note.length <= 120)
+  return Array.isArray(v.ties) && v.ties.length <= TIES_MAX && v.ties.every(t => t && ['owes', 'knows', 'hates'].includes(t.kind) && typeof t.name === 'string' && t.name.length <= 60 && typeof t.note === 'string' && t.note.length <= 120)
     && (v.portionDay === undefined || (Number.isSafeInteger(v.portionDay) && v.portionDay >= 0 && v.portionDay <= s.day));
 }

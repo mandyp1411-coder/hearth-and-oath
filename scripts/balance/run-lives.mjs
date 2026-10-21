@@ -71,6 +71,7 @@ function measure(s, start, log) {
     supportedGold: b.supportedGold || 0, billedGold: b.billedGold || 0, conditions: (s.health?.physical?.length || 0) + (s.health?.mental?.length || 0),
     profession: s.hero.profession, wentIntoDebt: log.debt, worstStress: log.worstStress, minGold: log.minGold, yearsPlayed: s.age - start,
     worldThreads: s.living ? s.living.counters.threads : null, worldEvents: s.living ? s.living.counters.events : null,
+    guild: s.guild ? (s.guild.member ? `${s.guild.member.rank} (${s.guild.member.how})` : s.guild.past.length ? `out (${s.guild.past.at(-1).left})` : s.guild.family ? 'born to it, not joined' : null) : null, guildThreads: s.guild ? s.guild.counters.threads : null,
     literate: s.education?.schooling ? s.education.schooling.literate : null, certificate: (s.education?.qualifications || []).some(q => q.route === 'academy') ? 2 : (s.education?.qualifications || []).some(q => q.route !== 'apprenticeship') ? 1 : 0,
   };
 }
@@ -112,6 +113,7 @@ for (const policy of POLICIES) {
   console.log(`gold median ${r.medianGold} · lowest point median ${r.medianMinGold} · ever short of money ${r.everShortPct}%`);
   console.log(`joy ${r.medianJoy} · stress ${r.medianStress} (worst ${r.medianWorstStress}) · bodily ${r.medianBodily} · with a condition at end ${r.conditionsAtEndPct}%`);
   if (r.rows.some(x => x.worldThreads !== null)) console.log(`  the living world: ${(r.rows.reduce((n, x) => n + (x.worldEvents || 0), 0) / r.rows.length).toFixed(1)} events and ${(r.rows.reduce((n, x) => n + (x.worldThreads || 0), 0) / r.rows.length).toFixed(1)} threads that reached the player, per life`);
+  if (r.rows.some(x => x.guildThreads !== null)) { const tally = r.rows.reduce((m, x) => { if (x.guild) m[x.guild] = (m[x.guild] || 0) + 1; return m; }, {}); console.log(`  the guild: ${JSON.stringify(tally)} · ${(r.rows.reduce((n, x) => n + (x.guildThreads || 0), 0) / r.rows.length).toFixed(1)} hall stories per life`); }
   for (const [id, g] of Object.entries(r.byStation)) console.log(`  ${id}: ${g.lives} lives · died ${g.diedPct}% (median ${g.medianDeathAge ?? '-'}) · gold ${g.medianGold} · owed at end ${g.medianDebt} · ever short ${g.everShortPct}%${g.literatePct !== null ? ` · lettered ${g.literatePct}% · schooled ${g.schooledPct}% · grammar ${g.grammarPct}%` : ''}`);
 }
 if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify(results, null, 1));
