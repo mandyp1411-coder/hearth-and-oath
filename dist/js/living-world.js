@@ -7,6 +7,12 @@
 // news. The route is a thread: a scene with roles filled by people who already
 // exist in the life, a choice, and a memory that comes back later.
 //
+// Second slice (v0.65.1): people have wants of their own (a rival who
+// undercuts you, a friend who asks you to lie, a parent who falls ill and
+// needs you home); refugees and the plague they carry as events in their own
+// right; and places that change, written into the world's changes where the
+// place view reads them.
+//
 // New-edition lives only (`hero.station`). The realm's own yearly tick keeps
 // its rulers, merchants and prosperity; this module writes into it (a war the
 // courts began, security and prosperity where an event sits) and reads it.
@@ -27,13 +33,14 @@ const ANCESTRY_WORD = Object.freeze({ tiefling: 'the horned', goblin: 'the gobli
 const LIMITS = Object.freeze({ actors: 14, events: 12, threads: 12, news: 24 });
 
 // The house convention: 'continue' is always the choice that lets the world take its course.
-export const LIVING_EVENTS = { ids: () => ({ living_conscription: ['pay', 'go', 'continue'], living_strike: ['continue', 'work', 'mediate'], living_wolves: ['hunt', 'pay', 'continue'], living_purge: ['shelter', 'denounce', 'send', 'continue'], living_refugees: ['shelter', 'report', 'continue'] }) };
+export const LIVING_EVENTS = { ids: () => ({ living_conscription: ['pay', 'go', 'continue'], living_strike: ['continue', 'work', 'mediate'], living_wolves: ['hunt', 'pay', 'continue'], living_purge: ['shelter', 'denounce', 'send', 'continue'], living_refugees: ['shelter', 'report', 'continue'], living_rival: ['match', 'outwork', 'expose', 'continue'], living_lie: ['lie', 'truth', 'continue'], living_bedside: ['nurse', 'physician', 'go', 'send', 'write', 'continue'] }) };
 
 const regionName = id => REGION_TEMPLATES.find(r => r.id === id)?.name || id;
 const neighboursOf = (s, regionId) => { const borders = s.realm?.politics?.borders; if (Array.isArray(borders) && borders.length) { const rows = borders.filter(b => b.includes(regionId)).map(b => b[0] === regionId ? b[1] : b[0]); if (rows.length) return rows; } return NEIGHBOURS[regionId] || []; };
 const placeName = (s, id) => s.world.locations.find(p => p.id === id)?.name || id;
 const regionOf = (s, siteId) => s.realm?.sites?.[siteId]?.regionId || null;
-const sitesIn = (s, regionId, settled = true) => Object.values(s.realm?.sites || {}).filter(x => x.regionId === regionId && (!settled || isSettlement(s.world, x.id))).map(x => x.id);
+const named = id => !/^(seat|reach)-/.test(id); // the map's seats and hexes are not places a story can stand in
+const sitesIn = (s, regionId, settled = true) => Object.values(s.realm?.sites || {}).filter(x => x.regionId === regionId && named(x.id) && (!settled || isSettlement(s.world, x.id))).map(x => x.id);
 const clamp = (n, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, n));
 const note = (ctx, title, text, tag = 'world') => (ctx?.journalLiteral || ctx?.journal)?.(title, text, tag);
 const homeOf = s => s.life?.home?.locationId || s.hero.birthplaceId || 'home';
@@ -55,7 +62,7 @@ function newGoal(s, actor, season) {
   if (actor.kind === 'guild') {
     // A guild's reach is the whole map: the contract it wants may be in any town, and a strike follows it there.
     const kind = ['contract', 'monopoly', 'contract'][roll(3)];
-    const sites = Object.values(s.realm?.sites || {}).filter(x => isSettlement(s.world, x.id)).map(x => x.id);
+    const sites = Object.values(s.realm?.sites || {}).filter(x => named(x.id) && isSettlement(s.world, x.id)).map(x => x.id);
     return { kind, target: kind === 'contract' ? sites[seededRoll(s.seed, `goal:site:${actor.id}:${season}`, Math.max(1, sites.length))] || null : actor.craft, progress: 0, pace: 3 + roll(4) };
   }
   return { kind: 'descend', target: null, progress: 0, pace: 1 + roll(2) }; // the wolves: slow, until a hard winter
@@ -116,6 +123,17 @@ function resolveGoal(s, season, actor, ctx) {
   actor.goal = newGoal(s, actor, season);
   return ev;
 }
+/** Places change: a line in the world's changes, which the place view reads back for a decade. */
+function placeChange(s, id, locationId, title, text) {
+  if (!s.world.changes || !s.world.locations.some(p => p.id === locationId) || s.world.changes.some(c => c.id === id)) return;
+  s.world.changes.push({ id, day: s.day, title, text, locationId, source: 'living' });
+  if (s.world.changes.length > 500) s.world.changes.splice(0, s.world.changes.length - 500);
+}
+function placeChanges(s, ev) {
+  const lines = { raid: ['The wolves came', 'Something was taken from the edge of the village in the night. The pens are moved in closer, and nobody walks the top field after dusk.'], strike: ['Tools down', 'The yard gates are chained and the guild stands outside them. Nothing of that trade is made or sold until it is settled.'], purge: ['Marked doors', `Chalk on the doors of ${ANCESTRY_WORD[ev.target] || 'one people'}, and carts leaving by night.`], works: ['A new hall', 'Scaffolding on the square and work for anyone with hands.'], plague: ['The sickness', 'Lime on the doorsteps and the bell rung for the carts. The market is half empty.'], refugees: ['Carts from the border', 'Families from the front camped under the walls with what they could carry. Bread is dearer.'], monopoly: ['The guild’s mark', 'No one works the trade here without the guild’s mark, and the prices say so.'] };
+  const line = lines[ev.kind]; if (!line) return;
+  for (const id of ev.siteIds.slice(0, 6)) placeChange(s, `living-${ev.id}-${id}`, id, line[0], line[1]);
+}
 function markEvent(s, ev) {
   for (const id of ev.siteIds) {
     const site = s.realm.sites[id]; if (!site) continue;
@@ -124,7 +142,25 @@ function markEvent(s, ev) {
     else if (ev.kind === 'strike') { site.prosperity = clamp(site.prosperity - 4); }
     else if (ev.kind === 'purge') { site.security = clamp(site.security - 4); site.prosperity = clamp(site.prosperity - 2); }
     else if (ev.kind === 'monopoly') { site.prosperity = clamp(site.prosperity - 1); }
+    else if (ev.kind === 'refugees') { site.prosperity = clamp(site.prosperity - 2); }
+    else if (ev.kind === 'plague') { site.prosperity = clamp(site.prosperity - 5); site.security = clamp(site.security - 2); }
   }
+}
+/** A monopoly held to its end raises a hall the player can walk past. */
+function guildHall(s, season, ev) {
+  const seat = ev.siteIds.find(id => ['city', 'citadel', 'tower'].includes(s.world.locations.find(p => p.id === id)?.type)) || ev.siteIds[0]; if (!seat) return;
+  const site = s.realm.sites[seat]; if (site) site.prosperity = clamp(site.prosperity + 4);
+  placeChange(s, `living-hall-${ev.id}`, seat, `The ${ev.craft}s’ hall`, `The ${ev.craft}s’ guild has raised its hall on the square, with its mark over the door and a bench inside for anyone who holds it.`);
+  pushNews(s, season, `The ${ev.craft}s’ guild has raised a hall at ${placeName(s, seat)}.`, ev.id);
+}
+/** Refugees follow a war into the next region over; one cart in four carries the sickness. */
+function refugeesFrom(s, season, warEv) {
+  const l = living(s), candidates = neighboursOf(s, warEv.against).filter(id => id !== warEv.regionId), regionId = candidates[seededRoll(s.seed, `refugees:${warEv.id}`, Math.max(1, candidates.length))] || warEv.against;
+  if (l.events.some(e => e.kind === 'refugees' && e.warId === warEv.warId)) return null;
+  const from = placeName(s, warEv.siteIds.find(id => regionOf(s, id) === warEv.against) || warEv.siteIds[0]);
+  const ev = spawnEvent(s, season, { kind: 'refugees', regionId, warId: warEv.warId, from, siteIds: sitesIn(s, regionId), endSeason: season + 3, text: `Carts from ${from} on every road into ${regionName(regionId)}: families from the front with what they could carry. Bread is dearer and the byres are full.` });
+  if (seededRoll(s.seed, `plague:${ev.id}`, 100) < 25) { const pl = spawnEvent(s, season + 1, { kind: 'plague', regionId, siteIds: sitesIn(s, regionId), endSeason: season + 4, text: `The carts from ${from} brought a sickness with them. Lime on the doorsteps in ${regionName(regionId)} and the bell rung for the dead.` }); ev.plagueId = pl.id; }
+  return ev;
 }
 function spreadEvent(s, season, ev) {
   if (ev.kind === 'purge' && ev.spreadAt === season) { const next = (NEIGHBOURS[ev.regionId] || [])[seededRoll(s.seed, `spread:${ev.id}`, (NEIGHBOURS[ev.regionId] || []).length)]; if (next) { ev.spreadTo = next; ev.siteIds = [...new Set([...ev.siteIds, ...sitesIn(s, next)])]; pushNews(s, season, `The purge has crossed into ${regionName(next)}. ${ANCESTRY_WORD[ev.target][0].toUpperCase()}${ANCESTRY_WORD[ev.target].slice(1)} are leaving by night.`, ev.id); return true; } }
@@ -182,8 +218,9 @@ function routeEvent(s, season, ev, ctx) {
   if (ev.kind === 'war' && s.age >= 8) {
     const kin = levyKin(s);
     if (kin && (ev.regionId === region || ev.against === region)) t = openThread(s, season, ev, 'conscription', { kin: { id: kin.id, name: kin.name, relation: presentKin(s).find(x => x.p.id === kin.id)?.m.relationship || 'kin' } }, ctx);
-    else if (s.age >= 16 && (ev.regionId === region || ev.against === region || ev.spreadTo === region)) { const family = `the ${generateFamilyName(s, ev.id)}s`; t = openThread(s, season, ev, 'refugees', { family, from: placeName(s, ev.siteIds.find(id => regionOf(s, id) !== region) || ev.siteIds[0]) }, ctx); }
   }
+  else if (ev.kind === 'refugees' && s.age >= 16 && ev.regionId === region) { const family = `the ${generateFamilyName(s, ev.id)}s`; t = openThread(s, season, ev, 'refugees', { family, from: ev.from }, ctx); }
+  else if (ev.kind === 'plague' && s.age >= 12 && ev.regionId === region) { const kin = presentKin(s).map(x => x.p).find(p => kinAge(s, p) >= 40) || presentKin(s).map(x => x.p)[0]; if (kin) t = openThread(s, season, ev, 'bedside', { kin: { id: kin.id, name: kin.name, relation: presentKin(s).find(x => x.p.id === kin.id)?.m.relationship || 'kin' }, cause: 'plague', away: false }, ctx); else { s.hero.hp = Math.max(1, s.hero.hp - Math.round(s.hero.maxHp * 0.2)); if (s.life) s.life.stress = clamp((s.life.stress || 0) + 8); note(ctx, 'The sickness', 'The sickness went through the house and left you thin and shaking for a month. Nobody came to the door, which was the kindness.', 'health'); } }
   else if (ev.kind === 'strike' && s.age >= 14) { const trade = tradeOf(s, ev.craft); if (trade) t = openThread(s, season, ev, 'strike', { craft: ev.craft, how: trade.how, master: trade.master || null }, ctx); else if (s.age >= 16 && s.hero.profession === 'Unemployed' && ev.regionId === region) t = openThread(s, season, ev, 'strike', { craft: ev.craft, how: 'hands', master: null }, ctx); }
   else if (ev.kind === 'raid' && s.age >= 14 && (ev.siteIds.includes(home) || ev.regionId === region && seededRoll(s.seed, `raid:ask:${ev.id}`, 100) < 40)) { const n = ev.siteIds.includes(home) ? neighbourOf(s) : null; t = openThread(s, season, ev, 'wolves', { neighbour: n ? { id: n.id, name: n.name } : null, village: ev.siteIds.includes(home) ? null : placeName(s, ev.siteIds[0]) }, ctx); }
   else if (ev.kind === 'purge' && s.age >= 12) { const kin = purgeKin(s, ev.target); if (kin) t = openThread(s, season, ev, 'purge', { ancestry: ev.target, kin: kin.person ? { id: kin.person.id, name: kin.person.name, relation: kin.relation } : null, relation: kin.relation }, ctx); }
@@ -192,10 +229,29 @@ function routeEvent(s, season, ev, ctx) {
 }
 
 // ---------------------------------------------------------------------------
+// People have wants. Once in a while someone the player knows acts on one.
+function wantOf(s, season) {
+  const l = living(s); if (s.age < 16 || seededRoll(s.seed, `want:${season}`, 100) >= 5) return null;
+  const home = homeOf(s), region = regionOf(s, home), here = regionOf(s, s.locationId);
+  const rival = peopleOf(s).find(p => p.role === 'rival'), friend = peopleOf(s).filter(p => p.role === 'friend')[seededRoll(s.seed, `want:friend:${season}`, 2)] || peopleOf(s).find(p => p.role === 'friend');
+  const parent = presentKin(s).find(x => x.m.relationship === 'parent' && kinAge(s, x.p) >= 40)?.p;
+  const options = [];
+  if (rival && s.hero.profession !== 'Unemployed' && s.age >= 18) options.push(['rival', { rival: { id: rival.id, name: rival.name }, trade: s.hero.profession.toLowerCase() }]);
+  if (friend) options.push(['lie', { friend: { id: friend.id, name: friend.name }, matter: ['where they were the night the storehouse burned', 'what they said to the lender', 'whose cart it was on the tithe road', 'where the money for the roof came from'][seededRoll(s.seed, `want:matter:${season}`, 4)] }]);
+  if (parent) options.push(['bedside', { kin: { id: parent.id, name: parent.name, relation: 'parent' }, cause: 'age', away: here !== region || !!s.careers?.active }]);
+  if (!options.length) return null;
+  const [def, roles] = options[seededRoll(s.seed, `want:which:${season}`, options.length)];
+  if (l.threads.some(t => t.def === def && season - t.season < THREAD_COOLDOWN * 3)) return null;
+  const ev = spawnEvent(s, season, { kind: 'want', regionId: region || 'rainward', siteIds: [home], endSeason: season + 1, text: '' });
+  ev.routed = true; return openThread(s, season, ev, def, roles, {});
+}
+
+// ---------------------------------------------------------------------------
 // The seasonal tick.
 export function onLivingTime(s, { oldDay, newDay }, ctx = {}) {
   const l = living(s); if (!l || s.phase === 'retired' || !s.realm) return;
   const to = seasonOf(newDay);
+  for (const t of l.threads) if (t.def === 'bedside' && t.obligation && !t.closed) bedsideWatch(s, to, t, ctx); // the road home is watched every day, not once a season
   for (let season = l.lastSeason + 1; season <= to; season++) {
     // Goals advance. The wolves move fastest when winter comes early.
     const done = [];
@@ -204,6 +260,11 @@ export function onLivingTime(s, { oldDay, newDay }, ctx = {}) {
     for (const a of done) { const ev = resolveGoal(s, season, a, ctx); if (ev) fresh.push(ev); }
     for (const ev of l.events) { if (ev.endSeason <= season) continue; markEvent(s, ev); if (spreadEvent(s, season, ev) && !ev.routed) routeEvent(s, season, ev, ctx); }
     for (const ev of fresh) routeEvent(s, season, ev, ctx);
+    for (const ev of fresh.filter(e => e.kind === 'war')) { const r = refugeesFrom(s, season, ev); if (r) { placeChanges(s, r); routeEvent(s, season, r, ctx); } }
+    for (const ev of fresh) placeChanges(s, ev);
+    for (const ev of l.events) if (ev.kind === 'plague' && ev.startSeason === season && !ev.routed) { placeChanges(s, ev); routeEvent(s, season, ev, ctx); }
+    for (const ev of l.events) if (ev.kind === 'monopoly' && ev.endSeason === season) guildHall(s, season, ev);
+    wantOf(s, season);
     for (const ev of l.events) if (ev.kind === 'war' && ev.endSeason > season) { const war = s.realm.wars.find(w => w.id === ev.warId); if (war && war.status !== 'active') { ev.endSeason = season; pushNews(s, season, `${war.status === 'ended' ? `${regionName(war.victor)} keeps the field` : 'A ceasefire'} between ${regionName(ev.regionId)} and ${regionName(ev.against)}. Both sides bury.`, ev.id); } }
     for (const t of l.threads) if (t.followUp && t.followUp.season <= season && !t.closed) followUp(s, season, t, ctx);
     l.lastSeason = season;
@@ -246,6 +307,35 @@ export function flushLivingEvent(s, ctx = {}) {
       { id: 'shelter', label: 'Give them the loft', description: 'Fifteen gold of bread and firewood you had not planned for, and a name that will remember yours.' },
       { id: 'report', label: 'Send for the watch', description: 'Strangers from the enemy’s side, the captain will say, and thank you for it. The street will say something else.' },
       { id: 'continue', label: 'Keep your door shut', description: 'They will find somewhere, or they will not. It is not your war.' },
+    ]); return true;
+  }
+  if (t.def === 'rival') {
+    ctx.setEvent?.('living_rival', 'Across the square', 'Your own people', `${r.rival.name} has set up a bench across the square in your own trade and is charging half what you charge, and telling anyone who stops that your work was always dear for what it is. Your custom has begun to cross the square.`, [
+      { id: 'match', label: 'Match the price', description: 'Cut your own until one of you cannot. Thin seasons, and the town knows why.' },
+      { id: 'outwork', label: 'Out-work them', description: 'Better work, longer days, and let the town choose. It costs you sleep.' },
+      { id: 'expose', label: 'Show the town the shoddy work', description: 'Name the flaws in the square. If the town agrees, it ends; if it does not, you have made an enemy for life.', ...((s.hero.skills?.persuasion || 0) < 2 ? { disabledReason: 'Nobody would listen to you over the hammer.' } : {}) },
+      { id: 'continue', label: 'Let the town decide', description: 'Keep your prices and your pride. Some custom will not come back.' },
+    ]); return true;
+  }
+  if (t.def === 'lie') {
+    ctx.setEvent?.('living_lie', 'A favour', 'Your own people', `${r.friend.name} comes to the door after dark and asks you to say, if anyone asks, that you know ${r.matter}: that it was nothing, that they were with you. They do not say why. They look at you the way people look when they have already decided what you are.`, [
+      { id: 'lie', label: 'Say what they ask', description: 'For a friend. If it comes out, it comes out on you too.' },
+      { id: 'truth', label: 'Say you will not lie for them', description: 'And watch the friendship go out of their face.' },
+      { id: 'continue', label: 'Say nothing to anyone', description: 'Neither lie nor truth. Friends remember that too.' },
+    ]); return true;
+  }
+  if (t.def === 'bedside') {
+    const kin = r.kin, plague = r.cause === 'plague';
+    const body = plague ? `The sickness the carts brought is in the house: ${kin.name}, your ${kin.relation}, has it, and the physicians will not come to doors with lime on the step.` : r.away ? `A letter, three weeks old, in a neighbour’s hand: ${kin.name}, your ${kin.relation}, has taken to bed and is not getting up, and asks for you. You are ${s.careers?.active ? 'in the middle of a commission' : 'a long road from home'}.` : `${kin.name}, your ${kin.relation}, has taken to bed and is not getting up. The house is quiet in the way houses go quiet.`;
+    ctx.setEvent?.('living_bedside', 'A sickbed', 'Your own people', body, r.away ? [
+      { id: 'go', label: 'Go home now', description: 'Drop what you are holding. Sixty days to reach the bedside; the road is what it is.' },
+      { id: 'send', label: 'Send money for a physician: 40 gold', description: 'A physician who will come, and a letter that is not you.', ...(s.hero.gold < 40 ? { disabledReason: `You have ${s.hero.gold} gold.` } : {}) },
+      { id: 'write', label: 'Write', description: 'A letter back, and the work finished first.' },
+      { id: 'continue', label: 'Finish what you are doing', description: 'There will be time, or there will not.' },
+    ] : [
+      { id: 'nurse', label: 'Nurse them yourself', description: 'Weeks at the bedside and the work undone. It is what the hands are for.' },
+      { id: 'physician', label: 'Pay a physician: 40 gold', description: plague ? 'One who will come to a marked door, for enough.' : 'The best that can be had.', ...(s.hero.gold < 40 ? { disabledReason: `You have ${s.hero.gold} gold.` } : {}) },
+      { id: 'continue', label: 'Leave it to the others', description: 'The house has other hands. They will remember whose were missing.' },
     ]); return true;
   }
   if (t.def === 'purge') {
@@ -302,6 +392,31 @@ export function applyLivingChoice(s, eventId, pick, ctx = {}) {
     else { stress(4); ctx.standing?.('villagers', -2); t.memory.push(`You kept your door shut to ${r.family}.`); note(ctx, 'Carts at the gate', `The cart stood at your door until dark and then went on. You heard later they found a byre two villages down, or did not. It was not your war.`); }
     t.closed = true; return true;
   }
+  if (t.def === 'rival') {
+    const rv = r.rival;
+    if (pick === 'match') { s.hero.gold = Math.max(0, s.hero.gold - 20); stress(4); t.memory.push(`You matched ${rv.name}’s prices.`); note(ctx, 'Across the square', `You cut your prices to ${rv.name}’s and the town bought from whichever door was nearer. Two thin seasons. Neither of you has said the other’s name aloud.`); t.followUp = { kind: 'rival_settled', season: season + 2 }; }
+    else if (pick === 'outwork') { stress(10); const skill = { Blacksmith: 'defense', Merchant: 'persuasion', Miner: 'survival', Healer: 'devotion', Scholar: 'scholarship', Herbalist: 'survival', Farmer: 'survival', Innkeeper: 'persuasion', Bard: 'persuasion', Cartographer: 'scholarship', Alchemist: 'arcana', Soldier: 'weapons' }[s.hero.profession]; if (skill && Number.isFinite(s.hero.skills[skill])) s.hero.skills[skill] += 1; t.memory.push(`You out-worked ${rv.name}.`); note(ctx, 'Across the square', `Longer days and better work, and let the town choose. By the second season the custom was drifting back, and ${rv.name} was charging what you charge.`); t.followUp = { kind: 'rival_settled', season: season + 2 }; }
+    else if (pick === 'expose') { const believed = seededRoll(s.seed, `rival:expose:${t.id}`, 100) < 40 + (s.hero.skills?.persuasion || 0) * 8; if (believed) { ctx.standing?.('villagers', 4); bond(rv.id, -20); t.memory.push(`You showed the town ${rv.name}’s shoddy work, and it agreed.`); note(ctx, 'Across the square', `You held up ${rv.name}’s work in the square beside your own and let the town look. It looked. ${rv.name} has not forgiven you and never will, and the custom came home.`); } else { ctx.standing?.('villagers', -6); bond(rv.id, -30); if (s.hero.station?.ties && s.hero.station.ties.length < 8) s.hero.station.ties.push({ kind: 'hates', name: rv.name, note: 'you called their work shoddy in the square and the town did not agree' }); t.memory.push(`You called ${rv.name}’s work shoddy in the square, and the town did not agree.`); note(ctx, 'Across the square', `You held up ${rv.name}’s work in the square and called it what you thought it was. The town thought you were dear and bitter, and said so, and ${rv.name} has an enemy for life and a full order book.`); } t.closed = true; }
+    else { s.hero.gold = Math.max(0, s.hero.gold - 10); bond(rv.id, 2); t.memory.push(`You let the town choose between you and ${rv.name}.`); note(ctx, 'Across the square', `You kept your prices and your pride. Some of the custom crossed the square and some of it came back, and ${rv.name} nods to you now, which is new.`); t.closed = true; }
+    return true;
+  }
+  if (t.def === 'lie') {
+    const f = r.friend;
+    if (pick === 'lie') { bond(f.id, 15); ctx.standing?.('order', -3); t.memory.push(`You lied for ${f.name} about ${r.matter}.`); note(ctx, 'A favour', `You said what ${f.name} asked, to the people who asked. They believed you, or they wrote it down. ${f.name} did not thank you, which was the thanks.`); t.followUp = { kind: 'lie_out', season: season + 1 }; }
+    else if (pick === 'truth') { bond(f.id, -30); ctx.standing?.('order', 4); t.memory.push(`You would not lie for ${f.name}.`); note(ctx, 'A favour', `You said you would not lie for them, and watched the friendship go out of ${f.name}’s face like a lamp. They went back out into the dark. You hear they managed.`); t.closed = true; }
+    else { bond(f.id, -10); t.memory.push(`You said nothing, for ${f.name} or against.`); note(ctx, 'A favour', `You said nothing to anyone, which is what you told ${f.name} you would do. They nodded as if it were less than they had hoped, because it was.`); t.closed = true; }
+    return true;
+  }
+  if (t.def === 'bedside') {
+    const kin = r.kin;
+    if (pick === 'go') { ctx.addObligation?.(`living_bedside_${t.id}`, `Reach ${kin.name}’s bedside`, 60, `${kin.name} is not getting up. Be at home within the season.`); t.obligation = `living_bedside_${t.id}`; t.memory.push(`You dropped everything to reach ${kin.name}.`); note(ctx, 'A sickbed', `You dropped what you were holding. Sixty days to the bedside; the road is what it is.`); return true; }
+    if (pick === 'send') { s.hero.gold = Math.max(0, s.hero.gold - 40); bond(kin.id, 6); t.chance = 85; t.memory.push(`You sent money for a physician for ${kin.name}.`); note(ctx, 'A sickbed', `Forty gold by the next carter, and a letter that was not you.`); }
+    else if (pick === 'write') { bond(kin.id, 2); t.chance = 60; t.memory.push(`You wrote to ${kin.name} and finished the work.`); note(ctx, 'A sickbed', `A letter back, and the work finished first. The letter took three weeks.`); }
+    else if (pick === 'nurse') { stress(8); s.hero.gold = Math.max(0, s.hero.gold - 10); bond(kin.id, 12); t.chance = 75; t.memory.push(`You nursed ${kin.name} yourself.`); note(ctx, 'A sickbed', `Weeks at the bedside, the basin and the spoon and the window, and the work undone. ${kin.name} knew you were there, mostly.`); }
+    else if (pick === 'physician') { s.hero.gold = Math.max(0, s.hero.gold - 40); bond(kin.id, 6); t.chance = 90; t.memory.push(`You paid a physician for ${kin.name}.`); note(ctx, 'A sickbed', `Forty gold to a physician who came, looked, bled and left a bottle. The bottle helped, or the looking did.`); }
+    else { bond(kin.id, -10); t.chance = r.cause === 'plague' ? 40 : 55; t.memory.push(`You left ${kin.name}’s sickbed to the others.`); note(ctx, 'A sickbed', `The house had other hands. They remember whose were missing.`); }
+    t.followUp = { kind: 'sickbed', season: season + 1 }; return true;
+  }
   if (t.def === 'purge') {
     const kin = r.kin;
     if (pick === 'shelter') { if (kin) bond(kin.id, 15); const found = seededRoll(s.seed, `purge:found:${t.id}`, 100) < 30; if (found) { ctx.standing?.('order', -14); stress(15); if (s.hero.station?.ties && s.hero.station.ties.length < 8) s.hero.station.ties.push({ kind: 'hates', name: 'the officers of the purge', note: 'they found who you hid' }); t.memory.push(kin ? `You hid ${kin.name} and were found out.` : 'You hid and were found.'); note(ctx, 'The marked door', kin ? `${kin.name} in the cellar for a season, and the officers at the door twice. The second time they had a list with your name added in a different hand.` : 'A season in a cousin’s loft. The officers came twice; the second time they had your name in a different hand.'); } else { stress(8); t.memory.push(kin ? `You hid ${kin.name} until it passed.` : 'You hid until it passed.'); note(ctx, 'The marked door', kin ? `${kin.name} in the cellar for a season, eating what you could spare, while the chalk marks spread along the street and stopped two doors from yours.` : 'A season in a cousin’s loft, while the chalk spread along the street and stopped two doors short.'); } }
@@ -328,10 +443,30 @@ function followUp(s, season, t, ctx) {
   } else if (f.kind === 'wolves_return') {
     if (season % 4 === WINTER || seededRoll(s.seed, `wolves:again:${t.id}`, 100) < 50) { const site = s.realm?.sites?.[homeOf(s)]; if (site) site.security = clamp(site.security - 6); t.memory.push('The wolves came back the next winter.'); note(ctx, 'The wolves', `The wolves came back the next winter, as everyone said they would, and took a goat and then a dog and then nothing more, because the village went up the mountain without asking who would.`); }
     else t.memory.push('The wolves did not come back.');
+  } else if (f.kind === 'rival_settled') {
+    const rv = r.rival, failed = seededRoll(s.seed, `rival:fail:${t.id}`, 100) < (t.choice === 'outwork' ? 60 : 45);
+    if (failed) { bond(rv.id, -4); t.memory.push(`${rv.name}’s bench across the square has closed.`); note(ctx, 'Across the square', `${rv.name}’s bench across the square is shuttered. They are working for someone else now, two towns over, and the custom is yours again, and you are not as glad as you expected.`); }
+    else { ctx.standing?.('villagers', -2); t.memory.push(`${rv.name}’s bench across the square has stayed.`); note(ctx, 'Across the square', `${rv.name}’s bench across the square has stayed open. The town has two of you now and pays accordingly. You nod to each other on market days.`); }
+  } else if (f.kind === 'lie_out') {
+    const f2 = r.friend, out = seededRoll(s.seed, `lie:out:${t.id}`, 100) < 30;
+    if (out) { ctx.standing?.('villagers', -6); ctx.standing?.('order', -8); bond(f2.id, -10); t.memory.push(`The lie you told for ${f2.name} came out.`); note(ctx, 'A favour', `It came out, the way these things do: a carter who remembered, a date that did not fit. The watch has your name beside ${f2.name}’s now, and the street has an opinion of you it did not have before.`); shiftNature(s, 'deceitful', 'A favour', 'You lied for a friend and were caught in it, and found the second lie came easier than the first.', ctx); }
+    else { bond(f2.id, 5); t.memory.push(`The lie you told for ${f2.name} held.`); note(ctx, 'A favour', `It held. ${f2.name} was cleared of whatever it was, and brought you a ham at midwinter and did not say why.`); }
+  } else if (f.kind === 'sickbed') {
+    const kin = r.kin, old = (peopleOf(s).find(p => p.id === kin.id)?.age || 0) >= 65, lives = seededRoll(s.seed, `sickbed:${t.id}`, 100) < (t.chance ?? 60) - (old ? 15 : 0);
+    if (lives) { bond(kin.id, 4); t.memory.push(`${kin.name} recovered.`); note(ctx, 'A sickbed', `${kin.name} sat up one morning and asked what day it was, and was angry about the answer. The house breathed out.`); }
+    else { ctx.killPerson?.(kin.id, r.cause === 'plague' ? 'the sickness the carts brought' : 'a sickness that would not lift', s.day, { title: 'A sickbed', text: `${kin.name} died in the night, with the lamp lit and ${t.choice === 'nurse' || t.choice === 'physician' || t.choice === 'go' ? 'you in the chair' : 'someone else in the chair'}. The house is quieter than a house should be.` }); t.memory.push(`${kin.name} died of it.`); if (s.life) s.life.stress = clamp((s.life.stress || 0) + 10); }
   } else if (f.kind === 'road') {
     const safe = seededRoll(s.seed, `road:${t.id}`, 100) < 60;
     if (r.kin) { if (safe) { bond(r.kin.id, 10); t.memory.push(`${r.kin.name} reached safety.`); note(ctx, 'A letter', `A letter in ${r.kin.name}’s hand, from a town you have not seen: arrived, hungry, alive. It does not say thank you and does not need to.`); } else { ctx.killPerson?.(r.kin.id, 'lost on the road in the purge', s.day, { title: 'The road', text: `No letter came from ${r.kin.name}. In the spring a carter who travels that road said there had been bodies in the ditch past the border, and did not say more.` }); t.memory.push(`${r.kin.name} was lost on the road.`); } }
   }
+}
+
+/** The road home: the obligation is kept by being at home before it comes due, and missed by the calendar. */
+function bedsideWatch(s, season, t, ctx) {
+  const ob = (s.obligations || []).find(o => o.id === t.obligation); if (!ob) { t.obligation = null; t.closed = true; return; }
+  const kin = t.roles.kin, bond = (id, n) => { const p = peopleOf(s).find(p => p.id === id); if (p) p.bond = clamp((p.bond || 0) + n); };
+  if (!ob.resolved && s.locationId === homeOf(s)) { ctx.finishObligation?.(ob.id); bond(kin.id, 15); t.obligation = null; t.chance = 80; t.memory.push(`You reached ${kin.name}’s bedside in time.`); note(ctx, 'A sickbed', `You came in off the road with the dust still on you and sat down in the chair, and ${kin.name} opened their eyes and knew you.`); t.followUp = { kind: 'sickbed', season: season + 1 }; }
+  else if (ob.missed) { bond(kin.id, -20); t.obligation = null; t.chance = 50; t.memory.push(`You did not reach ${kin.name} in time.`); note(ctx, 'A sickbed', `The season turned before you did. Whatever happens at the bedside now happens without you, and the house will remember that it did.`); t.followUp = { kind: 'sickbed', season: season + 1 }; }
 }
 
 // ---------------------------------------------------------------------------
@@ -340,7 +475,7 @@ export function livingView(s) {
   const l = living(s); if (!l) return null;
   const season = seasonOf(s.day);
   return {
-    events: l.events.filter(e => e.endSeason > season).map(e => ({ id: e.id, kind: e.kind, region: regionName(e.regionId), text: e.text, seasonsLeft: e.endSeason - season, routed: e.routed })),
+    events: l.events.filter(e => e.endSeason > season && e.kind !== 'want').map(e => ({ id: e.id, kind: e.kind, region: regionName(e.regionId), text: e.text, seasonsLeft: e.endSeason - season, routed: e.routed })),
     threads: l.threads.filter(t => !t.closed || t.memory.length).slice(-6).map(t => ({ id: t.id, def: t.def, stage: t.closed ? 'closed' : t.stage, memory: [...t.memory], waiting: !!t.followUp })),
     news: l.news.slice(-6).map(n => ({ ...n, seasonsAgo: season - n.season })),
     actors: l.actors.map(a => ({ id: a.id, kind: a.kind, name: a.name, region: regionName(a.regionId), goal: a.goal?.kind || null, progress: a.goal?.progress || 0 })),
@@ -351,8 +486,8 @@ export function validateLiving(l, s) {
   const int = (n, max = 1000000) => Number.isSafeInteger(n) && n >= 0 && n <= max, str = (v, max = 400) => typeof v === 'string' && v.length <= max;
   if (!l || typeof l !== 'object' || l.version !== 1 || !int(l.lastSeason) || (s && l.lastSeason > seasonOf(s.day))) return false;
   if (!Array.isArray(l.actors) || l.actors.length > LIMITS.actors || !l.actors.every(a => a && ['court', 'guild', 'beasts'].includes(a.kind) && str(a.id, 60) && str(a.name, 160) && REGION_TEMPLATES.some(r => r.id === a.regionId) && (a.goal === null || a.goal && ['reclaim', 'levy', 'purge', 'build', 'contract', 'monopoly', 'descend'].includes(a.goal.kind) && int(a.goal.progress, 400) && int(a.goal.pace, 60)))) return false;
-  if (!Array.isArray(l.events) || l.events.length > LIMITS.events || !l.events.every(e => e && str(e.id, 20) && ['war', 'levy', 'purge', 'works', 'strike', 'monopoly', 'raid'].includes(e.kind) && REGION_TEMPLATES.some(r => r.id === e.regionId) && int(e.startSeason) && int(e.endSeason) && e.endSeason >= e.startSeason && Array.isArray(e.siteIds) && e.siteIds.length <= 64 && str(e.text, 600) && typeof e.routed === 'boolean')) return false;
-  if (!Array.isArray(l.threads) || l.threads.length > LIMITS.threads * 2 || !l.threads.every(t => t && str(t.id, 20) && ['conscription', 'strike', 'wolves', 'purge', 'refugees'].includes(t.def) && str(t.eventId, 20) && t.roles && typeof t.roles === 'object' && int(t.season) && ['open', 'chosen'].includes(t.stage) && (t.choice === null || str(t.choice, 20)) && (t.followUp === null || t.followUp && ['return', 'settled', 'wolves_return', 'road'].includes(t.followUp.kind) && int(t.followUp.season)) && Array.isArray(t.memory) && t.memory.length <= 12 && t.memory.every(m => str(m, 300)) && typeof t.closed === 'boolean')) return false;
+  if (!Array.isArray(l.events) || l.events.length > LIMITS.events || !l.events.every(e => e && str(e.id, 20) && ['war', 'levy', 'purge', 'works', 'strike', 'monopoly', 'raid', 'refugees', 'plague', 'want'].includes(e.kind) && REGION_TEMPLATES.some(r => r.id === e.regionId) && int(e.startSeason) && int(e.endSeason) && e.endSeason >= e.startSeason && Array.isArray(e.siteIds) && e.siteIds.length <= 64 && str(e.text, 600) && typeof e.routed === 'boolean')) return false;
+  if (!Array.isArray(l.threads) || l.threads.length > LIMITS.threads * 2 || !l.threads.every(t => t && str(t.id, 20) && ['conscription', 'strike', 'wolves', 'purge', 'refugees', 'rival', 'lie', 'bedside'].includes(t.def) && str(t.eventId, 20) && t.roles && typeof t.roles === 'object' && int(t.season) && ['open', 'chosen'].includes(t.stage) && (t.choice === null || str(t.choice, 20)) && (t.followUp === null || t.followUp && ['return', 'settled', 'wolves_return', 'road', 'rival_settled', 'lie_out', 'sickbed'].includes(t.followUp.kind) && int(t.followUp.season)) && Array.isArray(t.memory) && t.memory.length <= 12 && t.memory.every(m => str(m, 300)) && typeof t.closed === 'boolean' && (t.obligation === undefined || t.obligation === null || str(t.obligation, 60)) && (t.chance === undefined || int(t.chance, 100)))) return false;
   if (!Array.isArray(l.news) || l.news.length > LIMITS.news || !l.news.every(n => n && int(n.season) && str(n.text, 600))) return false;
   if (!l.counters || !int(l.counters.events) || !int(l.counters.threads)) return false;
   if (s?.event?.id?.startsWith('living_') && !l.threads.some(t => t.stage === 'open' && !t.closed && `living_${t.def}` === s.event.id)) return false;

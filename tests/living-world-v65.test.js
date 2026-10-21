@@ -102,7 +102,7 @@ test('the wolves: a raid on the home village asks who will go up the mountain, a
   const pack = s.living.actors.find(a => a.kind === 'beasts'); pack.goal.progress = 99;
   s = untilScene(s, 'living_wolves', 60);
   if (s.event?.id !== 'living_wolves') return;
-  assert.ok(/go up the mountain/.test(s.event.body));
+  assert.ok(/go up the mountain|spear or a dog/.test(s.event.body));
   const hunted = engine.chooseEventOption(s, 'hunt');
   assert.ok(hunted.journal.some(j => j.title === 'The wolves'));
   assert.ok(hunted.living.threads.find(t => t.def === 'wolves').closed);
@@ -171,7 +171,7 @@ test('what cannot reach you stays background: news is bounded, events expire, th
   assert.ok(Array.isArray(v.events) && Array.isArray(v.news) && v.actors.length === s.living.actors.length);
   assert.ok(activeEvents(s).every(e => e.endSeason > seasonOf(s.day)));
   const bad = structuredClone(s); bad.living.actors[0].goal.kind = 'conquer'; assert.equal(validateLiving(bad.living, bad), false);
-  const worse = structuredClone(s); worse.living.events.push({ id: 'x', kind: 'plague', regionId: 'rainward', startSeason: 0, endSeason: 1, siteIds: [], text: '', routed: false }); assert.equal(validateLiving(worse.living, worse), false);
+  const worse = structuredClone(s); worse.living.events.push({ id: 'x', kind: 'famine', regionId: 'rainward', startSeason: 0, endSeason: 1, siteIds: [], text: '', routed: false }); assert.equal(validateLiving(worse.living, worse), false);
   const stray = structuredClone(s); stray.event = { id: 'living_wolves', title: 'x', category: 'y', body: 'z', choices: [{ id: 'hunt', label: 'a', description: 'b' }] }; assert.equal(validateLiving(stray.living, stray), false, 'a scene with no open thread behind it');
 });
 

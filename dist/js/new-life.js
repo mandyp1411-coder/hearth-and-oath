@@ -15,7 +15,7 @@ function pastChoice(s,attempt=0) {
   let preferred=id==='health_concern'?(s.health.pending?.kind==='physical'?'rest':'support'):
     id==='plague_letter'?'later':id==='life_budget'?'simplify':id==='deadline_review'?'pause':
     id==='lineage_bereavement'?['share','private','memorial'][seededRoll(s.seed,`past:grief:${s.day}`,3)]:
-    id==='career_staff'?'decline':id==='retirement'?'continue':id==='school_exam'?'present':id==='hard_winter'?'endure':id==='schooling_rival'?'contest':id==='schooling_temper'?'endure':id==='living_conscription'?(offered.some(c=>c.id==='pay')?'pay':'continue'):id==='living_strike'?'continue':id==='living_wolves'?(offered.some(c=>c.id==='pay')?'pay':'continue'):id==='living_purge'?'shelter':id==='living_refugees'?(s.hero.gold>=40?'shelter':'continue'):null;
+    id==='career_staff'?'decline':id==='retirement'?'continue':id==='school_exam'?'present':id==='hard_winter'?'endure':id==='schooling_rival'?'contest':id==='schooling_temper'?'endure':id==='living_conscription'?(offered.some(c=>c.id==='pay')?'pay':'continue'):id==='living_strike'?'continue':id==='living_wolves'?(offered.some(c=>c.id==='pay')?'pay':'continue'):id==='living_purge'?'shelter':id==='living_refugees'?(s.hero.gold>=40?'shelter':'continue'):id==='living_rival'||id==='living_lie'?'continue':id==='living_bedside'?(offered.some(c=>c.id==='nurse')?'nurse':s.hero.gold>=40?'send':'write'):null;
   const safe=offered.filter(c=>!(id==='family_visit'&&c.id==='gift'&&s.hero.gold<10));
   if(id==='sanctuary_case_capture')preferred='service';
   // A choice the scene refused (a fee the purse cannot meet) is not tried twice: the next sitting takes the next door.
