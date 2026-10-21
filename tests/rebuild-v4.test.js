@@ -58,6 +58,7 @@ function grow(state, target) {
       if (state.event.id === 'health_concern') { state = choose(state, 'continue'); continue; }
       if (state.event.id === 'lineage_bereavement') { state = choose(state, 'private'); continue; }
       if (state.event.id === 'hard_winter') { state = choose(state, 'endure'); continue; }
+      if (state.event.id.startsWith('living_')) { state = choose(state, 'continue'); continue; } // the world takes its course
       assert.match(state.event.id, /^(birth_|fate_)/, 'growing policy must expose any unexpected interruption');
       state = choose(state, state.event.choices.some(item => item.id === 'curiosity') ? 'curiosity' : state.event.choices[0].id);
     } else state = transition(state, value => value.timeline.yearTarget == null ? engine.ageUp(value) : engine.continueAgeUp(value));
@@ -75,7 +76,7 @@ function move(state, id) {
   const startDay = state.day;
   state = transition(state, value => engine.travelTo(value, id));
   let extraDays = 0;
-  const picks = { lycan_fullmoon:'isolate',travel_messenger:'continue',travel_pilgrims:'continue',travel_grave_robber:'continue',travel_fortune:'continue',travel_wagon:'continue',travel_relic:'continue', travel_lore: 'continue', travel_witness: 'continue', travel_caravan: 'continue', travel_sick_traveler: 'continue', travel_bandits: 'avoid', travel_beasts: 'avoid', travel_weather: 'press', travel_delay: 'continue', health_concern: 'continue' };
+  const picks = { lycan_fullmoon:'isolate',living_conscription:'continue',living_strike:'continue',living_wolves:'continue',living_purge:'continue',travel_messenger:'continue',travel_pilgrims:'continue',travel_grave_robber:'continue',travel_fortune:'continue',travel_wagon:'continue',travel_relic:'continue', travel_lore: 'continue', travel_witness: 'continue', travel_caravan: 'continue', travel_sick_traveler: 'continue', travel_bandits: 'avoid', travel_beasts: 'avoid', travel_weather: 'press', travel_delay: 'continue', health_concern: 'continue' };
   for (let step = 0; step < 60 && (state.timeline.journey || state.event); step += 1) {
     if (state.event) {
       const pick = picks[state.event.id];
@@ -214,7 +215,7 @@ test('parented, orphan, and homeless lives retain actual caregivers and free lea
     assert.ok(householdView(state).education.schoolName.includes(state.world.locations.find(place => place.id === 'home').name));
     state = grow(state, 18);
     assert.equal(state.hero.path, 'unformed');
-    for (const person of state.life.people.filter(contact => contact.role === 'relative')) {
+    for (const person of state.life.people.filter(contact => contact.role === 'relative' && contact.alive !== false)) { // the living world can take a relative (v0.65); the dead keep the age they died at
       assert.equal(person.age, person.baseAge + state.age);
       assert.equal(engine.getActions(state).some(item => item.id === `life_court_${person.id}`), false, 'every actual parent, sibling, and guardian is excluded from courtship');
       const refused = transition(state, value => engine.chooseAction(value, `life_court_${person.id}`));

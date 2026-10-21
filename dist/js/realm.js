@@ -99,7 +99,7 @@ export function onRealmTime(s,oldDay,newDay,ctx){
     for(const region of r.regions){
       if(region.ruler.baseAge+Math.floor((y*365-region.ruler.createdDay)/365)>70+agingPolicy(region.ruler).elder-65&&seededRoll(s.seed,`succession:${region.id}:${y}`,3)===0){region.succession++;const p=person(s,`ruler:${region.id}:${region.succession}`,'Courtier',25+seededRoll(s.seed,`heir-age:${region.id}:${y}`,20));region.ruler={...p,id:`ruler:${region.id}:${region.succession}`,baseAge:p.age,createdDay:y*365};history(s,`${region.ruler.name} takes the ${region.regime} of ${regionAt(s,Object.values(r.sites).find(p=>p.regionId===region.id)?.id)?.name||region.id}.`);}
     }
-    if(!r.politics&&y%4===0&&r.wars.filter(w=>w.status==='active').length<2){
+    if(!r.politics&&!s.living&&y%4===0&&r.wars.filter(w=>w.status==='active').length<2){
       const a=r.regions[seededRoll(s.seed,'war-a:'+y,6)],b=r.regions[(r.regions.indexOf(a)+1+seededRoll(s.seed,'war-b:'+y,5))%6];
       const war={id:'war-'+y,a:a.id,b:b.id,startDay:y*365,endsDay:(y+3)*365,status:'active',victor:null,balance:0,causeVersion:25,claimantName:a.ruler.name,grievance:REGION_TEMPLATES.find(t=>t.id===a.id).conflictFlavor[seededRoll(s.seed,'grievance:'+y,4)],terms:'Supply the displaced households, release the road toll, and recognize a limited ceasefire.'};r.wars.push(war);const template=REGION_TEMPLATES.find(t=>t.id===a.id);history(s,`${template.name} and ${REGION_TEMPLATES.find(t=>t.id===b.id).name} enter open conflict. ${war.grievance}`);
     }

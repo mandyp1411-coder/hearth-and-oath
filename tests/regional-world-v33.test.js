@@ -26,7 +26,8 @@ function drain(s){for(let i=0;s.event&&i<100;i++)s=E.chooseEventOption(s,(s.even
 const base=drain(await createLifeAtAge({seed:'regional-foundation-contracts',startAge:22,difficulty:'gentle'}));
 assert.ok(E.validateSave(base));
 function valid(s){assert.ok(E.validateSave(s),s.notice||'The complete save must validate');return s;}
-function fresh(){const s=structuredClone(base);s.realm.wars=[];Object.assign(s.realm.politics,{quests:[],holds:[],deployments:[],dispatches:[],pending:null});return s;}
+// The regional world's own border tensions start wars only where no living world's courts do (v0.65); this file tests the regional tick on its own.
+function fresh(){const s=structuredClone(base);delete s.living;s.realm.wars=[];Object.assign(s.realm.politics,{quests:[],holds:[],deployments:[],dispatches:[],pending:null});return s;}
 function at(s,id,room='gate'){s.locationId=id;s.cartography.route=null;s.cartography.pending=null;s.cartography.offsite=false;s.cartography.interior=null;syncCartography(s);for(const step of serviceWalkPath(s,room)||[])s=valid(E.chooseAction(s,'atlas_room_'+step));return s;}
 function war(s){const pair=s.realm.politics.borders.find(([a,b])=>s.realm.politics.regions[a].capitalId&&s.realm.politics.regions[b].capitalId);return startRegionalWar(s,...pair,s.day,'border');}
 const qfor=(s,kind)=>s.realm.politics.quests.find(q=>q.kind===kind&&q.status==='active');

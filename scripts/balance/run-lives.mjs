@@ -18,7 +18,7 @@ const JSON_OUT = arg('json', null);
 const SEASONS = process.argv.includes('--season');
 
 const alive = s => s.phase !== 'retired' && s.hero.alive !== false;
-function resolveEvents(s, max = 60) { for (let n = 0; s.event && n < max; n++) s = engine.chooseEventOption(s, s.event.choices[0].id); return s; }
+function resolveEvents(s, max = 60) { for (let n = 0; s.event && n < max; n++) s = engine.chooseEventOption(s, (s.event.choices.find(c => !c.disabledReason) || s.event.choices[0]).id); return s; }
 let stops = 0;
 function finishYear(s) {
   const age = s.age;
@@ -70,6 +70,7 @@ function measure(s, start, log) {
     gold: s.hero.gold, debt: b.debt || 0, station: s.hero.station?.id || 'none', joy: s.life?.happiness, stress: s.life?.stress, bodily: s.life?.health, hp: s.hero.hp, maxHp: s.hero.maxHp,
     supportedGold: b.supportedGold || 0, billedGold: b.billedGold || 0, conditions: (s.health?.physical?.length || 0) + (s.health?.mental?.length || 0),
     profession: s.hero.profession, wentIntoDebt: log.debt, worstStress: log.worstStress, minGold: log.minGold, yearsPlayed: s.age - start,
+    worldThreads: s.living ? s.living.counters.threads : null, worldEvents: s.living ? s.living.counters.events : null,
     literate: s.education?.schooling ? s.education.schooling.literate : null, certificate: (s.education?.qualifications || []).some(q => q.route === 'academy') ? 2 : (s.education?.qualifications || []).some(q => q.route !== 'apprenticeship') ? 1 : 0,
   };
 }
@@ -110,6 +111,7 @@ for (const policy of POLICIES) {
   console.log(`died ${r.diedPct}% (median age at death ${r.medianDeathAge ?? '-'}) · causes ${JSON.stringify(r.causes)}`);
   console.log(`gold median ${r.medianGold} · lowest point median ${r.medianMinGold} · ever short of money ${r.everShortPct}%`);
   console.log(`joy ${r.medianJoy} · stress ${r.medianStress} (worst ${r.medianWorstStress}) · bodily ${r.medianBodily} · with a condition at end ${r.conditionsAtEndPct}%`);
+  if (r.rows.some(x => x.worldThreads !== null)) console.log(`  the living world: ${(r.rows.reduce((n, x) => n + (x.worldEvents || 0), 0) / r.rows.length).toFixed(1)} events and ${(r.rows.reduce((n, x) => n + (x.worldThreads || 0), 0) / r.rows.length).toFixed(1)} threads that reached the player, per life`);
   for (const [id, g] of Object.entries(r.byStation)) console.log(`  ${id}: ${g.lives} lives · died ${g.diedPct}% (median ${g.medianDeathAge ?? '-'}) · gold ${g.medianGold} · owed at end ${g.medianDebt} · ever short ${g.everShortPct}%${g.literatePct !== null ? ` · lettered ${g.literatePct}% · schooled ${g.schooledPct}% · grammar ${g.grammarPct}%` : ''}`);
 }
 if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify(results, null, 1));
