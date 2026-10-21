@@ -26,7 +26,8 @@ const PURGE_TARGETS = Object.freeze(['tiefling', 'tiefling', 'goblin', 'orc', 'b
 const ANCESTRY_WORD = Object.freeze({ tiefling: 'the horned', goblin: 'the goblin-born', orc: 'the orc-born', beastfolk: 'the beastfolk', elf: 'the elven', dwarf: 'the dwarven', halfling: 'the halfling', human: 'the human' });
 const LIMITS = Object.freeze({ actors: 14, events: 12, threads: 12, news: 24 });
 
-export const LIVING_EVENTS = { ids: () => ({ living_conscription: ['pay', 'go', 'let'], living_strike: ['strike', 'work', 'mediate'], living_wolves: ['hunt', 'pay', 'stay'], living_purge: ['shelter', 'denounce', 'send'] }) };
+// The house convention: 'continue' is always the choice that lets the world take its course.
+export const LIVING_EVENTS = { ids: () => ({ living_conscription: ['pay', 'go', 'continue'], living_strike: ['continue', 'work', 'mediate'], living_wolves: ['hunt', 'pay', 'continue'], living_purge: ['shelter', 'denounce', 'send', 'continue'] }) };
 
 const regionName = id => REGION_TEMPLATES.find(r => r.id === id)?.name || id;
 const neighboursOf = (s, regionId) => { const borders = s.realm?.politics?.borders; if (Array.isArray(borders) && borders.length) { const rows = borders.filter(b => b.includes(regionId)).map(b => b[0] === regionId ? b[1] : b[0]); if (rows.length) return rows; } return NEIGHBOURS[regionId] || []; };
@@ -215,12 +216,12 @@ export function flushLivingEvent(s, ctx = {}) {
     ctx.setEvent?.('living_conscription', 'The levy', 'The world', `${regionName(ev.regionId || regionOf(s, homeOf(s)))} is at war and the levy has reached your door. ${r.kin.name}, your ${r.kin.relation}, is called. The sergeant has a list and a cart, and will take ${fee} gold instead, or someone else’s name.`, [
       { id: 'pay', label: `Pay the exemption: ${fee} gold`, description: 'The sergeant takes the gold and crosses out the name. The list is long; he will not come back for this one.', ...(s.hero.gold < fee ? { disabledReason: `You have ${s.hero.gold} gold.` } : {}) },
       ...(s.age >= 16 && s.age <= 50 ? [{ id: 'go', label: `Go in ${r.kin.name}’s place`, description: 'A season with the levy. You come back, probably, and not the same.' }] : []),
-      { id: 'let', label: `Let ${r.kin.name} go`, description: 'The cart leaves at dawn. You will hear, or you will not.' },
+      { id: 'continue', label: `Let ${r.kin.name} go`, description: 'The cart leaves at dawn. You will hear, or you will not.' },
     ]); return true;
   }
   if (t.def === 'strike') {
     ctx.setEvent?.('living_strike', 'Tools down', 'The world', `${ev.text || 'The guild has downed tools.'} ${r.how === 'bench' ? `${r.master} has shut the yard and stands with the guild.` : r.how === 'commission' ? 'Your commission cannot be finished while it lasts.' : 'Your trade is the one struck.'} The masters want blacklegs; the strikers want everyone.`, [
-      { id: 'strike', label: 'Down tools with them', description: 'No wages while it lasts. The street remembers who stood.' },
+      { id: 'continue', label: 'Down tools with them', description: 'No wages while it lasts. The street remembers who stood.' },
       { id: 'work', label: 'Work through it', description: 'The masters pay well for it, and the strikers will know your face for years.' },
       { id: 'mediate', label: 'Carry terms between them', description: 'If you can be believed by both. Persuasion.', ...((s.hero.skills?.persuasion || 0) < 4 ? { disabledReason: 'Neither side would listen to you.' } : {}) },
     ]); return true;
@@ -230,7 +231,7 @@ export function flushLivingEvent(s, ctx = {}) {
     ctx.setEvent?.('living_wolves', 'The wolves', 'The world', `The wolves came down early and took ${who} from the edge of ${placeName(s, homeOf(s))}. The village stands in the square with lanterns and asks who will go up the mountain.`, [
       { id: 'hunt', label: 'Go up the mountain', description: 'Survival and weapons, against the pack, in the snow. People remember who went.' },
       { id: 'pay', label: 'Pay for hunters: 30 gold', description: 'Men from the next valley who do this for coin.', ...(s.hero.gold < 30 ? { disabledReason: `You have ${s.hero.gold} gold.` } : {}) },
-      { id: 'stay', label: 'Stay by the fire', description: 'Someone else will go, or nobody will, and the wolves will know the way now.' },
+      { id: 'continue', label: 'Stay by the fire', description: 'Someone else will go, or nobody will, and the wolves will know the way now.' },
     ]); return true;
   }
   if (t.def === 'purge') {
@@ -239,6 +240,7 @@ export function flushLivingEvent(s, ctx = {}) {
       { id: 'shelter', label: kin ? `Hide ${kin.name}` : 'Hide, and wait it out', description: 'In the cellar, the loft, a cousin’s cart. If it comes out, the law will have you both.' },
       ...(kin ? [{ id: 'denounce', label: `Give the officers ${kin.name}’s name first`, description: 'Before someone else does. The court will remember you kindly; nobody else will.' }] : []),
       { id: 'send', label: kin ? `Send ${kin.name} away tonight` : 'Leave tonight', description: 'The road at night, with what can be carried. Safer than the cellar, if the road is safe.' },
+      ...(kin ? [{ id: 'continue', label: 'Keep your door shut, and your mouth', description: `${kin.name} takes their own chances. So does everyone who did nothing.` }] : []),
     ]); return true;
   }
   t.closed = true; return false;
@@ -265,7 +267,7 @@ export function applyLivingChoice(s, eventId, pick, ctx = {}) {
     return true;
   }
   if (t.def === 'strike') {
-    if (pick === 'strike') { s.hero.gold = Math.max(0, s.hero.gold - 15); ctx.standing?.('villagers', 6); ctx.standing?.('order', -3); t.memory.push('You downed tools with the guild.'); note(ctx, 'Tools down', 'You stood with them in the cold outside the yard for a season, and ate thin. The street knows you stood.'); }
+    if (pick === 'continue') { s.hero.gold = Math.max(0, s.hero.gold - 15); ctx.standing?.('villagers', 6); ctx.standing?.('order', -3); t.memory.push('You downed tools with the guild.'); note(ctx, 'Tools down', 'You stood with them in the cold outside the yard for a season, and ate thin. The street knows you stood.'); }
     else if (pick === 'work') { s.hero.gold += 40; ctx.standing?.('villagers', -10); ctx.standing?.('order', 3); if (s.hero.station?.ties) s.hero.station.ties.push({ kind: 'hates', name: `the ${ev.craft || r.craft}s’ guild`, note: 'you worked through their strike' }); t.memory.push('You worked through the strike.'); note(ctx, 'Blackleg', 'Forty gold from the masters for a season’s work with the yard gate barred behind you. Someone has chalked a word on your door. It will be chalked again.'); }
     else { ctx.standing?.('villagers', 4); ctx.standing?.('order', 4); if (Number.isFinite(s.hero.skills?.persuasion)) s.hero.skills.persuasion += 1; t.memory.push('You carried terms between the guild and the masters.'); note(ctx, 'Terms', 'You carried paper between the yard and the hall for a month, and were cursed by both, and the strike ended a season early with your name on the paper.'); }
     t.followUp = { kind: 'settled', season: season + 2 }; return true;
@@ -284,6 +286,7 @@ export function applyLivingChoice(s, eventId, pick, ctx = {}) {
     const kin = r.kin;
     if (pick === 'shelter') { if (kin) bond(kin.id, 15); const found = seededRoll(s.seed, `purge:found:${t.id}`, 100) < 30; if (found) { ctx.addEvidence?.(2, 'An officer of the purge recorded who you hid.'); ctx.standing?.('order', -10); stress(15); t.memory.push(kin ? `You hid ${kin.name} and were found out.` : 'You hid and were found.'); note(ctx, 'The marked door', kin ? `${kin.name} in the cellar for a season, and the officers at the door twice. The second time they had a list with your name added in a different hand.` : 'A season in a cousin’s loft. The officers came twice; the second time they had your name in a different hand.'); } else { stress(8); t.memory.push(kin ? `You hid ${kin.name} until it passed.` : 'You hid until it passed.'); note(ctx, 'The marked door', kin ? `${kin.name} in the cellar for a season, eating what you could spare, while the chalk marks spread along the street and stopped two doors from yours.` : 'A season in a cousin’s loft, while the chalk spread along the street and stopped two doors short.'); } }
     else if (pick === 'denounce' && kin) { bond(kin.id, -60); ctx.standing?.('order', 8); ctx.standing?.('villagers', -8); if (s.hero.station?.ties) s.hero.station.ties.push({ kind: 'hates', name: kin.name, note: 'you gave their name to the purge' }); stress(10); shiftNature(s, 'hard', 'The marked door', 'You gave a name, and something in you closed over it.', ctx); t.memory.push(`You gave ${kin.name}’s name to the officers.`); note(ctx, 'The marked door', `You gave the officers ${kin.name}’s name before anyone else could. The court will remember you kindly. ${kin.name} was taken at dusk and did not look at you.`); }
+    else if (pick === 'continue' && kin) { bond(kin.id, -20); const taken = seededRoll(s.seed, `purge:taken:${t.id}`, 100) < 50; if (taken) { ctx.killPerson?.(kin.id, 'taken in the purge', s.day, { title: 'The marked door', text: `${kin.name} was taken from the house two streets over with the chalk still wet on the door. You kept yours shut. Nobody has said anything about it to you, and nobody needs to.` }); t.memory.push(`${kin.name} was taken while you kept your door shut.`); } else { t.memory.push(`${kin.name} slipped the purge while you kept your door shut.`); note(ctx, 'The marked door', `${kin.name} slipped the officers by a night and a cousin’s cart, and knows you did not open your door. The chalk stopped two streets short of yours.`); } stress(10); }
     else { if (kin) bond(kin.id, -8); t.followUp = { kind: 'road', season: season + 2 }; t.memory.push(kin ? `You sent ${kin.name} away by night.` : 'You left by night.'); note(ctx, 'The marked door', kin ? `${kin.name} on the road before dawn with a bundle and a letter to someone in ${regionName((NEIGHBOURS[ev.regionId] || ['rainward'])[0])}. You will know by the thaw whether it arrived.` : 'The road before dawn, with what you could carry.'); }
     if (!t.followUp) t.closed = true; return true;
   }
@@ -298,9 +301,9 @@ function followUp(s, season, t, ctx) {
     else if (roll < 45) { bond(r.kin.id, 6); t.memory.push(`${r.kin.name} came back from the levy wounded.`); note(ctx, 'The levy', `${r.kin.name} came back with the carts, with a leg that will not bend and a way of looking at a door before going through it.`); }
     else { bond(r.kin.id, 10); t.memory.push(`${r.kin.name} came back from the levy.`); note(ctx, 'The levy', `${r.kin.name} came back with the carts, thinner, with twenty gold and stories that stop in the middle. You were at the gate.`); }
   } else if (f.kind === 'settled') {
-    const won = seededRoll(s.seed, `strike:${t.id}`, 100) < (t.choice === 'strike' ? 55 : t.choice === 'mediate' ? 70 : 40);
+    const won = seededRoll(s.seed, `strike:${t.id}`, 100) < (t.choice === 'continue' ? 55 : t.choice === 'mediate' ? 70 : 40);
     t.memory.push(won ? 'The strike was won.' : 'The strike was broken.');
-    note(ctx, 'Tools up', won ? `The strike is won: the guild’s terms, a copper more a day, and the masters’ long memory. ${t.choice === 'work' ? 'The word on your door has been painted over, and everyone can still read it.' : ''}` : `The strike is broken: the masters’ terms, the yard open, and three men who will not be hired again anywhere in ${regionName(regionOf(s, homeOf(s)))}. ${t.choice === 'strike' ? 'You are not one of the three, this time.' : ''}`);
+    note(ctx, 'Tools up', won ? `The strike is won: the guild’s terms, a copper more a day, and the masters’ long memory. ${t.choice === 'work' ? 'The word on your door has been painted over, and everyone can still read it.' : ''}` : `The strike is broken: the masters’ terms, the yard open, and three men who will not be hired again anywhere in ${regionName(regionOf(s, homeOf(s)))}. ${t.choice === 'continue' ? 'You are not one of the three, this time.' : ''}`);
   } else if (f.kind === 'wolves_return') {
     if (season % 4 === WINTER || seededRoll(s.seed, `wolves:again:${t.id}`, 100) < 50) { const site = s.realm?.sites?.[homeOf(s)]; if (site) site.security = clamp(site.security - 6); t.memory.push('The wolves came back the next winter.'); note(ctx, 'The wolves', `The wolves came back the next winter, as everyone said they would, and took a goat and then a dog and then nothing more, because the village went up the mountain without asking who would.`); }
     else t.memory.push('The wolves did not come back.');

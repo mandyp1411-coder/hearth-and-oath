@@ -77,7 +77,7 @@ test('the levy reaches your door through your own people: pay, go in their place
   const kin = s.living.threads.find(t => t.def === 'conscription').roles.kin;
   assert.ok(kin.name && kin.relation);
   assert.ok(s.event.body.includes(kin.name));
-  assert.deepEqual(s.event.choices.map(c => c.id).filter(id => id !== 'go'), ['pay', 'let']);
+  assert.deepEqual(s.event.choices.map(c => c.id).filter(id => id !== 'go'), ['pay', 'continue']);
   assert.equal(engine.validateSave(s), true);
   // pay
   const rich = structuredClone(s); rich.hero.gold = 200;
@@ -86,7 +86,7 @@ test('the levy reaches your door through your own people: pay, go in their place
   assert.ok(paid.living.threads.find(t => t.def === 'conscription').closed);
   assert.ok(paid.journal.some(j => j.title === 'The levy' && /crosses out/.test(j.text)));
   // let
-  const gone = engine.chooseEventOption(s, 'let');
+  const gone = engine.chooseEventOption(s, 'continue');
   const d = gone.realm.politics.deployments.find(d => d.personId === kin.id);
   assert.ok(d && d.status === 'deployed', 'the regional world keeps the deployment');
   assert.ok(gone.living.threads.find(t => t.def === 'conscription').closed);
@@ -106,7 +106,7 @@ test('the wolves: a raid on the home village asks who will go up the mountain, a
   const hunted = engine.chooseEventOption(s, 'hunt');
   assert.ok(hunted.journal.some(j => j.title === 'The wolves'));
   assert.ok(hunted.living.threads.find(t => t.def === 'wolves').closed);
-  const stayed = engine.chooseEventOption(s, 'stay');
+  const stayed = engine.chooseEventOption(s, 'continue');
   const t = stayed.living.threads.find(x => x.def === 'wolves');
   assert.equal(t.followUp.kind, 'wolves_return');
   assert.ok(stayed.factions.villagers < s.factions.villagers);
