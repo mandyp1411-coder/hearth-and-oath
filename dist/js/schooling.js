@@ -423,7 +423,8 @@ export function makeClassmates(s, ctx = {}) {
   const subjects = ['rhetoric', 'law', 'astronomy', 'anatomy', 'accounting', 'heraldry'];
   for (let i = 0; i < 2; i++) {
     const name = generatePersonName(s.seed, `classmate:${i}`), subject = subjects[seededRoll(s.seed, `classmate:subject:${i}`, subjects.length)];
-    const nature = ['proud', 'quiet', 'quick', 'kind', 'sly'][seededRoll(s.seed, `classmate:nature:${i}`, 5)];
+    const natures = ['proud', 'quiet', 'quick', 'kind', 'sly'].filter(n => !k.classmates.some(c => c.nature === n));
+    const nature = natures[seededRoll(s.seed, `classmate:nature:${i}`, natures.length)];
     k.classmates.push({ id: `classmate-${i}`, name, subject, nature, standing: 0, bornDay: s.day - s.age * 365 + (seededRoll(s.seed, `classmate:born:${i}`, 365) - 182), fate: null, contests: [], memories: [] });
   }
   note(ctx, 'The bench', `Two names you will know for the rest of your life: ${k.classmates[0].name}, ${k.classmates[0].nature}, and ${k.classmates[1].name}, ${k.classmates[1].nature}. You sit between them because nobody else would.`, 'education');
@@ -465,8 +466,10 @@ export function applySchoolingChoice(s, eventId, pick, ctx = {}) {
   if (eventId === 'schooling_rival' && k.pending.kind === 'rival') {
     const c = k.classmates.find(x => x.id === k.pending.classmateId); k.pending = null; if (!c) return true;
     const subject = SUBJECTS[c.subject]?.label.toLowerCase() || c.subject;
-    const mine = (s.education.performance || 50) + ((s.hero.attributes?.intellect || 3) - 3) * 5 + studyLevel(s, c.subject) * 3 + seededRoll(s.seed, `rival:mine:${s.age}`, 30);
-    const theirs = 55 + (c.nature === 'quick' ? 10 : c.nature === 'quiet' ? 8 : 0) + seededRoll(s.seed, `rival:theirs:${s.age}`, 30);
+    // Peers: the two beside you were admitted the same way, and work as hard as the school asks of everyone.
+    const perf = s.education.performance || 50;
+    const mine = perf + ((s.hero.attributes?.intellect || 3) - 3) * 4 + studyLevel(s, c.subject) * 2 + seededRoll(s.seed, `rival:mine:${s.age}`, 30);
+    const theirs = 20 + Math.round(perf * 0.8) + (c.nature === 'quick' ? 12 : c.nature === 'quiet' ? 10 : c.nature === 'proud' ? 6 : 0) + c.contests.filter(x => !x.won).length * 2 + seededRoll(s.seed, `rival:theirs:${s.age}`, 30);
     let won = false, text;
     if (pick === 'yield') { c.standing++; text = `You let ${c.name} take the ${subject} prize, and said your piece badly enough that nobody but ${c.name} knew. They knew.`; c.memories.push(`You let them have the ${subject} prize at ${s.age}.`); }
     else if (pick === 'cheat') { won = seededRoll(s.seed, `rival:cheat:${s.age}`, 100) < 70; if (won) { c.standing -= 2; text = `You took the ${subject} prize with ${c.name}’s own notes, copied by candle. ${c.name} does not know how. The master, perhaps, suspects.`; } else { c.standing -= 2; s.education.performance = Math.max(0, (s.education.performance || 50) - 10); text = `The master found ${c.name}’s notes in your hand. The prize went to ${c.name}; your name went into a book the master keeps.`; } c.memories.push(`Their notes went missing before the ${subject} prize at ${s.age}.`); }

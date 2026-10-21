@@ -102,11 +102,22 @@ async function generateLife(config, { onProgress, shouldCancel } = {}, draws = {
       const place=getActions(s).find(a=>/^school_place_/.test(a.id)&&!a.disabledReason);if(place&&tryOnce(place.id))continue;
       const reads=getActions(s).filter(a=>/^school_read_/.test(a.id)&&!a.disabledReason);if(reads.length&&tryOnce(reads[seededRoll(s.seed,'past:major',reads.length)].id))continue;}
     if(s.education.schooling?.institution&&!s.education.schooling.institution.degree){if(tryTimes('school_lecture',6))continue;if(tryOnce('school_degree'))continue;}
-    if(s.age>=16&&s.hero.profession==='Unemployed'){
+    // A student does not take a trade; a graduate takes the one the degree fits, even from another.
+    const studying=s.education.schooling?.institution&&!s.education.schooling.institution.degree;
+    const graduate=s.education.schooling?.credentials?.find(c=>c.kind!=='journeyman'),graduateFit=graduate&&({degree:{medicine:'healer',law:'scholar',history:'scholar',natural_philosophy:'alchemist'}[graduate.major]||'scholar',clerkship:'scholar',commission:'soldier',licence:'alchemist',orders:'scholar'})[graduate.kind];
+    if(graduateFit&&s.hero.profession!=='Unemployed'&&PROFESSION_CATALOG.find(j=>j.id===graduateFit)?.name!==s.hero.profession&&!civilianEntryReason(s,{profession:PROFESSION_CATALOG.find(j=>j.id===graduateFit).name})&&tryOnce(`career_choose_${graduateFit}`))continue;
+    if(s.age>=16&&s.hero.profession==='Unemployed'&&!studying){
       // The trades that would have this life, wherever it is standing; the walk to the mentor is the action's own.
       const served=s.education.schooling?.credentials?.find(c=>c.kind==='journeyman')?.major,craft=served&&PROFESSION_CATALOG.find(j=>j.id===served&&!civilianEntryReason(s,{profession:j.name}));
       if(craft&&tryOnce(`career_choose_${craft.id}`))continue; // a journeyman takes up the trade the bond taught
-      const jobs=PROFESSION_CATALOG.filter(j=>j.name!=='Unemployed'&&!civilianEntryReason(s,{profession:j.name})).map(j=>`career_choose_${j.id}`);
+      // What the examinations made you is what you do: a doctor heals, a clerk keeps the archive, an officer soldiers, a licensed mage works the fire.
+      const learned=s.education.schooling?.credentials?.find(c=>c.kind!=='journeyman'),fit=learned&&({degree:{medicine:'healer',law:'scholar',history:'scholar',natural_philosophy:'alchemist'}[learned.major]||'scholar',clerkship:'scholar',commission:'soldier',licence:'alchemist',orders:'scholar'})[learned.kind];
+      const fitJob=fit&&PROFESSION_CATALOG.find(j=>j.id===fit&&!civilianEntryReason(s,{profession:j.name}));
+      if(fitJob&&tryOnce(`career_choose_${fitJob.id}`))continue;
+      const open=PROFESSION_CATALOG.filter(j=>j.name!=='Unemployed'&&!civilianEntryReason(s,{profession:j.name}));
+      // A high house does not send its children down the mine or behind the plough while any other door is open.
+      const gentle=['gentry','noble','royal'].includes(s.hero.station?.id)?open.filter(j=>!['miner','farmer','blacksmith'].includes(j.id)):open;
+      const jobs=(gentle.length?gentle:open).map(j=>`career_choose_${j.id}`);
       if(jobs.length&&tryOnce(jobs[seededRoll(s.seed,'past:livelihood',jobs.length)]))continue;
     }
     // A sensible past pays what it owes when it can.
