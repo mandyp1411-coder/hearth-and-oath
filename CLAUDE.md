@@ -97,7 +97,10 @@ stay for legacy saves. Battle contexts must be strings and `kind: 'delve'`
 is in `validBattle`'s list; defeat below ground is death (`afterDelveBattle`)
 except on `gentle`. Tests that are about the maze on an edition life
 `delete s.delves`, the way they `delete s.mazeBook` to reach the older
-engine; `getActions` returns only `delve_*` actions while below.
+engine; `getActions` returns only `delve_*` actions while below. The
+playtest Player (`scripts/playtest-story.mjs`) walks a delve with `delve()`
+the way it walks a maze, so the campaign playthroughs cover the authored
+delves end to end.
 
 Test fixtures that are not about birth should pin a station
 (`station: rollBirthCircumstances(seed, 'common', ancestry)`): a bound

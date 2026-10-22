@@ -10,6 +10,7 @@ Version 0.67.0 is The delve: dungeons as places with a history. New lives only.
 - **It is deadly.** What lives at the bottom is not scaled to you. Defeat below ground is death; on the gentle setting your companions carry you out and the place is left awake.
 - **It touches the world above.** A cleared lair is a quieter town — the road past it walked after dark, the place remembering. A woken lair left alone grows bolder by the season until something comes up out of it and takes a child from the edge houses, and the village asks who will go down after it. What you carry up has an owner: the shrine, a guild, a family two streets over — return it, sell it to a dealer who does not ask, or keep it on the shelf where its owner may one day see it.
 - **Legacy.** An heir takes up the same places: what was put to rest stays quiet, what was woken is still awake, and what sat on the shelf is theirs.
+- **Also fixed.** On the road, the shrine keeper's bowl, the pilgrims' pot and the reader's cup are shut when the purse is short instead of refusing you after you chose them.
 - Old saves keep their grid mazes, which are untouched.
 
 Version 0.66.0 is The guild, the first path built at full depth. New lives only.

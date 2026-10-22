@@ -12,6 +12,7 @@ const types = ['bandits', 'beasts', 'weather', 'caravan', 'witness', 'sick_trave
 const clone = value => structuredClone(value);
 const place = (state, id) => state.world?.locations?.find(location => location.id === id);
 const choice = (id, label, description) => ({ id, label, description });
+const PAID = { offering: 3, reading: 2, donate: 4 }; // the road's paid choices, shut when the purse is short rather than refused after
 
 function roadGuidance(state) {
   if ((state.revision || 0) < 5) return { reduction: 0, fatigue: 0, accounts: [] };
@@ -117,7 +118,7 @@ function scene(state, pending) {
   };
   const selected = data[pending.type];
   if(pending.type==='weather'&&pending.account){const rough=/rain|snow|storm|fog|mist|wind|frost|ash|spore/i.test(pending.account.weather),weather=String(pending.account.weather||''),Weather=weather.charAt(0).toUpperCase()+weather.slice(1),party=state.companions?.some(p=>p.recruited&&p.active&&p.alive!==false);selected.title=rough?'The weather on this stretch':'An exposed stretch of road';selected.body=`Between ${from} and ${to}, the road crosses an exposed bank. ${rough?`${Weather} limits the open crossing.`:`The air brings ${weather}; the bank still gives little shelter.`} Waiting lets ${party?'the party':'you'} find a sheltered crossing. Pressing on costs bodily health; taking cover costs time.`;selected.choices[0]={...selected.choices[0],label:'Wait and find a sheltered crossing'};selected.choices[1]={...selected.choices[1],label:'Cross the exposed stretch now'};}
-  return { id: `travel_${pending.type}`, ...selected,body:pending.account?describeRoadAccount(pending.account,selected.body):selected.body, choices: selected.choices.filter(option => !['fight','extort','join','pocket'].includes(option.id) || state.age >= 16) };
+  return { id: `travel_${pending.type}`, ...selected,body:pending.account?describeRoadAccount(pending.account,selected.body):selected.body, choices: selected.choices.filter(option => !['fight','extort','join','pocket'].includes(option.id) || state.age >= 16).map(option => PAID[option.id] && state.hero.gold < PAID[option.id] ? { ...option, disabledReason: `Requires ${PAID[option.id]} gold` } : option) };
 }
 
 export function onTravelLeg(state, { actualDays = 0, legIndex = state.timeline?.journey?.legIndex } = {}, ctx = {}) {
