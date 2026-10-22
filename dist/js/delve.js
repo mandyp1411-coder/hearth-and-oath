@@ -220,15 +220,16 @@ function applies(s, id, r) {
 }
 function revealSecret(s, r, why) {
   const secret = s.delve.rooms.find(x => x.kind === 'secret');
-  if (secret?.hidden && r.exits.includes('secret')) { secret.hidden = false; log(s, `${why} ${secret.name}: a way the builders hid.`); return true; }
-  return false;
+  if (secret?.hidden && r.exits.includes('secret')) { secret.hidden = false; return `${why} ${secret.name.toLowerCase()}: a way the builders hid.`; }
+  return null;
 }
 function notice(s, r, ctx) {
   const d = s.delve; if (!sees(s, d)) return [];
   const hits = [];
   for (const id of d.cues) { const cue = CUES[id]; if (!cue || id === 'darksight' || r.noticed.includes(id) || !cue.who(s) || !applies(s, id, r)) continue; r.noticed.push(id); hits.push(id); if (cue.study) useStudy(s, cue.study); }
   // The right eyes find the door the builders hid: a draught, a hollow note, a track that goes into the wall.
-  if (hits.some(id => ['thief', 'miner', 'hunter', 'arcanist'].includes(id)) || hits.includes('read') && r.inscription) revealSecret(s, r, { thief: 'A draught where no draught should be, and behind the slab', miner: 'The wall rings hollow under your knuckle, and behind it', hunter: 'The tracks go into the wall, and so does', arcanist: 'The weave is thin along one wall, and behind it', read: 'What is written here points to' }[hits.find(id => ['thief', 'miner', 'hunter', 'arcanist', 'read'].includes(id))] || 'You find');
+  hits.reveal = null;
+  if (hits.some(id => ['thief', 'miner', 'hunter', 'arcanist'].includes(id)) || hits.includes('read') && r.inscription) hits.reveal = revealSecret(s, r, { thief: 'A draught where no draught should be, and behind the slab', miner: 'The wall rings hollow under your knuckle, and behind it', hunter: 'The tracks go into the wall, and so does', arcanist: 'The weave is thin along one wall, and behind it', read: 'What is written here points to' }[hits.find(id => ['thief', 'miner', 'hunter', 'arcanist', 'read'].includes(id))] || 'You find');
   return hits;
 }
 function arrive(s, ctx, id, first = false) {
@@ -239,6 +240,7 @@ function arrive(s, ctx, id, first = false) {
   const lines = [`${r.name}. ${r.text}`];
   if (dark) lines.push('You cannot see your hand. Whatever is written here, whatever is set for the unwary, you will learn by touch.');
   for (const id of hits) { const t = CUES[id].text(r); if (t) lines.push(t); }
+  if (hits.reveal) lines.push(hits.reveal);
   // What bites: a hazard noticed is a hazard stepped round; one not noticed takes its due.
   if (r.hazard && !r.hazard.sprung && !r.cleared) {
     if (!dark && r.noticed.includes(r.hazard.cue)) { r.hazard.sprung = true; lines.push(`You step round it. ${{ trap: 'The wire stays taut and the slab stays level.', ceiling: 'You are out from under before it comes down behind you.', water: 'You keep to the shelf and out of the water.', gas: 'You hold your breath and go through quick.', ward: 'You step over the weave where it is thin.', thorns: 'You go between the vines where they are sleeping.', drop: 'You see the edge before the edge sees you.' }[r.hazard.kind] || ''}`); }
@@ -275,7 +277,7 @@ export function applyDelveAction(s, id, ctx = {}) {
   const d = s.delve; if (!d || typeof id !== 'string' || !id.startsWith('delve_') || s.event || s.battle) return false;
   const r = here(s);
   if (id.startsWith('delve_go_')) { const to = id.slice(9); if (!r.exits.includes(to) || room(s, to).hidden) return false; arrive(s, ctx, to); return true; }
-  if (id === 'delve_search') { if (r.searched || !sees(s, d) || r.encounter && !r.encounter.cleared) return false; r.searched = true; spendHours(s, 1, ctx); d.noise = clamp(d.noise + NOISE.search); const door = revealSecret(s, r, 'An hour on your knees along the walls finds'); if (r.find && !r.find.taken) log(s, `You find it: ${r.find.text}`); else if (!door) log(s, 'Dust, bones, nothing you can carry. An hour of light gone.'); return true; }
+  if (id === 'delve_search') { if (r.searched || !sees(s, d) || r.encounter && !r.encounter.cleared) return false; r.searched = true; spendHours(s, 1, ctx); d.noise = clamp(d.noise + NOISE.search); const door = revealSecret(s, r, 'An hour on your knees along the walls finds'); if (door) log(s, door); if (r.find && !r.find.taken) log(s, `You find it: ${r.find.text}`); else if (!door) log(s, 'Dust, bones, nothing you can carry. An hour of light gone.'); return true; }
   if (id === 'delve_take') { if (!r.find || r.find.taken || !r.searched) return false; const f = r.find; f.taken = true; r.cleared = r.cleared || !r.encounter; if (f.gold) { s.hero.gold += f.gold; d.loot.gold += f.gold; } for (const [k, n] of Object.entries(f.materials || {})) { if (s.equipment?.materials) s.equipment.materials[k] = Math.min(100000, (s.equipment.materials[k] || 0) + n); d.loot.materials[k] = (d.loot.materials[k] || 0) + n; } if (f.herbs) { s.flags.herbs = (s.flags.herbs || 0) + f.herbs; d.loot.herbs += f.herbs; } if (f.kind === 'page') d.finds.push({ kind: 'page', room: r.name, text: f.text }); if (d.finds.length > LIMITS.finds) d.finds.splice(0, 1); if (f.kind === 'cache' && f.gold >= 8) { d.supplies.torches++; log(s, 'There is a torch in it too, which you take.'); } return true; }
   if (id === 'delve_relic') { if (!r.relic || r.relic.taken || !(r.objective?.done || d.objectiveDone)) return false; r.relic.taken = true; placeRecord(s, d.id).relicTaken = true; d.finds.push({ kind: r.relic.kind, name: r.relic.name, owner: r.relic.owner, ownerName: r.relic.ownerName || null, text: r.relic.text }); log(s, `You take ${r.relic.name}. It is heavier than it looks, the way owned things are.`); return true; }
   if (id === 'delve_claim') { const lairAlive = !d.lairCleared && d.rooms.find(x => x.kind === 'lair').encounter; if (!r.objective || r.objective.done || lairAlive && !d.rooms.find(x => x.kind === 'secret')?.seen) return false; if (lairAlive) { d.noise = Math.max(d.noise, STIRRING); log(s, `${cap(d.lairName)} has heard you. Whatever you do next, do it quickly.`); } r.objective.done = true; d.objectiveDone = true; r.cleared = true; if (r.objective.herbs) { s.flags.herbs = (s.flags.herbs || 0) + r.objective.herbs; d.loot.herbs += r.objective.herbs; } if (r.objective.kind === 'hoard') { const gold = 20 + d.tier * 12 + d.floor * 8; s.hero.gold += gold; d.loot.gold += gold; } if (d.questId && s.campaign) { s.campaign.facts['dungeon_' + d.questId] = true; ctx.touchCampaign?.(); } log(s, r.objective.text); note(ctx, d.title, `${r.name}: ${r.objective.text} ${d.hours} hours below, ${d.floor === d.floors ? 'and the bottom reached' : 'and further to go'}.`); return true; }

@@ -65,10 +65,10 @@ test('what you notice depends on who you are: letters read the lintel, a thief s
   // A miner finds the door the builders hid.
   let m = structuredClone(base); m.hero.profession = 'Miner'; m = act(m, 'adventure_descend'); m = act(m, 'delve_go_hub');
   const doorRoom = m.delve.rooms.find(x => x.exits.includes('secret')); doorRoom.encounter = null; doorRoom.hazard = null;
-  m = act(m, `delve_go_${doorRoom.id}`); assert.equal(room(m, 'secret').hidden, false); assert.ok(m.delve.log.at(-1).includes('a way the builders hid'));
+  m = act(m, `delve_go_${doorRoom.id}`); assert.equal(room(m, 'secret').hidden, false); assert.ok(m.delve.log.some(l => l.includes('a way the builders hid')));
   assert.ok(engine.getActions(m).some(a => a.id === 'delve_go_secret'));
   // Searching finds it too, for those without the eyes.
-  let q = structuredClone(base); q = act(q, 'adventure_descend'); q = act(q, 'delve_go_hub'); const dr = q.delve.rooms.find(x => x.exits.includes('secret')); dr.encounter = null; dr.hazard = null; q = act(q, `delve_go_${dr.id}`); assert.equal(room(q, 'secret').hidden, true); q = act(q, 'delve_search'); assert.equal(room(q, 'secret').hidden, false);
+  let q = structuredClone(base); q.hero.skills.stealth = 0; q.hero.skills.survival = 0; q.hero.skills.arcana = 0; q.hero.profession = 'Farmer'; q.hero.specialization = null; q.education.schooling.literate = false; q = act(q, 'adventure_descend'); q = act(q, 'delve_go_hub'); const dr = q.delve.rooms.find(x => x.exits.includes('secret')); dr.encounter = null; dr.hazard = null; q = act(q, `delve_go_${dr.id}`); assert.equal(room(q, 'secret').hidden, true); q = act(q, 'delve_search'); assert.equal(room(q, 'secret').hidden, false);
 });
 
 test('the dungeon reacts: fighting wakes the halls and the lair comes looking; a room is safe to camp in only once you have made it so', () => {
@@ -84,8 +84,8 @@ test('the dungeon reacts: fighting wakes the halls and the lair comes looking; a
   s.hero.hp = 40; const rations = s.adventuring.rations, hours = s.delve.hours; const camp = engine.getActions(s).find(a => a.id === 'delve_camp'); assert.ok(camp && !camp.disabledReason, camp?.disabledReason);
   s = act(s, 'delve_camp'); assert.equal(s.adventuring.rations, rations - 1); assert.equal(s.delve.hours, hours + 8); assert.equal(s.hero.hp, 40 + Math.round(150 * 0.4)); assert.equal(s.delve.noise, Math.max(0, noise + NOISE.fight + NOISE.camp));
   // Awake: the next fight is a tier harder. Stirring: the lair comes to you.
-  let loud = structuredClone(s); loud.delve.noise = AWAKE; const other = loud.delve.rooms.find(x => x.kind === 'chamber' && x.encounter && !x.encounter.cleared); if (other) { other.hazard = null; loud = act(loud, 'delve_go_hub'); loud = engine.chooseAction(loud, `delve_go_${other.id}`); assert.equal(loud.battle.context.tier, String(other.encounter.tier + 1)); }
-  let stirring = structuredClone(s); stirring.delve.noise = STIRRING; const quiet = stirring.delve.rooms.find(x => x.kind === 'chamber' && !x.encounter); if (quiet) { quiet.hazard = null; stirring = act(stirring, 'delve_go_hub'); stirring = engine.chooseAction(stirring, `delve_go_${quiet.id}`); assert.ok(stirring.battle); assert.equal(stirring.battle.context.boss, 'yes'); assert.equal(stirring.battle.context.roomId, 'lair'); assert.equal(stirring.battle.context.cameTo, quiet.id); assert.equal(engine.validateSave(stirring), true); }
+  let loud = act(structuredClone(s), 'delve_go_hub'); loud.delve.noise = AWAKE; const other = loud.delve.rooms.find(x => x.kind === 'chamber' && x.encounter && !x.encounter.cleared); if (other) { other.hazard = null; loud = engine.chooseAction(loud, `delve_go_${other.id}`); assert.equal(loud.battle.context.tier, String(other.encounter.tier + 1)); }
+  let stirring = act(structuredClone(s), 'delve_go_hub'); stirring.delve.noise = STIRRING; const quiet = stirring.delve.rooms.find(x => x.kind === 'chamber' && !x.encounter); if (quiet) { quiet.hazard = null; stirring = engine.chooseAction(stirring, `delve_go_${quiet.id}`); assert.ok(stirring.battle); assert.equal(stirring.battle.context.boss, 'yes'); assert.equal(stirring.battle.context.roomId, 'lair'); assert.equal(stirring.battle.context.cameTo, quiet.id); assert.equal(engine.validateSave(stirring), true); }
 });
 
 test('the authored cistern: the campaign quest goes down into the premise, the keeper’s chamber is the lair, the spring is the objective, and the quest is credited', () => {
@@ -102,10 +102,10 @@ test('the authored cistern: the campaign quest goes down into the premise, the k
   s = act(s, 'delve_go_way'); s = act(s, 'delve_claim'); assert.equal(s.delve.objectiveDone, true); assert.equal(s.campaign.facts.dungeon_well, true);
   s = act(s, 'delve_relic'); assert.equal(s.delve.finds.at(-1).name, 'the engineers’ sluice-key');
   s = act(s, 'delve_go_lair'); s = act(s, 'delve_go_hub'); s = act(s, 'delve_go_approach');
-  const security = s.realm.sites.marsh?.security ?? null, villagers = s.factions.villagers;
+  const before = structuredClone(s), villagers = s.factions.villagers;
   s = engine.chooseAction(s, 'delve_out'); assert.equal(s.delve, null);
   assert.ok(s.campaign.completed.includes('well'), 'the campaign credited the delve'); assert.equal(s.campaign.pending, null);
-  assert.ok(s.world.changes.some(c => c.id === 'delve-quiet-cistern')); if (security !== null) assert.equal(s.realm.sites.marsh.security, Math.min(100, security + 8)); assert.equal(s.factions.villagers, villagers + 6);
+  const change = s.world.changes.find(c => c.id === 'delve-quiet-cistern'); assert.ok(change); const above = change.locationId; if (before.realm.sites[above]) assert.equal(s.realm.sites[above].security, Math.min(100, before.realm.sites[above].security + 8)); assert.equal(s.factions.villagers, villagers + 6);
   assert.equal(s.delves.places.cistern.lairCleared, true); assert.equal(s.delves.places.cistern.objectiveDone, true);
   // What you brought up has an owner.
   assert.equal(s.event?.id, 'delve_spoils'); assert.ok(s.event.body.includes('smiths’ guild'));
@@ -130,9 +130,9 @@ test('a woken place left alone reaches the village: the threat grows by the seas
   s.delves.places['descent-barrow-9'] = { id: 'descent-barrow-9', visits: 1, seen: [], cleared: [], lairCleared: false, objectiveDone: false, floorsCleared: 0, awake: true, threat: 70, lastDay: s.day, relicTaken: false, secretFound: false, title: 'The Barrow under Cinderhead', site: s.locationId };
   assert.equal(engine.validateSave(s), true);
   const { rows, ctx } = mock(); const events = s.living.counters.events; const old = s.day; s.day += 2 * SEASON_DAYS; onDelveTime(s, { oldDay: old, newDay: s.day }, ctx);
-  assert.equal(s.living.counters.events, events + 1); const ev = s.living.events.at(-1); assert.equal(ev.kind, 'raid'); assert.equal(ev.beast, 'The Barrow under Cinderhead'); assert.ok(rows.some(r => r.title === 'From below'));
+  assert.equal(s.living.counters.events, events + 1); const ev = s.living.events.find(e => e.beast) || s.living.events.at(-1); assert.equal(ev.kind, 'raid'); assert.equal(ev.beast, 'The Barrow under Cinderhead'); assert.ok(rows.some(r => r.title === 'From below'));
   assert.equal(s.delves.places['descent-barrow-9'].threat, 40); assert.equal(s.delves.places['descent-barrow-9'].raids, 1);
-  const t = s.living.threads.find(t => t.def === 'wolves'); if (t) { assert.equal(t.roles.beast, 'The Barrow under Cinderhead'); for (let n = 0; n < 4 && s.event?.id !== 'living_wolves'; n++) s = s.event ? engine.chooseEventOption(s, pick(s)) : engine.ageUp(s); if (s.event?.id === 'living_wolves') { assert.equal(s.event.title, 'From below'); assert.ok(s.event.choices.find(c => c.id === 'hunt').label.includes('Go down')); } }
+  const t = s.living.threads.find(t => t.def === 'wolves' && t.eventId === ev.id); if (t) { for (const other of s.living.threads) if (other !== t && !other.closed) other.closed = true; assert.equal(t.roles.beast, 'The Barrow under Cinderhead'); for (let n = 0; n < 4 && s.event?.id !== 'living_wolves'; n++) s = s.event ? engine.chooseEventOption(s, pick(s)) : engine.ageUp(s); if (s.event?.id === 'living_wolves') { assert.equal(s.event.title, 'From below'); assert.ok(s.event.choices.find(c => c.id === 'hunt').label.includes('Go down')); } }
   assert.equal(engine.validateSave(s), true);
 });
 
