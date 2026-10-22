@@ -27,7 +27,7 @@ function fight(b, { until = () => false, choose } = {}) { for (let n = 0; n < 20
 const mock = () => { const rows = []; return { rows, ctx: { journal: (t, x) => rows.push({ title: t, text: x }), journalLiteral: (t, x) => rows.push({ title: t, text: x }), standing: () => {}, setEvent: () => {}, spendDays: () => {}, killPerson: () => true, inflictCondition: (type) => { rows.push({ title: 'condition', text: type }); return true; } } }; };
 const act = (s, id) => { const a = engine.getActions(s).find(a => a.id === id); assert.ok(a, `${id} offered`); assert.equal(a.disabledReason, undefined, `${id}: ${a.disabledReason}`); const next = engine.chooseAction(s, id); assert.equal(engine.validateSave(next), true, `${id} leaves a valid save`); return next; };
 
-test('the field: ranks by role, the opening line, a plain blow cannot reach the back rank, a hook can drag it forward', () => {
+test('the field: ranks by role, the opening line, a plain blow past the front rank lands on it, a hook can drag the back rank forward', () => {
   const s = ready('bc-field-1', { friends: ['orrin', 'kest'] }); if (!s) return;
   s.battlecraft.arts = ['hook_and_drag'];
   let b = begin(s, 'free_bandit');
@@ -42,8 +42,8 @@ test('the field: ranks by role, the opening line, a plain blow cannot reach the 
   assert.equal(reaches(b, hero, second), false); assert.equal(reaches(b, hero, first), true);
   assert.equal(reaches(b, hero, second, { ranged: true }), true);
   while (mine(b)?.id !== 'hero' && !b.outcome) b = takeBattleAction(b, 'attack', first.id);
-  const refused = takeBattleAction(b, 'attack', second.id);
-  assert.match(refused.log.at(-1), /stands in the back rank/); assert.equal(refused.actors.find(a => a.id === second.id).hp, second.hp, 'no damage from a refused blow');
+  const swung = takeBattleAction(b, 'attack', second.id);
+  assert.ok(swung.log.some(l => /is behind .*; the blow goes to what is in front/.test(l))); assert.equal(swung.actors.find(a => a.id === second.id).hp, second.hp, 'the back rank is not touched'); assert.ok(swung.actors.find(a => a.id === first.id).hp < first.hp, 'the front rank takes it');
   const dragged = takeBattleAction(b, 'art_hook_and_drag', second.id);
   assert.equal(dragged.actors.find(a => a.id === second.id).row, 'front');
   assert.ok(dragged.log.some(l => /dragged into the front rank/.test(l)));

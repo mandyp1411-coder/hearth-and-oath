@@ -18,7 +18,7 @@ import { seededRoll } from './world.js';
 import { identifyEnemy, proceduralEnemies } from './enemies.js';
 import { adventureEncounter } from './adventuring.js';
 import { FIELD_VERSION, assignRows, fieldActions, applyFieldCommand, fieldAttack, fieldIntentNote, fieldOpening, fieldDefeatLine, injuryModifiers, loyaltyOf } from './battlecraft.js';
-import { reaches } from './enemy-targets.js';
+import { reaches, livingRow } from './enemy-targets.js';
 const onField = battle => battle?.fieldVersion === FIELD_VERSION;
 
 const ENCOUNTERS = {
@@ -670,7 +670,6 @@ function commandReason(battle, action, target) {
   if (action.disabledReason) return action.disabledReason;
   if (!action.needsTarget) return null;
   if (!target || !alive(target) || combatDead(battle, target.id) || target.side !== action.targetSide) return `Choose a living ${action.targetSide === 'party' ? 'ally' : 'enemy'} as the target.`;
-  if (onField(battle) && target.side === 'enemy' && !reaches(battle, current(battle), target, { ranged: rangedCommand(battle, action) })) return `${battleActorDisplayName(target,battle)} stands in the back rank. Reach it with a bow, a spell or a hook, or clear the front.`;
   if (action.targetIds && !action.targetIds.includes(target.id)) return action.id === 'blood' ? `${battleActorDisplayName(target,battle)} carries no blood. Choose a flesh-bearing enemy or another ability; no magic or turn was spent.` : ['capture','hold_back'].includes(action.id) ? 'Choose the named bounty target eligible for this action. No magic or turn was spent.' : 'Choose an eligible opponent for this ability. No magic or turn was spent.';
   const actor = current(battle);
   if ((action.id === 'potion' || action.id === 'skill' && actor.role === 'healer' && (actor.specialization !== 'healer' || number(target.status.ward) >= 3)) && target.hp === target.maxHp) return `${battleActorDisplayName(target,battle)} is already at full health.`;
@@ -678,6 +677,8 @@ function commandReason(battle, action, target) {
 }
 const rangedCommand = (battle, action) => !!(action && (action.id.startsWith('spell_') || action.id === 'inspect' || action.id === 'capture' || /^art_(pitch_flask|needle|pinning_shot|flare_arrow|rain_of_arrows|hamstring|hunters_mark|black_lotus|frost_bolt|spark|storm_call|glacial_prison|inferno|grave_chill|siphon|withering|plague_breath|death_mark|thorn_lash|swarm|smite|holy_wrath|surgeons_eye|mockery|dirge|strangling_roots|hook_and_drag)$/.test(action.id) || action.id === 'tech_chain_lightning' || action.id === 'tech_winter_prison' || action.id === 'tech_hunters_volley' || action.id === 'tech_soul_unmake' || action.id === 'tech_judgment_vow' || action.id === 'tech_rootbound' || action.id === 'tech_discord_chorus' || action.id === 'joint_orrin' || action.id === 'joint_kest' || (action.id === 'skill' || action.id === 'tactic') && ['mage', 'healer'].includes(current(battle)?.role) || (action.id === 'skill' || action.id === 'tactic') && current(battle)?.specialization === 'ranger' || action.id === 'weapon_counter' && /bow|staff|wand/.test(current(battle)?.equipment?.weapon || '')));
 function applyBattleCommand(updated, actor, actionId, target) {
+  // The field: a blow aimed past the front rank lands on it. Position matters; nobody stalls on it.
+  if (onField(updated) && target?.side === 'enemy' && !reaches(updated, actor, target, { ranged: rangedCommand(updated, getBattleActions(updated).find(a => a.id === actionId)) })) { const front = livingRow(updated, 'enemy', 'front').find(f => f.id !== target.id); if (front) { addLog(updated, `${target.name} is behind ${front.name}; the blow goes to what is in front.`); target = front; } }
   if (applyFieldCommand(updated, actor, actionId, target, {damage:(a,t,n,o)=>dealDamage(updated,a,t,n,o),loseHealth:(a,n)=>setHealth(updated,a,a.hp-n),heal:(a,n)=>restoreHealth(updated,a,n),stopped:()=>ironmanCombatStopped(updated),power:basicPower,log:t=>addLog(updated,t)})) return;
   if (actionId === 'retreat') {
     updated.outcome = 'retreat';
