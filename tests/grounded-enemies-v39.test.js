@@ -143,7 +143,7 @@ let adult;
 async function fresh(){
   if(!adult){
     let s=await createLifeAtAge({seed:'grounded-release-v39',startAge:22,difficulty:'gentle'});
-    s=drain(s);delete s.delves;assert.ok(E.validateSave(s));adult=s; // the maze's enemies, not the delve's
+    s=drain(s);delete s.delves;delete s.battlecraft;assert.ok(E.validateSave(s));adult=s; // the maze's enemies, not the delve's; the fight as it was, not the field's
   }
   const s=structuredClone(adult);
   // Survival resources and run counter are controlled QA fixtures. Routes,

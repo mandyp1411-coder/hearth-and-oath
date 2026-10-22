@@ -102,6 +102,23 @@ playtest Player (`scripts/playtest-story.mjs`) walks a delve with `delve()`
 the way it walks a maze, so the campaign playthroughs cover the authored
 delves end to end.
 
+`battlecraft.js` (v0.68) is the fight on an edition life: `state.battlecraft`
+(the arts learned, the injuries, the bestiary, the record, a pending
+scene) and `battle.fieldVersion = 68` on every battle `createBattle` makes
+for one. combat.js keeps the engine and calls the hooks (`assignRows`,
+`fieldActions`, `applyFieldCommand`, `fieldAttack`); the reach rule lives
+in enemy-targets.js (`reaches`) so both sides use it; danger by place means
+no hero-level growth on the field and `placeTier` for roaming fights.
+Injuries apply through `injuryModifiers` in `makeHero` and
+`applyBattlecraftGates`; a wound fever goes through health.js's
+`inflictCondition` (`ctx.inflictCondition`). A companion's death goes
+through `ctx.killPerson` so the family book agrees with the roster — a
+mock context without it leaves the save invalid. The legacy golden
+fixtures (combat, tournament-ordinary-golden, second-wind-balance) have no
+station and must keep passing unchanged; an edition fixture that wants the
+old battle page does `delete s.battlecraft` (grounded-enemies-v39 does).
+The playtest Player aims at what it can reach.
+
 Test fixtures that are not about birth should pin a station
 (`station: rollBirthCircumstances(seed, 'common', ancestry)`): a bound
 child may die of a winter fever, gets no pocket money and is not schooled,

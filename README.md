@@ -1,5 +1,17 @@
 # Hearth & Oath
 
+Version 0.68.0 is Battlecraft: the field you can read, the arts of a calling, what a fight costs, who stands with you, and the bestiary. New lives only.
+
+- **The field.** Two ranks a side. Warriors and rogues stand in front, mages and healers behind; nothing without a bow, a spell or a pack reaches the back rank while the front stands, and a wolf pack flanks. Step back or step up, and it costs you the action. Portraits, bars and an intent glyph on every foe; the log folded beneath.
+- **The arts.** Each calling keeps its two gifts and its two earned techniques, and beyond them a tree: two arts at the second tier, four at the third, seventy-two in all — the guardian's hook that drags a foe out of the back rank, the thief's pitch flask, the ranger's pinning shot, the bard's chorus of blades. Three days and fifteen gold with your mentor for the second tier; four days and forty, two arts of the second tier, and the mentor's own place for the third. Only the calling that owns an art can use it.
+- **Foes that force tactics.** A person who has fought before takes the measure of a stroke repeated: the third identical blow is turned and answered. Cold holds a foe for the blow that shatters it; fire on oil burns twice. Charges still want interrupting, wards still want breaking, the bosses still turn.
+- **Danger by place, not by level.** What you meet in a barrow is a barrow's; it does not grow because you have. The roaming fights take their tier from where you stand: a village's road is a village's, a ruin's is a ruin's.
+- **What a fight costs.** Beaten, you are hurt: bruised ribs, a broken arm, cracked ribs, a gashed leg, an eye. A broken arm is six weeks and a slow hand; a gashed leg left to itself mends crooked, and a limp ends your soldiering; a wound a week without a healer goes bad and reaches the health book. Two days and eight gold with the healer set it straight in half the time.
+- **Who stands with you.** Companions have loyalty now: it rises when you win together, falls when you walk away from a fight and leave them lying, falls when you do what they would not. Below twenty they say so at the fire — let them go, pay them, or promise. Down in a fight you win, they are carried out and mend for a fortnight; down in a fight you lose or leave, half the time they do not get up, and the party remembers what you did with the body. At eighty you fight as one: shield and spear, fire on the oil, the mark and the blade.
+- **The bestiary.** Every creature met, fought and killed is written down. Kill a kind twice, or read it in the archive, or know natural philosophy, and you know what it fears before it shows you. The heir inherits what the parent knew.
+- **Not worth the telling.** A fight your party outweighs by far can be settled in a line: a few scratches, the spoils, and on.
+- Old saves keep the fight they had.
+
 Version 0.67.0 is The delve: dungeons as places with a history. New lives only.
 
 - **A place with a history.** Every delve has a premise — who built it, what went wrong, what lives there now, why you came — and every room serves it. The five campaign dungeons are rebuilt on it first: the Drowned Cistern and its bound keeper, the Buried Archive and the last archivist, the Moonroot Caverns and the Thornheart, the Broken Watchtower and its captain, the Covenant Core and the anchor warden. Under any town, the board's uncharted descents are a barrow, a root-hollow, a fallen tower or a deep cave, each with a reason to be feared and a rumour of how many came back.
