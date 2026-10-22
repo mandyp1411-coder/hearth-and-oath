@@ -1,4 +1,5 @@
 import { isMazeEntry } from './maze-rules.js';
+import { placeTier } from './battlecraft.js';
 import { isRadiant, initializeRadiant, showRadiantRoom, applyRadiantChoice, resolveRadiantBattle, radiantReceipt, validateRadiant, validateRadiantHistory } from './radiant-descent.js';
 import { DESCENT_PREMISES } from './field-notes-v25.js';
 import { CONTRACT_FLAVOR } from './realm-content-v18.js';
@@ -150,7 +151,7 @@ export function adventureEncounter(s,c){
  if(c?.kind==='delve'&&s.delve)return {tier:Math.max(1,Math.min(6,Number(c.tier)||1)),salt:`delve:${s.delve.id}:${c.floor}:${c.roomId}`,targetName:null,targetPerson:null,captureAllowed:false,title:c.title||s.delve.title};
  if(c?.kind==='maze'&&s.maze){const target=s.maze.kind==='contract'&&c.roomId===String(s.maze.guardianRoom)?contract(s,s.maze.sourceId):null;return {tier:s.maze.tier,salt:s.maze.seed+':enemy:'+c.roomId,targetName:target?.type==='bounty'?target.targetName:null,targetPerson:target?.target||null,captureAllowed:target?.type==='bounty'&&target.targetType==='bandit',title:s.maze.title};}
   const item=c?.mode==='contract'?contract(s,c.token):null,run=c?.mode==='descent'?s.adventuring.expedition:null;
-  return {tier:item?.tier||run?.floor||(c?.mode==='conquest'?3:Math.min(4,1+Math.floor(s.hero.level/4))),salt:c?`${c.mode}:${c.token}:${c.room||''}`:`free:${s.flags.battlesStarted||0}`,targetName:item?.type==='bounty'?item.targetName:null,targetPerson:item?.target||null,captureAllowed:item?.type==='bounty'&&item.targetType==='bandit',title:item?CONTRACT_FLAVOR.find(f=>f.id===item.flavorId).title:run?`The ${run.theme} — floor ${run.floor}`:c?.mode==='raid'?'War on the road':c?.mode==='conquest'?'The regional watch stands against you':'An unpromised encounter'};
+  return {tier:item?.tier||run?.floor||(c?.mode==='conquest'?3:s.battlecraft?placeTier(s):Math.min(4,1+Math.floor(s.hero.level/4))),salt:c?`${c.mode}:${c.token}:${c.room||''}`:`free:${s.flags.battlesStarted||0}`,targetName:item?.type==='bounty'?item.targetName:null,targetPerson:item?.target||null,captureAllowed:item?.type==='bounty'&&item.targetType==='bandit',title:item?CONTRACT_FLAVOR.find(f=>f.id===item.flavorId).title:run?`The ${run.theme} — floor ${run.floor}`:c?.mode==='raid'?'War on the road':c?.mode==='conquest'?'The regional watch stands against you':'An unpromised encounter'};
 }
 export function validAdventureContext(s,c){
   if(!s.adventuring||c.kind!=='adventure'||c.locationId!==s.locationId)return false;

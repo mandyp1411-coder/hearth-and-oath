@@ -17,6 +17,9 @@ import { getGearItem, gearBonuses } from './gear.js';
 import { seededRoll } from './world.js';
 import { identifyEnemy, proceduralEnemies } from './enemies.js';
 import { adventureEncounter } from './adventuring.js';
+import { FIELD_VERSION, assignRows, fieldActions, applyFieldCommand, fieldAttack, fieldIntentNote, fieldOpening, fieldDefeatLine, injuryModifiers, loyaltyOf } from './battlecraft.js';
+import { reaches } from './enemy-targets.js';
+const onField = battle => battle?.fieldVersion === FIELD_VERSION;
 
 const ENCOUNTERS = {
   forest: {
@@ -112,7 +115,9 @@ function makeHero(game) {
   const skills = clone(hero.skills || {});
   for(const [k,v] of Object.entries(curseModifiers(hero.condition)))attributes[k]=Math.max(1,number(attributes[k],3)+v);
   if(game.revision>=5){for(const k of Object.keys(attributes))attributes[k]=combatTraining(attributes[k]);for(const k of Object.keys(skills))skills[k]=combatTraining(skills[k]);}
-  const maxHp = Math.max(1, number(hero.maxHp, 56));
+  const wounds = game.battlecraft ? injuryModifiers(game) : null;
+  if (wounds) { skills.weapons = Math.max(0, number(skills.weapons) + wounds.weapons); attributes.agility = Math.max(1, number(attributes.agility, 3) + wounds.agility); }
+  const maxHp = Math.max(1, number(hero.maxHp, 56) + (wounds?.maxHp || 0));
   const maxMp = Math.max(0, number(hero.maxMp, 25));
   const role = CLASS_ROLES[hero.specialization] || (hero.path === 'unformed' ? 'civilian' : roleOf(hero.path));
   const gear = gearBonuses(game);
@@ -127,6 +132,7 @@ function makeHero(game) {
     attributes, skills, condition: hero.condition ? clone(hero.condition) : null,
     oathBroken: Boolean(game.flags?.oathBroken || game.flags?.paladinOathBroken),
     defending: false, status: {},
+    ...(game.battlecraft ? { arts: [...game.battlecraft.arts], rangedMod: wounds.ranged } : {}),
   };
 }
 
@@ -165,7 +171,7 @@ function finishIfNeeded(battle) {
     battle.currentActorId = null;
     addLog(battle,isTournamentBattle(battle)?battle.outcome==='victory'?'The marshal calls the bout for you. Both entrants leave it alive.':'The marshal stops the bout. This is a loss, not the end of your life.':battle.outcome === 'victory'
       ? 'The encounter is won. Your party can return to its life.'
-      : 'Your party is overwhelmed. You will survive, but recovery takes time.');
+      : onField(battle) ? fieldDefeatLine(battle) : 'Your party is overwhelmed. You will survive, but recovery takes time.');
     return true;
   }
   return false;
@@ -258,7 +264,7 @@ function dealDamage(battle, source, target, rawDamage, { pierce = false, nonleth
 }
 
 function enemyIntent(actor) {
-  if(actor.planCycle)return planIntent(actor);
+  if(actor.planCycle)return planIntent(actor)+fieldIntentNote(actor);
   const step = number(actor.aiStep);
   const patterns = {
     keeper: ['Raises an 8-point ward on itself.', 'Surges against every ally. Party wards and personal defense reduce the damage.', 'Smashes the most injured ally; a defender can draw the strike.'],
@@ -268,7 +274,8 @@ function enemyIntent(actor) {
     warden: ['Charges an armor-piercing strike; defend or weaken it before its turn.', 'Raises a 10-point ward on itself.', 'Pulses against every ally and weakens their next strikes.'],
     covenant: ['Sends a pulse across the entire party.', 'A charged strike leaves its target bleeding.', 'Raises a 12-point ward on itself.'],
   };
-  if (patterns[actor.aiKey]) return patterns[actor.aiKey][step % patterns[actor.aiKey].length];
+  const note=fieldIntentNote(actor);
+  if (patterns[actor.aiKey]) return patterns[actor.aiKey][step % patterns[actor.aiKey].length]+note;
   if (actor.aiKey === 'warder') return step % 2 === 0 ? 'Grants a 5-point ward to the most injured enemy. Defeat it to stop the support.' : 'Strikes the most injured ally; a defender can draw the hit.';
   if (actor.aiKey === 'leech') return 'Drains the most injured ally and restores half the damage as health.';
   if (actor.aiKey === 'sniper') return 'Targets the ally with the largest magic reserves unless a defender draws the shot.';
@@ -364,8 +371,8 @@ export function createBattle(game, encounterId = 'forest', context = null, { ope
   const encounter = rpg?rpgEncounter:free?{title:spec.title,rewards:{gold:10+spec.tier*5,exp:18+spec.tier*8},enemies:proceduralEnemies(game,id.slice(5),spec.tier,spec.salt,spec.targetName,spec.targetPerson)}:ENCOUNTERS[id];
   const hero = makeHero(game);
   if(game.rpg)hero.trainedTechniques=[...game.rpg.trainedTechniques];
-  const recruited = (game.companions || []).filter((companion) => companion.recruited && companion.active).slice(0, 3).filter(c=>!(game.revision>=5)||c.alive!==false&&c.hp>0);
-  const actors = [hero, ...recruited.map(c=>companionCombatProfile(game,c).actor), ...encounter.enemies.map((enemy, index) => ({
+  const recruited = (game.companions || []).filter((companion) => companion.recruited && companion.active).slice(0, 3).filter(c=>!(game.revision>=5)||c.alive!==false&&c.hp>0).filter(c=>!game.battlecraft||!(c.woundedUntil>game.day));
+  const actors = [hero, ...recruited.map(c=>({...companionCombatProfile(game,c).actor,...(game.battlecraft?{loyalty:loyaltyOf(c)}:{})})), ...encounter.enemies.map((enemy, index) => ({
     ...enemy, id: `enemy-${index + 1}`, side: 'enemy', maxHp: enemy.hp,
     ...(index===0&&(spec?.targetName||spec?.targetPerson)?{namedTarget:true}:{}),
     mp: 0, maxMp: 0, defending: false, status: {},
@@ -380,8 +387,8 @@ export function createBattle(game, encounterId = 'forest', context = null, { ope
   let variant = 0;
   if (expanded) {
     variant = seededRoll(game.seed, `${id}:${number(game.flags?.battlesStarted)}:formation`, 3);
-    const growth = Math.min(8, Math.max(0, number(game.hero.level, 1) - 1) * 2);
-    const strength = Math.min(2, Math.floor(Math.max(0, number(game.hero.level, 1) - 1) / 3));
+    const growth = game.battlecraft ? 0 : Math.min(8, Math.max(0, number(game.hero.level, 1) - 1) * 2);
+    const strength = game.battlecraft ? 0 : Math.min(2, Math.floor(Math.max(0, number(game.hero.level, 1) - 1) / 3));
     const difficulty = game.difficulty === 'gentle' ? -1 : game.difficulty === 'perilous' ? 1 : 0;
     for (const enemy of actors.filter((actor) => actor.side === 'enemy')) {
       enemy.hp = Math.max(10, enemy.hp + growth + difficulty * 3);
@@ -445,7 +452,8 @@ export function createBattle(game, encounterId = 'forest', context = null, { ope
   if(game.rpg){battle.effectsVersion=27;battle.attendantUsed=false;}
   if(spec&&spec.tier>=3&&game.revision>=5)for(const foe of actors.filter(a=>a.side==='enemy'))foe.hp=foe.maxHp=Math.round(foe.maxHp*(1+Math.min(.6,(spec.tier-2)*.15)));
   if(game.realm){battle.rulesVersion=18;if(spec?.captureAllowed)battle.captureAllowed=true;}
-  if (expanded) addLog(battle, `Formation ${variant + 1}; ${game.difficulty || 'balanced'} danger. Marks add damage; wards absorb hits; feints weaken attacks; bleeding can be cleansed.`);
+  if(game.battlecraft){battle.fieldVersion=FIELD_VERSION;battle.artsUsed=[];assignRows(battle,game);for(const a of actors.filter(a=>a.side==='enemy'))a.intent=enemyIntent(a);}
+  if (onField(battle)) { battle.log[0] = fieldOpening(battle); } else if (expanded) addLog(battle, `Formation ${variant + 1}; ${game.difficulty || 'balanced'} danger. Marks add damage; wards absorb hits; feints weaken attacks; bleeding can be cleansed.`);
   if (id === 'initiation') {
     battle.title = hero.role === 'warrior' ? 'The oathkeeper’s trial'
       : hero.role === 'mage' ? 'The forbidden study’s guardian' : 'The silent contract';
@@ -462,7 +470,7 @@ export function getBattleActions(battle) {
   if (!actor || !alive(actor) || actor.side !== 'party' || combatDead(battle, actor.id)) return [];
   const skill = skillOf(actor);
   const tactic = tacticOf(actor);
-  const actions = [...advancedBattleActions(battle,actor),
+  const actions = [...fieldActions(battle,actor,basicPower),...advancedBattleActions(battle,actor),
     { id: 'attack', label: 'Attack', description: 'Strike a living enemy without spending magic.', cost: 'Free', needsTarget: true, targetSide: 'enemy' },
     { id: 'skill', label: skill.label, description: skill.description, cost: `${skill.cost} MP${actor.specialization === 'berserker' ? ' · 4 HP' : ''}`, needsTarget: true, targetSide: skill.targetSide,
       ...(actor.role==='healer'&&party(battle).every(a=>a.hp===a.maxHp&&(actor.specialization!=='healer'||number(a.status.ward)>=3))?{disabledReason:'Every living ally is healthy and already warded.'}:{}),
@@ -662,12 +670,15 @@ function commandReason(battle, action, target) {
   if (action.disabledReason) return action.disabledReason;
   if (!action.needsTarget) return null;
   if (!target || !alive(target) || combatDead(battle, target.id) || target.side !== action.targetSide) return `Choose a living ${action.targetSide === 'party' ? 'ally' : 'enemy'} as the target.`;
+  if (onField(battle) && target.side === 'enemy' && !reaches(battle, current(battle), target, { ranged: rangedCommand(battle, action) })) return `${battleActorDisplayName(target,battle)} stands in the back rank. Reach it with a bow, a spell or a hook, or clear the front.`;
   if (action.targetIds && !action.targetIds.includes(target.id)) return action.id === 'blood' ? `${battleActorDisplayName(target,battle)} carries no blood. Choose a flesh-bearing enemy or another ability; no magic or turn was spent.` : ['capture','hold_back'].includes(action.id) ? 'Choose the named bounty target eligible for this action. No magic or turn was spent.' : 'Choose an eligible opponent for this ability. No magic or turn was spent.';
   const actor = current(battle);
   if ((action.id === 'potion' || action.id === 'skill' && actor.role === 'healer' && (actor.specialization !== 'healer' || number(target.status.ward) >= 3)) && target.hp === target.maxHp) return `${battleActorDisplayName(target,battle)} is already at full health.`;
   return null;
 }
+const rangedCommand = (battle, action) => !!(action && (action.id.startsWith('spell_') || action.id === 'inspect' || action.id === 'capture' || /^art_(pitch_flask|needle|pinning_shot|flare_arrow|rain_of_arrows|hamstring|hunters_mark|black_lotus|frost_bolt|spark|storm_call|glacial_prison|inferno|grave_chill|siphon|withering|plague_breath|death_mark|thorn_lash|swarm|smite|holy_wrath|surgeons_eye|mockery|dirge|strangling_roots|hook_and_drag)$/.test(action.id) || action.id === 'tech_chain_lightning' || action.id === 'tech_winter_prison' || action.id === 'tech_hunters_volley' || action.id === 'tech_soul_unmake' || action.id === 'tech_judgment_vow' || action.id === 'tech_rootbound' || action.id === 'tech_discord_chorus' || action.id === 'joint_orrin' || action.id === 'joint_kest' || (action.id === 'skill' || action.id === 'tactic') && ['mage', 'healer'].includes(current(battle)?.role) || (action.id === 'skill' || action.id === 'tactic') && current(battle)?.specialization === 'ranger' || action.id === 'weapon_counter' && /bow|staff|wand/.test(current(battle)?.equipment?.weapon || '')));
 function applyBattleCommand(updated, actor, actionId, target) {
+  if (applyFieldCommand(updated, actor, actionId, target, {damage:(a,t,n,o)=>dealDamage(updated,a,t,n,o),loseHealth:(a,n)=>setHealth(updated,a,a.hp-n),heal:(a,n)=>restoreHealth(updated,a,n),stopped:()=>ironmanCombatStopped(updated),power:basicPower,log:t=>addLog(updated,t)})) return;
   if (actionId === 'retreat') {
     updated.outcome = 'retreat';
     updated.currentActorId = null;
@@ -679,13 +690,15 @@ function applyBattleCommand(updated, actor, actionId, target) {
   else if(actionId==='party_cover'){actor.mp-=6;updated.coverUsed=true;for(const ally of party(updated)){ally.status.ward=number(ally.status.ward)+5;delete ally.status.bleed;delete ally.status.bleedTurns;}addLog(updated,'The earned covering formation grants five ward and cleanses bleeding.');}
   else if(actionId==='weapon_counter'){actor.mp-=3;const weapon=actor.equipment.weapon;if(/staff|wand/.test(weapon)){target.status.ward=Math.max(0,number(target.status.ward)-8);applyStatus(target,'weakened',3,undefined,t=>addLog(updated,t));delete target.status.charged;delete target.status.stolenWard;}else if(/bow/.test(weapon)){applyStatus(target,'weakened',4,undefined,t=>addLog(updated,t));target.status.marked=1;}else if(/hammer|mace/.test(weapon)){target.status.ward=Math.max(0,number(target.status.ward)-6);dealDamage(updated,actor,target,basicPower(actor)+2);}else if(/spear/.test(weapon)){actor.defending=true;actor.status.ward=number(actor.status.ward)+4;dealDamage(updated,actor,target,basicPower(actor));}else{target.status.marked=2;dealDamage(updated,actor,target,basicPower(actor)-2);}addLog(updated,'The equipped weapon determines the counter.');}
   else if(actionId==='inspect'){target.status.inspected=true;delete target.status.charged;delete target.status.stolenWard;target.status.marked=number(target.status.marked)+1;addLog(updated,`${actor.name} reads ${target.name}: ${target.weakness?'vulnerable to '+target.weakness:'no elemental weakness found'}. ${resistanceReadout(target)} ${curseCombatNote(target.condition||target.illustration?.condition,target)} One opening is marked.`);}
-  else if(actionId.startsWith('spell_')){const element=actionId.slice(6),match=target.weakness===element;actor.mp-=5;const sacred=element==='radiance';const power=10+Math.floor(number(actor.attributes?.[sacred?'willpower':'intellect'],3)/2)+number(actor.skills?.[sacred?'devotion':'arcana'])+number(actor.gear?.magic)+(match?7:0);dealDamage(updated,actor,target,power*((target.resistances||[]).includes(element)?.7:1),{pierce:true});if(element==='ice')applyStatus(target,'weakened',3,undefined,t=>addLog(updated,t));if(element==='fire')applyStatus(target,'burn',2,2,t=>addLog(updated,t));addLog(updated,`${actor.name} calls ${element}${match?' into an exposed weakness':''}.`);}
+  else if(actionId.startsWith('spell_')){const element=actionId.slice(6),match=target.weakness===element;actor.mp-=5;const sacred=element==='radiance';const power=10+Math.floor(number(actor.attributes?.[sacred?'willpower':'intellect'],3)/2)+number(actor.skills?.[sacred?'devotion':'arcana'])+number(actor.gear?.magic)+(match?7:0);dealDamage(updated,actor,target,power*((target.resistances||[]).includes(element)?.7:1),{pierce:true});if(element==='ice')applyStatus(target,'weakened',3,undefined,t=>addLog(updated,t));if(element==='fire'){const oiled=onField(updated)&&target.status.oiled;if(oiled)delete target.status.oiled;applyStatus(target,'burn',oiled?4:2,2,t=>addLog(updated,t));}addLog(updated,`${actor.name} calls ${element}${match?' into an exposed weakness':''}.`);}
   else if(actionId==='capture'){actor.mp-=3;target.hp=0;target.status.captured=true;addLog(updated,`${target.name} is restrained alive. The bounty can be returned after the remaining fight.`);}
   else if(actionId==='hold_back')dealDamage(updated,actor,target,basicPower(actor),{nonlethal:true,maxDamage:Math.ceil(target.maxHp*.2)});
   else if (actionId === 'attack') {
     const physicalWeakness=updated.effectsVersion===27&&target.weakness==='physical';
-    dealDamage(updated, actor, target, basicPower(actor)+(physicalWeakness?4:0));
+    const field=fieldAttack(updated,actor,target,{log:t=>addLog(updated,t)});
+    dealDamage(updated, actor, target, Math.round((basicPower(actor)+(physicalWeakness?4:0)+field.bonus)*field.multiplier));
     if(physicalWeakness)addLog(updated,`${actor.name} strikes into a physical weakness.`);
+    if(field.riposte&&alive(target)&&alive(actor)&&!ironmanCombatStopped(updated))dealDamage(updated,target,actor,field.riposte);
   }
   else if (actionId === 'skill') useSkill(updated, actor, target);
   else if (actionId === 'tactic'){useTactic(updated, actor, target);if(updated.effectsVersion===27&&target?.bloodless&&(target.status.bleed||actor.role==='rogue'&&!['thief','bard'].includes(actor.specialization))){delete target.status.bleed;delete target.status.bleedTurns;target.status.marked=2;addLog(updated,target.name+' carries no blood; the technique exposes its guard instead.');}}
@@ -751,6 +764,7 @@ function resolveBattleAction(battle, actionId, targetId, report = null) {
   if (!finishIfNeeded(updated)) {
     advanceTurn(updated, actor.id, order);
     processEnemyTurns(updated);
+    if (onField(updated)) for (const enemy of enemies(updated)) enemy.intent = enemyIntent(enemy);
   }
   return updated;
 }
@@ -767,7 +781,7 @@ export function takeBattleActionDetailed(battle, actionId, targetId) {
   return { ...report, battle: result };
 }
 
-export function partyPreparation(game){const active=(game.companions||[]).filter(p=>p.recruited&&p.active).slice(0,3),ready=active.filter(p=>p.alive!==false&&p.hp>0);return {participants:[{id:'hero',name:game.hero.name,role:game.hero.specialization||game.hero.path,hp:game.hero.hp,maxHp:game.hero.maxHp,mp:game.hero.mp,maxMp:game.hero.maxMp},...ready.map(p=>({id:p.id,name:p.name,role:p.role,hp:p.hp,maxHp:p.maxHp,mp:p.mp,maxMp:p.maxMp}))],unready:active.filter(p=>!ready.includes(p)).map(p=>({id:p.id,name:p.name,reason:p.alive===false?'Deceased':'Recover health before entry'})),potions:game.hero.potions,equipment:structuredClone(game.equipment?.equipped||{}),formationEarned:Object.values(game.fellowship?.formations||{}).some(f=>f.stage==='completed')||false};}
+export function partyPreparation(game){const active=(game.companions||[]).filter(p=>p.recruited&&p.active).slice(0,3),ready=active.filter(p=>p.alive!==false&&p.hp>0&&!(game.battlecraft&&p.woundedUntil>game.day));return {participants:[{id:'hero',name:game.hero.name,role:game.hero.specialization||game.hero.path,hp:game.hero.hp,maxHp:game.hero.maxHp,mp:game.hero.mp,maxMp:game.hero.maxMp},...ready.map(p=>({id:p.id,name:p.name,role:p.role,hp:p.hp,maxHp:p.maxHp,mp:p.mp,maxMp:p.maxMp}))],unready:active.filter(p=>!ready.includes(p)).map(p=>({id:p.id,name:p.name,reason:p.alive===false?'Deceased':game.battlecraft&&p.woundedUntil>game.day?`Mending; ${p.woundedUntil-game.day} day${p.woundedUntil-game.day===1?'':'s'} before they fight`:'Recover health before entry'})),potions:game.hero.potions,equipment:structuredClone(game.equipment?.equipped||{}),formationEarned:Object.values(game.fellowship?.formations||{}).some(f=>f.stage==='completed')||false};}
 
 export function combatProfile(game) {
   const actor = makeHero(game);

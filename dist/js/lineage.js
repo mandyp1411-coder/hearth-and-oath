@@ -18,6 +18,7 @@ import { heirStation } from './station.js';
 import { initializeSchooling, tier1Certificate } from './schooling.js';
 import { inheritGuild } from './guild.js';
 import { inheritDelves } from './delve.js';
+import { inheritBattlecraft } from './battlecraft.js';
 import { inheritCommunity, communitySupport } from './community.js';
 import { inheritSociety } from './society.js';
 import { inheritSocial } from './social.js';
@@ -593,7 +594,7 @@ export function createSuccessor(original, childId, createBirthGame) {
   if (s.fortune) s.fortune = { version: 1, lastSeason: Math.floor(s.day / 92), incomeFactor: 1, factorUntil: 0, history: [] };
   // The changed world is the same world: the courts, guilds and packs keep their goals and their news; the parent's own stories stay in the parent's book.
   if (old.living && s.living) s.living = { ...clone(old.living), threads: [], bonds: {}, lastSeason: Math.floor(s.day / 92) };
-  inheritGuild(old, s); inheritDelves(old, s);
+  inheritGuild(old, s); inheritDelves(old, s); inheritBattlecraft(old, s);
   inheritCommunity(old,s); inheritSociety(old,s); inheritFellowship(old,s); initializeSanctuaries(s,{reset:true}); initializeFamilyDepth(s);
   inheritSocial(old,s); inheritPastimes(old,s);
   // A successor does not acquire private manuscripts, artistic preparation or personal recognition.

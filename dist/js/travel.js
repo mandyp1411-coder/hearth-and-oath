@@ -1,4 +1,5 @@
 import { generateCharacter } from './characters.js';
+import { companionOpinion } from './battlecraft.js';
 import { isCanonicalAppearance } from './avatar.js';
 import { seededRoll, travelPreview, generatePersonName } from './world.js';
 import { communitySupport } from './community.js';
@@ -213,7 +214,7 @@ export function applyTravelChoice(state, eventId, pick, ctx = {}) {
   } else if(['extort','join','pocket','labor'].includes(pick)) {
     state.hero.gold+={extort:6,join:4,pocket:5,labor:4}[pick];
     if(pick==='labor')state.hero.hp=Math.max(1,state.hero.hp-1);
-    else ctx.standing?.(pick==='extort'?'villagers':'order',-3);
+    else {ctx.standing?.(pick==='extort'?'villagers':'order',-3);companionOpinion(state,pick==='extort'?'cruelty':'greed',ctx);}
   } else if(pick==='refuse')ctx.standing?.('order',1);
   else if(pick==='rest'&&state.life)state.life.stress=clamp(state.life.stress-2,0,100);
   else if(['ask','pray','study'].includes(pick)) {
