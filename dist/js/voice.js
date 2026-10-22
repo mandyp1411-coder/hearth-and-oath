@@ -2,6 +2,7 @@ import { settlementServices } from './world-services.js';
 import { schooling, isLiterate, tuitionDue, electiveOffer, institutionYearDue } from './schooling.js';
 import { member as guildMember, BUY_IN } from './guild.js';
 import { activeInjuries, INJURIES, loyaltyOf } from './battlecraft.js';
+import { cloth, faithRightNow } from './faith.js';
 
 // Voice: the game speaks as a terse, grim chronicle with a dry edge, in the
 // register of its engraved art. This module rewrites what the player reads
@@ -87,6 +88,16 @@ const EXACT = {
   delve_descend: ['Go down', 'Worse odds, better finds.'],
   delve_out: ['Climb out', 'Daylight, and what you carry.'],
   battlecraft_read_bestiary: ['Read the bestiaries', 'Two days and five gold in the archive. What lives here, and what it fears.'],
+  faith_novice: ['Ask for the novice’s place', 'A year of the offices, then the vows, if the house will have you.'],
+  faith_ordain: ['Present your orders', 'The Seminary’s paper, read aloud at the shrine.'],
+  faith_offices: ['Keep the offices', 'Three days of the shrine’s work.'],
+  faith_penance: ['Do your penance', 'The floor, the lamps, the silence.'],
+  faith_tithe_pay: ['Pay the tithe owed', 'Into the house’s box.'],
+  faith_vows: ['Take the vows', 'Poverty, chastity, obedience, on the shrine floor.'],
+  faith_assignment: ['The prior’s work', 'Four days, and the house’s regard.'],
+  faith_keep: ['Ask for a shrine to keep', 'The lamps, the flock, a stipend, a roof.'],
+  faith_hear: ['Hear a confession', 'A day, and whatever they carry.'],
+  faith_leave: ['Leave the cloth', 'The grey handed back.'],
   family_support: ['Ask for what you need', 'A conversation with the person who raises you.'],
   family_shelter: ['Find a roof', 'Somewhere with walls, for now.'],
   family_dilemma: ['Trouble at home', 'Something in the house needs an answer.'],
@@ -273,6 +284,8 @@ export function whatMatters(s, actions) {
   for (const i of activeInjuries(s).filter(i => !i.treated && !i.permanent && i.id !== 'bruised')) take(open('battlecraft_treat_' + i.id) || open('health_rest'), `${INJURIES[i.id].name}, untended. A healer would set it; left alone it goes bad.`);
   for (const c of (s.companions || []).filter(c => c.recruited && c.alive !== false && loyaltyOf(c) < 30)) take(open(/^talk_/), `${c.name} has had about enough of this.`);
   if (s.battlecraft && s.hero.specialization && s.age >= 18) take(open(/^battlecraft_learn_/), 'There is more to your calling than you know yet.');
+  for (const row of faithRightNow(s)) take(open(row.id), row.text);
+  if (!cloth(s) && s.faith && s.realm?.faithId && s.age >= 16 && (s.hero.skills?.devotion || 0) >= 3) take(open('faith_novice'), 'The house would take you, if you asked at the shrine.');
   if (k && s.age >= 16 && s.age <= 30 && !k.institution) take(open(/^school_read_/) || open(/^school_sit_/), open(/^school_read_/) ? 'An institution will have you, if the fee is found.' : 'The capitals examine at their doors. You hold the certificate they ask for.');
   if (s.age >= 6 && s.age < 18 && !s.education?.enrolled && (s.hero.station?.freedom === 'owned' || s.hero.station?.id === 'bound' && !s.family?.literate)) take(open('grow_survival') || open('grow_play') || open(/^upbringing_(practice|discovery)$/), 'No school for the likes of you. The woods and the field, then.');
   if ((life.stress || 0) >= 60 || (life.health ?? 80) < 50) take(open('life_rest') || open('health_routine'), (life.stress || 0) >= 60 ? 'Your hands shake. A week of nothing would help.' : 'You are worn thin.');
