@@ -45,6 +45,8 @@ function wellbeing(state, happiness = 0, stress = 0, bodily = 0) {
   state.life.health = clamp(state.life.health + bodily);
 }
 function recoverHp(state, amount) { state.hero.hp = Math.min(state.hero.maxHp, state.hero.hp + amount); }
+/** A condition another subsystem brings on (a wound gone bad, v0.68). Same rules as the monthly roll. */
+export function inflictCondition(state, type, severity, ctx = {}, circumstance = 'ordinary') { if (!state.health || !(physicalTypes.includes(type) || mentalTypes.includes(type))) return false; const before = state.health[physicalTypes.includes(type) ? 'physical' : 'mental'].length; onset(state, type, Math.max(1, Math.min(3, severity)), ctx, circumstance); return state.health[physicalTypes.includes(type) ? 'physical' : 'mental'].length > before; }
 function onset(state, type, severity, ctx, circumstance) {
   const kind = physicalTypes.includes(type) ? 'physical' : 'mental';
   if (state.health[kind].some(condition => condition.type === type)) return;
@@ -229,7 +231,7 @@ function ageContext(state, condition) {
 function careContext(state, condition) {
   return condition.careUntil > state.day ? `Care is already supported through day ${condition.careUntil}; another session renews support rather than treating this as an untreated new concern.` : 'This concern has no current supported-care window. Free care remains available.';
 }
-const circumstanceText = { winter:'It came in a hard winter, in a house with little to fight it with.', outdoors:'It was first noted during a period with outdoor exposure; that is a circumstance, not a confirmed cause.', ordinary:'It was first noted during ordinary daily life.', stress:'It was first noted during sustained high stress.', low_mood:'It was first noted while low joy and continuing stress were recorded.', later_life:'This recurring concern was first noted during a regular bodily-health review.' };
+const circumstanceText = { combat:'It began as a wound taken in a fight and left too long without a healer.', winter:'It came in a hard winter, in a house with little to fight it with.', outdoors:'It was first noted during a period with outdoor exposure; that is a circumstance, not a confirmed cause.', ordinary:'It was first noted during ordinary daily life.', stress:'It was first noted during sustained high stress.', low_mood:'It was first noted while low joy and continuing stress were recorded.', later_life:'This recurring concern was first noted during a regular bodily-health review.' };
 function symptomProgress(state, condition) {
   const mental = mentalTypes.includes(condition.type), nextDay = condition.lastEffectDay + 14;
   return `${mental ? `Emotional improvement needs continuing care, at least ${condition.type === 'depression' ? 35 : 21} days since onset, joy 40+ and stress 65 or less. Current joy ${state.life?.happiness ?? 0}; stress ${state.life?.stress ?? 0}.` : condition.type === 'chronic' ? 'Supported care can lower severity to 1; this recurring condition remains recorded.' : 'Supported physical reviews can lower severity; HP restoration alone does not clear symptoms.'} Next fortnightly review: day ${nextDay}.`;

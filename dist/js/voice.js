@@ -1,6 +1,7 @@
 import { settlementServices } from './world-services.js';
 import { schooling, isLiterate, tuitionDue, electiveOffer, institutionYearDue } from './schooling.js';
 import { member as guildMember, BUY_IN } from './guild.js';
+import { activeInjuries, INJURIES, loyaltyOf } from './battlecraft.js';
 
 // Voice: the game speaks as a terse, grim chronicle with a dry edge, in the
 // register of its engraved art. This module rewrites what the player reads
@@ -85,6 +86,7 @@ const EXACT = {
   delve_camp: ['Camp here', 'Eight hours, a ration, your back to a checked wall.'],
   delve_descend: ['Go down', 'Worse odds, better finds.'],
   delve_out: ['Climb out', 'Daylight, and what you carry.'],
+  battlecraft_read_bestiary: ['Read the bestiaries', 'Two days and five gold in the archive. What lives here, and what it fears.'],
   family_support: ['Ask for what you need', 'A conversation with the person who raises you.'],
   family_shelter: ['Find a roof', 'Somewhere with walls, for now.'],
   family_dilemma: ['Trouble at home', 'Something in the house needs an answer.'],
@@ -268,6 +270,9 @@ export function whatMatters(s, actions) {
   if (gm?.rank === 'journeyman' && gm.wander.done) take(open('guild_masterpiece'), 'The road years are served. The wardens will look at a masterpiece.');
   if (!gm && s.guild && s.age >= 16) take(open('guild_join'), 'The hall has a place for your name, if you take up the trade.');
   if (!gm && s.guild && s.age >= 18 && s.hero.gold >= BUY_IN * 2) take(open('guild_buy_in'), `The hall sells places at ${BUY_IN} gold, to those whose work it has seen.`);
+  for (const i of activeInjuries(s).filter(i => !i.treated && !i.permanent && i.id !== 'bruised')) take(open('battlecraft_treat_' + i.id) || open('health_rest'), `${INJURIES[i.id].name}, untended. A healer would set it; left alone it goes bad.`);
+  for (const c of (s.companions || []).filter(c => c.recruited && c.alive !== false && loyaltyOf(c) < 30)) take(open(/^talk_/), `${c.name} has had about enough of this.`);
+  if (s.battlecraft && s.hero.specialization && s.age >= 18) take(open(/^battlecraft_learn_/), 'There is more to your calling than you know yet.');
   if (k && s.age >= 16 && s.age <= 30 && !k.institution) take(open(/^school_read_/) || open(/^school_sit_/), open(/^school_read_/) ? 'An institution will have you, if the fee is found.' : 'The capitals examine at their doors. You hold the certificate they ask for.');
   if (s.age >= 6 && s.age < 18 && !s.education?.enrolled && (s.hero.station?.freedom === 'owned' || s.hero.station?.id === 'bound' && !s.family?.literate)) take(open('grow_survival') || open('grow_play') || open(/^upbringing_(practice|discovery)$/), 'No school for the likes of you. The woods and the field, then.');
   if ((life.stress || 0) >= 60 || (life.health ?? 80) < 50) take(open('life_rest') || open('health_routine'), (life.stress || 0) >= 60 ? 'Your hands shake. A week of nothing would help.' : 'You are worn thin.');

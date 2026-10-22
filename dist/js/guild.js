@@ -14,6 +14,7 @@
 // member's side. Threads follow living-world.js: open → scene → choice →
 // follow-up → memory. New-edition lives only (`hero.station`).
 import { seededRoll, isSettlement, generatePersonName } from './world.js';
+import { companionOpinion } from './battlecraft.js';
 import { REGION_TEMPLATES } from './realm-content-v18.js';
 import { hasNature, shiftNature, natureChoice } from './personality.js';
 import { addStationTie } from './station.js';
@@ -256,7 +257,7 @@ function decide(s, g, t, pick, ctx, stress) {
     return true;
   }
   if (t.def === 'secret') {
-    if (pick === 'sell' || pick === 'haggle') { const sum = pick === 'haggle' ? 100 : 60; s.hero.gold += sum; m.secret = 'sold'; stress(6); t.memory.push(`You sold ${SECRET[m.craft]} to ${r.buyer}${pick === 'haggle' ? ' for a hundred' : ''}.`); note(ctx, 'The secret', `${pick === 'haggle' ? 'A hundred' : 'Sixty'} gold in a purse under the table, and ${r.buyer} gone by morning. You told him. It is in ${r.guild} now, or it is in a court somewhere, and it was the hall’s and now it is not.${pick === 'haggle' ? ' A hundred is a sum people talk about.' : ''}`); t.followUp = { kind: 'sold', season: season + 3, loud: pick === 'haggle' }; }
+    if (pick === 'sell' || pick === 'haggle') { const sum = pick === 'haggle' ? 100 : 60; s.hero.gold += sum; companionOpinion(s, 'greed', ctx); m.secret = 'sold'; stress(6); t.memory.push(`You sold ${SECRET[m.craft]} to ${r.buyer}${pick === 'haggle' ? ' for a hundred' : ''}.`); note(ctx, 'The secret', `${pick === 'haggle' ? 'A hundred' : 'Sixty'} gold in a purse under the table, and ${r.buyer} gone by morning. You told him. It is in ${r.guild} now, or it is in a court somewhere, and it was the hall’s and now it is not.${pick === 'haggle' ? ' A hundred is a sum people talk about.' : ''}`); t.followUp = { kind: 'sold', season: season + 3, loud: pick === 'haggle' }; }
     else if (pick === 'refuse') { m.secret = 'kept'; m.standing = clamp(m.standing + 2); t.memory.push('You would not sell the hall’s secret.'); note(ctx, 'The secret', `You finished the drink he bought and said no, and he smiled as if you had said something else, and tried the next bench. The hall does not know. You do.`); }
     else if (pick === 'report') { m.secret = 'kept'; m.standing = clamp(m.standing + 10); ctx.standing?.('underworld', -4); t.memory.push(`You told the warden about ${r.buyer}.`); note(ctx, 'The secret', `You told ${m.warden.name} before the drink was warm. ${r.buyer} was found by the hall’s men in the yard the next morning and will not drink in this town again. The hall remembers who told it, in the book and out of it.`); }
     else { m.secret = 'kept'; t.memory.push('You finished the drink and went home.'); note(ctx, 'The secret', 'You finished the drink and went home and told nobody, which is also a thing the hall could ask about one day.'); }

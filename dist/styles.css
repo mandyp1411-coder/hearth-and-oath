@@ -5128,3 +5128,41 @@ html[data-reading-motion="reduced"] *,html[data-reading-motion="reduced"] *::bef
 .delve-room.cleared .delve-room-symbol { opacity: .5; }
 .delve-room-symbol { width: 1.2em; text-align: center; }
 .delve-room small { opacity: .7; margin-left: 4px; }
+
+/* v0.68 — the field */
+.field-workspace{display:grid;gap:14px}
+.field-ground{display:grid;gap:10px;padding:12px;border:1px solid var(--line,rgba(120,100,70,.35));border-radius:8px;background:linear-gradient(180deg,rgba(40,30,22,.35),rgba(20,16,12,.55))}
+.field-side{display:grid;gap:8px}
+.field-line{height:1px;background:linear-gradient(90deg,transparent,rgba(200,170,120,.5),transparent)}
+.field-rank{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;position:relative;padding-left:40px;min-height:72px}
+.field-rank-label{position:absolute;left:0;top:4px;width:34px;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;opacity:.6}
+.field-card{display:flex;gap:8px;min-width:200px;flex:1 1 200px;max-width:320px;padding:8px;border-radius:8px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06)}
+.field-card.enemy{background:rgba(60,20,18,.28)}
+.field-card.current{box-shadow:0 0 0 2px rgba(220,180,110,.7)}
+.field-card.down{opacity:.45;filter:grayscale(1)}
+.field-card.out-of-reach{opacity:.75}
+.field-portrait{position:relative;flex:0 0 auto}
+.field-turn{position:absolute;right:-6px;top:-6px;font-size:.8rem;color:#e7c777}
+.field-body{display:grid;gap:3px;flex:1;font-size:.86rem}
+.field-body .stat-row{font-size:.74rem}
+.field-down,.field-reach{font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;opacity:.7;margin-left:6px}
+.field-intent{margin:0;font-size:.78rem;opacity:.85}
+.field-glyph{display:inline-block;width:1.1em;text-align:center;color:#e7c777}
+.field-known{margin:0;font-size:.76rem;color:#c9b27a}
+.field-pick{font-size:.76rem;opacity:.85}
+.field-actions{display:grid;gap:6px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.field-action{display:grid;gap:2px}
+.field-action .button.art{border-color:rgba(200,170,120,.6)}
+.field-action small{opacity:.7;margin-left:4px}
+.field-preview{margin:0;min-height:1.2em}
+.field-recent p{margin:2px 0;font-size:.84rem}
+.field-log summary{cursor:pointer;font-size:.8rem;opacity:.75}
+.field-tree,.field-bestiary{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:6px}
+.field-tree ul{list-style:none;margin:2px 0 0;padding-left:12px;display:grid;gap:2px}
+.field-tree li.learned>span{color:#e7c777}
+.field-tree li.locked>span{opacity:.55}
+.field-tree li small,.field-bestiary li small{opacity:.7;margin-left:6px}
+.field-bestiary li p{margin:2px 0 0}
+@media (max-width:640px){.field-card{min-width:0;flex:1 1 100%;max-width:none}.field-rank{padding-left:0;padding-top:16px}.field-rank-label{top:0}}
+.field-help summary{cursor:pointer;font-size:.78rem;opacity:.7}
+.field-help p{margin:4px 0}

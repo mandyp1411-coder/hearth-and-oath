@@ -11,10 +11,24 @@ const wardValue = value => Math.max(0, finite(value));
  * describes this action's actual aim, not the next action in its cycle.
  * Typed and legacy battles deliberately retain their different injury ties.
  */
+/** The field (v0.68): who stands in which rank, and what can reach the back one. */
+export const livingRow = (battle, side, row) => living(battle, side).filter(a => (a.row || 'front') === row);
+const RANGED_KEYS = ['sniper', 'hexer', 'warder', 'archivist', 'keeper', 'warden', 'covenant'];
+export function reaches(battle, attacker, target, { ranged = false } = {}) {
+  if (battle?.fieldVersion !== 68 || !attacker || !target || attacker.side === target.side) return true;
+  if ((target.row || 'front') === 'front' || ranged) return true;
+  if (!livingRow(battle, target.side, 'front').some(a => a.id !== target.id)) return true;
+  if (attacker.side === 'enemy') {
+    if (RANGED_KEYS.includes(attacker.aiKey) || attacker.role === 'spirit' || attacker.planCycle?.some(p => /volley|wave|ambush|precision|ritual/.test(p.action))) return true;
+    if (attacker.role === 'beast' && living(battle, 'enemy').filter(a => a.role === 'beast').length >= 2) return true; // the pack flanks
+    return false;
+  }
+  return false;
+}
 export function resolveEnemyTargets(battle, actor, { planned = battle.effectsVersion === 27 && Boolean(actor.planCycle?.length) } = {}) {
-  const party = living(battle, 'party'), foes = living(battle, 'enemy');
+  const everyone = living(battle, 'party'), reachable = everyone.filter(a => reaches(battle, actor, a)), party = reachable.length ? reachable : everyone, foes = living(battle, 'enemy');
   if (!party.length) return { target: null, recipients: [], secondaryRecipients: [], scope: 'none', reason: 'No living party target.' };
-  const protector = party.find(a => a.status?.protecting);
+  const protector = everyone.find(a => a.status?.protecting); // a guard draws the blow whatever rank it stands in
   if (planned) {
     const plan = actor.planCycle?.[(actor.aiStep || 0) % actor.planCycle.length];
     if (!plan) return { target: null, recipients: [], secondaryRecipients: [], scope: 'none', reason: 'No current plan.' };
@@ -44,7 +58,7 @@ export function resolveEnemyTargets(battle, actor, { planned = battle.effectsVer
     if (['burning_wave', 'drain_and_share'].includes(plan.action) && !actor.status?.charged) {
       return { ...result, recipients: [], scope: 'none', reason: 'Broken charge: this prepared action has no effect.' };
     }
-    if (['wave', 'burning_wave', 'poisoning_wave'].includes(plan.action)) return { ...result, recipients: party, scope: 'all_party' };
+    if (['wave', 'burning_wave', 'poisoning_wave'].includes(plan.action)) return { ...result, recipients: everyone, scope: 'all_party' };
     if (['charge', 'ritual', 'predict'].includes(plan.action)) return { ...result, recipients: [actor], scope: 'self', preparation: true, aim: plan.action === 'predict' ? target : null };
     if (plan.action === 'ward') {
       if (plan.target === 'all_enemies') return { ...result, recipients: foes, scope: 'all_enemies' };
@@ -76,7 +90,7 @@ export function resolveEnemyTargets(battle, actor, { planned = battle.effectsVer
     ...(key === 'leech' ? { recoveryRecipient: actor } : {}),
   };
   if ((key === 'keeper' && step % 3 === 1) || (key === 'archivist' && step % 3 === 2) || (key === 'captain' && step % 3 === 2) || (key === 'warden' && step % 3 === 2) || (key === 'covenant' && step % 3 === 0)) {
-    return { ...result, recipients: party, scope: 'all_party' };
+    return { ...result, recipients: everyone, scope: 'all_party' };
   }
   if (key === 'captain' && step % 3 === 1) return { ...result, recipients: foes, scope: 'all_enemies' };
   if (key === 'warder' && step % 2 === 0) {

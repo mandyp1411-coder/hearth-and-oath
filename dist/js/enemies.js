@@ -17,6 +17,8 @@ export const ENEMY_SPECIES = [
   ...GROUNDED_ENEMY_SPECIES_V39.map(row=>[row.id,row.name,row.group,row.row,row.role,row.aiKey]),
 ];
 export const ENEMY_ATLASES = {...FOE_ATLASES,...GROUNDED_FOE_ATLASES_V39};
+/** What a bestiary says of a species, where one was written (the grounded rows carry it). */
+export const ENEMY_DESCRIPTIONS = Object.fromEntries(GROUNDED_ENEMY_SPECIES_V39.filter(row=>row.description).map(row=>[row.id,row.description]));
 const newSpecies=new Map(GROUNDED_ENEMY_SPECIES_V39.map(row=>[row.id,row]));
 const bossSpecies=new Set(GROUNDED_BOSS_ROWS_V39);
 const nameConnectors=new Set(['a','an','and','as','at','but','by','for','from','in','into','nor','of','on','or','the','to','with','without']);
