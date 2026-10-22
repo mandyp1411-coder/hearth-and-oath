@@ -5164,3 +5164,5 @@ html[data-reading-motion="reduced"] *,html[data-reading-motion="reduced"] *::bef
 .field-tree li small,.field-bestiary li small{opacity:.7;margin-left:6px}
 .field-bestiary li p{margin:2px 0 0}
 @media (max-width:640px){.field-card{min-width:0;flex:1 1 100%;max-width:none}.field-rank{padding-left:0;padding-top:16px}.field-rank-label{top:0}}
+.field-help summary{cursor:pointer;font-size:.78rem;opacity:.7}
+.field-help p{margin:4px 0}
