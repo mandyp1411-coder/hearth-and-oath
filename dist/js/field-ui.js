@@ -43,18 +43,18 @@ export function renderField(b, ui, { selectedEnemy = null, selectedAlly = null, 
 // ---------------------------------------------------------------- above ground
 import { battlecraftView, bestiaryView, treeView } from './battlecraft.js';
 /** The arts of a calling, what a fight has cost, and who stands with you. Under Activities › Training. */
-export function battlecraftPanel(s, e) {
+export function battlecraftPanel(s, e, { sections = ['arts', 'injuries', 'companions', 'record'] } = {}) {
   const v = battlecraftView(s); if (!v) return '';
-  const parts = [];
-  const tree = treeView(s);
+  const parts = [], want = id => sections.includes(id);
+  const tree = want('arts') ? treeView(s) : null;
   if (tree) {
     const tiers = [2, 3].map(t => tree.rows.filter(r => r.tier === t));
     parts.push(`<div class="schooling-row"><span class="eyebrow">THE ARTS OF THE ${e(tree.calling.toUpperCase())}</span><p class="small-copy">Your calling's two gifts are always yours${tree.roots.length ? '; the two earned techniques sit beside them' : ''}. Beyond those, ${tree.rows.filter(r => r.learned).length} of ${tree.rows.length} learned.</p><ul class="field-tree">${tiers.map((rows, i) => `<li><strong>${i === 0 ? 'Second tier' : 'Third tier'}</strong><ul>${rows.map(r => `<li class="${r.learned ? 'learned' : r.reason ? 'locked' : 'open'}"><span>${e(r.name)}</span> <small>${e(r.learned ? r.line : r.reason || 'Within reach.')}</small></li>`).join('')}</ul></li>`).join('')}</ul></div>`);
   }
-  if (v.injuries.length) parts.push(`<div class="schooling-row"><span class="eyebrow">WHAT IT COST</span>${v.injuries.map(i => `<p><strong>${e(i.name)}</strong>${i.permanent ? ', for good' : `, ${i.daysLeft} day${i.daysLeft === 1 ? '' : 's'}${i.treated ? ', set and mending' : ', untended'}`}. ${e(i.line)}</p>`).join('')}</div>`);
-  const people = v.companions.filter(c => c.alive);
+  if (want('injuries') && v.injuries.length) parts.push(`<div class="schooling-row"><span class="eyebrow">WHAT IT COST</span>${v.injuries.map(i => `<p><strong>${e(i.name)}</strong>${i.permanent ? ', for good' : `, ${i.daysLeft} day${i.daysLeft === 1 ? '' : 's'}${i.treated ? ', set and mending' : ', untended'}`}. ${e(i.line)}</p>`).join('')}</div>`);
+  const people = want('companions') ? v.companions.filter(c => c.alive) : [];
   if (people.length) parts.push(`<div class="schooling-row"><span class="eyebrow">WHO STANDS WITH YOU</span>${people.map(c => `<p><strong>${e(c.name)}</strong>: ${c.loyalty >= 80 ? 'would follow you anywhere, and fights beside you as one' : c.loyalty >= 55 ? 'with you' : c.loyalty >= 30 ? 'with you, for now' : 'close to walking'}${c.wounded ? '; mending' : ''}.</p>`).join('')}</div>`);
-  if (v.record.fights) parts.push(`<p class="small-copy">${v.record.fights} fight${v.record.fights === 1 ? '' : 's'}: ${v.record.won} won, ${v.record.lost} lost, ${v.record.fled} walked away from${v.record.settled ? `, ${v.record.settled} not worth the telling` : ''}.</p>`);
+  if (want('record') && v.record.fights) parts.push(`<p class="small-copy">${v.record.fights} fight${v.record.fights === 1 ? '' : 's'}: ${v.record.won} won, ${v.record.lost} lost, ${v.record.fled} walked away from${v.record.settled ? `, ${v.record.settled} not worth the telling` : ''}.</p>`);
   return parts.join('');
 }
 /** What a life knows of what lives in the dark. */
