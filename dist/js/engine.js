@@ -97,6 +97,7 @@ import { epitaph, validateEpitaph } from './voice.js';
 import { initializeSchooling, onSchoolingBirthday, onSchoolingYear, validateSchooling, flushSchoolingEvent, applySchoolingChoice, SCHOOLING_EVENTS } from './schooling.js';
 import { initializeLivingWorld, onLivingTime, flushLivingEvent, applyLivingChoice, validateLiving, LIVING_EVENTS } from './living-world.js';
 import { initializeGuild, onGuildTime, guildActions, applyGuildAction, applyGuildGates, flushGuildEvent, applyGuildChoice, validateGuild, GUILD_EVENTS } from './guild.js';
+import { initializeDelves, isDelveEntry, delveEntryReason, enterDelve, delveActions, applyDelveAction, afterDelveBattle, flushDelveEvent, applyDelveChoice, onDelveTime, validateDelve, DELVE_EVENTS } from './delve.js';
 import { initializeHouseholdBudget, accrueHouseholdBudget, settleHouseholdBudget, chargeDebtInterest, debtReckoning, applyDebtReckoningChoice, DEBT_RECKONING_EVENT, applyAnnualFocus, annualWorkRatio, householdCostPreview, householdBudgetActions, applyHouseholdBudgetAction, validateHouseholdBudget } from './budget.js';
 import { initializeSociety, societyActions, applySocietyAction, applySocietyChoice, societyEventIds, onSocietyTime, flushSocietyEvent, validateSociety, inheritSociety, societyCustomerChoiceReason } from './society.js';
 import { initializeCommunity, communityActions, applyCommunityAction, applyCommunityChoice, communityEventIds, onCommunityTime, flushCommunityEvent, validateCommunity, inheritCommunity } from './community.js';
@@ -323,7 +324,7 @@ function spendDays(state, days, { outdoors = false, night, expeditionDayKind = '
       onSocialTime(state,{oldDay,newDay:state.day},ctx);
       onPastimeTime(state,{oldDay,newDay:state.day},ctx);
       const worldClockContext=childClock?{...ctx,onSettlementAvailability:event=>recordAdultChildSiteChange(childClock,event)}:ctx;
-      onRegionalTime(state,oldDay,state.day,worldClockContext);onRealmTime(state,oldDay,state.day,worldClockContext);onLivingTime(state,{oldDay,newDay:state.day},ctx);onGuildTime(state,{oldDay,newDay:state.day},ctx);initializeRegionalWorld(state);onRpgTime(state,{oldDay,newDay:state.day},ctx);onJusticeTime(state,days,ctx);onAdventuringTime(state);
+      onRegionalTime(state,oldDay,state.day,worldClockContext);onRealmTime(state,oldDay,state.day,worldClockContext);onLivingTime(state,{oldDay,newDay:state.day},ctx);onGuildTime(state,{oldDay,newDay:state.day},ctx);onDelveTime(state,{oldDay,newDay:state.day},ctx);initializeRegionalWorld(state);onRpgTime(state,{oldDay,newDay:state.day},ctx);onJusticeTime(state,days,ctx);onAdventuringTime(state);
       settleAdultChildClock(state,childClock);
       recordLifeAtmosphere(state,oldDay,state.day,(title,text,tag,options)=>addJournal(state,title,text,tag,options));
     }
@@ -493,6 +494,7 @@ function unfilteredActions(state) {
   if (state.phase === 'retired') return state.revision >= 5 ? lineageActions(state) : [];
   if(tournamentLocked(state))return tournamentActions(state);
   if(yardLocked(state))return yardActions(state);
+  if(state.delve)return delveActions(state);
   if(state.maze)return mazeActions(state);
   if (state.justice?.prison) return [...justiceActions(state),...curseActions(state)];
   if(state.rpg?.expedition)return rpgActions(state);
@@ -553,6 +555,7 @@ export function getActions(state){
  if(!state||terminalRun(state))return [];
  if(observationalInfancy(state))return [];
  if(countingTableCommitment(state)||tournamentLocked(state)||yardLocked(state))return unfilteredActions(state);
+ if(state.delve)return unfilteredActions(state); // below ground there is only the dark and what you can do in it
  const contacts=state?getContacts(state):[];
  const rows=[...new Map([...[...unfilteredActions(state),...(state.adultTournament?.stage==='paused'?tournamentActions(state):[]),...legacyCallingOffers(state),...legacyMentorTrialActions(state)].filter(a=>(!state.trail||!['atlas_rest','camp_rest'].includes(a.id))&&!a.id.startsWith('adventure_roam_')&&a.id!=='atlas_scout'),...campingActions(state),...hospitalityActions(state),...homeRestActions(state),...socialLifeActions(state,contacts),...(experienceModule(state)?[]:daylifeActions(state,contacts))].map(a=>[a.id,a])).values()];
  const owner=experienceModule(state);
@@ -687,7 +690,7 @@ export function createBirthGame(config = {}) {
   initializeHouseholdBudget(state,{edition:true});initializeFortune(state,{attempt:Number.isInteger(config.attempt)&&config.attempt>0&&config.attempt<=12?config.attempt:0});
   initializeFamilyDepth(state);initializeSociety(state);initializeCommunity(state);initializeFellowship(state);initializeSanctuaries(state);
   initializeSocial(state);initializePastimes(state);initializeLifeStories(state);
-  initializeRealm(state,{fresh:true});initializeLivingWorld(state);initializeGuild(state);initializeJustice(state);initializeAdventuring(state);initializeCartography(state);initializeRegionalWorld(state);initializeRpg(state,{fresh:true},engineContext(state));
+  initializeRealm(state,{fresh:true});initializeLivingWorld(state);initializeGuild(state);initializeDelves(state);initializeJustice(state);initializeAdventuring(state);initializeCartography(state);initializeRegionalWorld(state);initializeRpg(state,{fresh:true},engineContext(state));
   initializeQuestJournal(state);initializeUpbringing(state);settlePublicRoster(state,{migration:true});
   addJournal(state, 'A life begins at birth', `${state.hero.name} was born in ${location(state).name}${station ? ` to ${station.rank}` : ''}. The morning brought ${worldCalendarContext(state.world,state.day,state.seed).weather}.`, 'origin',{literal:true,meta:{narrativeEdition:30,capturedReceipt:true}});
   birthEvent(state, engineContext(state), true);
@@ -710,7 +713,7 @@ export function liveSeason(original) {if(terminalRun(original))return copy(origi
   const state = copy(original);
   if(!state.hero.station||state.age<3)return ageUp(original);
   if(state.cartography?.pending||state.cartography?.offsite){state.notice='Reach a named place before the season can turn. Continue your journey in Explore.';return state;}
-  if(state.maze||state.rpg?.expedition||state.justice?.prison||state.adventuring?.expedition){state.notice='Complete custody or leave the descent before living on.';return state;}
+  if(state.maze||state.delve||state.rpg?.expedition||state.justice?.prison||state.adventuring?.expedition){state.notice='Complete custody or leave the descent before living on.';return state;}
   if(experienceModule(state)){state.notice='Finish or withdraw from your current commitment before living on.';return state;}
   if (!state.timeline) initializeTimeline(state, { migration: true });
   if(!waiting(state)&&!state.dungeon&&!state.timeline.journey&&!state.workshop?.project&&!state.careers?.batch&&!state.life?.plan)delete state.flags.hungerPauseDay;
@@ -729,7 +732,7 @@ export function liveSeason(original) {if(terminalRun(original))return copy(origi
 export function ageUp(original) {if(terminalRun(original))return copy(original);
   const state = copy(original);
   if(state.cartography?.pending||state.cartography?.offsite){state.notice='Reach a named place before turning the year. Continue your journey in Explore.';return state;}
-  if(state.maze||state.rpg?.expedition||state.justice?.prison||state.adventuring?.expedition){state.notice='Complete custody or leave the descent before beginning another year.';return state;}
+  if(state.maze||state.delve||state.rpg?.expedition||state.justice?.prison||state.adventuring?.expedition){state.notice='Complete custody or leave the descent before beginning another year.';return state;}
   if(experienceModule(state)){state.notice='Finish or withdraw from your current commitment before beginning another year.';return state;}
   if (!state.timeline) initializeTimeline(state, { migration: true });
   if (!birthMode(state) && state.phase === 'childhood') { state.notice = 'Finish your saved childhood episode before aging up.'; return state; }
@@ -740,7 +743,7 @@ export function ageUp(original) {if(terminalRun(original))return copy(original);
 export function continueAgeUp(original) {if(terminalRun(original))return copy(original);
   const state = copy(original);
   if(state.cartography?.pending||state.cartography?.offsite){state.notice='Reach a named place before turning the year. Continue your journey in Explore.';return state;}
-  if(state.maze||state.rpg?.expedition||state.justice?.prison||state.adventuring?.expedition){state.notice='Complete custody or leave the descent before resuming the year.';return state;}
+  if(state.maze||state.delve||state.rpg?.expedition||state.justice?.prison||state.adventuring?.expedition){state.notice='Complete custody or leave the descent before resuming the year.';return state;}
   if(experienceModule(state)){state.notice='Continue or withdraw from the committed work before resuming your year.';return state;}
   if (!state.timeline) { state.notice = 'Choose Age up to begin a year.'; return state; }
   if(state.timeline.yearTarget!==null&&!waiting(state)&&!state.dungeon&&!state.workshop?.project&&!state.careers?.batch)delete state.flags.hungerPauseDay;
@@ -901,7 +904,7 @@ function engineContext(state, { annual = false, resolvingNeed=null } = {}) {
     endLife: cause=>endLife(state,cause),
     offerCurse: type=>type==='vampire'?vampireEvent(state):lycanOffer(state),
     startBattle: (id, context) => beginBattle(state, id, context),
-    startDungeon: (id, questId) => state.mazeBook&&!state.flags.dungeonRecords?.[id]?enterMaze(state,id,questId,engineContext(state,{annual:true})):enterDungeon(state,id,questId,engineContext(state)),
+    startDungeon: (id, questId) => state.delves&&!state.flags.dungeonRecords?.[id]?enterDelve(state,id,questId,engineContext(state,{annual:true})):state.mazeBook&&!state.flags.dungeonRecords?.[id]?enterMaze(state,id,questId,engineContext(state,{annual:true})):enterDungeon(state,id,questId,engineContext(state)),
     touchCampaign: () => { if (state.campaign && !waiting(state)) onCampaignAge(state, engineContext(state)); },
     onBirthday: () => {
       if (state.family && state.education) onHouseholdAge(state, engineContext(state));
@@ -978,7 +981,7 @@ function reconcile(state) {
   if (!waiting(state) && birthMode(state) && state.age > 0 && (state.day-birthDay(state)) % 365 === 0 && !state.timeline.yearHistory.some(y => y.id === birthdayId(state))) { state.timeline.yearStartDay=Math.max(state.timeline.yearStartDay,state.day-365);state.timeline.yearTarget = state.day; birthEvent(state, engineContext(state)); }
   if (!state.event && !state.battle) plagueMessage(state);
   if (!state.event && !state.battle) companionFollowup(state);
-  if (!waiting(state) && (state.timeline?.yearTarget || state.timeline?.journey || state.maze || state.dungeon || state.workshop?.project || state.careers?.batch || state.justice?.prison || state.adventuring?.expedition || experienceModule(state)) && state.flags.hungerPauseDay !== state.day && state.hero.condition?.type === 'vampire' && state.hero.condition.hunger >= 75) {
+  if (!waiting(state) && (state.timeline?.yearTarget || state.timeline?.journey || state.maze || state.delve || state.dungeon || state.workshop?.project || state.careers?.batch || state.justice?.prison || state.adventuring?.expedition || experienceModule(state)) && state.flags.hungerPauseDay !== state.day && state.hero.condition?.type === 'vampire' && state.hero.condition.hunger >= 75) {
     setEvent(state, 'life_hunger', 'A need before the next season', 'Vampirism', 'Your year stops at blood hunger 75 or above. Feed without coercion, or suspend the year and make other arrangements.', [choice('animal', 'Arrange animal blood', 'Take one day and reduce hunger by 45, without gold or official evidence.'), ...(state.hero.gold >= 8 ? [choice('donor', 'Find a willing donor', 'Take one day, spend 8 gold and reduce hunger by 65.')] : []), choice('pause', 'Make my own arrangements', 'Pause the year and return to day-based activities.')]);
   }
   if (state.revision >= 5 && !waiting(state)) {
@@ -991,6 +994,7 @@ function reconcile(state) {
     if (!waiting(state)) flushSchoolingEvent(state,ctx);
     if (!waiting(state)) flushLivingEvent(state,ctx);
     if (!waiting(state)) flushGuildEvent(state,ctx);
+    if (!waiting(state)) flushDelveEvent(state,ctx);
     if (!waiting(state)) flushLineageEvent(state,ctx);
     if (!waiting(state)&&!state.justice?.prison) flushSanctuaryEvent(state,ctx);
     if (!waiting(state)) flushFellowshipEvent(state,ctx);
@@ -1063,9 +1067,10 @@ function performAction(original, id) {
     return state;
   }
   state.notice = '';
+  if(isDelveEntry(state,id)){const why=delveEntryReason(state,id);if(why)return {...copy(original),notice:why};if(!enterDelve(state,id,null,engineContext(state,{annual:true})))return {...copy(original),notice:'The door does not open to you today.'};return afterAction(state);}
   const newMaze=isMazeEntry(state,id);
   if(newMaze){if(!enterMaze(state,id,null,engineContext(state,{annual:true})))return {...copy(original),notice:'This descent cannot begin yet.'};return afterAction(state);}
-  const experienceHandlers=[['tournament_',applyTournamentAction],['repertoire_',applyRepertoireAction],['research_',applyResearchAction],['origin_',applyOriginAction],['legacycalling_',applyLegacyMentorTrialAction],['yard_',applyYardAction],['home_',applyHomeRest],['inn_',applyHospitalityAction],['leisure_',applyDaylifeAction],['misdeed_',applyDaylifeAction],['polity_',applyRegionalAction],['people_',applySocialLifeAction],['fun_',applySocialLifeAction],['maze_',applyMazeAction],['trail_',applyCampingAction],['conversations_',applyRelationshipAction],['rpg_',applyRpgAction],['way_',applyFieldAction],['curse_',applyCurseAction],['atlas_',applyCartographyAction],['nature_',applyPersonalityAction],['realm_',applyRealmAction],['justice_',applyJusticeAction],['adventure_',applyAdventureAction],['stories_',applyStoryAction],['recovery_',applyRecoveryAction],['society_',applySocietyAction],['community_',applyCommunityAction],['fellowship_',applyFellowshipAction],['sanctuary_',applySanctuaryAction],['lineage_adoption_',applyLineageAction],['social_',applySocialAction],['pastime_',applyPastimeAction]];
+  const experienceHandlers=[['tournament_',applyTournamentAction],['repertoire_',applyRepertoireAction],['research_',applyResearchAction],['origin_',applyOriginAction],['legacycalling_',applyLegacyMentorTrialAction],['yard_',applyYardAction],['home_',applyHomeRest],['inn_',applyHospitalityAction],['leisure_',applyDaylifeAction],['misdeed_',applyDaylifeAction],['polity_',applyRegionalAction],['people_',applySocialLifeAction],['fun_',applySocialLifeAction],['maze_',applyMazeAction],['delve_',applyDelveAction],['trail_',applyCampingAction],['conversations_',applyRelationshipAction],['rpg_',applyRpgAction],['way_',applyFieldAction],['curse_',applyCurseAction],['atlas_',applyCartographyAction],['nature_',applyPersonalityAction],['realm_',applyRealmAction],['justice_',applyJusticeAction],['adventure_',applyAdventureAction],['stories_',applyStoryAction],['recovery_',applyRecoveryAction],['society_',applySocietyAction],['community_',applyCommunityAction],['fellowship_',applyFellowshipAction],['sanctuary_',applySanctuaryAction],['lineage_adoption_',applyLineageAction],['social_',applySocialAction],['pastime_',applyPastimeAction]];
   for(const [prefix,handler] of experienceHandlers)if(id.startsWith(prefix)) {
     const before=state.hero.gold,actionStartDay=state.day,ctx=engineContext(state,{annual:true,resolvingNeed:id.startsWith('curse_')?'vampire':sanctuaryNeedsBypass(state,id)});
     if(!handler(state,id,ctx,getContacts(state)))return {...copy(original),notice:'This commitment could not proceed; no time or resources were spent.'};
@@ -1478,7 +1483,7 @@ function performEventOption(original, id) {
   const moduleChoices = [ ['tournament_',applyTournamentChoice], ['repertoire_',applyRepertoireChoice], ['origin_',applyOriginChoice], ['yard_',applyYardChoice], ['rpg_',applyRpgChoice],
     ['country_',applyWildernessChoice],['way_',applyFieldChoice],
     ['curse_',applyCurseChoice],
-    ['nature_',applyPersonalityChoice],['hard_',applyWinterChoice],['schooling_',applySchoolingChoice],['living_',applyLivingChoice],['guild_',applyGuildChoice],
+    ['nature_',applyPersonalityChoice],['hard_',applyWinterChoice],['schooling_',applySchoolingChoice],['living_',applyLivingChoice],['guild_',applyGuildChoice],['delve_',applyDelveChoice],
     ['birth_', applyBirthChoice], ['calling_', applyCallingChoice], ['fate_', applyCampaignChoice],
     ['quest_', applyCampaignChoice], ['dungeon_', applyExplorationChoice],
     ['family_', applyHouseholdChoice], ['school_', applyHouseholdChoice], ['lore_', applyLoreChoice],
@@ -1841,7 +1846,7 @@ export function continueAsChild(original, childId) {if(terminalRun(original))ret
 
 export function updateTravelPlan(original, values) {if(terminalRun(original))return copy(original);
   const state=copy(original);
-  if(state.maze||state.rpg?.expedition||state.justice?.prison||state.adventuring?.expedition){state.notice='Road preparations wait until you return.';return state;}
+  if(state.maze||state.delve||state.rpg?.expedition||state.justice?.prison||state.adventuring?.expedition){state.notice='Road preparations wait until you return.';return state;}
   if(state.revision<5||state.timeline?.journey||state.battle||state.event||state.dungeon||state.workshop?.project||state.careers?.batch||experienceModule(state)||state.life?.plan||state.conversations?.pending||state.phase==='retired'){state.notice='Choose preparations before starting your journey.';return state;}
   if(!setTravelPlan(state,values))return {...copy(original),notice:'Finish your current commitment before changing the road plan.'};
   state.notice='Your next journey will use these preparations. Costs are paid only on departure.';
@@ -1874,7 +1879,7 @@ function applyIronmanBattleMortality(state) {
 export function planYear(original, config = {}) {if(terminalRun(original))return copy(original);
   if(original.cartography?.offsite||original.cartography?.pending)return {...copy(original),notice:'Return to a named place before planning a year.'};
   const state = original.revision < 4 && original.phase === 'adult' ? migrateSave(original) || copy(original) : copy(original);
-  if (state.maze||state.rpg?.expedition||state.justice?.prison||state.adventuring?.expedition||birthMode(state) || state.phase !== 'adult' || waiting(state) || state.dungeon || state.timeline?.journey || state.workshop?.project || experienceModule(state)) {
+  if (state.maze||state.delve||state.rpg?.expedition||state.justice?.prison||state.adventuring?.expedition||birthMode(state) || state.phase !== 'adult' || waiting(state) || state.dungeon || state.timeline?.journey || state.workshop?.project || experienceModule(state)) {
     state.notice = birthMode(state) ? 'Use Age up to continue this life.' : 'Finish the current situation before planning a year.';
     return state;
   }
@@ -1887,7 +1892,7 @@ export function planYear(original, config = {}) {if(terminalRun(original))return
 export function continueYear(original) {if(terminalRun(original))return copy(original);
   if(original.cartography?.offsite||original.cartography?.pending)return {...copy(original),notice:'Complete your crossing and return to a named place before resuming a year.'};
   const state = copy(original);
-  if (state.maze||state.rpg?.expedition||state.justice?.prison||state.adventuring?.expedition||state.phase !== 'adult' || waiting(state) || state.dungeon || state.timeline?.journey || state.workshop?.project || experienceModule(state)) {
+  if (state.maze||state.delve||state.rpg?.expedition||state.justice?.prison||state.adventuring?.expedition||state.phase !== 'adult' || waiting(state) || state.dungeon || state.timeline?.journey || state.workshop?.project || experienceModule(state)) {
     state.notice = 'Finish the current decision or battle before continuing the planned year.';
     return state;
   }
@@ -1959,7 +1964,7 @@ export function gearOrganizerCommand(original,command) {
 
 function partyPreparationReason(state) {
   if(terminalRun(state))return 'This Ironman run has ended in combat.';
-  if(state.maze||state.rpg?.expedition||state.justice?.prison||state.adventuring?.expedition)return 'Return from custody or the descent before changing party equipment.';
+  if(state.maze||state.delve||state.rpg?.expedition||state.justice?.prison||state.adventuring?.expedition)return 'Return from custody or the descent before changing party equipment.';
   if(!state)return 'Begin a life first.';
   if(state.cartography?.pending)return 'Finish this travel stretch before changing your equipment.';
   if(state.phase==='retired')return 'This chapter has closed; continue as a living child to prepare another journey.';
@@ -2118,7 +2123,7 @@ export function exploreTravelPreview(state, destinationId) {
   else if(!ageAllows(state,14))disabledReason='Independent travel begins at age 14.';
   else if(waiting(state))disabledReason='Finish the current decision before setting out.';
   else if(state.justice?.prison)disabledReason='You must leave custody before travelling.';
-  else if(state.maze||state.dungeon||state.rpg?.expedition||state.adventuring?.expedition)disabledReason='Leave the dungeon before setting out.';
+  else if(state.maze||state.delve||state.dungeon||state.rpg?.expedition||state.adventuring?.expedition)disabledReason='Leave the dungeon before setting out.';
   else if(state.timeline?.journey||state.cartography?.route)disabledReason='Continue your journey, or stop before choosing another destination.';
   else if(state.cartography?.pending)disabledReason='Finish the current stretch, or turn back before choosing a destination.';
   else if(state.workshop?.project)disabledReason='Finish or cancel your workshop project in Activities.';
@@ -2197,7 +2202,7 @@ export function stopExploreJourney(original) {if(terminalRun(original))return co
 export function travelTo(original, locationId) {if(terminalRun(original))return copy(original);
   const state = copy(original);
   if(state.cartography?.offsite||state.cartography?.pending){state.notice='Complete your crossing and return to a named place before taking a road journey.';return state;}
-  if(state.maze||state.rpg?.expedition||state.justice?.prison||state.adventuring?.expedition){state.notice='You must leave custody or withdraw from the descent before traveling.';return state;}
+  if(state.maze||state.delve||state.rpg?.expedition||state.justice?.prison||state.adventuring?.expedition){state.notice='You must leave custody or withdraw from the descent before traveling.';return state;}
   if (!ageAllows(state, 14) || waiting(state) || state.dungeon || state.timeline?.journey || state.workshop?.project || state.careers?.batch || experienceModule(state) || state.life?.plan || state.phase === 'retired') {
     state.notice = state.workshop?.project ? 'Finish or cancel your committed project before traveling.' : !ageAllows(state, 14) ? 'Regional travel opens at age 14.' : 'Finish the current situation or road journey before traveling.'; return state;
   }
@@ -2338,6 +2343,8 @@ export function resolveBattle(original, completed) {
     state.hero.hp=Math.max(1,Math.ceil(state.hero.maxHp*.1));
     state.notice = `You survive the hunt with at least 10% health. ${defeatGuidance(completed)}`;
     addJournal(state, 'A hunt survived', state.notice, 'combat');
+  } else if (completed.outcome === 'defeat' && pending.context?.kind==='delve') {
+    state.notice = 'You went down in the dark.';
   } else if (completed.outcome === 'defeat') {
     const lost = Math.min(state.hero.gold, Math.max(4, Math.floor(state.hero.gold * 0.15)));
     if(mazeRun)recordMazeFee(state,'recovery',lost,mazeRun);
@@ -2355,12 +2362,13 @@ export function resolveBattle(original, completed) {
     addJournal(state, 'The choice to survive', state.notice, 'combat');
   }
   if(pending.encounterId==='initiation'&&completed.outcome!=='victory'&&state.flags.legacyMentorTrial&&['trial','service'].includes(state.flags.legacyMentorTrial.stage)&&state.phase!=='retired')state.flags.pendingSpecialization=state.flags.legacyMentorTrial.classId;
-  if(completed.outcome==='victory'&&['dungeon','rpg','campaign'].includes(pending.context?.kind))dropEquipment(state,'battle:'+pending.instanceId,Math.min(6,1+(pending.actors.filter(a=>a.side==='enemy').length||1)),engineContext(state));
+  if(completed.outcome==='victory'&&['dungeon','rpg','campaign','delve'].includes(pending.context?.kind))dropEquipment(state,'battle:'+pending.instanceId,Math.min(6,1+(pending.actors.filter(a=>a.side==='enemy').length||1)),engineContext(state));
   if (pending.context?.kind === 'curse') afterCurseBattle(state,pending,completed.outcome,engineContext(state));
   if (pending.context?.kind === 'dungeon') afterExplorationBattle(state, copy(pending.context), completed.outcome, engineContext(state));
   if (pending.context?.kind === 'campaign') afterCampaignBattle(state, copy(pending.context), completed.outcome, engineContext(state));
   if (pending.context?.kind === 'travel') afterTravelBattle(state, copy(pending.context), completed.outcome, engineContext(state,{annual:true}));
   if(pending.context?.kind==='maze')afterMazeBattle(state,pending,completed.outcome,engineContext(state,{annual:true}),completed);
+  if(pending.context?.kind==='delve'){afterDelveBattle(state,pending,completed.outcome,engineContext(state,{annual:true}),completed);if(terminalRun(state)||state.phase==='retired')return afterAction(state);}
   if(mazeVictoryBefore)endMazeVictory(state,mazeRun,Number(pending.context.roomId),mazeVictoryBefore,pending.rewards.exp);
   if(pending.context?.kind==='rpg')afterRpgBattle(state,completed,engineContext(state));
   if(pending.context?.kind==='politics')afterPoliticalBattle(state,pending,completed.outcome,engineContext(state,{annual:true}));
@@ -2446,7 +2454,7 @@ function validBattle(battle, state) {
   if (!ids.has('hero') || !battle.actors.some(actor => actor.side === 'enemy')) return false;
   if (battle.context !== undefined) {
     const context = battle.context;
-    if (!plain(context) || !['dungeon', 'campaign', 'travel','adventure','curse','rpg','maze','politics','tournament','initiation'].includes(context.kind) || !Object.entries(context).every(([key,v]) => textField(v, context.kind==='maze'&&context.contentVersion==='1'&&key==='runSeed'?400:160))) return false;
+    if (!plain(context) || !['dungeon', 'campaign', 'travel','adventure','curse','rpg','maze','delve','politics','tournament','initiation'].includes(context.kind) || !Object.entries(context).every(([key,v]) => textField(v, context.kind==='maze'&&context.contentVersion==='1'&&key==='runSeed'?400:160))) return false;
     if (context.kind === 'initiation' && (battle.encounterId !== 'initiation' || !validPaladinTrialContext(state, context))) return false;
     if(context.kind==='politics'&&!validPoliticalBattle(state,context))return false;
     if(context.kind==='tournament'&&!validTournamentContext(state,context))return false;
@@ -2556,7 +2564,7 @@ export function validateSave(value) {
     if (!Array.isArray(value.journal) || !value.journal.length || !value.journal.every(item => plain(item) && textField(item.id, 120) && integer(item.day) && integer(item.age, birthMode(value) ? 0 : 7, 5000) && textField(item.title, 1000) && textField(item.text, 10000) && textField(item.tag, 80) && (item.capturedReceipt===undefined||typeof item.capturedReceipt==='boolean') && (item.generation===undefined||integer(item.generation,1,5000)))) return false;
     if (value.event !== null) {
       const event = value.event;
-      const allowed = { ...EVENT_CHOICES, ...yardEventIds(), ...tournamentEventIds(), ...lifeEventIds(), ...birthEventIds(), ...callingEventIds(), ...campaignEventIds(), ...explorationEventIds(), ...dialogueEventIds(), ...householdEventIds(), ...researchEventIds(), ...originEventIds(), ...loreEventIds(), ...careerEventIds(), ...lineageEventIds(), ...healthEventIds(), ...travelEventIds(),...societyEventIds(),...communityEventIds(),...fellowshipEventIds(),...sanctuaryEventIds(),...socialEventIds(),...pastimeEventIds(),...repertoireEventIds(),...storyEventIds(),...rpgEventIds(),...personalityEventIds(),...justiceEventIds(),...adventureEventIds(),...curseEventIds(),...WINTER_EVENT.ids(), ...DEBT_RECKONING_EVENT.ids(), ...SCHOOLING_EVENTS.ids(), ...LIVING_EVENTS.ids(),...GUILD_EVENTS.ids() };
+      const allowed = { ...EVENT_CHOICES, ...yardEventIds(), ...tournamentEventIds(), ...lifeEventIds(), ...birthEventIds(), ...callingEventIds(), ...campaignEventIds(), ...explorationEventIds(), ...dialogueEventIds(), ...householdEventIds(), ...researchEventIds(), ...originEventIds(), ...loreEventIds(), ...careerEventIds(), ...lineageEventIds(), ...healthEventIds(), ...travelEventIds(),...societyEventIds(),...communityEventIds(),...fellowshipEventIds(),...sanctuaryEventIds(),...socialEventIds(),...pastimeEventIds(),...repertoireEventIds(),...storyEventIds(),...rpgEventIds(),...personalityEventIds(),...justiceEventIds(),...adventureEventIds(),...curseEventIds(),...WINTER_EVENT.ids(), ...DEBT_RECKONING_EVENT.ids(), ...SCHOOLING_EVENTS.ids(), ...LIVING_EVENTS.ids(),...GUILD_EVENTS.ids(),...DELVE_EVENTS.ids() };
       for(const need of ['life_hunger','vampire_feeding'])if(value.sanctuaries&&allowed[need])allowed[need]=[...allowed[need],'agreement'];
       if (!plain(event) || !(Object.hasOwn(allowed, event.id) || event.id === 'lycan_confidant') || ![event.title, event.category, event.body].every(item => textField(item))) return false;
       if (!Array.isArray(event.choices) || !event.choices.length || event.choices.length > 8 || new Set(event.choices.map(item => item?.id)).size !== event.choices.length) return false;
@@ -2601,6 +2609,7 @@ export function validateSave(value) {
       if(value.education&&!validateSchooling(value.education.schooling,value))return false;
       if(!validateLiving(value.living,value))return false;
       if(!validateGuild(value.guild,value))return false;
+      if(!validateDelve(value))return false;
       if(value.society!==undefined&&!validateSociety(value.society,value))return false;
       if(value.community!==undefined&&!validateCommunity(value.community,value))return false;
       if(value.fellowship!==undefined&&!validateFellowship(value.fellowship,value))return false;

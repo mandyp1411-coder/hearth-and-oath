@@ -17,7 +17,7 @@ import { adventurePage, realmPage, merchantPanel } from '../dist/js/rpg-ui.js';
 import { CONTRACT_FLAVOR } from '../dist/js/realm-content-v18.js';
 
 function clear(s){for(let i=0;i<80&&s.event;i++)s=engine.chooseEventOption(s,s.event.choices.find(c=>['later','leave','continue','keep'].includes(c.id))?.id||s.event.choices[0].id);return s;}
-async function adult(seed='rpg-v18'){const s=clear(await createLifeAtAge({seed,startAge:18}));if(!isSettlement(s.world,s.locationId))s.locationId=s.world.locations.find(p=>isSettlement(s.world,p.id)).id;s.cartography.interior=null;s.cartography.offsite=false;syncCartography(s);refreshAdventureBoard(s);const prepared=engine.migrateSave(s);delete prepared.mazeBook;delete prepared.maze;return prepared;}
+async function adult(seed='rpg-v18'){const s=clear(await createLifeAtAge({seed,startAge:18}));if(!isSettlement(s.world,s.locationId))s.locationId=s.world.locations.find(p=>isSettlement(s.world,p.id)).id;s.cartography.interior=null;s.cartography.offsite=false;syncCartography(s);refreshAdventureBoard(s);const prepared=engine.migrateSave(s);delete prepared.mazeBook;delete prepared.maze;delete prepared.delves;return prepared;}
 function fixture(s){s.hero.gold=4000;s.hero.hp=s.hero.maxHp=500;s.hero.mp=s.hero.maxMp=300;s.hero.attributes.strength=12;s.hero.skills.weapons=12;s.hero.skills.arcana=8;s.hero.skills.devotion=8;return s;}
 // Controlled legacy encounter snapshot: retired one-click roam commands remain absent.
 function freeEncounter(s,type){

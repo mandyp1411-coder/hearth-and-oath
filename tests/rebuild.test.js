@@ -83,7 +83,7 @@ function childhoodChoice(state, preference = []) {
 function growTo(state, target, preference = []) {
   // These retained linear-dungeon/quoted-road contracts use the explicit legacy
   // travel and dungeon profile. New energy and maze behavior has separate gates.
-  state=structuredClone(state);delete state.trail;delete state.mazeBook;delete state.maze;
+  state=structuredClone(state);delete state.trail;delete state.mazeBook;delete state.maze;delete state.delves;
   const moments = [];
   for (let step = 0; step < 150 && (state.age < target || state.event); step += 1) {
     saveable(state);
@@ -656,7 +656,7 @@ test('blood hunger interrupts a real road with a usable feeding choice and prese
   assert.notEqual(state.locationId, 'marsh', 'an interrupted partial leg cannot teleport to its destination');
   const journey = structuredClone(state.timeline.journey);
   saveable(state);
-  const restored = engine.migrateSave(JSON.parse(JSON.stringify(state)));delete restored.trail;delete restored.mazeBook;delete restored.maze;
+  const restored = engine.migrateSave(JSON.parse(JSON.stringify(state)));delete restored.trail;delete restored.mazeBook;delete restored.maze;delete restored.delves;
   assert.deepEqual(engine.chooseEventOption(restored, 'animal'), engine.chooseEventOption(state, 'animal'));
   const ownArrangement = choose(state, 'pause');
   assert.ok(engine.getActions(ownArrangement).some(action => action.id === 'feed_vampire' && !action.disabledReason), 'a paused hunger choice must still allow the promised day activity');

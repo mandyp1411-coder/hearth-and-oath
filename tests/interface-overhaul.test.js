@@ -38,7 +38,7 @@ test('unmet companions are discovered in the world rather than listed in party m
 });
 
 test('a resumable descent keeps its real continue and withdrawal routes on Life after the section split',async t=>{
- let s=E.chooseAction(atService(fresh(),'realm_ration'),'realm_ration');delete s.mazeBook;delete s.maze;s=E.chooseAction(s,'adventure_descend');assert.ok(s.adventuring.expedition);assert.ok(s.event);s.event=null; // Controlled older resumable-descent fixture, accepted by the actual save validator.
+ let s=E.chooseAction(atService(fresh(),'realm_ration'),'realm_ration');delete s.mazeBook;delete s.maze;delete s.delves;s=E.chooseAction(s,'adventure_descend');assert.ok(s.adventuring.expedition);assert.ok(s.event);s.event=null; // Controlled older resumable-descent fixture, accepted by the actual save validator.
  assert.ok(E.validateSave(s));const ui=await resume(t,s,'life'),before=ui.current();assert.ok(control(ui,'activity','adventure_continue'));assert.ok(control(ui,'activity','adventure_withdraw'));assert.equal(JSON.stringify(ui.current()),JSON.stringify(before));const expected=E.chooseAction(before,'adventure_continue');await ui.click('activity','adventure_continue');assert.equal(JSON.stringify(ui.current()),JSON.stringify(expected));assert.ok(ui.current().event);
 });
 test('earlier exchange records preserve unknown meeting dates rather than inventing a visit',()=>{const s=fresh();delete s.conversations.meetings;const before=JSON.stringify(s),rows=rememberedContacts(s);assert.ok(rows.length);assert.ok(JSON.stringify(s)===before);assert.equal(s.conversations.meetings,undefined);});

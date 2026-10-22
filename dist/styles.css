@@ -5105,3 +5105,26 @@ html[data-reading-motion="reduced"] *,html[data-reading-motion="reduced"] *::bef
 .world-panel .world-event small { opacity: .7; }
 .world-panel .world-threads { border-top: 1px solid var(--line, rgba(255,255,255,.08)); margin-top: 8px; padding-top: 6px; }
 .world-panel .world-news summary { cursor: pointer; opacity: .8; }
+
+/* The delve: a place with a history, room by room. */
+.delve-workspace { display: grid; gap: 12px; }
+.delve-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.delve-heading h1 { margin: 2px 0 4px; }
+.delve-premise { margin: 0; opacity: .8; max-width: 60ch; }
+.delve-vitals { white-space: nowrap; opacity: .85; }
+.delve-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr); gap: 12px; }
+@media (max-width: 760px) { .delve-layout { grid-template-columns: 1fr; } }
+.delve-room-panel p { margin: 6px 0; }
+.delve-noticed { border-left: 2px solid var(--accent, #b08a4a); padding-left: 8px; }
+.delve-log { border-top: 1px solid var(--line, rgba(255,255,255,.08)); margin-top: 8px; padding-top: 6px; opacity: .85; }
+.delve-doors { margin-top: 10px; }
+.delve-acts { margin-top: 6px; }
+.delve-side { display: grid; gap: 12px; align-content: start; }
+.delve-rooms { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 4px; }
+.delve-room { display: flex; align-items: baseline; gap: 6px; opacity: .7; }
+.delve-room.seen { opacity: 1; }
+.delve-room.here { font-weight: 600; }
+.delve-room.danger .delve-room-symbol { color: var(--danger, #c0504d); }
+.delve-room.cleared .delve-room-symbol { opacity: .5; }
+.delve-room-symbol { width: 1.2em; text-align: center; }
+.delve-room small { opacity: .7; margin-left: 4px; }
