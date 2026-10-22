@@ -154,7 +154,7 @@ function premiseFor(s, id, questId) {
   if (AUTHORED[id]) return { id, ...AUTHORED[id], tier: 2, authored: true };
   const m = /^descent-(ossuary|roots|tower|abyss)-(\d+)$/.exec(id); if (!m) return null;
   const kind = KINDS[THEME_KIND[m[1]]], roll = (salt, n) => seededRoll(s.seed, `delve:${id}:${salt}`, n), pick = (rows, salt) => rows[roll(salt, rows.length)];
-  const tier = 1 + roll('tier', 3), floors = tier >= 3 ? 3 : tier;
+  const tier = [1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3][roll('tier', 11)], floors = tier >= 3 ? 3 : tier; // most places under a town are shallow; the deep ones are the ones with the stories
   return { id, title: `${kind.title} under ${placeName(s, s.locationId)}`, site: s.locationId, family: kind.family, floors, tier, lairName: kind.lairName, built: pick(kind.builts, 'built'), wrong: pick(kind.wrongs, 'wrong'), lives: kind.lives[0], why: pick(kind.whys, 'why'), rooms: kind.rooms, cues: Object.keys(CUES), authored: false };
 }
 
@@ -261,7 +261,8 @@ const action = (id, label, description, extra = {}) => ({ id, label, description
 export function delveActions(s) {
   const d = s.delve; if (!d || s.event || s.battle || s.phase === 'retired') return [];
   const r = here(s), rows = [], dark = !sees(s, d);
-  for (const x of r.exits) { const n = room(s, x); if (n.hidden) continue; rows.push(action(`delve_go_${x}`, n.seen ? `Back to ${n.name.toLowerCase()}` : `On to ${n.name.toLowerCase()}`, n.seen ? (n.cleared || !n.encounter ? 'Quiet, as far as you know.' : 'Something is still in there.') : n.kind === 'lair' ? `${cap(d.lairName)} is in there. You can hear it.` : 'You have not been that way.', { days: 0 })); }
+  const ears = CUES.hunter.who(s) || CUES.darksight.who(s); // a hunter hears what is behind a door before opening it
+  for (const x of r.exits) { const n = room(s, x); if (n.hidden) continue; rows.push(action(`delve_go_${x}`, n.seen ? `Back to ${n.name.toLowerCase()}` : `On to ${n.name.toLowerCase()}`, n.seen ? (n.cleared || !n.encounter ? 'Quiet, as far as you know.' : 'Something is still in there.') : n.kind === 'lair' ? `${cap(d.lairName)} is in there. You can hear it.` : ears && n.encounter && !n.encounter.cleared ? 'Something is breathing in there. You can hear it from here.' : 'You have not been that way.', { days: 0 })); }
   if (!r.searched && !(r.encounter && !r.encounter.cleared)) rows.push(action('delve_search', 'Search the room', `An hour of light and some noise. ${r.find && !r.find.taken ? 'There is something here.' : 'There may be nothing.'}`, dark ? { disabledReason: 'You cannot search what you cannot see.' } : {}));
   if (r.find && !r.find.taken && r.searched) rows.push(action('delve_take', `Take ${r.find.kind === 'page' ? 'the pages' : 'what is here'}`, r.find.text));
   if (r.relic && !r.relic.taken && r.kind === 'way' && (r.objective?.done || d.objectiveDone)) rows.push(action('delve_relic', `Take ${r.relic.name}`, `${r.relic.text} It has an owner above.`));
