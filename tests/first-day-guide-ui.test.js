@@ -127,13 +127,13 @@ test('same-seed independent slots do not share saved dismissal or manual reopeni
 });
 
 test('a quota-held guide dismissal changes only its marker and keeps the canonical latest-session escape',async t=>{
-  const s=fixture(),ui=await open(t,s),before=ui.storage.getItem('hearth-and-oath:slots:v1'),write=ui.storage.setItem;
-  ui.storage.setItem=(key,value)=>{if(['hearth-and-oath:slots:v1','hearth-and-oath:life:v1'].includes(key))throw Error('Quota');write(key,value);};
-  await ui.click('footing-dismiss');assert.equal(guide(ui),null);assert.equal(ui.storage.getItem('hearth-and-oath:slots:v1'),before);
+  const s=fixture(),ui=await open(t,s),before=ui.storage.getItem('hearth-and-oath-legacy:slots:v1'),write=ui.storage.setItem;
+  ui.storage.setItem=(key,value)=>{if(['hearth-and-oath-legacy:slots:v1','hearth-and-oath-legacy:life:v1'].includes(key))throw Error('Quota');write(key,value);};
+  await ui.click('footing-dismiss');assert.equal(guide(ui),null);assert.equal(ui.storage.getItem('hearth-and-oath-legacy:slots:v1'),before);
   const expected=structuredClone(s);expected.hero.firstDayGuide.dismissed=true;
   const create=URL.createObjectURL,revoke=URL.revokeObjectURL;let exported;URL.createObjectURL=blob=>{exported=blob;return 'blob:guide-dismissal';};URL.revokeObjectURL=()=>{};ui.document.createElement=()=>({click(){}});t.after(()=>{URL.createObjectURL=create;URL.revokeObjectURL=revoke;});
   const health=ui.root.querySelector('[data-save-health]');assert.equal(health.querySelector('[data-save-label]').textContent,'Not saved — export needed');assert.equal(health.querySelector('[data-op="export-session"]').hidden,false);
-  await ui.click('export-session','0');assert.deepEqual(JSON.parse(await exported.text()),expected);assert.equal((await ui.windowEvent('beforeunload')).defaultPrevented,true);assert.equal(ui.storage.getItem('hearth-and-oath:slots:v1'),before);
+  await ui.click('export-session','0');assert.deepEqual(JSON.parse(await exported.text()),expected);assert.equal((await ui.windowEvent('beforeunload')).defaultPrevented,true);assert.equal(ui.storage.getItem('hearth-and-oath-legacy:slots:v1'),before);
 });
 
 
@@ -141,15 +141,15 @@ function feedbackMessages(node){let value=node.textContent;const messages=[];Obj
 for(const quota of [false,true])for(const queued of [false,true])test(`guide dismissal reports only its UI outcome, never the prior reward (${quota?'quota-held':'durable'}, ${queued?'queued':'immediate'} frames)`,async t=>{
   // A controlled prior-result string, not a newly awarded reward or invented
   // engine action. The whole validated state below must remain marker-only.
-  const s=fixture();s.notice='A prior cargo agreement awarded 20 Gold and one rank once.';valid(s);const ui=await open(t,s),messages=feedbackMessages(ui.viewStatus),toasts=feedbackMessages(ui.toast),disk=ui.storage.getItem('hearth-and-oath:slots:v1');
+  const s=fixture();s.notice='A prior cargo agreement awarded 20 Gold and one rank once.';valid(s);const ui=await open(t,s),messages=feedbackMessages(ui.viewStatus),toasts=feedbackMessages(ui.toast),disk=ui.storage.getItem('hearth-and-oath-legacy:slots:v1');
   const frames=[];if(queued)globalThis.requestAnimationFrame=callback=>{frames.push(callback);return frames.length;};
-  if(quota){const write=ui.storage.setItem;ui.storage.setItem=(key,value)=>{if(['hearth-and-oath:slots:v1','hearth-and-oath:life:v1'].includes(key))throw Error('Quota');write(key,value);};}
+  if(quota){const write=ui.storage.setItem;ui.storage.setItem=(key,value)=>{if(['hearth-and-oath-legacy:slots:v1','hearth-and-oath-legacy:life:v1'].includes(key))throw Error('Quota');write(key,value);};}
   const trigger=ui.root.querySelector('[data-op="footing-dismiss"]');trigger.focus();await ui.key('Enter');
   for(let n=0;frames.length&&n<20;n++)for(const callback of frames.splice(0))callback();assert.equal(frames.length,0);
   assert.deepEqual(messages,[],'the previous reward is never newly published to the outcome announcer');assert.deepEqual(toasts,['Guide hidden.'],'one actual nonpersisted UI outcome');assert.equal(guide(ui),null);assert.equal(ui.document.activeElement.isConnected,true);
   await ui.fire('click',trigger);assert.deepEqual(messages,[]);assert.deepEqual(toasts,['Guide hidden.'],'detached old control cannot repeat feedback');
   const expected=structuredClone(s);expected.hero.firstDayGuide.dismissed=true;
-  if(quota){assert.equal(ui.storage.getItem('hearth-and-oath:slots:v1'),disk);assert.deepEqual(ui.current(),s);assert.equal((await ui.windowEvent('beforeunload')).defaultPrevented,true);assert.match(ui.root.querySelector('[data-save-label]').textContent,/Not saved/);}
+  if(quota){assert.equal(ui.storage.getItem('hearth-and-oath-legacy:slots:v1'),disk);assert.deepEqual(ui.current(),s);assert.equal((await ui.windowEvent('beforeunload')).defaultPrevented,true);assert.match(ui.root.querySelector('[data-save-label]').textContent,/Not saved/);}
   else{assert.deepEqual(ui.current(),expected);assert.equal((await ui.windowEvent('beforeunload')).defaultPrevented,false);}
   const create=URL.createObjectURL,revoke=URL.revokeObjectURL;let exported;URL.createObjectURL=blob=>{exported=blob;return 'blob:guide-feedback';};URL.revokeObjectURL=()=>{};ui.document.createElement=()=>({click(){}});t.after(()=>{URL.createObjectURL=create;URL.revokeObjectURL=revoke;});
   if(quota)await ui.click('export-session','0');else{await ui.click('menu');await ui.click('export');}
@@ -163,12 +163,12 @@ for(const queued of [false,true])test(`reopened already-dismissed guide closes w
   t.after(()=>{probe.close();setMusicEnabled(settings.musicEnabled);for(const [key,descriptor]of originals)descriptor?Object.defineProperty(globalThis,key,descriptor):delete globalThis[key];});
   for(let repeat=0;repeat<2;repeat++){
     await ui.click('menu');await ui.click('help');await ui.click('footing-open');assert.ok(guide(ui));
-    const messages=feedbackMessages(ui.viewStatus),toasts=feedbackMessages(ui.toast),bytes=[ui.storage.getItem('hearth-and-oath:slots:v1'),ui.storage.getItem('hearth-and-oath:life:v1')],writes=[],write=ui.storage.setItem;
+    const messages=feedbackMessages(ui.viewStatus),toasts=feedbackMessages(ui.toast),bytes=[ui.storage.getItem('hearth-and-oath-legacy:slots:v1'),ui.storage.getItem('hearth-and-oath-legacy:life:v1')],writes=[],write=ui.storage.setItem;
     ui.storage.setItem=(key,value)=>{writes.push(key);write(key,value);};const tones=probe.tones.length;probe.advance();
     const frames=[];if(queued)globalThis.requestAnimationFrame=callback=>{frames.push(callback);return frames.length;};
     const trigger=ui.root.querySelector('[data-op="footing-dismiss"]');trigger.focus();await ui.key('Enter');for(let n=0;frames.length&&n<20;n++)for(const callback of frames.splice(0))callback();
     assert.equal(frames.length,0);assert.equal(guide(ui),null);assert.deepEqual(messages,[]);assert.deepEqual(toasts,['Guide hidden.']);assert.deepEqual(writes,[],'UI-only close makes no additional browser write');assert.deepEqual(probe.tones.slice(tones),[220,660],'real audio.js schedules only the ordinary UI click, not error or gameplay-action tones');
-    assert.deepEqual([ui.storage.getItem('hearth-and-oath:slots:v1'),ui.storage.getItem('hearth-and-oath:life:v1')],bytes);assert.deepEqual(ui.current(),s);assert.equal(ui.document.activeElement.isConnected,true);assert.equal((await ui.windowEvent('beforeunload')).defaultPrevented,false);
+    assert.deepEqual([ui.storage.getItem('hearth-and-oath-legacy:slots:v1'),ui.storage.getItem('hearth-and-oath-legacy:life:v1')],bytes);assert.deepEqual(ui.current(),s);assert.equal(ui.document.activeElement.isConnected,true);assert.equal((await ui.windowEvent('beforeunload')).defaultPrevented,false);
     await ui.fire('click',trigger);assert.deepEqual(toasts,['Guide hidden.']);assert.deepEqual(writes,[]);ui.storage.setItem=write;
     if(queued)globalThis.requestAnimationFrame=callback=>{callback();return 1;};
   }

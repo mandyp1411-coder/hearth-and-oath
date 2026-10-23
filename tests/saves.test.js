@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { createSaveStore, LEGACY_SAVE_KEY, SAVE_SLOT_COUNT } from '../dist/js/saves.js';
 import { createBirthGame, chooseEventOption, migrateSave, validateSave } from '../dist/js/engine.js';
 
-const slotsKey = 'hearth-and-oath:slots:v1';
+const slotsKey = 'hearth-and-oath-legacy:slots:v1';
 const legacy = JSON.parse(readFileSync(new URL('./fixtures/legacy-v5.json', import.meta.url), 'utf8')).states;
 function memoryStorage(initial = {}) {
   const values = new Map(Object.entries(initial));

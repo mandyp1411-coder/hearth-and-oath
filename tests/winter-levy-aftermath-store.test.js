@@ -8,7 +8,7 @@ import {levyDisclosureFor} from '../dist/js/winter-levy-aftermath.js';
 import {intrigueJournalRows} from '../dist/js/local-intrigue.js';
 import {base,completed,household,action,clone,reload,valid} from './helpers/winter-levy-fixtures.mjs';
 
-const KEY='hearth-and-oath:slots:v1';
+const KEY='hearth-and-oath-legacy:slots:v1';
 function storage(){const values=new Map();let readOnly=false,attempts=0;return {values,getItem:k=>values.get(k)??null,setItem(k,v){if(readOnly){attempts++;throw Error('Read attempted a durable write.');}values.set(k,String(v));},removeItem(k){if(readOnly){attempts++;throw Error('Read attempted durable removal.');}values.delete(k);},forbid(){readOnly=true;},get attempts(){return attempts;}};}
 const disk=s=>[...s.values.entries()].sort(([a],[b])=>a.localeCompare(b));
 async function admitted(state){const memory=storage(),coordinate=createSaveCoordinator({request:async(_name,_options,fn)=>fn()}),store=createSaveStore(memory,E.migrateSave);assert.ok(await coordinate(()=>store.replace(1,base())));assert.ok(await coordinate(()=>store.replace(0,base())));assert.ok(await coordinate(()=>store.replace(0,state,{reviewed:true,token:store.reviewToken(0)})));return {memory,store,coordinate};}

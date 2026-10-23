@@ -5,7 +5,7 @@ import { createSaveStore } from '../dist/js/saves.js';
 import { createBirthGame, chooseEventOption, migrateSave } from '../dist/js/engine.js';
 import { setImmediate as settle } from 'node:timers/promises';
 import { mountApp } from './helpers/ui-surface.mjs';
-const key='hearth-and-oath:slots:v1';
+const key='hearth-and-oath-legacy:slots:v1';
 let original;
 function fixture(){original ||= decisionLife();return structuredClone(original);}
 const named=new Map();
@@ -62,7 +62,7 @@ test('creating a life in a slot claimed elsewhere protects both the durable life
 
 test('quota-held session survives title navigation without an implicit reload and unsupported locking has clear guidance',async t=>{
   const before=fixture(),ui=await mountApp(t,{states:[before]});await ui.click('title-continue');const write=ui.storage.setItem;
-  ui.storage.setItem=(key,value)=>{if(key.startsWith('hearth-and-oath:slots:')||key==='hearth-and-oath:life:v1')throw Error('Quota');write(key,value);};
+  ui.storage.setItem=(key,value)=>{if(key.startsWith('hearth-and-oath-legacy:slots:')||key==='hearth-and-oath-legacy:life:v1')throw Error('Quota');write(key,value);};
   const expected=chooseEventOption(before,before.event.choices[0].id),exports=captureExports(t,ui);
   await ui.click('choice',before.event.choices[0].id);assert.match(ui.root.innerHTML,/Browser storage is unavailable/);
   await ui.click('title-menu');await ui.click('title-continue');await ui.click('menu','header');await ui.click('export');
@@ -120,7 +120,7 @@ test('title-screen import commits only the reviewed slot and a later reviewed re
 });
 
 test('malformed-envelope legacy recovery remains playable and retains the exact pending decision',async t=>{
-  const before=fixture(),ui=await mountApp(t,{storageEntries:[[key,'{bad json'],['hearth-and-oath:life:v1',JSON.stringify(before)]]});
+  const before=fixture(),ui=await mountApp(t,{storageEntries:[[key,'{bad json'],['hearth-and-oath-legacy:life:v1',JSON.stringify(before)]]});
   assert.equal(ui.storage.getItem(key),'{bad json','opening the game does not rewrite recovery data');
   await ui.click('title-continue');assert.ok(ui.root.querySelector('.game-frame'));assert.deepEqual(ui.current(),before);assert.deepEqual(ui.lives()[0].event,before.event);
 });

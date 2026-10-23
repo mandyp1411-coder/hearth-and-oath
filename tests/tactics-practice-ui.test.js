@@ -6,7 +6,7 @@ import { createSaveStore } from '../dist/js/saves.js';
 import { mountApp } from './helpers/ui-surface.mjs';
 
 // Handler/storage integration only. Browser focus/layout still requires QA.
-const KEY = 'hearth-and-oath:slots:v1';
+const KEY = 'hearth-and-oath-legacy:slots:v1';
 let base;
 const fixture = () => structuredClone(base ||= createBirthGame({ name: 'Rowan', seed: 'tactics-practice-ui-original' }));
 const snapshot = ui => JSON.stringify([...ui.values]);

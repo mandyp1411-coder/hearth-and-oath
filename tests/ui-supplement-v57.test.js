@@ -14,7 +14,7 @@ import { createSaveStore } from '../dist/js/saves.js';
 import { mountApp } from './helpers/ui-surface.mjs';
 const base=E.migrateSave(JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url)))).states.base);
 const fresh=()=>structuredClone(base);
-const KEY='hearth-and-oath:slots:v1',LIFE='hearth-and-oath:life:v1';
+const KEY='hearth-and-oath-legacy:slots:v1',LIFE='hearth-and-oath-legacy:life:v1';
 const e=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const helpers={e,paragraphs:text=>'<p>'+e(text)+'</p>',date:n=>'Day '+n,button:(label,op,id='',cls='',disabled=false)=>`<button data-op="${e(op)}" data-id="${e(id)}" ${disabled?'disabled':''}>${label}</button>`};
 const control=(ui,op)=>ui.root.querySelector(`[data-op="${op}"]`);

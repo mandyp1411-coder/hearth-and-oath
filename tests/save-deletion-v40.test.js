@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createBirthGame, migrateSave, chooseEventOption } from '../dist/js/engine.js';
 import { createSaveStore, LEGACY_SAVE_KEY } from '../dist/js/saves.js';
 import { mountApp } from './helpers/ui-surface.mjs';
-const key='hearth-and-oath:slots:v1';
+const key='hearth-and-oath-legacy:slots:v1';
 function storage(){const values=new Map();return {values,failKey:null,getItem:k=>values.get(k)??null,setItem(k,v){if(this.failKey===k)throw Error('Unavailable');values.set(k,String(v));}};}
 const life=name=>createBirthGame({name,seed:'delete-'+name});
 

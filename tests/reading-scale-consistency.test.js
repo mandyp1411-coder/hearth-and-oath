@@ -103,8 +103,8 @@ test('text scaling keeps the existing item art, arrow column and click-target mi
 
 test('display preferences remain browser-wide, independent from saved lives and workspace keys',()=>{
  const data=new Map([
-  ['hearth-and-oath:saves:v1','unchanged saved lives'],
-  ['hearth-and-oath:workspace:life-a:1','unchanged workspace'],
+  ['hearth-and-oath-legacy:saves:v1','unchanged saved lives'],
+  ['hearth-and-oath-legacy:workspace:life-a:1','unchanged workspace'],
  ]),before=new Map(data),writes=[],storage={getItem:k=>data.get(k),setItem:(k,v)=>{writes.push(k);data.set(k,v);}};
  assert.deepEqual(normalizeDisplay({scale:0,font:'plain'}),{scale:1,font:'plain',singleKeyShortcuts:true});
  assert.deepEqual(normalizeDisplay({scale:9,font:'other'}),{scale:1.5,font:'serif',singleKeyShortcuts:true});
@@ -113,7 +113,7 @@ test('display preferences remain browser-wide, independent from saved lives and 
   const style=new Map(),attrs=new Map();applyDisplay(settings,{documentElement:{style:{setProperty:(k,v)=>style.set(k,v)},setAttribute:(k,v)=>attrs.set(k,v)}});
   assert.equal(style.get('--reading-scale'),String(scale));assert.equal(attrs.get('data-reading-font'),'plain');
  }
- assert.deepEqual([...new Set(writes)],['hearth-and-oath:display:v1']);
+ assert.deepEqual([...new Set(writes)],['hearth-and-oath-legacy:display:v1']);
  for(const [key,value] of before)assert.equal(data.get(key),value);
  assert.match(css,/html\[data-reading-font="plain"\] \{ --serif: Arial, Helvetica, sans-serif; \}/);
 });

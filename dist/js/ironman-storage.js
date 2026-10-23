@@ -1,8 +1,8 @@
 // Strict, detached storage codecs. No storage, engine, DOM or lock side effects.
 import { isIronman, validateIronman, ironmanCombatStopped } from './ironman.js';
 
-export const IRONMAN_RECORD_PREFIX = 'hearth-and-oath:ironman-run:v1:';
-export const IRONMAN_ENDED_PREFIX = 'hearth-and-oath:ironman-ended:v1:';
+export const IRONMAN_RECORD_PREFIX = 'hearth-and-oath-legacy:ironman-run:v1:';
+export const IRONMAN_ENDED_PREFIX = 'hearth-and-oath-legacy:ironman-ended:v1:';
 const own = (value, key) => Boolean(value && Object.hasOwn(value, key));
 const object = value => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 const keys = (value, names) => object(value) && Object.keys(value).length === names.length && names.every(key => own(value, key));

@@ -50,9 +50,9 @@ test('all current production menu destinations remain reachable and navigation n
     assert.deepEqual(surface.lives(), slots, `opening ${id} cannot mutate another slot`);
     assert.ok(surface.root.querySelector('.workspace-body'));
   }
-  const oldWorkspace = surface.storage.getItem(`hearth-and-oath:workspace:${baseline.seed}:${baseline.dynasty.generation}`);
+  const oldWorkspace = surface.storage.getItem(`hearth-and-oath-legacy:workspace:${baseline.seed}:${baseline.dynasty.generation}`);
   await forged(surface, 'tab', 'not-a-game-view');
-  assert.equal(surface.storage.getItem(`hearth-and-oath:workspace:${baseline.seed}:${baseline.dynasty.generation}`), oldWorkspace);
+  assert.equal(surface.storage.getItem(`hearth-and-oath-legacy:workspace:${baseline.seed}:${baseline.dynasty.generation}`), oldWorkspace);
   assert.deepEqual(surface.current(), baseline);
 });
 
@@ -87,7 +87,7 @@ test('Escape still opens Menu from an editor, while numeric shortcuts cannot com
 
 test('destination exploration and the illustrated location list preserve knowledge',async t=>{
  const surface=await resume(t),baseline=surface.current();await surface.click('tab','map');assert.ok(surface.root.querySelector('.destination-exploration'));assert.equal(surface.root.querySelector('[data-op="spatial-pane"]'),null);assert.equal(surface.root.querySelector('[data-op="spatial-mode"]'),null);assert.deepEqual(surface.current(),baseline);
- const key=`hearth-and-oath:workspace:${baseline.seed}:${baseline.dynasty.generation}`,before=surface.storage.getItem(key);await forged(surface,'spatial-pane','hidden-debug-view');assert.equal(surface.storage.getItem(key),before);const local=nearbyContacts(baseline)[0];assert.ok(local);await surface.click('place-open');assert.ok(surface.root.querySelector('.place-areas'));await surface.click('spatial-contact',local.id);assert.ok(surface.root.querySelector('.settlement-meeting .dialogue-scene'));assert.deepEqual(surface.current(),baseline);
+ const key=`hearth-and-oath-legacy:workspace:${baseline.seed}:${baseline.dynasty.generation}`,before=surface.storage.getItem(key);await forged(surface,'spatial-pane','hidden-debug-view');assert.equal(surface.storage.getItem(key),before);const local=nearbyContacts(baseline)[0];assert.ok(local);await surface.click('place-open');assert.ok(surface.root.querySelector('.place-areas'));await surface.click('spatial-contact',local.id);assert.ok(surface.root.querySelector('.settlement-meeting .dialogue-scene'));assert.deepEqual(surface.current(),baseline);
 });
 
 test('settlement selection opens the existing NPC thread; its actual talk and reply IDs drive the engine', async t => {
@@ -177,7 +177,7 @@ test('map selection, zoom and workspace reload preserve UI preferences without c
   await t.test('production selection and zoom handlers only persist workspace preferences', async t => {
     const surface = await resume(t, base), before = surface.current(), slots = surface.lives();
     await surface.click('tab','map');await surface.click('tab','map'); await surface.click('destination-select', key);
-    const workspaceKey = `hearth-and-oath:workspace:${before.seed}:${before.dynasty.generation}`;
+    const workspaceKey = `hearth-and-oath-legacy:workspace:${before.seed}:${before.dynasty.generation}`;
     for (let n = 0; n < 12; n++) await surface.key('+',{target:surface.root.querySelector('[data-map-viewport]')});
     assert.equal(JSON.parse(surface.storage.getItem(workspaceKey)).mapScale, 4);
     for (let n = 0; n < 12; n++) await surface.key('-',{target:surface.root.querySelector('[data-map-viewport]')});
@@ -210,7 +210,7 @@ test('display preference changes remain separate from saves and reviewed imports
   await surface.click('menu', 'header');await surface.click('game-settings');
   const scale = surface.root.querySelector('#reading-size'); scale.value = '1.5'; await surface.fire('input', scale);
   const font = surface.root.querySelector('#reading-font'); font.value = 'plain'; await surface.fire('change', font);
-  assert.deepEqual(JSON.parse(surface.storage.getItem('hearth-and-oath:display:v1')), { scale: 1.5, font: 'plain', singleKeyShortcuts:true });
+  assert.deepEqual(JSON.parse(surface.storage.getItem('hearth-and-oath-legacy:display:v1')), { scale: 1.5, font: 'plain', singleKeyShortcuts:true });
   assert.equal(surface.documentStyle.get('--reading-scale'), '1.5');
   assert.deepEqual(surface.current(), before); assert.deepEqual(surface.lives(), slots);
   await surface.click('close-modal');

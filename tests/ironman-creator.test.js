@@ -113,7 +113,7 @@ test('changing identity and ancestry through actual controls preserves Ironman; 
   await ui.click('creator-back');
   assert.equal(mode(ui), 'standard');
   assert.equal(ui.current(), null);
-  assert.equal([...ui.values.keys()].some(key => key.startsWith('hearth-and-oath:ironman-')), false);
+  assert.equal([...ui.values.keys()].some(key => key.startsWith('hearth-and-oath-legacy:ironman-')), false);
 });
 
 test('leaving an unsubmitted Ironman draft and opening a new creator resets to Standard', async t => {

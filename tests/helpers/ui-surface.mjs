@@ -186,8 +186,8 @@ export function fakeSurface() {
       else controls[0].value = value;
     },
     async submit() { assert.ok(root.form); await this.fire('submit', root.form); },
-    lives() { return JSON.parse(storage.getItem('hearth-and-oath:slots:v1')).slots.map(slot => slot.state); },
-    current() { return JSON.parse(storage.getItem('hearth-and-oath:life:v1')); },
+    lives() { return JSON.parse(storage.getItem('hearth-and-oath-legacy:slots:v1')).slots.map(slot => slot.state); },
+    current() { return JSON.parse(storage.getItem('hearth-and-oath-legacy:life:v1')); },
     preview,previewName,ageValue,ageDescription,progress,
     async import(text) { const control = root.querySelector('#save-file'); control.files = [{ size: text.length, text: async () => text }]; await this.fire('change', control); },
   };
@@ -205,8 +205,8 @@ export async function mountApp(t, { states = [], activeSlot = 0, width = 1440, h
   // clicks. Flush only when the caller explicitly exercises a held touch.
   surface.flushTouchHolds=()=>{const pending=[...touchTimers.values()];touchTimers.clear();for(const callback of pending)callback();};
   if (states.length) {
-    surface.storage.setItem('hearth-and-oath:slots:v1', JSON.stringify({ version: 1, activeSlot, backups: {}, slots: Array.from({ length: 3 }, (_, id) => ({ id, state: states[id] || null, updatedAt: states[id] ? '2026-10-12T00:00:00.000Z' : null })) }));
-    if (states[activeSlot]) surface.storage.setItem('hearth-and-oath:life:v1', JSON.stringify(states[activeSlot]));
+    surface.storage.setItem('hearth-and-oath-legacy:slots:v1', JSON.stringify({ version: 1, activeSlot, backups: {}, slots: Array.from({ length: 3 }, (_, id) => ({ id, state: states[id] || null, updatedAt: states[id] ? '2026-10-12T00:00:00.000Z' : null })) }));
+    if (states[activeSlot]) surface.storage.setItem('hearth-and-oath-legacy:life:v1', JSON.stringify(states[activeSlot]));
   }
   for (const [key, value] of storageEntries) surface.storage.setItem(key, value);
   const globals = {

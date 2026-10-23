@@ -30,19 +30,19 @@ function fakeDatabase({ failAfter = Infinity } = {}) {
 
 test('reads are synchronous from the cache and writes reach the database in order', async () => {
   const db = fakeDatabase();
-  const storage = createCachedStorage(db, new Map([['hearth-and-oath:slots:v1', 'old']]));
-  assert.equal(storage.getItem('hearth-and-oath:slots:v1'), 'old');
+  const storage = createCachedStorage(db, new Map([['hearth-and-oath-legacy:slots:v1', 'old']]));
+  assert.equal(storage.getItem('hearth-and-oath-legacy:slots:v1'), 'old');
   assert.equal(storage.getItem('missing'), null);
-  storage.setItem('hearth-and-oath:slots:v1', 'new');
-  storage.setItem('hearth-and-oath:life:v1', 'life');
-  storage.removeItem('hearth-and-oath:life:v1');
-  assert.equal(storage.getItem('hearth-and-oath:slots:v1'), 'new');
-  assert.equal(storage.getItem('hearth-and-oath:life:v1'), null);
+  storage.setItem('hearth-and-oath-legacy:slots:v1', 'new');
+  storage.setItem('hearth-and-oath-legacy:life:v1', 'life');
+  storage.removeItem('hearth-and-oath-legacy:life:v1');
+  assert.equal(storage.getItem('hearth-and-oath-legacy:slots:v1'), 'new');
+  assert.equal(storage.getItem('hearth-and-oath-legacy:life:v1'), null);
   assert.equal(storage.length, 1);
-  assert.equal(storage.key(0), 'hearth-and-oath:slots:v1');
+  assert.equal(storage.key(0), 'hearth-and-oath-legacy:slots:v1');
   await storage.flushed();
-  assert.deepEqual(db.log, [['put', 'hearth-and-oath:slots:v1'], ['put', 'hearth-and-oath:life:v1'], ['delete', 'hearth-and-oath:life:v1']]);
-  assert.deepEqual([...db.rows], [['hearth-and-oath:slots:v1', 'new']]);
+  assert.deepEqual(db.log, [['put', 'hearth-and-oath-legacy:slots:v1'], ['put', 'hearth-and-oath-legacy:life:v1'], ['delete', 'hearth-and-oath-legacy:life:v1']]);
+  assert.deepEqual([...db.rows], [['hearth-and-oath-legacy:slots:v1', 'new']]);
 });
 
 test('a failed database write marks the storage degraded and later writes throw like a full localStorage', async () => {
@@ -65,11 +65,11 @@ test('changes from another tab update the cache and reach onChange listeners lik
   const storage = createCachedStorage(fakeDatabase(), new Map(), { channel });
   const seen = [];
   storage.onChange(event => seen.push(event));
-  storage.setItem('hearth-and-oath:slots:v1', 'mine');
-  assert.deepEqual(channel.posted, [{ key: 'hearth-and-oath:slots:v1', oldValue: null, newValue: 'mine' }]);
-  channel.onmessage({ data: { key: 'hearth-and-oath:slots:v1', oldValue: 'mine', newValue: 'theirs' } });
-  assert.equal(storage.getItem('hearth-and-oath:slots:v1'), 'theirs');
-  assert.deepEqual(seen, [{ key: 'hearth-and-oath:slots:v1', oldValue: 'mine', newValue: 'theirs' }]);
-  channel.onmessage({ data: { key: 'hearth-and-oath:slots:v1', oldValue: 'theirs', newValue: null } });
-  assert.equal(storage.getItem('hearth-and-oath:slots:v1'), null);
+  storage.setItem('hearth-and-oath-legacy:slots:v1', 'mine');
+  assert.deepEqual(channel.posted, [{ key: 'hearth-and-oath-legacy:slots:v1', oldValue: null, newValue: 'mine' }]);
+  channel.onmessage({ data: { key: 'hearth-and-oath-legacy:slots:v1', oldValue: 'mine', newValue: 'theirs' } });
+  assert.equal(storage.getItem('hearth-and-oath-legacy:slots:v1'), 'theirs');
+  assert.deepEqual(seen, [{ key: 'hearth-and-oath-legacy:slots:v1', oldValue: 'mine', newValue: 'theirs' }]);
+  channel.onmessage({ data: { key: 'hearth-and-oath-legacy:slots:v1', oldValue: 'theirs', newValue: null } });
+  assert.equal(storage.getItem('hearth-and-oath-legacy:slots:v1'), null);
 });

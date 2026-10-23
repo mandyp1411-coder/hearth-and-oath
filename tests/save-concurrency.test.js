@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSaveStore, createSaveCoordinator, LEGACY_SAVE_KEY } from '../dist/js/saves.js';
 import { createBirthGame, chooseEventOption, migrateSave } from '../dist/js/engine.js';
-const key = 'hearth-and-oath:slots:v1';
+const key = 'hearth-and-oath-legacy:slots:v1';
 const life = (name, step = 0) => ({ hero: { name }, seed: name, step, pending: { choices: ['keep', 'leave'] } });
 const validate = value => value?.hero?.name && Number.isInteger(value.step) ? structuredClone(value) : null;
 function disk(initial = {}) {
@@ -158,7 +158,7 @@ test('old v1 envelopes gain revisions lazily without losing pending content, and
 function lockManager() {
   let pending = Promise.resolve(), held = 0, maxHeld = 0;
   return { get maxHeld() { return maxHeld; }, request(name, options, operation) {
-    assert.equal(name, 'hearth-and-oath:save:v1'); assert.equal(options.mode, 'exclusive');
+    assert.equal(name, 'hearth-and-oath-legacy:save:v1'); assert.equal(options.mode, 'exclusive');
     const result = pending.then(async () => { held++; maxHeld = Math.max(held, maxHeld); try { return await operation(); } finally { held--; } });
     pending = result.catch(() => {}); return result;
   } };

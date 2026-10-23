@@ -14,7 +14,7 @@ import { freshStory } from './helpers/story-life-fixtures.mjs';
 // validator/migrator, and actual combat/engine commands. Controlled party,
 // saved-battle stats/order, and one-day projections are explicitly labeled.
 // This is not earned-party/balance evidence, app/UI coverage, or release QA.
-const SLOT_KEY = 'hearth-and-oath:slots:v1';
+const SLOT_KEY = 'hearth-and-oath-legacy:slots:v1';
 const RUN = '00112233-4455-4677-8899-aabbccddeeff';
 const OTHER_RUN = '11223344-5566-4788-99aa-bbccddeeff00';
 const THIRD_RUN = '22334455-6677-4899-aabb-ccddeeff0011';
@@ -199,12 +199,12 @@ function exactRecord(record, state, slot) {
 }
 
 test('Ironman namespaces identify only their own per-run records and ended markers', () => {
-  assert.equal(IRONMAN_RECORD_PREFIX, 'hearth-and-oath:ironman-run:v1:');
-  assert.equal(IRONMAN_ENDED_PREFIX, 'hearth-and-oath:ironman-ended:v1:');
+  assert.equal(IRONMAN_RECORD_PREFIX, 'hearth-and-oath-legacy:ironman-run:v1:');
+  assert.equal(IRONMAN_ENDED_PREFIX, 'hearth-and-oath-legacy:ironman-ended:v1:');
   assert.equal(ironmanRecordKey(RUN), IRONMAN_RECORD_PREFIX + RUN);
   assert.equal(ironmanEndedKey(RUN), IRONMAN_ENDED_PREFIX + RUN);
   for (const key of [ironmanRecordKey(RUN), ironmanEndedKey(RUN)]) assert.equal(isIronmanStorageKey(key), true);
-  for (const key of [SLOT_KEY, LEGACY_SAVE_KEY, 'unrelated', 'hearth-and-oath:ironman-run:v2:' + RUN]) assert.equal(isIronmanStorageKey(key), false);
+  for (const key of [SLOT_KEY, LEGACY_SAVE_KEY, 'unrelated', 'hearth-and-oath-legacy:ironman-run:v2:' + RUN]) assert.equal(isIronmanStorageKey(key), false);
 });
 
 test('creation claims an empty virtual slot with one atomic head/floor/attachment write', async () => {

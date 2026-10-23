@@ -50,8 +50,8 @@ function mountBoot(source = html, href = 'https://game.invalid/index.html') {
   document.baseURI = href;
   document.querySelector = selector => selector === 'script[type="module"]' ? entry : root.querySelector(selector);
   const saved = new Map([
-    ['hearth-and-oath:slots:v1', '{"slots":[{"synthetic":"existing life"}]}'],
-    ['hearth-and-oath:life:v1', '{"synthetic":"current life"}'],
+    ['hearth-and-oath-legacy:slots:v1', '{"slots":[{"synthetic":"existing life"}]}'],
+    ['hearth-and-oath-legacy:life:v1', '{"synthetic":"current life"}'],
     ['unrelated-setting', 'preserve me'],
   ]);
   const before = [...saved];

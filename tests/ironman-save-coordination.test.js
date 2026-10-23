@@ -17,8 +17,8 @@ import { freshStory } from './helpers/story-life-fixtures.mjs';
 // Real Web Locks do not serialize that writer. Raw-token ABA can be unobserved;
 // this suite does not claim to detect it or provide cross-profile anti-cheat.
 // This file is authored only; execution belongs to a separately approved gate.
-const SLOT_KEY = 'hearth-and-oath:slots:v1';
-const LOCK_NAME = 'hearth-and-oath:save:v1';
+const SLOT_KEY = 'hearth-and-oath-legacy:slots:v1';
+const LOCK_NAME = 'hearth-and-oath-legacy:save:v1';
 const RUN = '00112233-4455-4677-8899-aabbccddeeff';
 const OTHER_RUN = '11223344-5566-4788-99aa-bbccddeeff00';
 const copy = value => structuredClone(value);

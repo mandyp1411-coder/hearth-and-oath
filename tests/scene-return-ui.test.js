@@ -29,7 +29,7 @@ async function service(t,kind='work',state=fresh(kind)){
  await ui.click('place-open');await ui.click('service-open',r.id);return {ui,r};
 }
 const control=ui=>ui.root.querySelector('[data-op="scene-return"]');
-const savedBytes=ui=>ui.storage.getItem('hearth-and-oath:slots:v1');
+const savedBytes=ui=>ui.storage.getItem('hearth-and-oath-legacy:slots:v1');
 function queuedFrames(){const callbacks=[];globalThis.requestAnimationFrame=callback=>{callbacks.push(callback);return callbacks.length;};return ()=>{for(let i=0;callbacks.length&&i<20;i++){for(const callback of callbacks.splice(0))callback();}assert.equal(callbacks.length,0);};}
 
 test('work inquiry survives read-only Inventory ↔ Journal with exact person, focus, scroll and unchanged save',async t=>{
@@ -40,7 +40,7 @@ test('work inquiry survives read-only Inventory ↔ Journal with exact person, f
  assert.deepEqual(ui.current(),before);assert.equal(savedBytes(ui),durable);await ui.click('scene-return');
  assert.ok(ui.root.querySelector('.work-commission-meeting'));assert.equal(ui.root.querySelector('[data-service-person]').dataset.servicePerson,r.personId);assert.equal(ui.document.activeElement.id,'meeting-speaker');
  assert.equal(ui.root.querySelector('.workspace-body').scrollTop,137);assert.equal(ui.root.querySelector('.game-content').scrollTop,29);assert.deepEqual(ui.current(),before);assert.equal(savedBytes(ui),durable);assert.equal(control(ui),null);
- const workspace=JSON.parse(ui.storage.getItem('hearth-and-oath:workspace:'+before.seed+':'+before.dynasty.generation));assert.equal(workspace.sceneReturn,undefined);assert.equal(workspace.workspaceReturn,null);
+ const workspace=JSON.parse(ui.storage.getItem('hearth-and-oath-legacy:workspace:'+before.seed+':'+before.dynasty.generation));assert.equal(workspace.sceneReturn,undefined);assert.equal(workspace.workspaceReturn,null);
 });
 
 test('the last in-scene focus is remembered when the clicked utility tab owns focus',async t=>{
@@ -149,7 +149,7 @@ test('slot/title/reload does not persist the transient trail, including duplicat
 
 test('a cross-tab changed-slot conflict removes the trail and cannot be bypassed by old Return',async t=>{
  const {ui}=await service(t);await ui.click('tab','inventory');const stale=control(ui),before=ui.current(),remote=E.chooseAction(before,'leisure_walk');assert.ok(createSaveStore(ui.storage,E.migrateSave).write(0,remote));
- await ui.windowEvent('storage',{key:'hearth-and-oath:slots:v1'});await Promise.resolve();assert.ok(ui.root.querySelector('[data-save-conflict-dialog]'));assert.equal(control(ui),null);await ui.fire('click',stale);assert.ok(ui.root.querySelector('[data-save-conflict-dialog]'));await ui.key('Escape');assert.equal(control(ui),null);assert.deepEqual(ui.current(),remote);
+ await ui.windowEvent('storage',{key:'hearth-and-oath-legacy:slots:v1'});await Promise.resolve();assert.ok(ui.root.querySelector('[data-save-conflict-dialog]'));assert.equal(control(ui),null);await ui.fire('click',stale);assert.ok(ui.root.querySelector('[data-save-conflict-dialog]'));await ui.key('Escape');assert.equal(control(ui),null);assert.deepEqual(ui.current(),remote);
 });
 
 test('a newer modal suppresses queued scene-focus restoration',async t=>{

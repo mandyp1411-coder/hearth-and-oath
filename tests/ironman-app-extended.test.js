@@ -22,7 +22,7 @@ import { freshStory } from './helpers/story-life-fixtures.mjs';
 // Additional bounded SOURCE handler checks. Fixtures are controlled fictional
 // projections, not earned routes, browser timing or release certification.
 // This file is authored separately so the first immutable suite stays intact.
-const SLOT_KEY='hearth-and-oath:slots:v1',RUN='22334455-6677-4899-aabb-ccddeeff0011';
+const SLOT_KEY='hearth-and-oath-legacy:slots:v1',RUN='22334455-6677-4899-aabb-ccddeeff0011';
 const clone=value=>structuredClone(value);
 const head=(ui,runId=RUN)=>JSON.parse(ui.storage.getItem(ironmanRecordKey(runId))||'null');
 const shared=ui=>[ui.storage.getItem(SLOT_KEY),ui.storage.getItem(LEGACY_SAVE_KEY)];
@@ -39,7 +39,7 @@ function ironman(s=birth()){s.ironman=createIronmanMetadata(s,{randomUUID:()=>RU
 function lockManager(){
   let chain=Promise.resolve(),paused=false;const gates=[];
   return {requests:0,hold(){paused=true;},release(){paused=false;gates.splice(0).forEach(resolve=>resolve());},request(name,options,callback){
-    assert.equal(name,'hearth-and-oath:save:v1');assert.equal(options.mode,'exclusive');
+    assert.equal(name,'hearth-and-oath-legacy:save:v1');assert.equal(options.mode,'exclusive');
     this.requests++;
     const result=chain.then(async()=>{if(paused)await new Promise(resolve=>gates.push(resolve));return callback({name,mode:'exclusive'});});chain=result.catch(()=>{});return result;
   }};
@@ -67,7 +67,7 @@ test('actual adult Ironman submit completes Standard prehistory before committin
   const locks=lockManager(),ui=await mountApp(t,{locks});await ui.click('title-new');await ui.click('slot-new','0');
   ui.set('name','Fictional Adult Opt In');ui.set('startAge','18');ui.set('lifeMode','ironman');
   const bytes=shared(ui);await ui.click('creator-step','2');await ui.submit();await flush();assert.equal(phase(ui),'ready');
-  const keys=[...ui.values.keys()].filter(key=>key.startsWith('hearth-and-oath:ironman-run:v1:'));assert.equal(keys.length,1);
+  const keys=[...ui.values.keys()].filter(key=>key.startsWith('hearth-and-oath-legacy:ironman-run:v1:'));assert.equal(keys.length,1);
   const saved=JSON.parse(ui.storage.getItem(keys[0]));valid(saved.state);
   assert.equal(saved.state.hero.name,'Fictional Adult Opt In');assert.equal(saved.state.age,18);assert.equal(saved.state.day,18*365);
   assert.equal(saved.state.ironman.startedDay,saved.state.day);assert.equal(saved.state.ironman.casualties.length,0);
@@ -79,7 +79,7 @@ test('a first-save write followed by lost readback freezes game-null entry and a
   const locks=lockManager(),ui=await mountApp(t,{locks});await ui.click('title-new');await ui.click('slot-new','0');
   ui.set('name','Fictional Unconfirmed Opening');ui.set('startAge','0');ui.set('lifeMode','ironman');
   const set=ui.storage.setItem.bind(ui.storage),get=ui.storage.getItem.bind(ui.storage);let saved=null,lost=true,writes=0;
-  ui.storage.setItem=(key,value)=>{const result=set(key,value);if(key.startsWith('hearth-and-oath:ironman-run:v1:')){saved=JSON.parse(value);writes++;}return result;};
+  ui.storage.setItem=(key,value)=>{const result=set(key,value);if(key.startsWith('hearth-and-oath-legacy:ironman-run:v1:')){saved=JSON.parse(value);writes++;}return result;};
   ui.storage.getItem=key=>{if(saved&&lost&&key===ironmanRecordKey(saved.runId))throw Error('controlled first confirmation loss');return get(key);};
   const bytes=shared(ui);await ui.click('creator-step','2');await ui.submit();await flush();assert.ok(saved,'actual first commit reached durable storage');assert.equal(writes,1);
   assert.equal(phase(ui),'blocked');assert.equal(ui.root.querySelector('.game-frame'),null);assert.equal(enabled(ui,'ironman-standard-return'),undefined);
@@ -178,7 +178,7 @@ test('a reviewed Standard import leaves the old Ironman binding and a later old-
   fatal.battle.currentActorId='hero';fatal.battle.turnOrder=['hero','enemy-1',...fatal.battle.actors.filter(a=>a.hp>0&&!['hero','enemy-1'].includes(a.id)).map(a=>a.id)];valid(fatal,'controlled old-run fatal boundary');
   const terminal=E.chooseBattleAction(fatal,'attack','enemy-1');assert.ok(ironmanHeroDeath(terminal),'real engine action terminates the retained old run');
   assert.equal((await store(ui,locks).endIronman(0,terminal,{token:ironmanRecordToken(original)})).status,'ended');
-  await ui.windowEvent('storage',{key:'hearth-and-oath:ironman-ended:v1:'+RUN});await flush();
+  await ui.windowEvent('storage',{key:'hearth-and-oath-legacy:ironman-ended:v1:'+RUN});await flush();
   assert.equal(head(ui),null);assert.equal(ui.root.querySelector('[data-ironman-status]'),null);assert.ok(ui.root.querySelector('.game-frame'));assert.deepEqual(ui.current(),other);assert.deepEqual(shared(ui),bytes);
 });
 

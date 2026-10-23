@@ -23,7 +23,7 @@ async function submitLabel(ui, id, label) {
 async function assertTrailRetained(ui, expected, before, provider) {
   assert.ok(returnControl(ui)); assert.equal(returnControl(ui).textContent, expected);
   assert.deepEqual(savedBytes(ui), before); assert.equal(activeSlot(ui), 0);
-  assertPendingAndProvider(ui, JSON.parse(before['hearth-and-oath:life:v1']), provider);
+  assertPendingAndProvider(ui, JSON.parse(before['hearth-and-oath-legacy:life:v1']), provider);
 }
 
 test('an active scene survives actual note/gear preview, search, paging, scope, unchanged submit and cancel while downloading', async t => {
@@ -163,7 +163,7 @@ test('practice intercepts connected real background download, scene-return, note
   await ui.click('practice-close'); await settle(); await ui.click('close-modal');
   assert.equal(returnControl(ui).textContent, label); await ui.click('scene-return');
   assert.equal(ui.root.querySelector('[data-service-person]').dataset.servicePerson, provider.personId);
-  assert.deepEqual(ui.current(), life); assert.deepEqual(savedBytes(ui), Object.fromEntries(before.filter(([key]) => ['hearth-and-oath:slots:v1', 'hearth-and-oath:life:v1'].includes(key))));
+  assert.deepEqual(ui.current(), life); assert.deepEqual(savedBytes(ui), Object.fromEntries(before.filter(([key]) => ['hearth-and-oath-legacy:slots:v1', 'hearth-and-oath-legacy:life:v1'].includes(key))));
 });
 
 test('newer ordinary utility navigation cancels a genuinely pending practice open without discarding the existing scene trail', async t => {

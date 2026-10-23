@@ -5,7 +5,7 @@ import { setImmediate as settle } from 'node:timers/promises';
 import { createSaveStore } from '../dist/js/saves.js';
 import { createBirthGame, chooseEventOption, migrateSave } from '../dist/js/engine.js';
 import { mountApp } from './helpers/ui-surface.mjs';
-const KEY='hearth-and-oath:slots:v1',STAMP='2026-10-12T00:00:00.000Z';
+const KEY='hearth-and-oath-legacy:slots:v1',STAMP='2026-10-12T00:00:00.000Z';
 let original;const fixture=()=>structuredClone(original||=decisionLife());
 const status=(ui,slot=0)=>ui.root.querySelector(`[data-save-health][data-save-slot="${slot}"]`);
 const label=(ui,slot=0)=>status(ui,slot)?.querySelector('[data-save-label]').textContent;
@@ -14,7 +14,7 @@ function capture(t,ui,{fail=false}={}){
   URL.createObjectURL=blob=>{if(fail)throw Error('Download unavailable');blobs.push(blob);return 'blob:save-health-test';};URL.revokeObjectURL=()=>{};
   ui.document.createElement=()=>({click(){}});t.after(()=>{URL.createObjectURL=create;URL.revokeObjectURL=revoke;});return blobs;
 }
-function blockWrites(ui){const write=ui.storage.setItem;ui.storage.setItem=(key,value)=>{if([KEY,'hearth-and-oath:life:v1'].includes(key))throw Error('Quota');write(key,value);};return ()=>{ui.storage.setItem=write;};}
+function blockWrites(ui){const write=ui.storage.setItem;ui.storage.setItem=(key,value)=>{if([KEY,'hearth-and-oath-legacy:life:v1'].includes(key))throw Error('Quota');write(key,value);};return ()=>{ui.storage.setItem=write;};}
 
 test('empty title makes no saved claim or exit prompt; title and slots show real known save time',async t=>{
   const ui=await mountApp(t);assert.equal(label(ui),'No life saved yet');assert.equal(status(ui).querySelector('[data-op="export-session"]').hidden,true);
@@ -78,7 +78,7 @@ test('an unavailable initial storage surface does not pretend unreadable saved l
 
 test('unchanged Main menu autosave after storage denial keeps its last known time and offers export without a false saved claim',async t=>{
   const before=fixture(),ui=await mountApp(t,{states:[before]});await ui.click('title-continue');const stamp=status(ui).dataset.saveAt;
-  const read=ui.storage.getItem;ui.storage.getItem=key=>{if([KEY,'hearth-and-oath:life:v1'].includes(key))throw Error('Storage access denied');return read(key);};
+  const read=ui.storage.getItem;ui.storage.getItem=key=>{if([KEY,'hearth-and-oath-legacy:life:v1'].includes(key))throw Error('Storage access denied');return read(key);};
   await ui.click('title-menu');assert.ok(ui.root.querySelector('.title-screen'));
   assert.equal(label(ui),'Browser saves unavailable');assert.equal(status(ui).dataset.saveAt,stamp);assert.equal((await ui.windowEvent('beforeunload')).defaultPrevented,false);
   assert.match(status(ui).querySelector('[data-save-problem]').textContent,/storage is unavailable/);assert.equal(status(ui).querySelector('[data-op="export-session"]').hidden,false);

@@ -15,8 +15,8 @@ import { freshStory } from './helpers/story-life-fixtures.mjs';
 // or release acceptance. Cache one published adult fixture. Controlled living
 // party and saved-battle stats/order are labeled; actual engine commands must
 // produce companion death and hero-terminal results before session acceptance.
-const SLOT_KEY = 'hearth-and-oath:slots:v1';
-const LOCK_NAME = 'hearth-and-oath:save:v1';
+const SLOT_KEY = 'hearth-and-oath-legacy:slots:v1';
+const LOCK_NAME = 'hearth-and-oath-legacy:save:v1';
 const RUN = '00112233-4455-4677-8899-aabbccddeeff';
 const OTHER_RUN = '11223344-5566-4788-99aa-bbccddeeff00';
 const copy = value => structuredClone(value);

@@ -8,8 +8,8 @@ for (const key of ['Enter', ' ']) test(`native selected help ${JSON.stringify(ke
   const s = roomFixture('protector'), adjacent = copy(s), id = select(s, 'protector', 'mira').id, ui = await mountApp(t, { states: [s, adjacent], width: 390, height: 844 });
   await ui.click('title-continue'); const trigger = ui.root.querySelector(`[data-op="activity"][data-id="${id}"]`); assert.ok(trigger && !trigger.disabled); assert.match(ui.root.querySelector('.maze-field-assists').textContent, /Alone: lose/); assert.match(ui.root.querySelector('.maze-field-assists').textContent, /personal Focus/);
   trigger.focus(); const expected = E.chooseAction(s, id); await ui.key(key); assert.deepEqual(ui.current(), expected); assert.deepEqual(ui.lives()[1], adjacent); assert.equal(ui.document.activeElement.id, 'maze-field-assists-title');
-  const once = copy(ui.current()), disk = [ui.storage.getItem('hearth-and-oath:slots:v1'), ui.storage.getItem('hearth-and-oath:life:v1')], writes = [], write = ui.storage.setItem;
-  ui.storage.setItem = (key, value) => { writes.push(key); write(key, value); }; await ui.fire('click', trigger); assert.deepEqual(ui.current(), once); assert.deepEqual(writes, []); assert.deepEqual([ui.storage.getItem('hearth-and-oath:slots:v1'), ui.storage.getItem('hearth-and-oath:life:v1')], disk);
+  const once = copy(ui.current()), disk = [ui.storage.getItem('hearth-and-oath-legacy:slots:v1'), ui.storage.getItem('hearth-and-oath-legacy:life:v1')], writes = [], write = ui.storage.setItem;
+  ui.storage.setItem = (key, value) => { writes.push(key); write(key, value); }; await ui.fire('click', trigger); assert.deepEqual(ui.current(), once); assert.deepEqual(writes, []); assert.deepEqual([ui.storage.getItem('hearth-and-oath-legacy:slots:v1'), ui.storage.getItem('hearth-and-oath-legacy:life:v1')], disk);
   assert.match(ui.root.querySelector('[data-maze-assist-used]').textContent, /Companion help already used/); assert.equal(ui.current().maze.fieldAssists.entries.length, 1);
 });
 

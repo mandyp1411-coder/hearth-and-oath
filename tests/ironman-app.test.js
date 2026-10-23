@@ -13,8 +13,8 @@ import { freshStory } from './helpers/story-life-fixtures.mjs';
 // Source handler/store integration with bounded controlled fictional saves.
 // No production observer, fabricated accepted outcome, browser/layout claim,
 // earned recruitment claim, engine-command replay or hidden control injection.
-const SLOT_KEY = 'hearth-and-oath:slots:v1';
-const LOCK_NAME = 'hearth-and-oath:save:v1';
+const SLOT_KEY = 'hearth-and-oath-legacy:slots:v1';
+const LOCK_NAME = 'hearth-and-oath-legacy:save:v1';
 const RUN = '00112233-4455-4677-8899-aabbccddeeff';
 const OTHER_RUN = '11223344-5566-4788-99aa-bbccddeeff00';
 const copy = value => structuredClone(value);
@@ -277,7 +277,7 @@ test('first-save quota retains one fixed new run with no playable fallback, then
   ui.set('startAge','0');ui.set('name','Fictional First Reserve');ui.set('lifeMode','ironman');
   const set=ui.storage.setItem.bind(ui.storage),attempts=[];let fail=true;
   ui.storage.setItem=(key,value)=>{
-    if(key.startsWith('hearth-and-oath:ironman-run:v1:')){attempts.push(JSON.parse(value));if(fail)throw Object.assign(Error('controlled first quota'),{name:'QuotaExceededError'});}
+    if(key.startsWith('hearth-and-oath-legacy:ironman-run:v1:')){attempts.push(JSON.parse(value));if(fail)throw Object.assign(Error('controlled first quota'),{name:'QuotaExceededError'});}
     return set(key,value);
   };
   const bytes=shared(ui),blobs=captureExports(t,ui);

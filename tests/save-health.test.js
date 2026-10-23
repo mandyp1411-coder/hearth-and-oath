@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSaveStore, LEGACY_SAVE_KEY } from '../dist/js/saves.js';
 import { saveHealthView, renderSaveHealth } from '../dist/js/save-health-ui.js';
-const KEY='hearth-and-oath:slots:v1',STAMP='2026-10-15T00:00:00.000Z';
+const KEY='hearth-and-oath-legacy:slots:v1',STAMP='2026-10-15T00:00:00.000Z';
 const life=(step=0)=>({hero:{name:'Rowan'},step,pending:{choices:['keep','leave']}});
 const validate=value=>value?.hero?.name&&Number.isInteger(value.step)?JSON.parse(JSON.stringify(value)):null;
 function setup(){

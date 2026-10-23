@@ -9,7 +9,7 @@ import {properPlaceName} from '../dist/js/presentation-names.js';
 import {freshStory} from './helpers/story-life-fixtures.mjs';
 import {mountApp} from './helpers/ui-surface.mjs';
 
-const KEY='hearth-and-oath:slots:v1',MIRROR='hearth-and-oath:life:v1';
+const KEY='hearth-and-oath-legacy:slots:v1',MIRROR='hearth-and-oath-legacy:life:v1';
 const control=(ui,op)=>ui.root.querySelector(`[data-op="${op}"]`);
 const bytes=ui=>[ui.storage.getItem(KEY),ui.storage.getItem(MIRROR)];
 const flush=async()=>{for(let n=0;n<6;n++)await turn();};

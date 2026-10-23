@@ -25,7 +25,7 @@ test('the actual entry handlers create, resume and protect three lives through t
   assert.ok(surface.bodyClasses.has('title-mode'));
   assert.match(surface.root.innerHTML, /class="title-screen"/);
   assert.equal(surface.root.form, null, 'the game opens on a title menu');
-  assert.equal(surface.storage.getItem('hearth-and-oath:life:v1'), null);
+  assert.equal(surface.storage.getItem('hearth-and-oath-legacy:life:v1'), null);
 
   await surface.click('title-new');
   assert.match(surface.root.innerHTML, /Choose a place for your life/);
@@ -138,7 +138,7 @@ test('the actual entry handlers create, resume and protect three lives through t
   assert.match(surface.root.innerHTML, /Sound &amp; display/);
   await surface.click('music-toggle');
   await surface.click('sound-toggle');
-  assert.ok(surface.storage.getItem('hearth-and-oath:audio:v1'));
+  assert.ok(surface.storage.getItem('hearth-and-oath-legacy:audio:v1'));
   assert.deepEqual(surface.lives(), threeLives, 'audio settings are independent from all lives');
   await surface.click('title-menu');
   await surface.click('title-load');
@@ -149,8 +149,8 @@ test('the actual entry handlers create, resume and protect three lives through t
   assert.deepEqual(surface.lives(), threeLives, 'an import with no chosen replacement preserves all occupied slots');
   await surface.click('slot-load', 0);
   assert.deepEqual(surface.current(), progressed);
-  const beforeInvalid = surface.storage.getItem('hearth-and-oath:slots:v1');
+  const beforeInvalid = surface.storage.getItem('hearth-and-oath-legacy:slots:v1');
   await surface.import('{bad json');
-  assert.equal(surface.storage.getItem('hearth-and-oath:slots:v1'), beforeInvalid);
+  assert.equal(surface.storage.getItem('hearth-and-oath-legacy:slots:v1'), beforeInvalid);
   assert.match(surface.toast.textContent, /not a compatible/);
 });

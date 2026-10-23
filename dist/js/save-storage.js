@@ -13,7 +13,7 @@
 // returns null, which the app already treats as "storage unavailable".
 //
 // First run on a browser that already holds localStorage saves: every
-// `hearth-and-oath:` key is copied into IndexedDB once, then localStorage
+// `hearth-and-oath-legacy:` key is copied into IndexedDB once, then localStorage
 // keeps a shrinking mirror only of the small settings keys. The large
 // save keys are removed from localStorage after the copy so the quota is
 // freed, and they are never written there again.
@@ -22,11 +22,11 @@
 // BroadcastChannel, and listeners registered through `onChange` receive
 // `{key, oldValue, newValue}` the way a `storage` event would.
 
-const DB_NAME = 'hearth-and-oath';
+const DB_NAME = 'hearth-and-oath-legacy';
 const DB_VERSION = 1;
 const STORE = 'keyvalue';
-const CHANNEL = 'hearth-and-oath:storage';
-const OWNED_PREFIX = 'hearth-and-oath:';
+const CHANNEL = 'hearth-and-oath-legacy:storage';
+const OWNED_PREFIX = 'hearth-and-oath-legacy:';
 
 const idb = () => { try { return globalThis.indexedDB || null; } catch { return null; } };
 
@@ -121,7 +121,7 @@ export function createCachedStorage(db, initial = new Map(), { channel = null, o
   return storage;
 }
 
-const SETTINGS_KEYS = ['hearth-and-oath:audio', 'hearth-and-oath:display'];
+const SETTINGS_KEYS = ['hearth-and-oath-legacy:audio', 'hearth-and-oath-legacy:display'];
 
 /** Copy existing localStorage saves into the database once; free the quota. */
 async function migrateFromLocalStorage(db, cache, local) {

@@ -21,7 +21,7 @@ import { settlementWalkPath } from '../dist/js/exploration-ui.js';
 import { request as customerRequest } from './helpers/society-customer-fixtures.mjs';
 import { mountApp } from './helpers/ui-surface.mjs';
 const base=E.migrateSave(JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url)))).states.base);
-const fresh=()=>structuredClone(base),KEY='hearth-and-oath:slots:v1';
+const fresh=()=>structuredClone(base),KEY='hearth-and-oath-legacy:slots:v1';
 const ctl=(ui,op,id)=>ui.root.querySelector(`[data-op="${op}"]${id===undefined?'':`[data-id="${id}"]`}`);
 async function creator(t){const ui=await mountApp(t);await ui.click('title-new');await ui.click('slot-new','0');return ui;}
 async function input(ui,name,value){ui.set(name,String(value));await ui.fire('input',ui.root.querySelector(`[name="${name}"]`));}

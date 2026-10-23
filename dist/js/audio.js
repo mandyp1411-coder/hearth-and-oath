@@ -2,7 +2,7 @@ import { MUSIC_RECORDINGS_V27 } from './music-recordings-v27.js';
 import { cartographyView } from './cartography.js';
 /* An original, locally performed dungeon score. Preferences belong to the player,
    not their save. No downloads, audio permissions, or background autoplay. */
-const STORAGE_KEY = 'hearth-and-oath:audio:v1';
+const STORAGE_KEY = 'hearth-and-oath-legacy:audio:v1';
 const defaults = { enabled: true, volume: 0.35, musicEnabled: true, musicVolume: 0.42 };
 let settings = { ...defaults };
 let context = null;

@@ -19,7 +19,7 @@ function fixture(key = 'base') {
   return life;
 }
 function deferred() { let resolve; const promise = new Promise(yes => { resolve = yes; }); return { promise, resolve }; }
-const saves = ui => Object.fromEntries(['hearth-and-oath:slots:v1', 'hearth-and-oath:life:v1'].map(key => [key, ui.storage.getItem(key)]));
+const saves = ui => Object.fromEntries(['hearth-and-oath-legacy:slots:v1', 'hearth-and-oath-legacy:life:v1'].map(key => [key, ui.storage.getItem(key)]));
 const control = (ui, op) => ui.root.querySelector(`[data-op="${op}"]`);
 const panel = ui => ui.root.querySelector('[data-offline-download]');
 function panelOwnsStatus(ui, downloads, message) {
@@ -86,7 +86,7 @@ test('actual drawer progress/cancel/retry survives reopening and another active 
 
   // A download belongs to the application, not the life that started it.
   await ui.click('title-menu'); await ui.click('title-load'); await ui.click('slot-load', '1'); await settle();
-  const afterSlotChange = saves(ui); assert.deepEqual(ui.lives(), lives); assert.deepEqual(ui.current(), lives[1]); assert.equal(JSON.parse(ui.storage.getItem('hearth-and-oath:slots:v1')).activeSlot, 1);
+  const afterSlotChange = saves(ui); assert.deepEqual(ui.lives(), lives); assert.deepEqual(ui.current(), lives[1]); assert.equal(JSON.parse(ui.storage.getItem('hearth-and-oath-legacy:slots:v1')).activeSlot, 1);
   await ui.click('menu', 'header'); assert.equal(Number(panel(ui).querySelector('[data-offline-progress]').value), 3);
   attempts[0].release(); await settle(); assert.equal(downloads.blobs.length, 0, 'late aborted bytes cannot create a file');
   attempts[1].release(); await settle();
@@ -95,7 +95,7 @@ test('actual drawer progress/cancel/retry survives reopening and another active 
   assert.match(panel(ui).querySelector('[data-offline-message]').textContent, /Download started/);
   panelOwnsStatus(ui, downloads, /download started/);
   assert.equal(control(ui, 'cancel-game-download').hidden, true);
-  assert.deepEqual(saves(ui), afterSlotChange); assert.deepEqual(ui.lives(), lives); assert.deepEqual(ui.current(), lives[1]); assert.equal(JSON.parse(ui.storage.getItem('hearth-and-oath:slots:v1')).activeSlot, 1);
+  assert.deepEqual(saves(ui), afterSlotChange); assert.deepEqual(ui.lives(), lives); assert.deepEqual(ui.current(), lives[1]); assert.equal(JSON.parse(ui.storage.getItem('hearth-and-oath-legacy:slots:v1')).activeSlot, 1);
   assert.equal(calls.length, 4, 'exactly one manifest and one part per user attempt');
 });
 

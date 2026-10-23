@@ -100,6 +100,7 @@ import { initializeGuild, onGuildTime, guildActions, applyGuildAction, applyGuil
 import { initializeDelves, isDelveEntry, delveEntryReason, enterDelve, delveActions, applyDelveAction, afterDelveBattle, flushDelveEvent, applyDelveChoice, onDelveTime, validateDelve, DELVE_EVENTS } from './delve.js';
 import { initializeBattlecraft, onBattlecraftTime, battlecraftActions, applyBattlecraftAction, applyBattlecraftGates, afterBattlecraftBattle, flushBattlecraftEvent, applyBattlecraftChoice, validateBattlecraft, BATTLECRAFT_EVENTS, FIELD_VERSION, artById } from './battlecraft.js';
 import { initializeFaith, onFaithTime, faithActions, applyFaithAction, applyFaithGates, flushFaithEvent, applyFaithChoice, validateFaith, FAITH_EVENTS } from './faith.js';
+import { stampEdition, validateEdition } from './edition.js';
 import { inflictCondition } from './health.js';
 import { initializeHouseholdBudget, accrueHouseholdBudget, settleHouseholdBudget, chargeDebtInterest, debtReckoning, applyDebtReckoningChoice, DEBT_RECKONING_EVENT, applyAnnualFocus, annualWorkRatio, householdCostPreview, householdBudgetActions, applyHouseholdBudgetAction, validateHouseholdBudget } from './budget.js';
 import { initializeSociety, societyActions, applySocietyAction, applySocietyChoice, societyEventIds, onSocietyTime, flushSocietyEvent, validateSociety, inheritSociety, societyCustomerChoiceReason } from './society.js';
@@ -700,6 +701,7 @@ export function createBirthGame(config = {}) {
   const omen = { ember: 'Cold ash warmed your blanket although the hearth was dark.', echo: 'An unpulled bell answered your first cry.', thorn: 'A winter seed sprouted beside your cradle, its roots pointing toward the burial ground.' }[state.campaign.fate];
   if(state.timeline.contentVersion<7)state.event.body += ` ${omen}`;
   refreshNarrativeRecords(state);
+  stampEdition(state,{born:true});
   return copy(state);
 }
 
@@ -2041,7 +2043,7 @@ function enableRoleplayUpdates(state) {
 export function migrateSave(value) {
   if (!validateSave(value)) return null;
   const state = copy(value);
-  if (state.revision === 5) {enableRoleplayUpdates(state);normalizeInfantObservation(state);return validateSave(state)?state:null;}
+  if (state.revision === 5) {enableRoleplayUpdates(state);normalizeInfantObservation(state);stampEdition(state);return validateSave(state)?state:null;}
   if (!(state.revision >= 2)) {
     state.difficulty = ['gentle', 'balanced', 'perilous'].includes(state.difficulty) ? state.difficulty : 'balanced';
     state.hero.legacyAppearance = copy(state.hero.appearance);
@@ -2065,6 +2067,7 @@ export function migrateSave(value) {
   if(state.timeline){if(state.event?.id.startsWith('birth_'))state.timeline.nextContentVersion=6;else state.timeline.contentVersion=6;}
   enableRoleplayUpdates(state);
   normalizeInfantObservation(state);
+  stampEdition(state);
   return validateSave(state) ? state : null;
 }
 
@@ -2620,6 +2623,7 @@ export function validateSave(value) {
       if(!validateDelve(value))return false;
       if(!validateBattlecraft(value))return false;
       if(!validateFaith(value.faith,value))return false;
+      if(!validateEdition(value.edition))return false;
       if(value.society!==undefined&&!validateSociety(value.society,value))return false;
       if(value.community!==undefined&&!validateCommunity(value.community,value))return false;
       if(value.fellowship!==undefined&&!validateFellowship(value.fellowship,value))return false;

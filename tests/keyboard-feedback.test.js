@@ -25,9 +25,9 @@ function active(ui,op,id){assert.equal(ui.document.activeElement?.dataset?.op,op
 function heldLocks(){let blocked=false;const gates=[];return {hold(){blocked=true;},release(){blocked=false;for(const resolve of gates.splice(0))resolve();},async request(name,options,operation){if(blocked)await new Promise(resolve=>gates.push(resolve));return operation();}};}
 
 for(const op of ['creator-random','creator-name'])test(op+' retains its trigger over repeated Enter and Space rerenders',async t=>{
- const ui=await mountApp(t);await ui.click('title-new');await ui.click('slot-new','0');const before=ui.storage.getItem('hearth-and-oath:slots:v1');
+ const ui=await mountApp(t);await ui.click('title-new');await ui.click('slot-new','0');const before=ui.storage.getItem('hearth-and-oath-legacy:slots:v1');
  for(const key of ['Enter',' ','Enter']){const trigger=ui.root.querySelector('[data-op="'+op+'"]');trigger.focus();await ui.key(key);active(ui,op,'');assert.notEqual(ui.document.activeElement,trigger,'focus moves to the replacement, never its detached predecessor');}
- assert.equal(ui.storage.getItem('hearth-and-oath:slots:v1'),before,'rerolling never creates or replaces a saved life');
+ assert.equal(ui.storage.getItem('hearth-and-oath-legacy:slots:v1'),before,'rerolling never creates or replaces a saved life');
 });
 
 test('a queued creator restoration cannot pull focus out of a newer modal, whose Tab/Escape behavior remains intact',async t=>{
@@ -116,7 +116,7 @@ test('a synchronous trade-save conflict cannot be bypassed by the counter focus 
 
 for(const timing of ['before frames','after frames','after newer navigation'])test('queued quota failure '+timing+' preserves current focus and never replays the outcome',async t=>{
  const s=fresh();s.hero.hp=1;s.hero.maxHp=1000;s.hero.potions=3;const locks=heldLocks(),mounting=mountApp(t,{states:[s]});window.navigator={locks};const ui=await mounting;await ui.click('title-continue');await settle();await ui.click('tab','inventory');await ui.click('inventory-item','supply:potions');const before=ui.current(),expected=E.useConsumable(before,'potions'),messages=announcements(ui),flush=queuedFrames(),write=ui.storage.setItem;
- ui.storage.setItem=(key,value)=>{if(key.startsWith('hearth-and-oath:slots:')||key==='hearth-and-oath:life:v1')throw Error('Synthetic quota');write(key,value);};locks.hold();ui.root.querySelector('[data-op="use-consumable"][data-id="potions"]').focus();await ui.click('use-consumable','potions');
+ ui.storage.setItem=(key,value)=>{if(key.startsWith('hearth-and-oath-legacy:slots:')||key==='hearth-and-oath-legacy:life:v1')throw Error('Synthetic quota');write(key,value);};locks.hold();ui.root.querySelector('[data-op="use-consumable"][data-id="potions"]').focus();await ui.click('use-consumable','potions');
  if(timing==='after frames')flush();if(timing==='after newer navigation')await ui.click('tab','relationships');const restored=timing==='after frames'?ui.document.activeElement:null;
  const regionBeforeRelease=ui.root.querySelector('#storage-warning');assert.equal(regionBeforeRelease.hidden,false);assert.equal(regionBeforeRelease.getAttribute('aria-hidden'),null);locks.release();await settle();await settle();const warning=ui.root.querySelector('#storage-warning');assert.equal(warning,regionBeforeRelease,'availability-only feedback retains its mounted live region');assert.equal(warning.hidden,false);assert.equal(warning.getAttribute('aria-hidden'),null);assert.equal(warning.getAttribute('role'),'status');assert.equal(warning.getAttribute('aria-live'),'polite');assert.equal(warning.getAttribute('aria-atomic'),'true');assert.match(warning.textContent,/Browser storage is unavailable/);flush();assert.deepEqual(ui.current(),before,'a storage failure never pretends the new position became durable');assert.equal(ui.root.querySelector('.latest-result p').textContent,expected.notice);
  if(timing==='after newer navigation'){assert.deepEqual(messages,[]);assert.equal(ui.root.querySelector('#main-content').getAttribute('aria-label'),'Relationships');assert.notEqual(ui.document.activeElement?.dataset?.op,'use-consumable');}

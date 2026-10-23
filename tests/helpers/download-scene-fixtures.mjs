@@ -58,10 +58,10 @@ export async function openScene(ui, kind = 'work', topic = kind === 'work' ? 'co
 export const control = (ui, op, id) => ui.root.querySelector(`[data-op="${op}"]${id === undefined ? '' : `[data-id="${id}"]`}`);
 export const returnControl = ui => control(ui, 'scene-return');
 export const panel = ui => ui.root.querySelector('[data-offline-download]');
-export const savedBytes = ui => Object.fromEntries(['hearth-and-oath:slots:v1', 'hearth-and-oath:life:v1'].map(key => [key, ui.storage.getItem(key)]));
+export const savedBytes = ui => Object.fromEntries(['hearth-and-oath-legacy:slots:v1', 'hearth-and-oath-legacy:life:v1'].map(key => [key, ui.storage.getItem(key)]));
 export const storageBytes = ui => [...ui.values].sort(([a], [b]) => a.localeCompare(b));
 export const noteKey = (ui, id = 'note-1') => { const note = personalNoteRows(ui.current()).find(row => row.id === id && row.own); assert.ok(note); return note.key; };
-export const activeSlot = ui => JSON.parse(ui.storage.getItem('hearth-and-oath:slots:v1')).activeSlot;
+export const activeSlot = ui => JSON.parse(ui.storage.getItem('hearth-and-oath-legacy:slots:v1')).activeSlot;
 export function trackWrites(ui) {
   const writes = [], set = ui.storage.setItem.bind(ui.storage);
   ui.storage.setItem = (key, value) => { writes.push([key, String(value)]); return set(key, value); };

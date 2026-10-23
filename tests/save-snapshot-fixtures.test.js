@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { createSaveStore, LEGACY_SAVE_KEY } from '../dist/js/saves.js';
 import { migrateSave, validateSave } from '../dist/js/engine.js';
 
-const KEY='hearth-and-oath:slots:v1';
+const KEY='hearth-and-oath-legacy:slots:v1';
 const read=name=>JSON.parse(readFileSync(new URL('./fixtures/'+name,import.meta.url),'utf8')).states;
 const old=read('legacy-v5.json'),first=read('legacy-v1.json');
 function disk(initial){const values=new Map(initial);return {values,getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,String(value)),removeItem:key=>values.delete(key)};}

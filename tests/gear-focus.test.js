@@ -117,7 +117,7 @@ test('a pending encounter permits read-only comparison but blocks changing its c
 test('production Inventory shows actual set loss without a build preference or a change to the life',async t=>{
  const s=build('vanguard');s.equipment.owned.push('scholar_hood');const ui=await mountApp(t,{states:[s]});await ui.click('title-continue');await ui.click('tab','inventory');await ui.click('inventory-item','gear:scholar_hood');const before=ui.current();assert.match(ui.root.innerHTML,/Lose 3-piece bonus/);assert.ok(ui.root.querySelector('[data-equipment-preview="scholar_hood"]'));
  assert.equal(ui.root.querySelector('[data-op="build-goal"]'),null);assert.deepEqual(ui.current(),before);
- const workspace=JSON.parse(ui.storage.getItem(`hearth-and-oath:workspace:${s.seed}:${s.dynasty.generation}`));assert.equal(workspace.inventoryItem,'gear:scholar_hood');
+ const workspace=JSON.parse(ui.storage.getItem(`hearth-and-oath-legacy:workspace:${s.seed}:${s.dynasty.generation}`));assert.equal(workspace.inventoryItem,'gear:scholar_hood');
  await ui.click('equip','scholar_hood');assert.deepEqual(gearBonuses(ui.current()),compareEquipment(s,'scholar_hood').after.bonuses);roundtrip(ui.current());
 });
 test('production merchant shows comparison outside purchase controls and preserves stock and loadout accounting',async t=>{
@@ -125,7 +125,7 @@ test('production merchant shows comparison outside purchase controls and preserv
  await ui.click('shop-add','buy:gear:scholar_hood');await ui.click('shop-confirm');const next=ui.current();assert.equal(next.hero.gold,s.hero.gold-41);assert.deepEqual(next.equipment.equipped,s.equipment.equipped);assert.equal(next.realm.sites[next.locationId].merchant.stock.scholar_hood,0);roundtrip(next);
 });
 test('a restored older gear bookmark keeps its slot filter without restoring the removed build box',async t=>{
- const s=build('channeler');const key=`hearth-and-oath:workspace:${s.seed}:${s.dynasty.generation}`,ui=await mountApp(t,{states:[s],storageEntries:[[key,JSON.stringify({tab:'inventory',packPane:'bag',packGoal:'defender',gearFilter:'head'})]]});await ui.click('title-continue');assert.equal(ui.root.querySelector('[data-op="build-goal"]'),null);assert.equal(ui.root.querySelector('#inventory-slot').value,'head');assert.equal(ui.root.querySelectorAll('[data-item-id]').length,1);
+ const s=build('channeler');const key=`hearth-and-oath-legacy:workspace:${s.seed}:${s.dynasty.generation}`,ui=await mountApp(t,{states:[s],storageEntries:[[key,JSON.stringify({tab:'inventory',packPane:'bag',packGoal:'defender',gearFilter:'head'})]]});await ui.click('title-continue');assert.equal(ui.root.querySelector('[data-op="build-goal"]'),null);assert.equal(ui.root.querySelector('#inventory-slot').value,'head');assert.equal(ui.root.querySelectorAll('[data-item-id]').length,1);
 });
 test('the settlement market exposes the same comparison beside its production purchase command',async t=>{
  let s=build('vanguard');s.realm.sites[s.locationId].merchant.stock.scholar_hood=1;s.realm.sites[s.locationId].merchant.prices.scholar_hood=43;

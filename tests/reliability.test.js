@@ -119,14 +119,14 @@ test('invalid combat resources and numeric statuses cannot overwrite a valid sav
   const original = await completedFixture(100), values = new Map();
   const store = createSaveStore({ getItem: k => values.get(k) ?? null, setItem: (k, v) => values.set(k, v) }, migrateSave);
   assert.equal(store.write(0, original), true);
-  const envelope = values.get('hearth-and-oath:slots:v1');
+  const envelope = values.get('hearth-and-oath-legacy:slots:v1');
   for (const key of ['hp', 'mp', 'ward', 'charged']) for (const value of [NaN, Infinity, -1, null]) {
     const invalid = structuredClone(original), actor = invalid.battle.actors[0];
     if (['ward', 'charged'].includes(key)) actor.status[key] = value; else actor[key] = value;
     assert.equal(validateSave(invalid), false, `${key} rejects ${value}`);
     assert.equal(store.write(0, invalid), false);
     assert.deepEqual(store.read(0), original);
-    assert.equal(values.get('hearth-and-oath:slots:v1'), envelope);
+    assert.equal(values.get('hearth-and-oath-legacy:slots:v1'), envelope);
     assert.equal(store.available(), true, 'validation failure is not a storage outage');
   }
 });
@@ -147,14 +147,14 @@ test('a deliberately invalid result preserves the active combat position, all sl
   assert.equal(validateSave(resolveBattle(before, before.battle)), false);
   const surface = await mountApp(t, { states: [before, neighbor] });
   await surface.click('title-continue');
-  const current = surface.current(), slots = surface.lives(), envelope = surface.storage.getItem('hearth-and-oath:slots:v1');
+  const current = surface.current(), slots = surface.lives(), envelope = surface.storage.getItem('hearth-and-oath-legacy:slots:v1');
   const exports = captureExports(t, surface);
   await surface.click('battle-finish');
   assert.ok(surface.root.querySelector('[data-recovery-dialog]'));
   assert.match(surface.root.innerHTML, /action was not applied/i);
   assert.doesNotMatch(surface.root.innerHTML, /permanent(?:ly)? (?:lost|deleted)|Browser storage is unavailable/);
   assert.deepEqual(surface.current(), current); assert.deepEqual(surface.lives(), slots);
-  assert.equal(surface.storage.getItem('hearth-and-oath:slots:v1'), envelope, 'rejection writes no save or timestamp');
+  assert.equal(surface.storage.getItem('hearth-and-oath-legacy:slots:v1'), envelope, 'rejection writes no save or timestamp');
   await surface.click('export-slot', '0');
   assert.deepEqual(JSON.parse(await exports[0].text()), current);
   await surface.click('recover-current');
@@ -169,7 +169,7 @@ test('a deliberately invalid result preserves the active combat position, all sl
 test('recovery offers a retained slot backup for explicit review without replacing it on rejection', async t => {
   const before = await completedFixture(), backup = await fresh();
   const envelope = { version: 1, activeSlot: 0, slots: [{ id: 0, state: before, updatedAt: null }], backups: { 0: { state: backup, updatedAt: null } } };
-  const surface = await mountApp(t, { storageEntries: [['hearth-and-oath:slots:v1', JSON.stringify(envelope)]] });
+  const surface = await mountApp(t, { storageEntries: [['hearth-and-oath-legacy:slots:v1', JSON.stringify(envelope)]] });
   await surface.click('title-continue'); const current = surface.current();
   await surface.click('battle-finish');
   await surface.click('restore-backup', '0');
@@ -182,12 +182,12 @@ test('storage exhaustion still accepts a valid result for session play and expor
   const before = await completedFixture(100), expected = resolveBattle(before, before.battle);
   assert.ok(validateSave(expected));
   const surface = await mountApp(t, { states: [before] }); await surface.click('title-continue');
-  const durable = surface.storage.getItem('hearth-and-oath:slots:v1'), write = surface.storage.setItem;
-  surface.storage.setItem = (key, value) => { if (['hearth-and-oath:slots:v1', 'hearth-and-oath:life:v1'].includes(key)) throw Error('Quota unavailable'); return write(key, value); };
+  const durable = surface.storage.getItem('hearth-and-oath-legacy:slots:v1'), write = surface.storage.setItem;
+  surface.storage.setItem = (key, value) => { if (['hearth-and-oath-legacy:slots:v1', 'hearth-and-oath-legacy:life:v1'].includes(key)) throw Error('Quota unavailable'); return write(key, value); };
   const exports = captureExports(t, surface);
   await surface.click('battle-finish');
   assert.equal(surface.root.querySelector('[data-recovery-dialog]'), null);
   assert.match(surface.root.innerHTML, /Browser storage is unavailable/);
-  assert.equal(surface.storage.getItem('hearth-and-oath:slots:v1'), durable);
+  assert.equal(surface.storage.getItem('hearth-and-oath-legacy:slots:v1'), durable);
   await surface.click('menu', 'header'); await surface.click('export'); assert.deepEqual(JSON.parse(await exports[0].text()), expected);
 });

@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createBirthGame, chooseEventOption } from '../dist/js/engine.js';
 import { mountApp } from './helpers/ui-surface.mjs';
-const KEY = 'hearth-and-oath:slots:v1', MIRROR = 'hearth-and-oath:life:v1', STAMP = '2026-10-12T00:00:00.000Z';
+const KEY = 'hearth-and-oath-legacy:slots:v1', MIRROR = 'hearth-and-oath-legacy:life:v1', STAMP = '2026-10-12T00:00:00.000Z';
 const originals = new Map();
 function fixture(name = 'Rowan') { if (!originals.has(name)) originals.set(name, createBirthGame({ name, seed: 'return-card-' + name })); return structuredClone(originals.get(name)); }
 const row = (ui, id) => ui.root.querySelectorAll('[data-return-life-card]')[id];

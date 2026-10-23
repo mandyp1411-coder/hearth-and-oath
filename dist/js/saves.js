@@ -2,10 +2,10 @@ import { isIronman, validateIronman, validateCasualtyFloor, ironmanHeroDeath, ir
 import { IRONMAN_RECORD_PREFIX, IRONMAN_ENDED_PREFIX, validIronmanRunId, ironmanRecordKey, ironmanEndedKey, decodeIronmanRecord,
   decodeIronmanEnded, ironmanRecordToken, rawIronmanBase, sharedIronmanClaim, sharedIronmanCopies, emptyIronmanToken, reattachIronmanToken } from './ironman-storage.js';
 
-const SLOT_KEY = 'hearth-and-oath:slots:v1';
-export const LEGACY_SAVE_KEY = 'hearth-and-oath:life:v1';
+const SLOT_KEY = 'hearth-and-oath-legacy:slots:v1';
+export const LEGACY_SAVE_KEY = 'hearth-and-oath-legacy:life:v1';
 export const SAVE_SLOT_COUNT = 3;
-const SAVE_LOCK = 'hearth-and-oath:save:v1';
+const SAVE_LOCK = 'hearth-and-oath-legacy:save:v1';
 const copy = value => value == null ? value : JSON.parse(JSON.stringify(value));
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const emptySlots = () => Array.from({ length: SAVE_SLOT_COUNT }, (_, id) => ({ id, state: null, updatedAt: null }));

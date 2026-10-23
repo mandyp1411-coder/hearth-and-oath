@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSaveStore, LEGACY_SAVE_KEY } from '../dist/js/saves.js';
 
-const KEY='hearth-and-oath:slots:v1';
+const KEY='hearth-and-oath-legacy:slots:v1';
 const copy=value=>JSON.parse(JSON.stringify(value));
 const life=(name,step=0)=>({hero:{name},step,schema:2,pending:{choices:['keep','leave']}});
 function setup({legacy=false}={}){

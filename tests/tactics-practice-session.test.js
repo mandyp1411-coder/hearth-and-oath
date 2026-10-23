@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createSaveStore, LEGACY_SAVE_KEY } from '../dist/js/saves.js';
 import { createTacticsPracticeController } from '../dist/js/tactics-practice-session.js';
 
-const KEY = 'hearth-and-oath:slots:v1';
+const KEY = 'hearth-and-oath-legacy:slots:v1';
 function harness() {
   const life = { hero: { name: 'Original life', hp: 42 }, day: 18, pending: { kind: 'unresolved' } };
   const values = new Map([[KEY, JSON.stringify({ version: 1, activeSlot: 0, slots: [{ id: 0, state: life, updatedAt: '2026-10-17T01:00:00.000Z', revision: 'original' }], backups: {} })], [LEGACY_SAVE_KEY, JSON.stringify(life)], ['workspace-original', '{"tab":"life"}']]);
