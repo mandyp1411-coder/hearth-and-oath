@@ -7,6 +7,8 @@ import { portraitEntry } from '../dist/js/portrait-library.js';
 import { portraitLayers } from '../dist/js/avatar.js';
 
 import { fakeSurface } from './helpers/ui-surface.mjs';
+import { readFileSync } from 'node:fs';
+const oldRulesLife = JSON.parse(readFileSync(new URL('./fixtures/legacy-v5.json', import.meta.url), 'utf8')).states.adult18;
 
 test('the actual entry handlers create, resume and protect three lives through the game menu', async t => {
   const surface = fakeSurface(), originals = new Map();
@@ -142,9 +144,14 @@ test('the actual entry handlers create, resume and protect three lives through t
   assert.deepEqual(surface.lives(), threeLives, 'audio settings are independent from all lives');
   await surface.click('title-menu');
   await surface.click('title-load');
+  // This build is the archive: a life that lives by the new rules is turned away in a line; one under the old rules is reviewed and labelled.
   await surface.import(JSON.stringify(aster));
+  assert.doesNotMatch(surface.root.innerHTML, /REVIEW AN IMPORTED LIFE/);
+  assert.match(surface.toast.textContent, /lives by the new rules/);
+  await surface.import(JSON.stringify(oldRulesLife));
   assert.match(surface.root.innerHTML, /REVIEW AN IMPORTED LIFE/);
   assert.match(surface.root.innerHTML, /Choose where this life belongs/);
+  assert.match(surface.root.innerHTML, /Old rules/);
   await surface.click('close-modal');
   assert.deepEqual(surface.lives(), threeLives, 'an import with no chosen replacement preserves all occupied slots');
   await surface.click('slot-load', 0);
