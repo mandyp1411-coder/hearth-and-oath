@@ -1,6 +1,6 @@
 # Interface harness — v0.70
 
-Measured 2026-10-23T21:37:36+00:00 with Chromium 141.0.7390.37 against `http://127.0.0.1:49067/` (a local static server over `dist/`; no network latency). Run time 97.2 s.
+Measured 2026-10-23T21:42:42+00:00 with Chromium 141.0.7390.37 against `http://127.0.0.1:33391/` (a local static server over `dist/`; no network latency). Run time 87.8 s.
 
 Viewports: desktop 1440×900 and phone 390×844, each at the default text size and at the largest reading-scale setting (150%). Baselines are the 22 October evaluation of v0.66; aims are the Design Bible's. v0.70 measures only; nothing in the game changed for it.
 
@@ -14,7 +14,7 @@ Viewports: desktop 1440×900 and phone 390×844, each at the default text size a
 | Share of a phone screen that is content | about 66 % | 70 % or more | phone, default text: 65.2% (550.6px of 844; game-header 183.4px, game-commandbar 57px, mobile-command-dock 53px; #main-content is 550.6px)<br>phone, 150% text: 46.2% (390.1px of 844; game-header 301.3px, game-commandbar 79.7px, mobile-command-dock 72.9px; #main-content is 390.1px) |
 | Sub-tab rows per view | up to 2 | 1 | desktop up to 3 (Relationships 3 rows from 1 bar, Journal 2 rows from 2 bars); phone up to 4 (Relationships 4 rows from 1 bar, Journal 3 rows from 2 bars, Activities 2 rows from 1 bar)<br>150% text: desktop up to 4 (Relationships 4 rows from 1 bar, Journal 2 rows from 2 bars); phone up to 4 (Relationships 4 rows from 1 bar, Journal 4 rows from 2 bars, Activities 3 rows from 1 bar)<br>A bar is one group of tab controls; a bar that wraps counts each wrapped row. |
 | Smallest rendered font size on each main view | 8px | 12px | desktop 7px (Explore: text.paper-sheet-caption "THE WOODED BASIN"); phone 7px (Explore: text.paper-sheet-caption "THE WOODED BASIN")<br>150% text: desktop 7px (Explore: text.paper-sheet-caption "THE WOODED BASIN"); phone 7px (Explore: text.paper-sheet-caption "THE WOODED BASIN")<br>On the Life view: desktop, default text 10px, 28 elements under 12px; desktop, 150% text 10px, 2 elements under 12px; phone, default text 10px, 34 elements under 12px; phone, 150% text 10px, 2 elements under 12px |
-| Number of network requests before the title screen settles | 288 | under 40 | desktop 293 (script 289, image 2, document 1, stylesheet 1); phone 293 (script 289, image 2, document 1, stylesheet 1)<br>150% text: desktop 293 (script 289, image 2, document 1, stylesheet 1); phone 293 (script 289, image 2, document 1, stylesheet 1) |
+| Number of network requests before the title screen settles | 288 | under 40 | desktop 295 (script 291, image 2, document 1, stylesheet 1); phone 295 (script 291, image 2, document 1, stylesheet 1)<br>150% text: desktop 295 (script 291, image 2, document 1, stylesheet 1); phone 295 (script 291, image 2, document 1, stylesheet 1) |
 | A toast still covering a control after 10 s | yes | never | desktop, default text: at 10 s gone (at 0.4 s it was shown, over Do the hall’s work The hall has )<br>phone, default text: at 10 s gone (at 0.4 s it was shown, over Plans & household calendar, Live the season ¼, Age up 1, Download offline game) |
 
 ## Each view
@@ -25,7 +25,7 @@ First control / first choice: top edge in px with scroll at 0. Height: the unrol
 
 | View | First control | First choice | Height | Type | Tabs | Choices |
 |---|---|---|---|---|---|---|
-| Title screen | 20px | — | 979px | 10px, 5 under 12px | 0 | 0/0 |
+| Title screen | 20px | — | 1005px | 10px, 5 under 12px | 0 | 0/0 |
 | Life, as arrived (scene: Your First Adult Birthday) | 228.6px | 574.8px | 1835px | 10px, 25 under 12px | 1 | 0/3 |
 | Life, Right now | 228.6px | 606.2px | 1963px | 10px, 28 under 12px | 1 | 4/4 |
 | Activities | 325.3px | 468.3px | 1051px | 9px, 20 under 12px | 1 | 3/3 |
@@ -37,7 +37,7 @@ First control / first choice: top edge in px with scroll at 0. Height: the unrol
 | Party | 550.1px | — | 900px fits | 9px, 21 under 12px | 0 | 0/0 |
 | Family history | 1809.2px | — | 1978px | 9px, 20 under 12px | 0 | 0/0 |
 
-The creator drew its own life in 11.8 s (Begin at age 18); it left Vozhem Ravuzhen, age 18, scene birth_year_18, decision at 574.8px.
+The creator drew its own life in 8.1 s (Begin at age 18); it left Vaerelle Celovar, age 18, scene birth_year_18, decision at 574.8px.
 
 Choices without a visible cost/risk line: Life: “Thank the people who raised you”, “Talk with your friend about further learning”, “Spend the morning outdoors together”; Journal: “Accept this quest”, “Hear the proposal”, “Decline invitation”, “Hear the proposal”.
 
@@ -45,7 +45,7 @@ Choices without a visible cost/risk line: Life: “Thank the people who raised y
 
 | View | First control | First choice | Height | Type | Tabs | Choices |
 |---|---|---|---|---|---|---|
-| Title screen | 20px | — | 1211px | 15px, 0 under 12px | 0 | 0/0 |
+| Title screen | 20px | — | 1246px | 15px, 0 under 12px | 0 | 0/0 |
 | Life, as arrived (scene: Your First Adult Birthday) | 259.3px | 668px | 2252px | 15px, 0 under 12px | 1 | 0/3 |
 | Life, Right now | 259.3px | 697.6px | 2358px | 10px, 2 under 12px | 1 | 4/4 |
 | Activities | 380.2px | 533.2px | 1256px | 9px, 3 under 12px | 1 | 3/3 |
@@ -63,7 +63,7 @@ Choices without a visible cost/risk line: Life: “Thank the people who raised y
 
 | View | First control | First choice | Height | Type | Tabs | Choices |
 |---|---|---|---|---|---|---|
-| Title screen | 20px | — | 973px | 10px, 5 under 12px | 0 | 0/0 |
+| Title screen | 20px | — | 999px | 10px, 5 under 12px | 0 | 0/0 |
 | Life, as arrived (scene: Your First Adult Birthday) | 300.4px | 647px | 2903px | 10px, 31 under 12px | 1 | 0/3 |
 | Life, Right now | 290.8px | 662.4px | 3062px | 10px, 34 under 12px | 1 | 4/4 |
 | Activities | 385px | 574px | 1327px | 9px, 26 under 12px | 2 | 3/3 |
@@ -81,7 +81,7 @@ Choices without a visible cost/risk line: Life: “Thank the people who raised y
 
 | View | First control | First choice | Height | Type | Tabs | Choices |
 |---|---|---|---|---|---|---|
-| Title screen | 20px | — | 1357px | 15px, 0 under 12px | 0 | 0/0 |
+| Title screen | 20px | — | 1419px | 15px, 0 under 12px | 0 | 0/0 |
 | Life, as arrived (scene: Your First Adult Birthday) | 493px | 1025.7px | 4329px | 12px, 0 under 12px | 1 | 0/3 |
 | Life, Right now | 467.8px | 939.1px | 4165px | 10px, 2 under 12px | 1 | 4/4 |
 | Activities | 585.1px | 840.6px | 2092px | 9px, 3 under 12px | 3 | 3/3 |
@@ -99,16 +99,16 @@ Choices without a visible cost/risk line: Life: “Thank the people who raised y
 
 | Run | Page | Unrolled height | Viewport | Fits | Dialog scrollHeight | Type | Choices |
 |---|---|---|---|---|---|---|---|
-| desktop, default text | Tactics rehearsal (old page, practice dialog) | 2750px | 900px | no | 2637px | 10px, 30 under 12px | 7/7 |
+| desktop, default text | Tactics rehearsal (old page, practice dialog) | 2776px | 900px | no | 2637px | 10px, 30 under 12px | 7/7 |
 | desktop, default text | Field page (v0.68), edition life | 1582px | 900px | no | — | 9px, 36 under 12px | 6/6 |
 | desktop, default text | Old battle page, legacy life | 1568px | 900px | no | — | 9px, 35 under 12px | 5/5 |
-| desktop, 150% text | Tactics rehearsal (old page, practice dialog) | 3154px | 900px | no | 2809px | 10px, 25 under 12px | 7/7 |
+| desktop, 150% text | Tactics rehearsal (old page, practice dialog) | 3189px | 900px | no | 2809px | 10px, 25 under 12px | 7/7 |
 | desktop, 150% text | Field page (v0.68), edition life | 2008px | 900px | no | — | 9px, 2 under 12px | 6/6 |
 | desktop, 150% text | Old battle page, legacy life | 2115px | 900px | no | — | 9px, 2 under 12px | 5/5 |
-| phone, default text | Tactics rehearsal (old page, practice dialog) | 3495px | 844px | no | 3348px | 9px, 34 under 12px | 7/7 |
+| phone, default text | Tactics rehearsal (old page, practice dialog) | 3521px | 844px | no | 3348px | 9px, 34 under 12px | 7/7 |
 | phone, default text | Field page (v0.68), edition life | 2006px | 844px | no | — | 9px, 42 under 12px | 6/6 |
 | phone, default text | Old battle page, legacy life | 3280px | 844px | no | — | 9px, 41 under 12px | 5/5 |
-| phone, 150% text | Tactics rehearsal (old page, practice dialog) | 4247px | 844px | no | 3716px | 9px, 29 under 12px | 7/7 |
+| phone, 150% text | Tactics rehearsal (old page, practice dialog) | 4309px | 844px | no | 3716px | 9px, 29 under 12px | 7/7 |
 | phone, 150% text | Field page (v0.68), edition life | 2748px | 844px | no | — | 9px, 2 under 12px | 6/6 |
 | phone, 150% text | Old battle page, legacy life | 4357px | 844px | no | — | 9px, 2 under 12px | 5/5 |
 
