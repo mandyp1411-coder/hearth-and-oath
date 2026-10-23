@@ -81,7 +81,9 @@ test('voice check: the audit log and the unwritten are caught, clean text passes
   assert.deepEqual(voiceCheck('The steward counts it twice and does not thank you.'), []);
   assert.deepEqual(voiceCheck('TODO write this').map(h => h.kind), ['placeholder']);
   const hits = voiceCheck('This is recorded in the category ledger; the fee is settled separately and accrues. Choose this action. Not a promise of anything. lorem ipsum ${x} [object Object] undefined');
-  assert.deepEqual(hits.map(h => h.phrase).sort(), ['Choose this action', '[object Object]', '${', 'accrues', 'category', 'lorem', 'not a promise of', 'recorded', 'settled separately', 'undefined'].sort());
+  // The shared rules report the matched text as written (lintText's `match`), so the case is the text's.
+  assert.deepEqual(hits.map(h => h.phrase.toLowerCase()).sort(), ['choose this action', '[object object]', '${', 'accrues', 'category', 'lorem', 'not a promise of', 'recorded', 'settled separately', 'undefined'].sort());
+  assert.deepEqual(hits.map(h => h.rule).sort(), ['accrues', 'category', 'choose-this-action', 'lorem', 'not-a-promise-of', 'object-object', 'recorded', 'settled-separately', 'template-leak', 'undefined']);
   assert.ok(hits.every(h => Number.isInteger(h.index)));
   // Whole words only: a recorder is not a record, and a placeholder word inside another word is not one.
   assert.deepEqual(voiceCheck('The recorder played. Categorical.'), []);
