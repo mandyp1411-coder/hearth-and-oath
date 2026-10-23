@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {stampEdition} from '../dist/js/edition.js';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {gunzipSync} from 'node:zlib';
@@ -16,7 +17,7 @@ function original(){return copy(raw.states.renewedHeir);}
 function repaired(){return valid(E.migrateSave(original()));}
 function room(s,id){const cell=s.maze.content.anchors.find(a=>a.slotId===id).cellId;s.maze.position=cell;s.maze.previous=mazeLayout(s.maze).cells[cell].doors[0];s.maze.visited=[...new Set([...s.maze.visited,cell])];return valid(s);}
 function authored(source='cistern',locationId='marsh'){let s=E.migrateSave(JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v27-road-and-descent.json.gz',import.meta.url)))).descent);s=E.chooseEventOption(s,'withdraw');s.locationId=locationId;s.cartography.pending=null;s.cartography.offsite=false;s.cartography.interior=null;syncCartography(s);for(const k of Object.keys(s.equipment.materials))s.equipment.materials[k]=20;return valid(E.chooseAction(s,'explore_enter_'+source));}
-function withoutJournalChange(before,after){const value=copy(after);value.journal=copy(before.journal);assert.deepEqual(value,before);}
+function withoutJournalChange(before,after){const value=copy(after),prior=copy(before);value.journal=copy(prior.journal);delete value.edition;delete prior.edition;assert.deepEqual(value,prior);}
 function generic(s){return s.journal.findLast(r=>r.tag==='rpg'&&r.title==='Work in the Region');}
 
 test('new v2 signature contact retains its exact generated title/body through afterAction and reload',()=>{
@@ -53,7 +54,7 @@ test('staged A, unrelated calendar, B keep exact IDs/order/timestamps and only v
 test('one exact typed renewal/history repairs only the unique generic row and is input-pure and idempotent',()=>{
  const before=original(),prior=copy(before),after=E.migrateSave(before),old=generic(prior),row=after.journal.find(r=>r.id===old.id),history=prior.rpg.history.at(-1);
  assert.equal(row.title,history.title);assert.equal(row.text,history.text);assert.equal(row.day,old.day);assert.equal(row.age,old.age);assert.equal(row.generation,old.generation);assert.equal(row.id,old.id);withoutJournalChange(prior,after);assert.deepEqual(before,prior);
- const expected=copy(prior);const matched=expected.journal.find(r=>r.id===old.id);matched.title=history.title;matched.text=history.text;assert.deepEqual(after,expected);assert.deepEqual(E.migrateSave(copy(after)),after);assert.equal(JSON.stringify(raw),input);
+ const expected=stampEdition(copy(prior));const matched=expected.journal.find(r=>r.id===old.id);matched.title=history.title;matched.text=history.text;assert.deepEqual(after,expected);assert.deepEqual(E.migrateSave(copy(after)),after);assert.equal(JSON.stringify(raw),input);
 });
 
 for(const [name,change]of [
