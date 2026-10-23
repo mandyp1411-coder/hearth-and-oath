@@ -119,6 +119,26 @@ station and must keep passing unchanged; an edition fixture that wants the
 old battle page does `delete s.battlecraft` (grounded-enemies-v39 does).
 The playtest Player aims at what it can reach.
 
+`faith.js` (v0.69) is the church as a path, in guild.js's shape:
+`state.faith` (the member, the past, the heir, the threads) on edition lives
+only; `realm.faithId` stays the congregation and the cloth is what a few of
+it take (`faith_novice` wants the congregation first). Ways in are the
+oblate scene, the shrine door, the Seminary's `orders` credential and the
+vow after a grief; the house's seat is the region's shrine city
+(`faithSeat`), the prior is that site's keeper, and every faith has an open
+and a strict wing (`WINGS`) that colours the purge-at-the-door and heresy
+scenes. The tick is `onFaithTime`, the gates `applyFaithGates` (they win over
+the room's reason, as the guild's do), the inheritance `inheritFaith` (which
+also sets the heir's `realm.faithId`, since lineage wipes it). budget.js
+waives rent for a brother, keeper or prior. The validator ties
+`faith.member.faithId` to `realm.faithId`, so the congregation actions are
+gated under the cloth. Faith actions show at the shrine room: the keeper's
+`serviceAccepts` and the `needs` regex in world-services.js and the shrine
+regex in exploration-ui.js all list `faith_`. In tests that tick the
+module directly, move `s.day` before calling `onFaithTime`: the tick runs
+from `lastSeason` to `seasonOf(newDay)`, so a second call with the same day
+does nothing.
+
 Test fixtures that are not about birth should pin a station
 (`station: rollBirthCircumstances(seed, 'common', ancestry)`): a bound
 child may die of a winter fever, gets no pocket money and is not schooled,
