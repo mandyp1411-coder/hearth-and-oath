@@ -1,11 +1,11 @@
 # Voice lint
 
-Source version 0.69.0, run 2026-10-23. The lint (`scripts/voice-lint.mjs`) reads every string literal in `dist/js` that reads as prose and reports the phrases in `scripts/lib/voice-rules.mjs`: the ledger's words where the chronicle should speak, and text that was never finished. In v0.70 it reports only; `--strict` is how a later release turns the failures on.
+Source version 0.70.0, run 2026-10-23. The lint (`scripts/voice-lint.mjs`) reads every string literal in `dist/js` that reads as prose and reports the phrases in `scripts/lib/voice-rules.mjs`: the ledger's words where the chronicle should speak, and text that was never finished. In v0.70 it reports only; `--strict` is how a later release turns the failures on.
 
 ## The count
 
-- Modules scanned: 282 (9 skipped, listed below)
-- Player-facing strings: 22858
+- Modules scanned: 284 (9 skipped, listed below)
+- Player-facing strings: 22864
 - Hits: 614 (614 audit, 0 placeholder)
 - Modules with a hit: 137
 
@@ -48,7 +48,7 @@ Source version 0.69.0, run 2026-10-23. The lint (`scripts/voice-lint.mjs`) reads
 
 | Module | Strings | Hits |
 |---|---:|---:|
-| `dist/js/app.js` | 586 | 44 |
+| `dist/js/app.js` | 587 | 44 |
 | `dist/js/personal-stories-v27.js` | 528 | 22 |
 | `dist/js/campaign.js` | 556 | 20 |
 | `dist/js/family-origins.js` | 161 | 19 |
@@ -73,50 +73,50 @@ Source version 0.69.0, run 2026-10-23. The lint (`scripts/voice-lint.mjs`) reads
 
 ### `dist/js/app.js` — 44
 
-- line 245 · `reattached` (“reattaching”): The Ironman position was archived. Review it before reattaching.
-- line 260 · `reattached` (“reattachment”): Review reattachment The attachment may already be saved. Retry the original operation or freshly review this run before choosing an archive or deletion. {…}
-- line 260 · `reattached` (“Reattach”): Reattach the retained position to this reviewed empty slot. An unresolved action can resume only if the saved position exactly matches its reserved candidate.
-- line 260 · `reattached` (“Reattach”): Reattach reviewed position
-- line 304 · `reattached` (“reattach”): Only the latest retained position can reattach.
-- line 304 · `reattached` (“Reattach”): Reattach reviewed position
-- line 304 · `reattached` (“Reattach”): Reattach to freshly reviewed empty slot {…}. Existing backups and other lives remain intact. {…}
-- line 304 · `reattached` (“reattachment”): Review empty slot for reattachment
-- line 304 · `reattached` (“reattachment”): Archive keeps the full position for later reviewed reattachment. Delete position removes that full position and keeps its nonplayable casualty record; importing a downloaded copy will not restore the deleted position. {…
-- line 369 · `recorded` (“recorded”): Your enrollment, lessons and examinations will be recorded here.
-- line 372 · `recorded` (“recorded”): Family visits & responsibilities Parents and other relatives keep their own homes. Visit their recorded settlement and Homes area to spend time together. {…}
-- line 651 · `browser-save-status` (“browser save status”): {…} {…} HEARTH & OATH / SAVED LIVES {…} {…} {…} {…} {…} {…}{…} Saves stay in this browser. Export keeps a separate JSON file, without changing browser save status. {…} Three saved lives
-- line 719 · `recorded` (“recorded”): This account keeps the words recorded at the time; separate itemized changes were not retained.
-- line 728 · `recorded` (“recorded”): {…} gold and the listed supplies are already reserved. {…} work days remain; continue at the recorded site without gathering or paying again.
-- line 728 · `recorded` (“recorded”): Return to the recorded project site
-- line 730 · `recorded` (“recorded”): WORK IN PROGRESS {…} {…} {…} {…} working days remain. Reserved resources are recorded with this project. Abandoning it forfeits the committed gold and supplies. {…}{…}
-- line 739 · `category` (“category”): Equipment to make {…} recipes {…} {…} Standard recipes make the named design. Learned patterns make repeatable sound gear with one chosen affix; three matching pieces form its existing set. Rare dungeon pieces can excee…
-- line 743 · `recorded` (“recorded”): Part of your recorded background.
-- line 814 · `recorded` (“recorded”): Formal school attendance and qualifications are recorded in School.
-- line 891 · `recorded` (“recorded”): The upbringing you carry These are your own recorded childhood practices. Personality traits remain your choice within your current age budget. {…}{…}
-- line 896 · `recorded` (“recorded”): Find their recorded place
-- line 970 · `is-unchanged` (“is unchanged.”): Your note is unchanged.
-- line 985 · `browser-save-status` (“browser save status”): Saving needs attention before practice can open safely. Review the browser save status and export your latest session if needed. Your life has not changed.
-- line 1003 · `is-unchanged` (“is unchanged.”): Tactics rehearsal. Practice only; your life is unchanged.
-- line 1069 · `recorded` (“recorded”): HEARTH & OATH Live a Life in the World Life follows your current moment. {…} Your family, work, health and discoveries shape what happens. Activities separates Everyday, Work & School, Recovery, Training, Social & Fun, …
-- line 1105 · `recorded` (“recorded”): Review {…} {…} sessions · up to {…} actual days · {…} Gold in direct fees if every session is attended. Household living costs continue separately. Each session rechecks the current offer and affordability. The routine …
-- line 1110 · `reattached` (“reattach”): Retained Ironman positions Review and reattach an archive before playing or exporting it. {…}
-- line 1332 · `saved-trailer` (“saved.”): Your session is not saved.
-- line 1367 · `retained-archives` (“Retained archives”): Resume this Ironman position before exporting. Retained archives must first be reattached.
-- line 1367 · `reattached` (“reattached”): Resume this Ironman position before exporting. Retained archives must first be reattached.
-- line 1381 · `browser-save-status` (“Browser save status”): Download started: {…}. Browser save status is unchanged.
-- line 1381 · `is-unchanged` (“is unchanged.”): Download started: {…}. Browser save status is unchanged.
-- line 1496 · `is-unchanged` (“is unchanged.”): Enter a whole age from 0 to {…}. Your draft age is unchanged.
-- line 1523 · `saved-trailer` (“saved.”): Current equipment saved.
-- line 1523 · `saved-trailer` (“saved.”): Loadout name saved.
-- line 1531 · `recorded` (“recorded”): Your preferences are recorded.
-- line 1595 · `recorded` (“Recorded”): Recorded route cleared.
-- line 1693 · `is-unchanged` (“is unchanged.”): Filters cleared. Your portrait is unchanged.
-- line 1728 · `saved-trailer` (“saved.”): The reviewed Ironman position is saved.
-- line 1729 · `saved-trailer` (“saved.”): The reviewed import is saved.
-- line 1761 · `recorded` (“recorded”): Their recorded home has no charted route yet.
-- line 1774 · `category` (“Category”): Search and slot filter cleared. Category and finish are unchanged.
-- line 1835 · `recorded` (“recorded”): Their recorded home has no charted route yet. Ask at a known settlement for leads.
-- line 1964 · `compatible` (“compatible”): This is not a compatible Hearth & Oath save. Your current life is safe.
+- line 247 · `reattached` (“reattaching”): The Ironman position was archived. Review it before reattaching.
+- line 262 · `reattached` (“reattachment”): Review reattachment The attachment may already be saved. Retry the original operation or freshly review this run before choosing an archive or deletion. {…}
+- line 262 · `reattached` (“Reattach”): Reattach the retained position to this reviewed empty slot. An unresolved action can resume only if the saved position exactly matches its reserved candidate.
+- line 262 · `reattached` (“Reattach”): Reattach reviewed position
+- line 306 · `reattached` (“reattach”): Only the latest retained position can reattach.
+- line 306 · `reattached` (“Reattach”): Reattach reviewed position
+- line 306 · `reattached` (“Reattach”): Reattach to freshly reviewed empty slot {…}. Existing backups and other lives remain intact. {…}
+- line 306 · `reattached` (“reattachment”): Review empty slot for reattachment
+- line 306 · `reattached` (“reattachment”): Archive keeps the full position for later reviewed reattachment. Delete position removes that full position and keeps its nonplayable casualty record; importing a downloaded copy will not restore the deleted position. {…
+- line 371 · `recorded` (“recorded”): Your enrollment, lessons and examinations will be recorded here.
+- line 374 · `recorded` (“recorded”): Family visits & responsibilities Parents and other relatives keep their own homes. Visit their recorded settlement and Homes area to spend time together. {…}
+- line 661 · `browser-save-status` (“browser save status”): {…} {…} HEARTH & OATH / SAVED LIVES {…} {…} {…} {…} {…} {…}{…} Saves stay in this browser. Export keeps a separate JSON file, without changing browser save status. {…} Three saved lives
+- line 729 · `recorded` (“recorded”): This account keeps the words recorded at the time; separate itemized changes were not retained.
+- line 738 · `recorded` (“recorded”): {…} gold and the listed supplies are already reserved. {…} work days remain; continue at the recorded site without gathering or paying again.
+- line 738 · `recorded` (“recorded”): Return to the recorded project site
+- line 740 · `recorded` (“recorded”): WORK IN PROGRESS {…} {…} {…} {…} working days remain. Reserved resources are recorded with this project. Abandoning it forfeits the committed gold and supplies. {…}{…}
+- line 749 · `category` (“category”): Equipment to make {…} recipes {…} {…} Standard recipes make the named design. Learned patterns make repeatable sound gear with one chosen affix; three matching pieces form its existing set. Rare dungeon pieces can excee…
+- line 753 · `recorded` (“recorded”): Part of your recorded background.
+- line 824 · `recorded` (“recorded”): Formal school attendance and qualifications are recorded in School.
+- line 901 · `recorded` (“recorded”): The upbringing you carry These are your own recorded childhood practices. Personality traits remain your choice within your current age budget. {…}{…}
+- line 906 · `recorded` (“recorded”): Find their recorded place
+- line 980 · `is-unchanged` (“is unchanged.”): Your note is unchanged.
+- line 995 · `browser-save-status` (“browser save status”): Saving needs attention before practice can open safely. Review the browser save status and export your latest session if needed. Your life has not changed.
+- line 1013 · `is-unchanged` (“is unchanged.”): Tactics rehearsal. Practice only; your life is unchanged.
+- line 1079 · `recorded` (“recorded”): HEARTH & OATH Live a Life in the World Life follows your current moment. {…} Your family, work, health and discoveries shape what happens. Activities separates Everyday, Work & School, Recovery, Training, Social & Fun, …
+- line 1115 · `recorded` (“recorded”): Review {…} {…} sessions · up to {…} actual days · {…} Gold in direct fees if every session is attended. Household living costs continue separately. Each session rechecks the current offer and affordability. The routine …
+- line 1120 · `reattached` (“reattach”): Retained Ironman positions Review and reattach an archive before playing or exporting it. {…}
+- line 1342 · `saved-trailer` (“saved.”): Your session is not saved.
+- line 1377 · `retained-archives` (“Retained archives”): Resume this Ironman position before exporting. Retained archives must first be reattached.
+- line 1377 · `reattached` (“reattached”): Resume this Ironman position before exporting. Retained archives must first be reattached.
+- line 1391 · `browser-save-status` (“Browser save status”): Download started: {…}. Browser save status is unchanged.
+- line 1391 · `is-unchanged` (“is unchanged.”): Download started: {…}. Browser save status is unchanged.
+- line 1506 · `is-unchanged` (“is unchanged.”): Enter a whole age from 0 to {…}. Your draft age is unchanged.
+- line 1533 · `saved-trailer` (“saved.”): Current equipment saved.
+- line 1533 · `saved-trailer` (“saved.”): Loadout name saved.
+- line 1541 · `recorded` (“recorded”): Your preferences are recorded.
+- line 1605 · `recorded` (“Recorded”): Recorded route cleared.
+- line 1703 · `is-unchanged` (“is unchanged.”): Filters cleared. Your portrait is unchanged.
+- line 1738 · `saved-trailer` (“saved.”): The reviewed Ironman position is saved.
+- line 1739 · `saved-trailer` (“saved.”): The reviewed import is saved.
+- line 1771 · `recorded` (“recorded”): Their recorded home has no charted route yet.
+- line 1784 · `category` (“Category”): Search and slot filter cleared. Category and finish are unchanged.
+- line 1845 · `recorded` (“recorded”): Their recorded home has no charted route yet. Ask at a known settlement for leads.
+- line 1974 · `compatible` (“compatible”): This is not a compatible Hearth & Oath save. Your current life is safe.
 
 ### `dist/js/personal-stories-v27.js` — 22
 
@@ -190,23 +190,23 @@ Source version 0.69.0, run 2026-10-23. The lint (`scripts/voice-lint.mjs`) reads
 
 ### `dist/js/engine.js` — 17
 
-- line 583 · `recorded` (“recorded”): Your own identity and romantic interests are recorded. Other people keep their own wishes.
-- line 592 · `recorded` (“recorded”): Only recorded rooms can be marked.
-- line 595 · `saved-trailer` (“saved.”): That map reminder could not be saved.
-- line 632 · `recorded` (“recorded”): This care supports your recorded physical symptoms. Health restoration does not immediately clear illness or injury.
-- line 633 · `recorded` (“recorded”): You have no recorded physical symptoms. This is preventive supportive care; full Health does not remove that benefit. Existing longer care windows are kept, and values at their limits do not increase.
-- line 1062 · `recorded` (“recorded”): Your personality and its ability gains are recorded.
-- line 1231 · `recorded` (“recorded”): The merchant recognizes you. Two pieces of local evidence are recorded; restitution remains possible.
-- line 1389 · `recorded` (“recorded”): The order offers a supervised encounter against trial guardians, or four days escorting vulnerable travelers. Your chosen oath will be recorded in the character journal.
-- line 1712 · `recorded` (“recorded”): Hunger falls, but an identified witness reports the assault. Three local evidence are recorded.
-- line 1786 · `recorded` (“recorded”): You made a home in {…}, developed your career to rank {…}, and recorded {…} year{…} of changing priorities.
-- line 1794 · `recorded` (“recorded”): Your {…} life included {…} working days, {…} fulfilled commissions, and {…} gold earned through recorded work.
-- line 1798 · `recorded` (“recorded”): Your household's recorded living costs totalled {…} gold{…}.
-- line 1805 · `recorded` (“recorded”): You kept {…} recorded promise{…}{…}. {…}
-- line 1920 · `recorded` (“recorded”): This life’s portrait belongs to its recorded history. Continue as an heir to choose their face.
-- line 1932 · `saved-trailer` (“saved.”): Your portrait for this age is saved.
-- line 1940 · `recorded` (“recorded”): Your family heritage is recorded in Character and Lore.
-- line 2175 · `recorded` (“recorded”): This road has no recorded route.
+- line 584 · `recorded` (“recorded”): Your own identity and romantic interests are recorded. Other people keep their own wishes.
+- line 593 · `recorded` (“recorded”): Only recorded rooms can be marked.
+- line 596 · `saved-trailer` (“saved.”): That map reminder could not be saved.
+- line 633 · `recorded` (“recorded”): This care supports your recorded physical symptoms. Health restoration does not immediately clear illness or injury.
+- line 634 · `recorded` (“recorded”): You have no recorded physical symptoms. This is preventive supportive care; full Health does not remove that benefit. Existing longer care windows are kept, and values at their limits do not increase.
+- line 1064 · `recorded` (“recorded”): Your personality and its ability gains are recorded.
+- line 1233 · `recorded` (“recorded”): The merchant recognizes you. Two pieces of local evidence are recorded; restitution remains possible.
+- line 1391 · `recorded` (“recorded”): The order offers a supervised encounter against trial guardians, or four days escorting vulnerable travelers. Your chosen oath will be recorded in the character journal.
+- line 1714 · `recorded` (“recorded”): Hunger falls, but an identified witness reports the assault. Three local evidence are recorded.
+- line 1788 · `recorded` (“recorded”): You made a home in {…}, developed your career to rank {…}, and recorded {…} year{…} of changing priorities.
+- line 1796 · `recorded` (“recorded”): Your {…} life included {…} working days, {…} fulfilled commissions, and {…} gold earned through recorded work.
+- line 1800 · `recorded` (“recorded”): Your household's recorded living costs totalled {…} gold{…}.
+- line 1807 · `recorded` (“recorded”): You kept {…} recorded promise{…}{…}. {…}
+- line 1922 · `recorded` (“recorded”): This life’s portrait belongs to its recorded history. Continue as an heir to choose their face.
+- line 1934 · `saved-trailer` (“saved.”): Your portrait for this age is saved.
+- line 1942 · `recorded` (“recorded”): Your family heritage is recorded in Character and Lore.
+- line 2178 · `recorded` (“recorded”): This road has no recorded route.
 
 ### `dist/js/people-records.js` — 16
 
@@ -229,21 +229,21 @@ Source version 0.69.0, run 2026-10-23. The lint (`scripts/voice-lint.mjs`) reads
 
 ### `dist/js/lineage.js` — 15
 
-- line 104 · `recorded` (“recorded”): The household is already caring for three recorded children.
-- line 118 · `recorded` (“recorded”): Their birth parents died during a recorded regional flood; a named shelter keeper has cared for them since.
-- line 131 · `recorded` (“recorded”): {…} says they would welcome your offer, provided they can keep their own name, friends, and learning. Their agreement is recorded; you must still prepare the home.
-- line 131 · `recorded` (“recorded”): Keep the met child and their recorded wishes. No fee, new parent, or age reset.
-- line 139 · `recorded` (“recorded”): The young person is now an adult; the earlier wishes remain recorded, and no childhood adoption is made.
-- line 215 · `recorded` (“recorded”): Take up this actual child's life at age {…}. The world stays on day {…}; cash is divided among living children and the selected successor receives the recorded household property. Only their learned skills carry over.
-- line 222 · `recorded` (“recorded”): Keep the child’s recorded identity and wishes. No new child, fee, or inherited claim is created.
-- line 236 · `recorded` (“recorded”): One real session develops the chosen school skills. Six attended sessions earn a recorded school qualification; sessions become available every thirty days. An operating learning hall can cover the session fee.
-- line 239 · `recorded` (“recorded”): This is your recorded preference.
-- line 271 · `recorded` (“recorded”): A recorded independent beginning
-- line 406 · `recorded` (“recorded”): You and {…} made room for {…}. Their own {…} trait grew; their practiced skills are recorded for their future.
-- line 550 · `recorded` (“recorded”): You are part of {…}'s actual recorded family.
-- line 565 · `recorded` (“recorded”): Your other recorded parent, with a life and memories of their own.
-- line 585 · `recorded` (“recorded”): {…} takes up the story at age {…} on world day {…}. {…} gold and the recorded household property pass to them; {…}. Their own recorded learning remains. {…}'s chronicle is preserved in the dynasty; the changed world is …
-- line 588 · `recorded` (“recorded”): {…}'s own {…} introduction and {…} recorded unpaid training days continue. No earlier wages or the parent's professional mastery are awarded.
+- line 105 · `recorded` (“recorded”): The household is already caring for three recorded children.
+- line 119 · `recorded` (“recorded”): Their birth parents died during a recorded regional flood; a named shelter keeper has cared for them since.
+- line 132 · `recorded` (“recorded”): {…} says they would welcome your offer, provided they can keep their own name, friends, and learning. Their agreement is recorded; you must still prepare the home.
+- line 132 · `recorded` (“recorded”): Keep the met child and their recorded wishes. No fee, new parent, or age reset.
+- line 140 · `recorded` (“recorded”): The young person is now an adult; the earlier wishes remain recorded, and no childhood adoption is made.
+- line 216 · `recorded` (“recorded”): Take up this actual child's life at age {…}. The world stays on day {…}; cash is divided among living children and the selected successor receives the recorded household property. Only their learned skills carry over.
+- line 223 · `recorded` (“recorded”): Keep the child’s recorded identity and wishes. No new child, fee, or inherited claim is created.
+- line 237 · `recorded` (“recorded”): One real session develops the chosen school skills. Six attended sessions earn a recorded school qualification; sessions become available every thirty days. An operating learning hall can cover the session fee.
+- line 240 · `recorded` (“recorded”): This is your recorded preference.
+- line 272 · `recorded` (“recorded”): A recorded independent beginning
+- line 407 · `recorded` (“recorded”): You and {…} made room for {…}. Their own {…} trait grew; their practiced skills are recorded for their future.
+- line 551 · `recorded` (“recorded”): You are part of {…}'s actual recorded family.
+- line 566 · `recorded` (“recorded”): Your other recorded parent, with a life and memories of their own.
+- line 586 · `recorded` (“recorded”): {…} takes up the story at age {…} on world day {…}. {…} gold and the recorded household property pass to them; {…}. Their own recorded learning remains. {…}'s chronicle is preserved in the dynasty; the changed world is …
+- line 589 · `recorded` (“recorded”): {…}'s own {…} introduction and {…} recorded unpaid training days continue. No earlier wages or the parent's professional mastery are awarded.
 
 ### `dist/js/community.js` — 14
 

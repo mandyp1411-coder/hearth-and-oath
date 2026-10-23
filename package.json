@@ -8,8 +8,14 @@
     "test:fast": "node scripts/test-lanes.mjs fast",
     "test:slow": "node scripts/test-lanes.mjs slow",
     "bench": "node scripts/bench/engine-bench.mjs",
-    "build": "node scripts/build-offline.mjs && node scripts/package-hosting-v57.mjs",
+    "build": "node scripts/content/validate.mjs && node scripts/build-offline.mjs && node scripts/package-hosting-v57.mjs",
     "start": "python3 -m http.server 3000 --directory dist",
-    "release:check": "node scripts/validate-release.mjs"
+    "release:check": "node scripts/validate-release.mjs",
+    "build:archive": "node scripts/build-archive.mjs",
+    "measure": "node scripts/voice-lint.mjs --snapshot docs/measures/voice-lint-v070.md && node scripts/content/validate.mjs --snapshot docs/measures/content-validation-v070.md && python3 scripts/interface-harness.py --snapshot docs/measures/interface-harness-v070.md",
+    "measure:voice": "node scripts/voice-lint.mjs",
+    "measure:content": "node scripts/content/validate.mjs",
+    "measure:ui": "python3 scripts/interface-harness.py",
+    "check:archive": "python3 scripts/browser-archive-check.py --snapshot docs/measures/archive-verification-v070.md"
   }
 }
