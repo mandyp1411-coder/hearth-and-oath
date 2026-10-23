@@ -17,7 +17,7 @@ import { hasCredential } from './schooling.js';
 
 const edition = s => !!s?.hero?.station;
 export const RANKS = Object.freeze(['oblate', 'novice', 'brother', 'keeper', 'prior']);
-export const TITHE = 5, STIPEND = 10, OFFICE_DAYS = 3, NOVICE_SEASONS = 4, VOWS_STANDING = 40, KEEPER_STANDING = 60, KEEPER_YEARS = 3, ARREARS_DOOR = 3, ARREARS_OUT = 4, NOVICE_MISSED = 2, PENANCE_DAYS = 30, CALLED_DEVOTION = 3;
+export const TITHE = 5, STIPEND = 10, OFFICE_DAYS = 3, NOVICE_SEASONS = 4, VOWS_STANDING = 40, KEEPER_STANDING = 70, KEEPER_YEARS = 5, ARREARS_DOOR = 3, ARREARS_OUT = 4, NOVICE_MISSED = 2, PENANCE_DAYS = 30, CALLED_DEVOTION = 3;
 const LIMITS = Object.freeze({ threads: 10, history: 24 });
 const ANCESTRY_WORD = Object.freeze({ tiefling: 'the horned', goblin: 'the goblin-born', orc: 'the orc-born', beastfolk: 'the beastfolk', elf: 'the elven', dwarf: 'the dwarven', halfling: 'the halfling', human: 'the human' });
 // Each faith's doctrine names a dispute; the house has two wings over it.
@@ -133,7 +133,7 @@ export function applyFaithAction(s, id, ctx = {}) {
   if (id === 'faith_novice') { if (joinReason(s, 'called')) return false; return enrol(s, s.realm.faithId, 'novice', f.heir?.faithId === s.realm.faithId && f.heir.left === 'kept' ? 'heir' : 'called', ctx); }
   if (id === 'faith_ordain') { if (joinReason(s, 'ordained')) return false; const faithId = s.realm?.faithId || localFaith(s); enrol(s, faithId, 'novice', 'ordained', ctx); return ordain(s, ctx); }
   if (!m) return false;
-  if (id === 'faith_offices') { if (m.offices.season >= seasonOf(s.day) || !shrineHere(s) || m.penance) return false; m.offices.season = seasonOf(s.day); m.offices.kept++; m.standing = clamp(m.standing + 3); if (Number.isFinite(s.hero.skills?.devotion)) s.hero.skills.devotion += 1; devote(s, 2); stress(s, -3); ctx.standing?.('order', 1); note(ctx, 'The offices', `${OFFICE_DAYS} days at the shrine: the lamps trimmed, the words said over two graves and a child, the sick sat with. ${m.rank === 'novice' ? `${m.offices.kept} of ${NOVICE_SEASONS} seasons toward the vows.` : 'The house counts it.'}`); return true; }
+  if (id === 'faith_offices') { if (m.offices.season >= seasonOf(s.day) || !shrineHere(s) || m.penance) return false; m.offices.season = seasonOf(s.day); m.offices.kept++; m.standing = clamp(m.standing + (m.rank === 'novice' ? 3 : 2)); if (Number.isFinite(s.hero.skills?.devotion) && (m.rank === 'novice' || m.offices.kept % 2 === 0)) s.hero.skills.devotion += 1; devote(s, 2); stress(s, -3); if (m.offices.kept % 4 === 0) ctx.standing?.('order', 1); note(ctx, 'The offices', `${OFFICE_DAYS} days at the shrine: the lamps trimmed, the words said over two graves and a child, the sick sat with. ${m.rank === 'novice' ? `${m.offices.kept} of ${NOVICE_SEASONS} seasons toward the vows.` : 'The house counts it.'}`); return true; }
   if (id === 'faith_penance') { if (!m.penance || !shrineHere(s)) return false; const days = Math.min(10, m.penance.days); m.penance.days -= days; if (m.penance.days <= 0) { m.penance = null; m.standing = clamp(m.standing + 5); note(ctx, 'Penance done', `${m.prior.name} says nothing about it, which is how the house says it is finished.`); } else note(ctx, 'Penance', `${days} days of the floor and the lamps. ${m.penance.days} left.`); return true; }
   if (id === 'faith_tithe_pay') { const owed = m.tithe.arrears; if (!owed) return false; m.tithe.paid += owed * TITHE; m.tithe.arrears = 0; m.tithe.season = seasonOf(s.day); note(ctx, 'The tithe', `${owed * TITHE} gold into the house's box. ${m.prior.name} draws the line under the name.`); return true; }
   if (id === 'faith_vows') { if (m.rank !== 'novice' || m.offices.kept < NOVICE_SEASONS || m.standing < VOWS_STANDING || s.life?.partnerId && m.wing === 'strict' || !shrineHere(s)) return false; return ordain(s, ctx); }
@@ -170,11 +170,11 @@ function tickSeason(s, f, season, ctx) {
   // The prior's work, each spring.
   if (m.rank === 'brother' && season % 4 === 1 && !(m.assignment && !m.assignment.done)) { const where = atShrine ? s.locationId : m.seat; m.assignment = { season, locationId: where, what: ['the sick at the lower houses', 'the burials the village could not pay for', 'the lamp carried to the crossing where the lantern went out', 'the words at the levy\'s leaving', 'the tithe barn\'s ledger set right'][seededRoll(s.seed, `faith:work:${season}`, 5)], done: false }; }
   else if (m.assignment && !m.assignment.done && season - m.assignment.season >= 4) { m.standing = clamp(m.standing - 5); note(ctx, 'Work left undone', `${m.prior.name} does not fine; the house does not fine. It remembers, and your standing in it is less.`); m.assignment = null; }
-  if (m.rank !== 'novice' && atShrine && !m.tithe.arrears) m.standing = clamp(m.standing + 1);
+  if (m.rank !== 'novice' && atShrine && !m.tithe.arrears && season % 2 === 0) m.standing = clamp(m.standing + 1);
   // The sermon at the fair: you or the rival.
   if (season % 4 === 2 && ['novice', 'brother'].includes(m.rank)) { const won = seededRoll(s.seed, `faith:sermon:${season}`, 100) < 30 + Math.min(20, devotion(s)) + Math.min(15, Number(s.hero.skills?.persuasion) || 0) - Math.floor(m.rival.standing / 5); m.rival.sermons.push({ season, won }); m.rival.sermons = m.rival.sermons.slice(-10); if (won) { m.standing = clamp(m.standing + 3); m.rival.standing = clamp(m.rival.standing - 2); } else m.rival.standing = clamp(m.rival.standing + 3); note(ctx, 'The sermon at the fair', won ? `The house let you give the sermon at the fair this year, and ${m.rival.name} listened from the back.` : `${m.rival.name} gave the sermon at the fair this year, and gave it well, and ${m.prior.name} said so.`); }
   // The penitent comes back.
-  if (m.rank === 'keeper' && m.penitent && season % 2 === 0) m.penitent.heard = false;
+  if (m.rank === 'keeper' && m.penitent && season % 4 === 0) m.penitent.heard = false;
   // The world: the court's purge at the house door; a hungry village and the tithe; vows broken; the doubter; the preacher; the succession.
   const home = m.region, open = f.threads.filter(t => !t.closed).length;
   if (!open) {
@@ -187,7 +187,7 @@ function tickSeason(s, f, season, ctx) {
     else if ((s.delves?.kept || []).some(k => k.owner === 'faith') && m.rank !== 'novice' && seededRoll(s.seed, `faith:relic:${season}`, 100) < 40) openThread(s, 'relic', { name: (s.delves.kept.find(k => k.owner === 'faith') || {}).name }, ctx);
     else if (m.rank !== 'oblate' && seededRoll(s.seed, `faith:heresy:${season}`, 100) < 6) openThread(s, 'heresy', { preacher: generatePersonName(s.seed, `faith:preacher:${season}`), wing: m.wing === 'open' ? 'strict' : 'open' }, ctx);
     else if (['brother', 'keeper'].includes(m.rank) && !m.doubter && seededRoll(s.seed, `faith:doubter:${season}`, 100) < 5) openThread(s, 'doubter', { name: generatePersonName(s.seed, `faith:doubter:${season}`) }, ctx);
-    else if (['brother', 'keeper'].includes(m.rank) && s.day - m.prior.bornDay >= 72 * 365 && seededRoll(s.seed, `faith:succession:${season}`, 100) < 25) openThread(s, 'succession', { prior: m.prior.name, rival: m.rival.name }, ctx);
+    else if (m.rank === 'keeper' && s.age >= 35 && s.day - m.prior.bornDay >= 70 * 365 && s.day - m.since >= 10 * 365 && seededRoll(s.seed, `faith:succession:${season}`, 100) < 15) openThread(s, 'succession', { prior: m.prior.name, rival: m.rival.name }, ctx);
   }
   f.evidenceSeen = s.legal?.evidence || 0;
 }
@@ -213,7 +213,7 @@ export function onFaithTime(s, { newDay }, ctx = {}) {
 const THREAD_COOLDOWN = 8;
 function openThread(s, def, roles, ctx) {
   const f = faith(s), season = seasonOf(s.day); if (f.threads.filter(t => !t.closed).length >= 3) return null;
-  if (!['confession', 'inquiry', 'door'].includes(def) && f.threads.some(t => t.def === def && season - t.season < THREAD_COOLDOWN)) return null;
+  if (!['inquiry', 'door'].includes(def) && f.threads.some(t => t.def === def && season - t.season < (def === 'confession' ? 4 : THREAD_COOLDOWN))) return null;
   f.counters.threads++;
   const t = { id: `ft-${f.counters.threads}`, def, roles, season, stage: 'open', choice: null, followUp: null, memory: [], closed: false };
   f.threads.push(t); if (f.threads.length > LIMITS.threads) f.threads.splice(Math.max(0, f.threads.findIndex(x => x.closed)), 1);
