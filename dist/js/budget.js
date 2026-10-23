@@ -41,7 +41,9 @@ export function householdAnnualCost(s,day=s.day) {
   // Rented lodgings cost rent; a shared shelter or no roof at all costs nothing
   // but comfort. Owned homes cost their upkeep.
   const tier=s.life.home?.tier,sheltered=s.family?.housing&&s.family.housing!=='secure';
-  const home=tier&&tier!=='lodgings'?({cottage:30,townhouse:90,estate:240})[tier]??0:sheltered?0:60;
+  // The cloth sleeps under the house's roof (v0.69): a brother, keeper or prior pays no rent.
+  const roofed=['brother','keeper','prior'].includes(s.faith?.member?.rank);
+  const home=tier&&tier!=='lodgings'?({cottage:30,townhouse:90,estate:240})[tier]??0:sheltered||roofed?0:60;
   const children=s.life.children.filter(c=>c.alive!==false&&Math.max(0,Math.floor((day-c.bornDay)/365))<18).length;
   const address=s.life.home?.locationId||s.hero.birthplaceId||s.locationId;
   const support=communityFoodSupportAt(s,address,day);
