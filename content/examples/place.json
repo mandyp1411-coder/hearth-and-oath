@@ -1,0 +1,18 @@
+{
+  "kind": "place",
+  "schemaVersion": 1,
+  "note": "Examples for the schema, not game content. A place has rooms, and each room offers the actions whose ids begin with the listed prefixes.",
+  "items": [
+    {
+      "id": "the-farmstead",
+      "name": "The farmstead",
+      "kind": "farmstead",
+      "rooms": [
+        { "id": "yard", "name": "The yard", "text": "Mud, a well with a cracked lip, the plough under the eave and the dog that is not yours but eats here.", "offers": ["farm_", "work", "family_"] },
+        { "id": "byre", "name": "The byre", "text": "Warm with breath. The ox, when there is an ox, and the hens in the rafters.", "offers": ["farm_tend", "farm_sell"] },
+        { "id": "hearth", "name": "The hearth", "text": "One room, one fire, the bed behind the curtain and the table that was a door.", "offers": ["rest", "family_", "leisure_", "health_"] },
+        { "id": "field", "name": "The field", "text": "Eleven strips between the stone and the stream. Barley on seven, fallow on four, and the hurdles that keep moving.", "offers": ["farm_sow", "farm_reap", "farm_walk"] }
+      ]
+    }
+  ]
+}

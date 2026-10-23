@@ -1,0 +1,19 @@
+{
+  "kind": "landmark",
+  "schemaVersion": 1,
+  "note": "Examples for the schema, not game content. A landmark is a place with a plate on the map, a premise, the scenes that can happen there and the states it passes through.",
+  "items": [
+    {
+      "id": "the-hanging-stone",
+      "region": "rainward",
+      "name": "The Hanging Stone",
+      "plate": "A grey stone the height of two men, leaning over the field boundary as if it had been stopped mid-fall. The hurdles run up to it from both sides and have for longer than the roll.",
+      "premise": "Every boundary in the lower fields runs to the Hanging Stone, which is why nobody can move it and everybody wants to. The reeve walks the lines from it each spring. There is a mark on the north face that the old people say is a name, and the roll does not say whose.",
+      "scenes": ["fence-between", "fence-after"],
+      "states": [
+        { "id": "standing", "when": "not flag('stone_fallen')", "text": "The stone leans as it always has. Children dare each other to stand under it." },
+        { "id": "fallen", "when": "flag('stone_fallen')", "text": "The stone came down in the wet spring and lies across three boundaries at once. The reeve has not walked the lines since, and the hurdles have begun to wander." }
+      ]
+    }
+  ]
+}

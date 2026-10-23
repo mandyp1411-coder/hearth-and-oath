@@ -1,0 +1,51 @@
+{
+  "kind": "play",
+  "schemaVersion": 1,
+  "note": "Examples for the schema, not game content. A play is a life's signature verb: what a farmer does that nobody else can.",
+  "items": [
+    {
+      "id": "harvest-gamble",
+      "life": "farmer",
+      "title": "The harvest gamble",
+      "setup": "The barley is ripe a week early and the sky to the west has the look it had the year the Tolls lost everything. Cut now, green at the edges, and sell what you get; or leave it a week for the full head and pray the weather holds. {spouse.name} says cut. The old man at the mill says wait.",
+      "when": "age >= 16 and season == 'autumn' and hero.station.id != 'bound'",
+      "days": 9,
+      "roles": [
+        { "id": "spouse", "kind": "spouse", "required": false }
+      ],
+      "stages": [
+        {
+          "id": "wait",
+          "text": "Seven days of looking west. The head fills. The sky does what it will.",
+          "odds": { "skill": "survival", "base": 45, "words": { "good": "the weather held and the head filled", "bad": "the rain came on the sixth day and lay the barley flat" } },
+          "success": [
+            { "op": "gold", "by": 24 },
+            { "op": "joy", "by": 6 },
+            { "op": "skill", "id": "survival", "by": 1 },
+            { "op": "journal", "title": "A full head", "text": "You waited and the sky waited with you. The barley came in heavy, and the price at the market was the price for a full head, and {spouse.name} said nothing about having said cut." }
+          ],
+          "failure": [
+            { "op": "gold", "by": -10 },
+            { "op": "stress", "by": 10 },
+            { "op": "journal", "title": "Laid flat", "text": "The rain came on the sixth day and lay the barley flat, and you cut it wet off the ground and lost a third to the rot. The old man at the mill did not look at you for a month." }
+          ]
+        },
+        {
+          "id": "sell",
+          "text": "The grain is in. Sell at the autumn fair, or hold it in the barn for the spring price and the rats.",
+          "odds": { "skill": "persuasion", "base": 50, "words": { "good": "the spring price was high and the rats were few", "bad": "the spring price fell and the rats did not" } },
+          "success": [
+            { "op": "gold", "by": 18 },
+            { "op": "standing", "who": "villagers", "by": 2 },
+            { "op": "memory", "text": "Held the grain for the spring price and won." }
+          ],
+          "failure": [
+            { "op": "gold", "by": -8 },
+            { "op": "memory", "text": "Held the grain for the spring price and lost it to the rats." }
+          ]
+        }
+      ],
+      "fallout": "A farmer who gambles on the weather twice and loses twice is a farmer the village lends to carefully. The old man at the mill has a word for it, and uses it."
+    }
+  ]
+}

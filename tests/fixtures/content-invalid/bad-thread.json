@@ -1,0 +1,18 @@
+{
+  "kind": "thread",
+  "schemaVersion": 1,
+  "note": "A deliberately broken thread for tests/content-schema.test.js: a condition that does not parse, a condition that reads a path the scope does not have, and a stage whose scene exists nowhere.",
+  "items": [
+    {
+      "id": "broken-rent",
+      "roles": [
+        { "id": "lord", "kind": "lord", "required": true }
+      ],
+      "opens": "age >= and season == 'autumn'",
+      "closes": "weather.mood == 'grim'",
+      "stages": [
+        { "id": "door", "scene": "a-scene-nobody-wrote", "after": { "seasons": 0 } }
+      ]
+    }
+  ]
+}

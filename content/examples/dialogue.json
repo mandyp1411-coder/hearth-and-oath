@@ -1,0 +1,51 @@
+{
+  "kind": "dialogue",
+  "schemaVersion": 1,
+  "note": "Examples for the schema, not game content. A dialogue is what one kind of person says to the player, in a voice, with the replies the player may give. {speaker.name} is the one speaking.",
+  "items": [
+    {
+      "id": "spouse-at-the-hearth",
+      "role": "spouse",
+      "voice": "warm",
+      "when": "married",
+      "lines": [
+        {
+          "id": "the-day",
+          "text": "Sit. There is bread, and the fire has not quite given up on us. Tell me the day, or do not; I can read most of it off your boots.",
+          "replies": [
+            { "id": "tell", "text": "Tell {speaker.them} the day, all of it.", "tags": ["truth", "care"], "effects": [{ "op": "bond", "role": "speaker", "by": 2 }, { "op": "stress", "by": -3 }] },
+            { "id": "quiet", "text": "Sit, and say nothing, and eat.", "tags": ["rest"], "effects": [{ "op": "stress", "by": -2 }] }
+          ]
+        },
+        {
+          "id": "the-field",
+          "text": "The hurdles have moved again. I saw it from the well. I am not saying anything about it. I am saying I saw it.",
+          "when": "flag('fence_let_lie')",
+          "replies": [
+            { "id": "agree", "text": "Say you saw it too, and that it will keep.", "tags": ["patience"] },
+            { "id": "snap", "text": "Say it is your field and you will see to it.", "tags": ["reckless"], "effects": [{ "op": "bond", "role": "speaker", "by": -3 }] }
+          ]
+        },
+        {
+          "id": "the-rent",
+          "text": "{speaker.name} does not look up from the mending. \"The steward's cart went by twice today. He does not go by twice for nothing.\"",
+          "when": "season == 'autumn' and gold < 60",
+          "replies": [
+            { "id": "plan", "text": "Say you have a plan for it.", "tags": ["prudence"] },
+            { "id": "worry", "text": "Say you do not know what you will do.", "tags": ["truth"], "effects": [{ "op": "bond", "role": "speaker", "by": 3 }, { "op": "stress", "by": 2 }] },
+            { "id": "continue", "text": "Say nothing, and listen to the needle.", "tags": ["patience"] }
+          ]
+        },
+        {
+          "id": "the-child",
+          "text": "The little one asked today whether the field would be theirs. I said it would. I would like that to be true, is all.",
+          "when": "children > 0",
+          "replies": [
+            { "id": "promise", "text": "Say it will be.", "tags": ["aspiration"], "effects": [{ "op": "flag", "id": "field_promised", "value": true }, { "op": "bond", "role": "speaker", "by": 4 }] },
+            { "id": "honest", "text": "Say you cannot promise it.", "nature": "honest", "tags": ["truth"], "effects": [{ "op": "bond", "role": "speaker", "by": 1 }] }
+          ]
+        }
+      ]
+    }
+  ]
+}

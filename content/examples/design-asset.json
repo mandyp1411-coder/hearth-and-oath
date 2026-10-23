@@ -1,0 +1,21 @@
+{
+  "kind": "design-asset",
+  "schemaVersion": 1,
+  "note": "Examples for the schema, not game content. A design asset is read by people, not by the engine; the validator only asks that it parse and hold no unwritten text.",
+  "items": [
+    {
+      "id": "farmer-year-outline",
+      "title": "The farmer's year, in outline",
+      "seasons": {
+        "spring": "Sow, mend the hurdles, the reeve walks the lines from the Hanging Stone.",
+        "summer": "Weed, haymaking, the fair. The rival's bench is at the fair too.",
+        "autumn": "The harvest gamble, the rent, the lender's man on the field edge.",
+        "winter": "The hearth, the stores, the hard winter when the diet is thin."
+      },
+      "openQuestions": [
+        "Does the reeve belong to the lord or to the village? The engine has no reeve yet; v0.71 decides.",
+        "How many strips make a field worth keeping?"
+      ]
+    }
+  ]
+}
