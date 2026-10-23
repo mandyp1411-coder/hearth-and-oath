@@ -4811,6 +4811,13 @@ body.game-mode .crime-option summary { flex-wrap:wrap; }
 body.title-mode .save-slots-panel .slot-row-actions .button { margin:0; min-width:0; min-height:44px; white-space:normal; overflow-wrap:anywhere; font-size:calc(11px * var(--reading-scale,1)); }
 body.title-mode .save-slots-panel .slot-info .slot-pending-context { color:#d0c3a9; margin-top:4px; }
 body.title-mode .save-slots-panel .slot-info .slot-source-note { color:#e8c68b; margin-top:4px; }
+/* Which rules a life lives by: on the slot, the title card and the import review. */
+.slot-rules { display:inline-block; margin-top:4px; padding:1px 7px; border:1px solid rgba(232,198,139,0.45); border-radius:999px; font-size:calc(12px * var(--reading-scale,1)); letter-spacing:0.02em; color:#d0c3a9; }
+.slot-rules.old-rules { color:#e8c68b; border-color:rgba(232,198,139,0.75); }
+.slot-archive-note { grid-column:1 / -1; padding:8px 12px 10px; border-top:1px solid rgba(232,198,139,0.25); color:#d0c3a9; font-size:calc(13px * var(--reading-scale,1)); }
+.slot-archive-note p { margin:0 0 6px; }
+.slot-archive-note .slot-row-actions { flex-direction:row; flex-wrap:wrap; padding:0; min-width:0; }
+.import-rules .slot-rules { margin-top:0; }
 .save-slot-row [hidden] { display:none !important; }
 @media(max-width:420px) {
  .slot-row-actions { min-width:64px; padding:5px; }

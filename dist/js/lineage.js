@@ -27,6 +27,7 @@ import { inheritPastimes } from './pastimes.js';
 import { initializeFamilyDepth } from './household.js';
 import { inheritFellowship } from './fellowship.js';
 import { initializeSanctuaries } from './sanctuaries.js';
+import { stampEdition } from './edition.js';
 
 const YEAR = 365;
 const SKILLS = ['weapons', 'defense', 'arcana', 'devotion', 'stealth', 'survival', 'scholarship', 'persuasion'];
@@ -604,6 +605,8 @@ export function createSuccessor(original, childId, createBirthGame) {
   for(const p of s.life.people)if(p.compatibility){p.compatibility.known=[];p.compatibility.history=[];p.compatibility.lastDiscussionDay=null;}
   inheritCartography(original,s);
   if(s.rpg)for(const c of Object.values(s.rpg.companionStages))if(!s.world.locations.some(p=>p.id===c.locationId))c.locationId=s.locationId;
+  // The heir's life begins now, under the rules its budget and station say.
+  delete s.edition; stampEdition(s, { born: true });
   return s;
 }
 export function lineageEventIds() { return { lineage_marriage: ['vow', 'wait'], lineage_childhood: [...TRAITS], lineage_school: ['public', 'shrine', 'academy', 'wait'], lineage_bereavement: ['memorial', 'share', 'private'], lineage_adoption:['listen','offer','support','wait'], lineage_project:['inquiry','service','own'],lineage_future:['fund','listen','decline','leave'],lineage_independence:['company','celebrate','space','leave'] }; }

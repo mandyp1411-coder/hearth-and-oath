@@ -139,6 +139,27 @@ module directly, move `s.day` before calling `onFaithTime`: the tick runs
 from `lastSeason` to `seasonOf(newDay)`, so a second call with the same day
 does nothing.
 
+`edition.js` (v0.70) says which rulebook a save lives by: `rulesOf` reads
+the same two markers the rules check, `stampEdition` writes
+`state.edition = {rules, began, step}` at birth (`createBirthGame`), on
+every load (`migrateSave`) and again at the end of `createSuccessor` (the
+heir's budget decides its rules after the birth), and `validateSave` checks
+it. `began` is the version a life was begun in and is `null` for every life
+from before v0.70 — never date a save after the fact. `step` is the
+migration step a new-rules save has been brought through; a release that
+changes what a new-rules save holds adds a step to `STEPS` and states the
+default it gives older lives in its README entry. The Old Rules archive is
+the `v0.69-archive` branch (v0.69.0 with its storage renamed
+`hearth-and-oath-legacy`, the same labels, and an import that refuses a
+new-rules life); `scripts/build-archive.mjs` packages it into `out-legacy/`,
+and `dist/js/archive-link.js` is where the main game learns its address.
+`tests/fixtures/saves/` are real saves written by past releases' own engines
+(`scripts/fixtures/generate-release-saves.mjs` against a worktree at the
+release's merge commit); regenerate rather than hand-edit them. Volume II's
+measuring tools (`scripts/interface-harness.py`, `scripts/voice-lint.mjs`,
+`scripts/content/validate.mjs`) report and do not fail the build; their
+numbers for a release are committed under `docs/measures/`.
+
 Test fixtures that are not about birth should pin a station
 (`station: rollBirthCircumstances(seed, 'common', ancestry)`): a bound
 child may die of a winter fever, gets no pocket money and is not schooled,
