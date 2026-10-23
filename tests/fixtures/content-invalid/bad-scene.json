@@ -1,0 +1,32 @@
+{
+  "kind": "scene",
+  "schemaVersion": 1,
+  "note": "A deliberately broken scene for tests/content-schema.test.js: an unknown effect op, a placeholder naming a role the scene does not declare, and a TODO left in the text.",
+  "items": [
+    {
+      "id": "broken-fence",
+      "title": "The fence TODO",
+      "text": "{neighbour.name} has moved the hurdles, and {steward.name} has noticed.",
+      "roles": [
+        { "id": "neighbour", "kind": "neighbour", "required": true }
+      ],
+      "choices": [
+        {
+          "id": "smite",
+          "label": "Smite the hurdles",
+          "effects": [
+            { "op": "smite", "target": "hurdles" },
+            { "op": "gold", "by": -5 }
+          ],
+          "result": "The hurdles are smitten."
+        },
+        {
+          "id": "continue",
+          "label": "Let it lie",
+          "effects": [],
+          "result": "It lies."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "kind": "ambition",
+  "schemaVersion": 1,
+  "note": "Examples for the schema, not game content. An ambition is a promise a life makes to itself; the heir inherits the saying if it was kept and the shame if it was not.",
+  "items": [
+    {
+      "id": "keep-the-familys-field",
+      "title": "Keep the family's field",
+      "offeredTo": "age >= 16 and age <= 24 and hero.station.id == 'common' and knows('parent') and not flag('field_sold')",
+      "fulfilled": "age >= 50 and not flag('field_sold') and debt == 0",
+      "saying": "The field was {hero.name}'s and {hero.their} father's before that, and it is yours now, and the only thing anyone in this family has ever asked of the next one is that it stay so.",
+      "shame": "{hero.name} sold the field, or let it be taken, which comes to the same in a village. People still call it by the old name, and look at you when they do.",
+      "roles": [
+        { "id": "parent", "kind": "parent", "required": true }
+      ],
+      "turns": [
+        { "when": "debt > 40 and age >= 25", "text": "The lender's man has started to walk the field's edge on his way through, looking at the soil the way lenders do." },
+        { "when": "flag('field_sold')", "text": "The field has another name on the roll. The promise is broken, and the village knows the day it broke." },
+        { "when": "age >= 45 and debt == 0 and not flag('field_sold')", "text": "Thirty years of it. The field is yours, clear, and nobody's man walks its edge. {parent.name} would not have said so, and would have thought it." }
+      ]
+    }
+  ]
+}
