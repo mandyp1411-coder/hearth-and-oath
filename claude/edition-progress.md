@@ -5,7 +5,7 @@ rulebook and Design Bible Volume II. This ledger keeps that handoff visible.
 
 ## Current release
 
-v0.71, The farmer's life, is implemented as a playtest candidate on
+v0.71, The farmer's life, shipped as a playtest candidate from
 `codex/v0.71-farmers-life`, in
 [PR #15](https://github.com/mandyp1411-coder/hearth-and-oath/pull/15).
 The bounded slice includes the field's seasonal choices, actual neighbour
@@ -48,13 +48,14 @@ The [human protocol](../docs/playtests/farmer-v071.md) remains NOT RUN.
 | --- | --- |
 | Pull request | [#15](https://github.com/mandyp1411-coder/hearth-and-oath/pull/15) |
 | Release source commit | `e1b99c656abb1b6408bd394653a3af858d3a49df` (runtime source; later notes change no game bytes) |
-| Merge commit | PENDING |
+| Merge commit | `6d692f1fd0184ef4ae0efcd527b70ab1e5819d7c` — PR #15 merged successfully |
 | Site version | 104, source `e783d8175e4ca5b3b76621ea48aa77e8ba2a2c36`; published successfully |
 | Deployment ID | `appgdep_6adc1bce2cec8191992fa580abd14fca` |
 | Public candidate URL | [Play the farmer candidate](https://hearth-and-oath-v1-a73f.nilled463.chatgpt.site/) |
 
-Fill the merge and deployment fields only from their actual successful
-results. Keep the GitHub source/merge commit separate from the Site's own
-source commit and version. Published software remains a playtest candidate
+PR #15 merged head `65bb9fc9077b82543af71874fbce1200521d894a`, whose tree is
+`8dbb174b5cb77ccb8f32510de20454cded1dcafb`. The Site source has the same
+runtime and predates evidence-only notes. Keep the GitHub source/merge commit
+separate from the Site's own source commit and version. Published software remains a playtest candidate
 until the human gate passes; publication does not authorize the later
 compatibility cleanup or a wider set of livelihoods.

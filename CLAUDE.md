@@ -213,7 +213,7 @@ notes and a verdict exist in `docs/playtests/farmer-v071.md`. Do not widen
 this slice before that verdict, or remove legacy rules before the archive
 has a verified public home.
 
-The implementation is a playtest candidate in
+The implementation shipped as a playtest candidate in
 [PR #15](https://github.com/mandyp1411-coder/hearth-and-oath/pull/15).
 `docs/measures/farmer-v071-verification.md` records 3,939 selected passing
 assertions and five skips, with the composite FAST/SLOW snapshot limits.

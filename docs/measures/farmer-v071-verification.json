@@ -153,13 +153,16 @@
     "laterLivelihoodsRemainGated": true
   },
   "publication": {
-    "mergeStatus": "pending",
+    "mergeStatus": "merged",
     "siteVersion": 104,
     "deploymentStatus": "succeeded",
     "deploymentId": "appgdep_6adc1bce2cec8191992fa580abd14fca",
     "url": "https://hearth-and-oath-v1-a73f.nilled463.chatgpt.site/",
     "browserObservedVersion": "0.71.0",
-    "audience": "public"
+    "audience": "public",
+    "mergeCommit": "6d692f1fd0184ef4ae0efcd527b70ab1e5819d7c",
+    "pullRequestHead": "65bb9fc9077b82543af71874fbce1200521d894a",
+    "evidenceTree": "8dbb174b5cb77ccb8f32510de20454cded1dcafb"
   },
   "limits": [
     "FAST is 241 unchanged B files plus one corrected full creator-file replay.",

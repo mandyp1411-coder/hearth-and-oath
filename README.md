@@ -33,7 +33,7 @@ gate is not yet passed.
   in `docs/playtests/farmer-v071.md`; its human result is NOT RUN. No trader,
   healer or general-purpose life engine is declared finished by this slice.
 
-The implementation is [PR #15](https://github.com/mandyp1411-coder/hearth-and-oath/pull/15).
+The farmer candidate shipped in [PR #15](https://github.com/mandyp1411-coder/hearth-and-oath/pull/15).
 The [software evidence](docs/measures/farmer-v071-verification.md) records
 3,939 selected passing assertions and five skips. FAST/SLOW results combine
 documented snapshots and focused reruns; the strict single-snapshot software

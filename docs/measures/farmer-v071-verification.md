@@ -127,7 +127,10 @@ was published successfully as deployment
 `appgdep_6adc1bce2cec8191992fa580abd14fca`. The audience remains public.
 Real Chrome opened the [published game](https://hearth-and-oath-v1-a73f.nilled463.chatgpt.site/)
 and visibly confirmed v0.71.0; [publication screenshot](farmer-v071-published.jpg).
-GitHub merge bookkeeping remains separate from the deployed source.
+PR #15 merged successfully as `6d692f1fd0184ef4ae0efcd527b70ab1e5819d7c`,
+from head `65bb9fc9077b82543af71874fbce1200521d894a`. Its final evidence-bearing
+tree is `8dbb174b5cb77ccb8f32510de20454cded1dcafb`. GitHub merge
+bookkeeping remains separate from the deployed source.
 
 The [machine-readable record](farmer-v071-verification.json) records the
 selected results. Closed raw reports, original failures, full-file replays

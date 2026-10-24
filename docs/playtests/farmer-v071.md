@@ -19,13 +19,12 @@ Mechanical simulations supply no human participant or acceptance verdict.
 | Candidate field | Result |
 | --- | --- |
 | Source/build to play | v0.71.0, Sites 104; runtime `43559063337c7bc243bc152ad153d672a9c933d61d85a494f17d3f46bddfa311` |
-| Merge commit | PENDING |
+| Merge commit | `6d692f1fd0184ef4ae0efcd527b70ab1e5819d7c` (PR #15) |
 | Public candidate URL | [Play the farmer candidate](https://hearth-and-oath-v1-a73f.nilled463.chatgpt.site/) |
 
 The [edition ledger](../../claude/edition-progress.md) tracks the actual
-merge and deployment. Fill these session fields after successful delivery,
-then retain the exact build used by each participant even if a later fix
-ships.
+merge and deployment. Retain the exact build used by each participant even
+if a later fix ships.
 
 ## Participants and session
 
