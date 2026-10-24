@@ -4,8 +4,8 @@
 
 | Step | Result | Seen |
 |---|---|---|
-| main game opens at its own origin | pass | http://127.0.0.1:57819/ |
-| archive opens at its own origin and names itself | pass | http://127.0.0.1:48967/ |
+| main game opens at its own origin | pass | http://127.0.0.1:47313/ |
+| archive opens at its own origin and names itself | pass | http://127.0.0.1:39453/ |
 | import review in the main game labels the old-rules life | pass | × REVIEW AN IMPORTED LIFE Choose where this life belongs  Incoming: Vesper Hearthkeeper · Age 18 · v5-dynasty-fixture.  Old rules This life was written under th |
 | the slot says Old rules | pass | [('old', 'Old rules')] |
 | the slot carries the way to the archive, in the game’s voice | pass | This life was written under the old rules. It plays on here for now; the archive keeps those rules for good, and a life exported from here opens there.  Export  |
@@ -21,7 +21,7 @@
 | the archive turns the new-rules life away in a line | pass | This life lives by the new rules. It belongs in the main game; open it there. |
 | a life begins in the archive | pass |  |
 | a life begun in the archive is labelled New rules, begun in v0.69 | pass | [('old', 'Old rules'), ('new', 'New rules, begun in v0.69')] |
-| the main game takes a life begun in the archive and keeps its date | pass | × REVIEW AN IMPORTED LIFE Choose where this life belongs  Incoming: Demerio Cavesta · Age 18 · thorn-grove-f8b02100.  Ne |
+| the main game takes a life begun in the archive and keeps its date | pass | × REVIEW AN IMPORTED LIFE Choose where this life belongs  Incoming: Ivando Jannery · Age 18 · ember-march-48376dd4.  New |
 | the main game keeps its saves in hearth-and-oath | pass | {"dbs": ["hearth-and-oath"], "keys": []} |
 | the archive keeps its saves in hearth-and-oath-legacy and nowhere else | pass | {"dbs": ["hearth-and-oath-legacy"], "keys": []} |
 | main offline file opens from disk | pass | 318 MB |
