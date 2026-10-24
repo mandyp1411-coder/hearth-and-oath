@@ -1,4 +1,4 @@
-# The archive, checked in a browser (v0.70)
+# The archive, checked in a browser (main 0.71.2 at 6130d94)
 
 32 of 32 steps passed. Headless Chromium, the main game served from `dist/` and the archive from `out-legacy/` on two ports (two origins, as published); the offline files opened from disk.
 

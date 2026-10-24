@@ -326,7 +326,9 @@ def main():
 
     (out / 'report.json').write_text(json.dumps({'results': results, 'errors': errors}, indent=2))
     failed = [r for r in results if not r['ok']]
-    md = ['# The archive, checked in a browser (v0.70)', '', f'{len(results) - len(failed)} of {len(results)} steps passed. Headless Chromium, the main game served from `{args.main}/` and the archive from `{args.archive}/` on two ports (two origins, as published); the offline files opened from disk.', '', '| Step | Result | Seen |', '|---|---|---|']
+    version = json.loads((project / 'package.json').read_text()).get('version', '?')
+    head = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], cwd=project, capture_output=True, text=True).stdout.strip() or 'unknown'
+    md = [f'# The archive, checked in a browser (main {version} at {head})', '', f'{len(results) - len(failed)} of {len(results)} steps passed. Headless Chromium, the main game served from `{args.main}/` and the archive from `{args.archive}/` on two ports (two origins, as published); the offline files opened from disk.', '', '| Step | Result | Seen |', '|---|---|---|']
     for r in results:
         md.append(f"| {r['step']} | {'pass' if r['ok'] else 'FAIL'} | {r['seen'].replace('|', '/')} |")
     md += ['', 'Page errors: ' + (json.dumps(errors) if errors['main'] or errors['archive'] else 'none.'), '']
