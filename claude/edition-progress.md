@@ -57,6 +57,11 @@ The runtime remains the published version 104 bytes. This is preparation for
 the owner's session and six to eight new players; no human answer or gate
 verdict is claimed. v0.72 remains pending that verdict.
 
+The preparation kit merged in [PR #16](https://github.com/mandyp1411-coder/hearth-and-oath/pull/16) as
+`67733f9d036b5979bd3fdbb4225cec9f72ad75e0`, from source
+`d8546a6a1721e0140f0f473fe874ede5627a3303`. This is a materials-only merge;
+Sites version 104 remains the game build for these sessions.
+
 ## Delivery
 
 | Field | Result |

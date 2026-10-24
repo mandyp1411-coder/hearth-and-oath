@@ -16,7 +16,7 @@ farmer's real playtest. The protocol and separate verdict are in
 `docs/playtests/farmer-v071.md`.
 
 The [session materials](playtests/farmer-v071.md#ready-to-use-session-materials)
-now provide a player bundle with two genuine age-sixteen starts and separate
+shipped in [PR #16](https://github.com/mandyp1411-coder/hearth-and-oath/pull/16) with two genuine age-sixteen starts and separate
 blank observer forms. Both starts passed full save validation and exact
 import checks; one was opened in the live browser. This prepares the gate
 without supplying a participant or a verdict. The runtime is unchanged.

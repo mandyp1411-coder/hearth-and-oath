@@ -41,7 +41,7 @@ gate remains uncertified. [Play the published candidate](https://hearth-and-oath
 Merge bookkeeping and deployment provenance are kept in the
 [edition ledger](claude/edition-progress.md).
 
-For the farmer sessions, the [playtest materials](docs/playtests/farmer-v071.md)
+The farmer session kit shipped in [PR #16](https://github.com/mandyp1411-coder/hearth-and-oath/pull/16). Its [playtest materials](docs/playtests/farmer-v071.md)
 include two genuine age-sixteen starts, a short player guide and separate
 blank observer forms. Use the [player bundle](docs/playtests/farmer-v071/farmer-starts.zip)
 to cover freeholder and tenant lives without rerolling for a station. No

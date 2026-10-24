@@ -221,7 +221,8 @@ It is not a strict single-snapshot software-gate PASS. Sites version 104 is
 published; exact source, merge and deployment records live in
 `claude/edition-progress.md`. The human gate is NOT RUN.
 
-The v0.71 session kit lives under `docs/playtests/farmer-v071/`. Its two
+The v0.71 session kit shipped in [PR #16](https://github.com/mandyp1411-coder/hearth-and-oath/pull/16)
+and lives under `docs/playtests/farmer-v071/`. Its two
 standard JSON starts are untouched production age-entry output; keep their
 actual generated history and pending sixteenth birthday. The manifest and
 preparation checks distinguish saved files, disposable command probes and
