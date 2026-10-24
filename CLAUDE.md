@@ -285,6 +285,11 @@ reads, authority discovery, archive/delete, revocation or death cleanup.
 This is not the later simulation-entry policy. The genuine v0.61 fixture
 comes from its own merge engine: zero debt without a station is new rules.
 Keep the fixture's source/provenance and unedited historical output.
+The first storage slice's frozen development replay passes 448 tests in 25
+files with zero failures/skips, plus one full compiled session with 14 cases.
+`docs/measures/one-rulebook-v072-storage-verification.md` retains raw proof,
+exact identities and the omitted full release/browser/human gates. PR #19
+remains draft; the main Site is not redeployed by these checks.
 
 ## Direction
 

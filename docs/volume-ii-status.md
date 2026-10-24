@@ -22,6 +22,12 @@ separate; both rulebooks remain accepted by the current caller. A genuine
 v0.61 fixture protects debt-only new-rule lives. This widens no livelihood,
 removes no compatibility and waives neither gate.
 
+The [first storage implementation](measures/one-rulebook-v072-storage-verification.md)
+passed 448 selected save/Ironman/edition tests and one compiled session with
+14 bounded cases. Strict content, import-graph build and artifact identity
+passed. These are development results on draft PR #19; full FAST/SLOW,
+formal release certification and browser/human gates remain NOT RUN.
+
 The [session materials](playtests/farmer-v071.md#ready-to-use-session-materials)
 shipped in [PR #16](https://github.com/mandyp1411-coder/hearth-and-oath/pull/16) with two genuine age-sixteen starts and separate
 blank observer forms. Both starts passed full save validation and exact

@@ -157,3 +157,10 @@ boundary changes `dist/js/saves.js` and adds the genuine fixture and its
 regressions. The package/version and release contract remain unchanged.
 No deployment, full release gate or browser/human check is claimed here;
 actual development results belong to the PR findings.
+
+The first storage implementation passed 448 selected tests across 25 save,
+Ironman, edition and cutover files, zero failures/skips, on frozen local
+`27c924424a7577c08c0741e57918d448ee6890dc`. One exact compiled standalone
+session passed 14 bounded cases. The strict content/import-graph build and
+artifact identity passed. [The verification record](measures/one-rulebook-v072-storage-verification.md)
+keeps the closed proof and the full-gate/browser/human checks still NOT RUN.

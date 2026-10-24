@@ -43,6 +43,17 @@ pre-station migration and write coverage without invented history. No
 compatibility is removed. The archive browser loop and real farmer/heir gate remain NOT RUN;
 this preparation is not a shipped v0.72 or a passed gate.
 
+[Draft PR #19](https://github.com/mandyp1411-coder/hearth-and-oath/pull/19)
+now contains that first storage implementation and its rebuilt standalone.
+On frozen local `27c924424a7577c08c0741e57918d448ee6890dc`, 448 selected
+tests in 25 files passed, zero failures/skips. One complete compiled-module
+session passed 14 bounded cases; content/import-graph and artifact checks
+passed. API source `11a21de2ab65f2bcfb8be80a83da706b36522cee` has the
+same tree `fcc8d1cf59d33f215a6d08258de17d57e9b6b585`. The
+[development record](../docs/measures/one-rulebook-v072-storage-verification.md)
+preserves closed raw proof. Full FAST/SLOW and the formal gate were NOT RUN;
+the PR stays draft and the live game stays Sites 106.
+
 ## Earlier farmer releases
 
 v0.71.1, The first choice, is published as Sites version 105 in

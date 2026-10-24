@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "phase": "v0.72 first storage implementation; draft and unpublished",
+  "frozenLocalCommit": "27c924424a7577c08c0741e57918d448ee6890dc",
+  "frozenTree": "fcc8d1cf59d33f215a6d08258de17d57e9b6b585",
+  "equivalentApiCommit": "11a21de2ab65f2bcfb8be80a83da706b36522cee",
+  "buildSourceLocalCommit": "6b8cd46551d10989b70aa33b5ea3bf2f656b5398",
+  "identities": {
+    "runtime": {
+      "sha256": "17986d2e2b4230603f2cca38dc6996b09b8f65b2699dc721855c24a3a4532f22",
+      "files": 1053
+    },
+    "verification": {
+      "sha256": "3912ee5fcb16da26e0ca91635872b64da60f6e9ebcf4ea90ded5983c2e87c0bc",
+      "files": 500
+    },
+    "offline": {
+      "version": "0.71.2",
+      "bytes": 333661901,
+      "sha256": "4e3fb1570a8afe2497b5c9d3d7fcf8cd4ee1ab3f05fe729b97fa03b587551061",
+      "parts": 40,
+      "manifestSha256": "a62c03abbd9e3432a32ba29be433c78e7c9a84f6b98a346decb87d86fb67a086",
+      "loaderSha256": "3a04d1cd7f7091eb36bd78c28afc99a2b24ccbac777be88b0668db25c75d19c5",
+      "source": {
+        "sha256": "17986d2e2b4230603f2cca38dc6996b09b8f65b2699dc721855c24a3a4532f22",
+        "files": 1053
+      },
+      "buildGit": {
+        "head": "6b8cd46551d10989b70aa33b5ea3bf2f656b5398",
+        "dirty": false
+      }
+    }
+  },
+  "selected": {
+    "scope": "Selected current save, Ironman, edition and cutover tests, not full FAST/SLOW or release certification.",
+    "command": [
+      "node",
+      "--test",
+      "--test-concurrency=1",
+      "--test-reporter=./scripts/lib/release-reporter.mjs",
+      "tests/archive-link.test.js",
+      "tests/edition-v70.test.js",
+      "tests/ironman-app-extended.test.js",
+      "tests/ironman-app.test.js",
+      "tests/ironman-combat.test.js",
+      "tests/ironman-creator.test.js",
+      "tests/ironman-engine.test.js",
+      "tests/ironman-rules.test.js",
+      "tests/ironman-save-coordination.test.js",
+      "tests/ironman-session.test.js",
+      "tests/ironman-store.test.js",
+      "tests/ironman-validation.test.js",
+      "tests/one-rulebook-inventory.test.js",
+      "tests/one-rulebook-retention.test.js",
+      "tests/save-admission.test.js",
+      "tests/save-concurrency.test.js",
+      "tests/save-conflict-ui.test.js",
+      "tests/save-deletion-v40.test.js",
+      "tests/save-guide-integration.test.js",
+      "tests/save-health-ui.test.js",
+      "tests/save-health.test.js",
+      "tests/save-snapshot-cache.test.js",
+      "tests/save-snapshot-fixtures.test.js",
+      "tests/save-storage.test.js",
+      "tests/saves.test.js"
+    ],
+    "before": {
+      "head": "27c924424a7577c08c0741e57918d448ee6890dc",
+      "status": "",
+      "trackedSha256": "c377461ccfd22c10897b5547c24a8b9efb1dec01053acdcc693e07843e0282e0",
+      "files": 1791
+    },
+    "after": {
+      "head": "27c924424a7577c08c0741e57918d448ee6890dc",
+      "status": "",
+      "trackedSha256": "c377461ccfd22c10897b5547c24a8b9efb1dec01053acdcc693e07843e0282e0",
+      "files": 1791
+    },
+    "immutableTrackedSource": true,
+    "actualNodeExit": 0,
+    "expired": false,
+    "elapsedMs": 368062,
+    "fileCount": 25,
+    "counts": {
+      "passed": 448,
+      "failed": 0,
+      "skipped": 0
+    },
+    "raw": {
+      "selected.jsonl": {
+        "bytes": 155014,
+        "sha256": "e3bb36f9d235b5bd68a339b62b0b8ffce75c429627f391ae550af1575fa8924b"
+      },
+      "selected.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "failures": [],
+    "status": "PASS"
+  },
+  "offline": {
+    "scope": "One exact compiled standalone SourceTextModule semantic checker; not browser layout, archive transfer or human playtest. Other offline checkers NOT RUN.",
+    "command": [
+      "node",
+      "--experimental-vm-modules",
+      "scripts/verify-offline-module-startup-v71.mjs"
+    ],
+    "before": {
+      "head": "27c924424a7577c08c0741e57918d448ee6890dc",
+      "status": "",
+      "trackedSha256": "c377461ccfd22c10897b5547c24a8b9efb1dec01053acdcc693e07843e0282e0",
+      "files": 1791
+    },
+    "after": {
+      "head": "27c924424a7577c08c0741e57918d448ee6890dc",
+      "status": "",
+      "trackedSha256": "c377461ccfd22c10897b5547c24a8b9efb1dec01053acdcc693e07843e0282e0",
+      "files": 1791
+    },
+    "immutableTrackedSource": true,
+    "actualNodeExit": 0,
+    "expired": false,
+    "elapsedMs": 15551,
+    "stdoutJsonDocuments": [
+      {
+        "vmMode": "complete unchanged SourceTextModule",
+        "filename": "exact-full-module-v71.js",
+        "inertMedia": "native per-realm JSON parse",
+        "codeSha256": "1f05e6113853a0a25c08a90863d13df951952210a0ee3940dda13dea5ecd7b8a"
+      },
+      {
+        "status": "PASS",
+        "mode": "complete unchanged SourceTextModule",
+        "version": "0.71.2",
+        "artifactSha256": "4e3fb1570a8afe2497b5c9d3d7fcf8cd4ee1ab3f05fe729b97fa03b587551061",
+        "sessions": 1,
+        "cases": [
+          "actual async startup",
+          "module lexical privacy",
+          "captured old birthday has useful default cost and risk captions",
+          "old birthday capture remains unchanged until chosen",
+          "exact captured birthday command and single gift",
+          "farmer first choice and visible costs",
+          "whole-state ambition parity",
+          "Book read immutability",
+          "exact current-life export",
+          "three-slot metadata and backup preservation",
+          "old-save no invented farm",
+          "adult compiled own-fee and household-keep disclosure",
+          "adult complete paid-command parity",
+          "zero network attempts"
+        ],
+        "limits": "A bounded semantic fake DOM session; browser layout and human farmer playtest remain separate."
+      }
+    ],
+    "stdoutParseError": null,
+    "raw": {
+      "offline.stdout": {
+        "bytes": 1138,
+        "sha256": "34ade594318137bce5bf539819ae8e53ccbf2524b299847601935410ad2030b7"
+      },
+      "offline.stderr": {
+        "bytes": 169,
+        "sha256": "9027f1b28020c2f484def167a0b875a758724ef58fbf18b620b7fd28f8d3fce2"
+      }
+    },
+    "status": "PASS"
+  },
+  "proof": {
+    "file": "one-rulebook-v072-storage-proofs.tar.gz",
+    "bytes": 27231,
+    "sha256": "eb90958ff8ce93a8c5f1bcdc09df2c06053852c1908c7b5a86419c57c5e9f8fe",
+    "members": 13,
+    "deterministicTwoBuilds": true,
+    "everyMemberReadBack": true
+  },
+  "limits": [
+    "Full FAST/SLOW and formal release:check NOT RUN for this slice.",
+    "Only one compiled checker ran; the other 29 offline checkers are NOT RUN.",
+    "Compiled semantic replay exercises the unchanged default app policy; configured admission policies are covered by source-store tests.",
+    "No browser layout, file chooser, IndexedDB handoff or human farmer/heir playtest ran.",
+    "No compatibility removal, new livelihood, version/edition migration step or deployment is included.",
+    "The initial admission development run exposed rejected-Promise handling and failed two tests; its closed output is retained beside the corrected run.",
+    "Build-generated staging files were moved to ignored build-temporaries after the builder closed; source and final artifact identity were checked before frozen verification."
+  ]
+}
