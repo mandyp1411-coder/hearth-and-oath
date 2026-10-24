@@ -101,6 +101,7 @@ import { personalityImpactText, personalityTrait } from './personality.js';
 import { voiceActions, voiceEvent, chapterHeading, whatMatters } from './voice.js';
 import { rulesLabel, rulesNote, oldRules, exportFileName } from './edition.js';
 import { ARCHIVE_URL, ARCHIVE_NAME } from './archive-link.js';
+import { createLifeEntry, LIFE_ENTRY_REFUSED, LIFE_ENTRY_CANCELLED } from './life-entry.js';
 import { schoolingView } from './schooling.js';
 import { livingView } from './living-world.js';
 import { farmView } from './farmer.js';
@@ -199,7 +200,11 @@ let screen = 'title', slotsMode = 'load', overwriteSlot = null, entryNotice = ''
 const storage = await openSaveStorage();
 if(storage?.onChange)storage.onChange(event=>window.dispatchEvent(new StorageEvent('storage',{key:event.key,oldValue:event.oldValue,newValue:event.newValue})));
 let displaySettings=readDisplay(storage);applyDisplay(displaySettings);
-const saveStore = createSaveStore(storage, migrateSave);
+// The cutover policy stays unset until the archive and farmer/heir gates pass.
+// One policy feeds ordinary entry, incoming writes and Ironman locked entry.
+const positionAdmissionPolicy = undefined;
+const saveStore = createSaveStore(storage, migrateSave, {acceptPosition:positionAdmissionPolicy});
+const lifeEntry = createLifeEntry({store:saveStore,coordinate:operation=>saveOperation(operation),acceptPosition:positionAdmissionPolicy});
 let activeSlot = saveStore.active();
 let saved = saveStore.read(activeSlot);
 let storageAvailable = saveStore.available();
@@ -207,7 +212,9 @@ let appViewEpoch=0, lifeSwitchEpoch=0, adoptingIronman=false, ironmanStatus=null
 let cancelInventoryDrag=()=>{}, practiceProtectionScope=null, ironmanReviewSequence=0, ironmanEntryPending=false;
 const ironmanSession=createIronmanSession({
  store:saveStore,readContext:()=>({state:game,slot:activeSlot}),
+ acceptPosition:positionAdmissionPolicy,
  onAdopt(state,authority){
+  if(!admitLifeEntry(state))return;
   cancelInventoryDrag();adoptingIronman=true;
   try{if(!['live'].includes(authority.kind)){modal=null;tab='life';pendingImport=null;importToken=null;}activeSlot=authority.slot;saved=structuredClone(state);ironmanReview=null;ironmanRecoveries=null;ironmanEnded=null;adoptPosition(state,authority.message,{persist:false});}
   finally{adoptingIronman=false;}
@@ -406,6 +413,15 @@ function e(value) { return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': 
 function title(value) { return String(value || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); }
 function readSave() { try { const raw=localStorage.getItem(SAVE_KEY); return raw ? migrateSave(JSON.parse(raw)) : null; } catch { return null; } }
 
+function admitLifeEntry(state){
+  if(lifeEntry.canEnter(state))return true;
+  // An explicit conflict discard may already have cleared the live position.
+  // Never leave its former game screen pointing at a freshly rebased store.
+  if(!game&&screen==='game'){screen='slots';slotsMode='load';modal=null;render();}
+  toast('This life cannot be opened here. Its saved copy is still yours.');
+  return false;
+}
+
 function saveOperation(operation, complete = value => value, {sameLife=false}={}) {
   const owner=viewOwner(),isCurrent=()=>sameLife?ownsSaveSource(owner):ownsView(owner);
   const failed=()=>{if(isCurrent()){storageAvailable=false;reflectStorageWarning();}return false;};
@@ -486,7 +502,6 @@ function update(next,message,{afterAdopt,afterPersist}={}) {
 }
 function adoptPosition(next,message,{persist=true,afterAdopt,afterPersist}={}) {
   if(practiceController.current())return false;
-  sceneReturn=null;sceneFocus=null;sceneActionRevision++;
   // Reject a broken result before changing the live position, selections,
   // movement, or any slot. Storage failure is a separate concern:
   // a valid result may still be played and exported within this session.
@@ -495,6 +510,8 @@ function adoptPosition(next,message,{persist=true,afterAdopt,afterPersist}={}) {
     openModal('recovery',document.activeElement);
     return false;
   }
+  if(!admitLifeEntry(next))return false;
+  sceneReturn=null;sceneFocus=null;sceneActionRevision++;
   const focused=document.activeElement?.dataset?.op?{op:document.activeElement.dataset.op,id:document.activeElement.dataset.id}:null;
   if(pendingPersonalNote&&next!==game){pendingPersonalNote=null;if(modal==='personal-note')modal=null;}
   const previous=game;if(!previous||previous.seed!==next.seed||previous.dynasty?.generation!==next.dynasty?.generation){shopSession=null;craftSession=null;mazeMapSession=null;mapCamera.forget();} selectedRoom=null;selectedDungeonRoom=null; movement=previous?getMapMovement(previous,next):null; game=next; mazeMapSession=currentMazeMapSession(game,mazeMapSession);screen='game';
@@ -696,12 +713,13 @@ function showTitle({discardDraft=false}={}) {
 function loadSlot(id) {
   if(ironmanFenced())return false;
   const displayed=saveStore.read(Number(id));
+  if(!displayed||!admitLifeEntry(displayed))return false;
   if(isIronman(displayed))return {ironmanLoad:{runId:runIdOf(displayed),slot:Number(id)}};
   if(!leaveIronman())return false;
   journalScope=null;pendingPersonalNote=null;
   resetGearOrganizerView();
   spatialMode='country';spatialPane='map';peoplePane='conversations';packPane='equipment';packGoal='none';gearFilter='all';inventoryQuery='';inventorySort='type';inventoryCategory='all';inventoryItem=null;craftFinish='plain';economyGoal='road';activitiesPane='daily';
-  const state=saveStore.read(Number(id));if(!state)return;
+  const state=displayed;
   questInvitations='preview';questArchiveQuery='';questCategory='main';
   activeSlot=Number(id);saveStore.select(activeSlot);tab='life';modal=null;game=null;inventoryQuery='';inventorySort='type';inventoryCategory='all';inventoryItem=null;selectedContact=null;selectedLocation=null;selectedTarget=null;selectedAllyTarget=null;mapScale=1;chartSheet=state.world.map?.generationVersion>=7?'local':window.innerWidth<=650?'local':'country';chartGrid=false;feedPosition=0;feedCount=0;disclosureStates.clear();conversationPositions.clear();circlePosition=0;workspaceSections={};nearbyPage=0;nearbyQuery='';peopleScope='family';peopleQuery='';peoplePage=0;const view=readWorkspace(state,storage);if(view){inventoryQuery=typeof view.inventoryQuery==='string'?view.inventoryQuery.slice(0,100):'';inventorySort=['type','name','rarity','value','score'].includes(view.inventorySort)?view.inventorySort:'type';inventoryCategory=['all','equipment','supplies','materials','loot'].includes(view.inventoryCategory)?view.inventoryCategory:'all';inventoryItem=typeof view.inventoryItem==='string'?view.inventoryItem:null;if(view.workspaceSections&&typeof view.workspaceSections==='object')for(const route of Object.keys(WORKSPACE_SECTIONS))workspaceSections[route]=workspaceSection(route,view.workspaceSections[route]);if(['life','map','relationships','activities','quests','adventure','realm','journal','household','career','legacy','health','workshop','lore','character','party','inventory','place'].includes(view.tab))tab=view.tab;selectedLocation=typeof view.selectedLocation==='string'?view.selectedLocation:null;selectedHex=typeof view.selectedHex==='string'?view.selectedHex:null;mapScale=Math.max(1,Math.min(4,Number(view.mapScale)||1));chartSheet=paperMapSheets(state,{view:cartographyView(state)}).some(s=>s.id===view.chartSheet)?view.chartSheet:state.world.map?.generationVersion>=7?'local':window.innerWidth<=650?'local':'country';chartGrid=view.chartGrid===true;workspaceReturn=view.workspaceReturn==='map'?'map':null;spatialMode=['country','settlement','dungeon'].includes(view.spatialMode)?view.spatialMode:'country';spatialPane=view.spatialPane==='actions'?'actions':'map';peoplePane=['conversations','bonds','society'].includes(view.peoplePane)?view.peoplePane:'conversations';packPane=['equipment','bag','merchant','craft','relics'].includes(view.packPane)?view.packPane:'equipment';packGoal=BUILD_GOALS.some(g=>g.id===view.packGoal)?view.packGoal:'none';gearFilter=['all',...EQUIPMENT_SLOTS].includes(view.gearFilter)?view.gearFilter:'all';activitiesPane=ACTIVITY_TABS.some(r=>r[0]===view.activitiesPane)?view.activitiesPane:'daily';selectedContact=typeof view.selectedContact==='string'?view.selectedContact:null;}if(state.timeline?.journey||state.cartography?.route){selectedLocation=state.timeline?.journey?.destinationId||state.cartography.route.destination;selectedHex=null;}inventoryFavoritesOnly=view?.inventoryFavoritesOnly===true;update(state);
 }
@@ -1569,14 +1587,18 @@ root.addEventListener('submit',async event=>{
       creationCandidate={key:JSON.stringify(config),state:next};
       if(config.lifeMode==='ironman'){
         const candidate={...next,ironman:createIronmanMetadata(next)};
+        if(!admitLifeEntry(candidate)){creatorError='This life cannot be opened here. Your draft is kept.';return;}
         const slot=activeSlot;ironmanEntryPending=true;cancelInventoryDrag();render();
-        let review;try{review=await saveStore.inspectIronman(candidate,{intent:'create',slot});}finally{ironmanEntryPending=false;}
+        let review;try{review=await saveStore.inspectIronman(candidate,{intent:'create',slot,acceptForPlay:positionAdmissionPolicy});}finally{ironmanEntryPending=false;}
         if(run!==creationRun||screen!=='creation')return;
-        if(review.status==='review'){tab='life';actionFilter='all';game=null;ironmanSession.create(slot,candidate,{token:review.token});}
+        if(review.status==='review'&&admitLifeEntry(candidate)){tab='life';actionFilter='all';game=null;ironmanSession.create(slot,candidate,{token:review.token});}
         else{entryNotice='Ironman could not begin: '+title(review.reason||review.status)+'. Your existing lives are unchanged. Choose Standard explicitly or review another empty slot.';render();toast(entryNotice);}
       }else{
-        const success=await saveOperation(()=>saveStore.replace(activeSlot,next,{reviewed:true,token:creationSlotToken}));
+        const slot=activeSlot,token=creationSlotToken;
+        const success=await lifeEntry.replaceReviewed({state:next,slot,token,isCurrent:()=>run===creationRun&&screen==='creation'&&activeSlot===slot&&creationSlotToken===token&&creationCandidate?.state===next});
         if(run!==creationRun||screen!=='creation')return;
+        if(success===LIFE_ENTRY_CANCELLED)return;
+        if(success===LIFE_ENTRY_REFUSED){creatorError='This life cannot be opened here. Your draft is kept.';render();announceView(creatorError);return;}
         if(success){creatorDirty=false;creatorUndo=null;creationCandidate=null;tab='life';actionFilter='all';game=null;adoptPosition(next,undefined,{persist:false});}
         else{creatorError=saveStore.conflict()?'This slot changed in another tab. Your draft is retained; leave this page open and review the saved-life conflict before replacing it.':'This life could not be saved in this browser. Your draft and generated life are retained on this page. Free browser space and use Begin This Life to retry this exact life.';if(saveStore.conflict()){saveConflictDismissed=false;modal='save-conflict';}render();announceView(creatorError);}
       }
@@ -1670,7 +1692,19 @@ root.addEventListener('click',async event=>{
   if(op==='music-toggle'){const a=setMusicEnabled(!getAudioSettings().musicEnabled);target.textContent=`♫ Music ${a.musicEnabled?'on':'off'}`;target.setAttribute('aria-pressed',String(a.musicEnabled));return;}
   if(op==='fullscreen'){try{if(document.fullscreenElement)document.exitFullscreen()?.catch(()=>{});else document.documentElement.requestFullscreen()?.catch(()=>toast('Fullscreen is unavailable here.'));}catch{toast('Fullscreen is unavailable here.');}return;}
   if(op==='review-save-conflict'){openModal('save-conflict',target);return;}
-  if(op==='reload-conflicted-life'){const slot=activeSlot,position=game,incoming=pendingImport,importing=Boolean(incoming);target.disabled=true;return refreshSavedLives(()=>{modal=null;focusReturn=null;game=null;saved=null;pendingImport=null;pendingDeletion=null;notificationToasts=[];clearTimeout(notificationTimer);if(!importing&&saveStore.read(slot)){return loadSlot(slot);}else{activeSlot=saveStore.active();screen='slots';slotsMode='load';entryNotice='The saved-life list is reloaded. No life was replaced or restored.';render();}},{discardSession:true,shouldContinue:()=>target.isConnected&&modal==='save-conflict'&&activeSlot===slot&&game===position&&pendingImport===incoming});}
+  if(op==='reload-conflicted-life'){
+    const slot=activeSlot,position=game,incoming=pendingImport,importing=Boolean(incoming);target.disabled=true;
+    return refreshSavedLives(()=>{
+      modal=null;focusReturn=null;game=null;saved=null;pendingImport=null;pendingDeletion=null;notificationToasts=[];clearTimeout(notificationTimer);
+      if(!importing&&saveStore.read(slot)){
+        const opened=loadSlot(slot);
+        if(opened!==false)return opened;
+      }
+      // The user explicitly discarded the old session. A refused fresh life
+      // must leave a rendered save list, including from a title-screen dialog.
+      activeSlot=saveStore.active();screen='slots';slotsMode='load';entryNotice='The saved-life list is reloaded. No life was replaced or restored.';render();
+    },{discardSession:true,shouldContinue:()=>target.isConnected&&modal==='save-conflict'&&activeSlot===slot&&game===position&&pendingImport===incoming});
+  }
   if(activeSaveConflict()&&['title-load','title-new','title-continue','confirm-new','slot-load','slot-new'].includes(op)){openModal('save-conflict',target);return;}
   if(op==='title-menu'){showTitle();return;}
   if(op==='title-settings'){screen='settings';render();focusRoute('.settings-screen h1,.menu-screen h1');return;}
@@ -1682,6 +1716,7 @@ root.addEventListener('click',async event=>{
     // lock may have prevented even the store's in-memory write from running.
     // Keep the exact previewed live position; Ironman always uses authority.
     if(screen==='title'&&game&&slot===activeSlot&&!isIronman(game)&&saveStore.hasUnsavedChanges(slot,game)){
+      if(!admitLifeEntry(game))return;
       screen='game';modal=null;render();focusRoute('#main-content h1,#main-content h2');return;
     }
     return refreshSavedLives(()=>{if(Number.isInteger(slot)&&slot>=0&&slot<3&&saveStore.read(slot))return loadSlot(slot);screen='slots';slotsMode='load';entryNotice='That life is no longer in its slot. Choose a saved life below.';render();focusRoute('#slot-heading');});
@@ -1748,13 +1783,23 @@ root.addEventListener('click',async event=>{
   if(op==='project-abandon-confirm'){const q=projectAbandonReview,a=actionsForUI(game).find(a=>a.id==='workshop_cancel'&&!a.disabledReason);if(modal!=='project-abandon'||!q||q.state!==game||q.snapshot!==JSON.stringify(game.workshop?.project)||!a||event.detail>1){closeModal();toast('This project changed. Review its current work before abandoning it.');return;}projectAbandonReview=null;target.disabled=true;update(chooseAction(game,'workshop_cancel'),undefined,{afterAdopt:()=>{modal=null;render();if(craftSession)focusControl(null,null,'#craft-heading');else restoreModalFocus();announceView(conciseOutcome(game.notice));}});return;}
   if(op==='close-modal'){closeModal();return;}
   if(op==='recover-current'){focusReturn=null;if(activeSaveConflict()){openModal('save-conflict',target);return;}dispatchSlotLoad(loadSlot(activeSlot));return;}
-  if(op==='resume'){if(isIronman(saved))ironmanSession.resume(runIdOf(saved),activeSlot);else if(saved){if(!leaveIronman())return;tab='life';update(structuredClone(saved));}return;}
+  if(op==='resume'){if(isIronman(saved))ironmanSession.resume(runIdOf(saved),activeSlot);else if(saved){if(!admitLifeEntry(saved)||!leaveIronman())return;tab='life';update(structuredClone(saved));}return;}
   if(op==='random-seed'){creationSeed=randomSeed();creatorDraft.seed=creationSeed;const input=root.querySelector('[name="seed"]');if(input)input.value=creationSeed;return;}
   if(op==='new'){openModal('new',target);return;}
   if(op==='import'){importOpener={dataset:{op:target.dataset.op,id:target.dataset.id}};root.querySelector('#save-file').click();return;}
   if(op==='export'){exportSave();return;}
-  if(op==='confirm-import'&&pendingImport&&isIronman(pendingImport)){if(!importToken)return;const incoming=pendingImport,slot=importSlot;ironmanSession.import(slot,incoming,{token:importToken,message:'The reviewed Ironman position is saved.',afterAdopt:()=>{pendingImport=null;importToken=null;modal=null;}});return;}
-  if(op==='confirm-import'&&pendingImport){const incoming=pendingImport,slot=importSlot,token=importToken,owner=viewOwner();target.disabled=true;const imported=await saveOperation(()=>pendingImport===incoming&&modal==='import-review'&&importSlot===slot&&importToken===token?saveStore.replace(slot,incoming,{reviewed:true,token}):'cancelled');if(!ownsView(owner)||imported==='cancelled')return;if(!imported){storageAvailable=saveStore.available();if(saveStore.conflict()){saveConflictDismissed=false;openModal('save-conflict',target);}else{render();toast('The import could not be saved. Export a backup or free browser space; your previous life remains safe.');}return;}if(!leaveIronman())return;activeSlot=slot;pendingImport=null;modal=null;resetGearOrganizerView();journalScope=null;pendingPersonalNote=null;mazeMapSession=null;game=null;tab='life';workspaceReturn=null;selectedHex=null;update(incoming,'The reviewed import is saved.');return;}
+  if(op==='confirm-import'&&pendingImport&&isIronman(pendingImport)){if(!importToken||!admitLifeEntry(pendingImport))return;const incoming=pendingImport,slot=importSlot;ironmanSession.import(slot,incoming,{token:importToken,message:'The reviewed Ironman position is saved.',afterAdopt:()=>{pendingImport=null;importToken=null;modal=null;}});return;}
+  if(op==='confirm-import'&&pendingImport){
+    const incoming=pendingImport,slot=importSlot,token=importToken,owner=viewOwner();
+    if(!admitLifeEntry(incoming))return;
+    target.disabled=true;
+    const imported=await lifeEntry.replaceReviewed({state:incoming,slot,token,isCurrent:()=>pendingImport===incoming&&modal==='import-review'&&importSlot===slot&&importToken===token});
+    if(!ownsView(owner)||imported===LIFE_ENTRY_CANCELLED)return;
+    if(imported===LIFE_ENTRY_REFUSED){target.disabled=false;admitLifeEntry(incoming);return;}
+    if(!imported){storageAvailable=saveStore.available();if(saveStore.conflict()){saveConflictDismissed=false;openModal('save-conflict',target);}else{render();toast('The import could not be saved. Export a backup or free browser space; your previous life remains safe.');}return;}
+    if(!leaveIronman())return;
+    activeSlot=slot;pendingImport=null;modal=null;resetGearOrganizerView();journalScope=null;pendingPersonalNote=null;mazeMapSession=null;game=null;tab='life';workspaceReturn=null;selectedHex=null;update(incoming,'The reviewed import is saved.');return;
+  }
   if(!game) return;
   if(op==='footing-open'){if(game.phase==='retired')return;firstDayGuideReopened=true;workspaceSections.life='present';modal=null;focusReturn=null;navigate('life');const guide=root.querySelector('.first-day-guide');if(guide)guide.open=true;disclosureStates.set('life:first-day-guide',true);focusControl(null,null,'#first-day-guide-heading');return;}
   if(op==='footing-dismiss'){

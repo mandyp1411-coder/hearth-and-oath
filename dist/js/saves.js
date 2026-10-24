@@ -1,6 +1,7 @@
 import { isIronman, validateIronman, validateCasualtyFloor, ironmanHeroDeath, ironmanCombatStopped, sameBattleMortalityPolicy } from './ironman.js';
 import { IRONMAN_RECORD_PREFIX, IRONMAN_ENDED_PREFIX, validIronmanRunId, ironmanRecordKey, ironmanEndedKey, decodeIronmanRecord,
   decodeIronmanEnded, ironmanRecordToken, rawIronmanBase, sharedIronmanClaim, sharedIronmanCopies, emptyIronmanToken, reattachIronmanToken } from './ironman-storage.js';
+import { createPositionAdmission } from './position-admission.js';
 
 const SLOT_KEY = 'hearth-and-oath:slots:v1';
 export const LEGACY_SAVE_KEY = 'hearth-and-oath:life:v1';
@@ -62,24 +63,7 @@ export function createSaveCoordinator(locks = globalThis.window?.navigator?.lock
  * Decoding retained data is separate from admitting an incoming write. A life
  * refused by acceptPosition must still occupy its slot and remain exportable. */
 export function createSaveStore(storage, decodeStoredLife = value => value, options = {}) {
-  const acceptPosition = options.acceptPosition;
-  if (acceptPosition !== undefined && typeof acceptPosition !== 'function') throw new TypeError('acceptPosition must be a function.');
-  function acceptsIncomingPosition(state) {
-    if (acceptPosition === undefined) return true;
-    // A predicate receives a disposable snapshot. Neither its mutations nor
-    // an exception may alter the caller's position or any retained state.
-    // Admission is synchronous: native Promises are refused, with rejection
-    // consumed without awaiting them or assimilating arbitrary thenables.
-    try {
-      const accepted = acceptPosition(copy(state));
-      if (accepted && typeof accepted === 'object') {
-        try { Promise.prototype.then.call(accepted, () => {}, () => {}); }
-        catch {} // Not a native Promise; it still cannot grant admission.
-      }
-      return accepted === true;
-    }
-    catch { return false; }
-  }
+  const acceptsIncomingPosition = createPositionAdmission(options.acceptPosition);
   const coordinate = options.coordinate === undefined ? createSaveCoordinator() : options.coordinate;
   const exclusive = coordinators.get(coordinate);
   const crypto = options.crypto === undefined ? globalThis.crypto : options.crypto;
@@ -373,7 +357,16 @@ export function createSaveStore(storage, decodeStoredLife = value => value, opti
       return { status, runId: record.runId, slot, token, value };
     } catch { return failure('consumer-failed'); }
   }
-  function inspect(input, { intent, slot, token, consume } = {}) {
+  function acceptsPlayPosition(state, acceptForPlay) {
+    if (acceptForPlay === undefined) return true;
+    try {
+      const admits = createPositionAdmission(acceptForPlay);
+      // A null create inspection reviews only the empty target. It cannot
+      // write or open a life; the actual candidate is checked at commit.
+      return state === null || admits(state);
+    } catch { return false; }
+  }
+  function inspect(input, { intent, slot, token, consume, acceptForPlay } = {}) {
     const id = idFor(slot), runId = inputRunId(input);
     if (!['create', 'import', 'reattach', 'resume', 'export'].includes(intent)
         || runId !== null && !validIronmanRunId(runId)) return failure('invalid-inspection');
@@ -384,13 +377,16 @@ export function createSaveStore(storage, decodeStoredLife = value => value, opti
     let record = runId ? found.records.get(runId) : null;
     if (record && !record.state) return failure('deleted-position');
     if (intent === 'create' || intent === 'import') {
-      if (input !== null && (!validatedPosition(input) || !runId)) return failure('invalid-position');
+      const state = input === null ? null : validatedPosition(input);
+      if (input !== null && (!state || !runId)) return failure('invalid-position');
+      if (!acceptsPlayPosition(state, acceptForPlay)) return failure('position-not-admitted');
       if (record) return intent === 'import' ? { status: 'known-head', runId, token: ironmanRecordToken(record) } : failure('known-run');
       if (id === null) return failure('invalid-slot');
       const target = emptyTarget(id, found); if (target.status !== 'review') return target;
       return { status: 'review', slot: id, ...(runId ? { runId } : {}), token: emptyIronmanToken(id, target.base.token) };
     }
     if (!record) return failure('missing-run-head');
+    if (intent !== 'export' && !acceptsPlayPosition(record.state, acceptForPlay)) return failure('position-not-admitted');
     let owner = ownership(record, found);
     if (owner.status === 'blocked') return failure(owner.reason);
     if (owner.status === 'conflict') return failure('conflicting-claims');
@@ -429,13 +425,14 @@ export function createSaveStore(storage, decodeStoredLife = value => value, opti
     }
     return result;
   }
-  function commitRun(slot, input, { intent, token, consume } = {}) {
+  function commitRun(slot, input, { intent, token, consume, acceptForPlay } = {}) {
     const id = idFor(slot), state = validatedPosition(input), runId = inputRunId(input);
     if (id === null || !state || !['create', 'import', 'continue'].includes(intent)) return failure('invalid-position');
     if (!acceptsIncomingPosition(state)) return failure('position-not-admitted');
     const found = discover(); if (!found.ok) return failure(found.reason);
     const marker = markerFor(runId); if (!marker.ok) return failure('unreadable-ended-marker');
     if (marker.marker) return { status: 'ended', runId };
+    if (!acceptsPlayPosition(state, acceptForPlay)) return failure('position-not-admitted');
     const prior = found.records.get(runId);
     if (intent === 'continue') {
       if (!prior?.state) return failure(prior ? 'deleted-position' : 'missing-run-head');
@@ -462,7 +459,7 @@ export function createSaveStore(storage, decodeStoredLife = value => value, opti
     if (!next) return failure('secure-randomness-unavailable');
     const saved = persistRecord(next); return saved.status === 'confirmed' ? committedHead(next, id, consume) : saved;
   }
-  function reattach(runId, slot, { reviewed = false, token } = {}) {
+  function reattach(runId, slot, { reviewed = false, token, acceptForPlay } = {}) {
     const id = idFor(slot);
     if (!reviewed || !validIronmanRunId(runId) || id === null) return failure('review-required');
     const found = discover(); if (!found.ok) return failure(found.reason);
@@ -470,6 +467,7 @@ export function createSaveStore(storage, decodeStoredLife = value => value, opti
     if (marker.marker) return { status: 'ended', runId };
     const prior = found.records.get(runId);
     if (!prior?.state) return failure(prior ? 'deleted-position' : 'missing-run-head');
+    if (!acceptsPlayPosition(prior.state, acceptForPlay)) return failure('position-not-admitted');
     const owner = ownership(prior, found);
     if (owner.status === 'blocked') return failure(owner.reason);
     if (owner.status === 'conflict') return failure('conflicting-claims');

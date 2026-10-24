@@ -291,6 +291,15 @@ files with zero failures/skips, plus one full compiled session with 14 cases.
 exact identities and the omitted full release/browser/human gates. PR #19
 remains draft; the main Site is not redeployed by these checks.
 
+The next v0.72 slice connects an unset `positionAdmissionPolicy` through
+`life-entry.js`, the store and `ironman-session.js`; it still admits both
+rulebooks. Reviewed ordinary replacements capture their exact payload and
+check the current view and policy again inside the save lock. Ironman entry
+passes raw `acceptForPlay` callbacks for locked actual-head checks, while
+export/lifecycle/death cleanup remain unfiltered. Preserve uncertain request
+obligations on refusal. Never activate the cutover before raw old-save
+export/recovery and the archive/browser/human gates are complete.
+
 ## Direction
 
 The v0.59.0 analysis and the owner's design direction live in the Claude

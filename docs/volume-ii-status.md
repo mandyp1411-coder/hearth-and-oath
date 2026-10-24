@@ -28,6 +28,12 @@ passed 448 selected save/Ironman/edition tests and one compiled session with
 passed. These are development results on draft PR #19; full FAST/SLOW,
 formal release certification and browser/human gates remain NOT RUN.
 
+The next v0.72 slice connects ordinary and Ironman simulation-entry fences,
+including queued imports and reattachment. Its current policy stays unset:
+both rulebooks remain accepted and no compatibility is removed. Raw old-save
+decoding/export UI and the outstanding acceptance gates remain prerequisites
+to the actual cutover.
+
 The [session materials](playtests/farmer-v071.md#ready-to-use-session-materials)
 shipped in [PR #16](https://github.com/mandyp1411-coder/hearth-and-oath/pull/16) with two genuine age-sixteen starts and separate
 blank observer forms. Both starts passed full save validation and exact

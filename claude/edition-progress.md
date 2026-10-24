@@ -54,6 +54,14 @@ same tree `fcc8d1cf59d33f215a6d08258de17d57e9b6b585`. The
 preserves closed raw proof. Full FAST/SLOW and the formal gate were NOT RUN;
 the PR stays draft and the live game stays Sites 106.
 
+The next implementation connects the app's unset entry policy to ordinary
+reviewed imports/creation, slot/resume/adoption guards and Ironman locked
+entry. It preserves captured review payloads, late-refused pending operations,
+raw exports/lifecycle and death cleanup. Restrictive policies are tested at
+the real coordinator/store/session boundaries; the current app still admits
+both rulebooks. Independent old-save decoding and export/recovery UI remain
+unfinished, and the same browser/human gates still precede any cutover.
+
 ## Earlier farmer releases
 
 v0.71.1, The first choice, is published as Sites version 105 in

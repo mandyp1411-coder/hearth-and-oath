@@ -62,11 +62,45 @@ cleanup still use the decoder. Ironman inspection may offer a review that
 the later commit refuses with `position-not-admitted`; the eventual UI must
 check simulation admission before adopting or writing the position.
 
-This is not yet the simulation-entry cutover, nor an independent raw-old-save
-decoder. `app.js` continues using the current decoder and default policy.
+This first slice was not the simulation-entry cutover or an independent
+raw-old-save decoder. `app.js` continues using the current decoder and default policy.
 Removing old engine decoding before its read/export replacement exists would
 still be wrong. `tests/save-admission.test.js` exercises stricter policies on
 real historical snapshots while keeping the live game's policy unchanged.
+
+## Implemented entry boundary
+
+The next slice connects one optional `positionAdmissionPolicy` to ordinary
+entry, incoming writes and Ironman sessions. It remains **undefined** in
+`app.js`: both rulebooks still play, and no gate is waived.
+
+`life-entry.js` checks reviewed replacements before queueing and inside the
+save lock. It captures the reviewed JSON, cancels a dismissed view or an
+altered incoming payload, and preserves the existing target token. A policy
+refusal has its own result, separate from storage failure. Imports, backup
+confirmation and Standard creation use this coordinator. Slot load, unsaved
+title return, resume and final adoption check before resetting the live
+position or selecting a slot. Explicit conflict reload still discards the
+old session; if fresh entry is refused it renders the retained save list
+instead of leaving a stale dialog or a game against a rebased store.
+
+`position-admission.js` shares the existing detached, synchronous strict-true
+predicate semantics. The unset default avoids extra JSON snapshots. Session
+entry sends the raw policy as `acceptForPlay` to the store: actual resume,
+commit and reattachment are checked under their lock against the decoded
+position, after ended-marker recognition and before entry-related writes or
+adoption. The last session adoption fence precedes the app's `onAdopt` side
+effects. A later refusal retains an uncertain operation's original candidate,
+token and obligation. Export, archive/delete, revocation and death cleanup
+remain available independently of entry policy.
+
+Configured-policy tests use actual stores and sessions with genuine saved
+lives, plus bounded lock/modern Ironman opt-in fixtures. The actual app
+handler tests retain today's default policy. These checks do not prove the
+future cutover UI under a restrictive policy. Independent raw old-save
+decoding and export/recovery UI still need completion before removing the
+old engine; in particular, a retained Ironman export must not require first
+adopting a life that the future policy refuses.
 
 ## Order of the eventual cutover
 

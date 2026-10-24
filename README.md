@@ -7,6 +7,8 @@ cutover inventory. Both rulebooks still play. The published release remains belo
 the archive browser loop and real farmer/heir verdict still precede cutover.
 Its [development record](docs/measures/one-rulebook-v072-storage-verification.md)
 contains 448 selected passing tests and one compiled standalone replay.
+The next entry-policy slice now connects ordinary and Ironman entry checks,
+with the policy still unset so both rulebooks remain playable.
 
 Version 0.71.2 is The old lives have a home. Merged in
 [PR #18](https://github.com/mandyp1411-coder/hearth-and-oath/pull/18). Old Rules saves now have a
