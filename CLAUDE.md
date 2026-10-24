@@ -267,6 +267,15 @@ farmer playtest remain NOT RUN. See `docs/measures/archive-v0712-verification.md
 The owner stopped further farmer-opening layout polish. No Phase 2 engine
 or legacy deletion is included.
 
+v0.72 preparation lives in `docs/one-rulebook-v072.md` and
+`scripts/plan-one-rulebook.mjs`. The inventory is textual discovery, not
+automatic deletion. Keep the shared save decoder able to retain complete
+old slots and backups: rejecting them there can make mixed occupied slots
+look empty. New-rule historical lives can still hold older maze/battle
+modes; their flags are not old-rule classification. The new retention tests
+protect occupancy, complete exports and backup review. No cutover or runtime
+change is included before the outstanding archive/browser and human gates.
+
 ## Direction
 
 The v0.59.0 analysis and the owner's design direction live in the Claude

@@ -29,6 +29,17 @@ browser transfers stalled, so the complete browser round trip is NOT RUN.
 The human farmer-and-heir gate remains NOT RUN. The owner stopped further
 opening-layout polish; no Phase 2 work or legacy deletion is included.
 
+## Next release in preparation
+
+The owner authorized beginning v0.72, One Rulebook. Branch
+`codex/v0.72-one-rulebook` starts with a repeatable source inventory and
+regressions for mixed old/new slots, whole-life exports and old backup
+recovery. The [cutover plan](../docs/one-rulebook-v072.md) identifies the
+shared decoder's occupied-slot risk and the older expedition modes that
+still belong to new-rule lives. No runtime admission or compatibility is
+changed. The archive browser loop and real farmer/heir gate remain NOT RUN;
+this preparation is not a shipped v0.72 or a passed gate.
+
 ## Earlier farmer releases
 
 v0.71.1, The first choice, is published as Sites version 105 in

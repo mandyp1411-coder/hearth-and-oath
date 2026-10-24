@@ -1,5 +1,10 @@
 # Hearth & Oath
 
+v0.72, One Rulebook, is [in preparation](docs/one-rulebook-v072.md) on a
+separate branch. It begins with a source inventory and preservation checks
+for mixed old/new saves and backups. The published release remains below;
+the archive browser loop and real farmer/heir verdict still precede cutover.
+
 Version 0.71.2 is The old lives have a home. Merged in
 [PR #18](https://github.com/mandyp1411-coder/hearth-and-oath/pull/18). Old Rules saves now have a
 [public archive](https://hearth-and-oath-old-rules.nilled463.chatgpt.site/),

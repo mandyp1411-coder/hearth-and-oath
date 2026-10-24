@@ -15,6 +15,10 @@ No later Volume II release is claimed complete. Phase 2 waits for the
 farmer's real playtest. The protocol and separate verdict are in
 `docs/playtests/farmer-v071.md`.
 
+The owner has authorized [v0.72 preparation](one-rulebook-v072.md): source
+inventory and save-preservation regressions on a separate branch. This
+changes no runtime rules, widens no livelihood and waives neither gate.
+
 The [session materials](playtests/farmer-v071.md#ready-to-use-session-materials)
 shipped in [PR #16](https://github.com/mandyp1411-coder/hearth-and-oath/pull/16) with two genuine age-sixteen starts and separate
 blank observer forms. Both starts passed full save validation and exact
