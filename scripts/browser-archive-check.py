@@ -276,7 +276,7 @@ def main():
             op(rehearsed, 'title-load')
             rehearsed.locator('.save-slots-screen').wait_for(timeout=15000)
             kept_slot = rehearsed.locator('.save-slot[data-id="0"]')
-            record('rehearsed cutover: the old slot is kept, not opened', kept_slot.is_disabled() and kept_slot.get_attribute('data-refused-life') is not None and 'Kept for the archive' in kept_slot.inner_text(), kept_slot.inner_text().replace('\n', ' ')[:120])
+            record('rehearsed cutover: the old slot is kept, not opened', kept_slot.is_disabled() and kept_slot.get_attribute('data-refused-life') is not None and 'kept for the archive' in kept_slot.inner_text().lower(), kept_slot.inner_text().replace('\n', ' ')[:120])
             rehearsed.screenshot(path=str(out / 'rehearsed-kept-slot.png'), full_page=True)
             with rehearsed.expect_download(timeout=20000) as download:
                 rehearsed.locator('[data-archive-note] [data-op="export-session"][data-id="0"]').first.click()
