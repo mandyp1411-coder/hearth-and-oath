@@ -102,6 +102,12 @@ decoding and export/recovery UI still need completion before removing the
 old engine; in particular, a retained Ironman export must not require first
 adopting a life that the future policy refuses.
 
+The [entry verification record](measures/one-rulebook-v072-entry-verification.md)
+records a fresh frozen replay: 500 selected tests in 31 save/creation/entry/
+Ironman/edition files passed, zero failures/skips, plus one compiled session
+with 14 bounded cases. Source, HEAD and artifact guards passed. Full release
+certification, browser handoff and real farmer/heir acceptance remain NOT RUN.
+
 ## Order of the eventual cutover
 
 1. Preserve occupied old slots, backups and their complete exports before

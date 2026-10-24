@@ -34,6 +34,12 @@ both rulebooks remain accepted and no compatibility is removed. Raw old-save
 decoding/export UI and the outstanding acceptance gates remain prerequisites
 to the actual cutover.
 
+That connected entry slice's [fresh record](measures/one-rulebook-v072-entry-verification.md)
+has 500 selected tests passed across 31 files, zero failed/skipped, and one
+compiled session with 14 cases. Source/artifact guards and content/import-
+graph build pass. These development checks do not complete either acceptance
+gate or certify the full release; v0.72 remains unpublished.
+
 The [session materials](playtests/farmer-v071.md#ready-to-use-session-materials)
 shipped in [PR #16](https://github.com/mandyp1411-coder/hearth-and-oath/pull/16) with two genuine age-sixteen starts and separate
 blank observer forms. Both starts passed full save validation and exact

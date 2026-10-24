@@ -299,6 +299,13 @@ passes raw `acceptForPlay` callbacks for locked actual-head checks, while
 export/lifecycle/death cleanup remain unfiltered. Preserve uncertain request
 obligations on refusal. Never activate the cutover before raw old-save
 export/recovery and the archive/browser/human gates are complete.
+The connected entry slice's own frozen replay passes 500 selected tests in
+31 files, zero failures/skips, plus one compiled session with 14 cases.
+`docs/measures/one-rulebook-v072-entry-verification.md` records exact source,
+artifact and raw proof separately from the earlier storage-only snapshot.
+Current app handlers retain the unset policy; configured policies are tested
+at actual coordinator/store/session boundaries, not claimed as a complete
+restrictive-policy UI review. No cutover or publication is included.
 
 ## Direction
 

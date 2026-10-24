@@ -62,6 +62,16 @@ the real coordinator/store/session boundaries; the current app still admits
 both rulebooks. Independent old-save decoding and export/recovery UI remain
 unfinished, and the same browser/human gates still precede any cutover.
 
+The connected entry slice now has its own [closed development proof](../docs/measures/one-rulebook-v072-entry-verification.md):
+500 selected tests in 31 files passed, zero failures/skips, on frozen local
+`11613fa2d5e9ad4e55869d6734c11f920f8d258e`. API source
+`375207e43ea674092533d4dbb720ba96b2644764` has the same tree
+`b78471afe20e3d2905ea8f563f86cf7dd963500f`. One compiled full-module
+session passed 14 cases. Strict content/import-graph build, exact artifact
+and unchanged-source guards pass. The earlier 448-test storage result stays
+separate; it is not added to this total. This remains draft work on PR #19,
+with no cutover, new version label or deployment.
+
 ## Earlier farmer releases
 
 v0.71.1, The first choice, is published as Sites version 105 in
