@@ -3,6 +3,7 @@ import { schooling, isLiterate, tuitionDue, electiveOffer, institutionYearDue } 
 import { member as guildMember, BUY_IN } from './guild.js';
 import { activeInjuries, INJURIES, loyaltyOf } from './battlecraft.js';
 import { cloth, faithRightNow } from './faith.js';
+import { farmerOpeningEvent } from './farmer-opening.js';
 
 // Voice: the game speaks as a terse, grim chronicle with a dry edge, in the
 // register of its engraved art. This module rewrites what the player reads
@@ -205,6 +206,7 @@ function voiceSchool(s, ev) {
 }
 export function voiceEvent(s, ev) {
   if (!ev || !edition(s)) return ev;
+  if (ev.id === 'birth_year_16') return farmerOpeningEvent(s, ev);
   if (ev.id === 'health_concern') return voiceHealth(s, ev);
   if (ev.id === 'annual_deadline_review') return voiceDeadline(s, ev);
   if (ev.id === 'family_dilemma') return voiceFamily(s, ev);

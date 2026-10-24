@@ -47,7 +47,9 @@ real player session or a whole-browser accessibility assessment.
 
 The opening birthday still displays the existing generic choice caption
 “Choose this action.” This belongs to the known repository voice debt; it
-is visible in the screenshot and is not claimed repaired by this kit.
+is visible in this original screenshot and was not repaired by the kit.
+The later [v0.71.1 opening repair](../../measures/farmer-v0711-verification.md)
+now supplies truthful display captions without changing these starter bytes.
 Record its effect on real players rather than treating these materials as
 evidence that every first-screen caption is finished.
 

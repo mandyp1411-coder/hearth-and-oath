@@ -231,6 +231,20 @@ recall questions. These fixtures and blank forms are preparation, not
 participants or acceptance evidence; no version bump or runtime change is
 part of the kit.
 
+v0.71.1 repairs only the farmer's opening birthday. `childhoodEvent` retains
+the authored hint for a matched age-sixteen farmer scene; the general fee
+filter is unchanged. `farmer-opening.js` is a pure voice reader for old
+captured birthdays. It matches age, day, title, body and ordered choices,
+uses only the captured typed effect, and refuses unsupported time/fee
+quotes. Money loss is clamped to the actual purse; bodily wellbeing is
+distinct from combat Health; dead people receive no inferred bond effect.
+Neither the event nor the pending story is rewritten on display or import.
+The version is a bounded repair while the human gate remains NOT RUN.
+Full frozen FAST/SLOW runs passed 3,947 cases, zero failures and five skips;
+four targeted offline checks pass. The formal full gate is NOT RUN. Exact
+scopes, proof seals, publication and the 200px birthday-layout limit are in
+`docs/measures/farmer-v0711-verification.md`.
+
 ## Direction
 
 The v0.59.0 analysis and the owner's design direction live in the Claude

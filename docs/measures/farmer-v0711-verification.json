@@ -1,0 +1,315 @@
+{
+  "schemaVersion": 1,
+  "release": "0.71.1",
+  "purpose": "Farmer opening repair; human acceptance remains separate",
+  "pullRequest": "https://github.com/mandyp1411-coder/hearth-and-oath/pull/17",
+  "source": {
+    "version": "0.71.1",
+    "commit": "c369b934cb8a1abeeed04ee69b6db39bf7e32ee1",
+    "runtimeSha256": "cee3675cd16e1883722a69d8f6e015689c72fe381e1043b767d0a7bfd2e9b926",
+    "verificationSha256": "7f9f074416c77be6a75ed789b11a65d0f1f09fa34cb4d22cfffbcaebabf2d89c",
+    "artifactSha256": "5f7dc2ea79789a4c5f1e656bf8b2b4fbaa3a4c5808497c02fd3cb99b0783b79f",
+    "engineSha256": "d8526974420a515bfb3c78a91d9efe515780d4fad0a66d4b48b8d09dab0b8813",
+    "runtime": {
+      "sha256": "cee3675cd16e1883722a69d8f6e015689c72fe381e1043b767d0a7bfd2e9b926",
+      "files": 1053
+    },
+    "verification": {
+      "sha256": "7f9f074416c77be6a75ed789b11a65d0f1f09fa34cb4d22cfffbcaebabf2d89c",
+      "files": 492
+    },
+    "offline": {
+      "version": "0.71.1",
+      "bytes": 333660569,
+      "sha256": "5f7dc2ea79789a4c5f1e656bf8b2b4fbaa3a4c5808497c02fd3cb99b0783b79f",
+      "parts": 40,
+      "manifestSha256": "39feb5e7ba923c089e580c9a680af750aeac7d98143e9b75570f9ebae28ce98f",
+      "loaderSha256": "3a04d1cd7f7091eb36bd78c28afc99a2b24ccbac777be88b0668db25c75d19c5",
+      "source": {
+        "sha256": "cee3675cd16e1883722a69d8f6e015689c72fe381e1043b767d0a7bfd2e9b926",
+        "files": 1053
+      },
+      "buildGit": {
+        "head": "8af7b22f0d25e4740a37fc5eda5af2f497d475c9",
+        "dirty": true
+      }
+    },
+    "git": {
+      "head": "c369b934cb8a1abeeed04ee69b6db39bf7e32ee1",
+      "dirty": false
+    }
+  },
+  "githubRuntimeCommit": "ca2c6df48d417992a3e2314a4eea3e4a19e52c2d",
+  "sourceTreeBeforeEvidenceNotes": "cbc887620e7df027d81766815d8e5b7387785c99",
+  "selectedSourceTests": {
+    "files": 279,
+    "passed": 3947,
+    "failed": 0,
+    "skipped": 5,
+    "scope": "Complete fresh official FAST and SLOW lanes on the same frozen C3 snapshot; no historical reuse or composites.",
+    "fast": {
+      "filesTotal": 243,
+      "filesTerminal": 243,
+      "filesPassed": 240,
+      "filesFailed": 3,
+      "filesBlocked": 0,
+      "filesNotRun": 0,
+      "passed": 3206,
+      "failed": 0,
+      "skipped": 4
+    },
+    "slow": {
+      "filesTotal": 36,
+      "filesTerminal": 36,
+      "filesPassed": 35,
+      "filesFailed": 1,
+      "filesBlocked": 0,
+      "filesNotRun": 0,
+      "passed": 741,
+      "failed": 0,
+      "skipped": 1
+    },
+    "strictStatus": "FAIL",
+    "reason": "Five retained skipped cases prevent strict lane PASS.",
+    "reports": {
+      "fast/report.json": {
+        "path": "artifacts/farmer-v0711/fast/report.json",
+        "sha256": "2040437629f0f682f4536ac5f59008f13ac36a5507d790331ba798a6ba357af6"
+      },
+      "fast/actual-node-summary.json": {
+        "path": "artifacts/farmer-v0711/fast/actual-node-summary.json",
+        "sha256": "203641456ee1eccf0046ce3e166d6d5d91eb7de9f35c6a25bfc2a25eadca7e23"
+      },
+      "slow/report.json": {
+        "path": "artifacts/farmer-v0711/slow/report.json",
+        "sha256": "eeec6fe8adbb36a8061de7f56cf9dcc69ed0258c3eb152dd577c6ecf536facbb"
+      },
+      "offline/report.json": {
+        "path": "artifacts/farmer-v0711/offline/report.json",
+        "sha256": "c60dc08336ce0852b8a33df95e2fcef2b22795b9287deb24b49608e467577759"
+      }
+    }
+  },
+  "offline": {
+    "status": "PASS",
+    "selectedRun": "run-b",
+    "selectedChecksPassed": 4,
+    "failed": 0,
+    "notRun": [
+      {
+        "script": "scripts/verify-offline-claims-tournament-v53.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-continuity-combat-v46.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-cost-gear-v45.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-download-scene-v54.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-explore-v34.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-feedback-v35.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-followups-v43.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-home-v41.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-infancy-mail-v57.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-journal-maze-v44.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-journey-confirmation-v38.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-life-tools-v51.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-map-inn-leisure-v37.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-map-services-v36.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-maze-integration-v50.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-maze-narrative-v501.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-menu-v581.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-portraits-v39.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-research-quotes-v521.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-save-guide-v49.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-saves-v431.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-story-continuity-v48.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-story-life-v52.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-ui-supplement-v572.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-winter-levy-aftermath.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      },
+      {
+        "script": "scripts/verify-offline-work-trade.mjs",
+        "status": "NOT RUN",
+        "reason": "Outside the authorized four-check v0.71.1 targeted scope."
+      }
+    ],
+    "scope": "Exactly the four authorized offline semantic checkers for v0.71.1. The other26areexplicitlyNOTRUN.",
+    "originalRunA": "Four semantic passes retained with an auxiliary memory-sample seal failure; not selected as final proof.",
+    "selectedProofs": "Closed stdout/stderr/kernel wait4 seals verified. Unsupported /proc sampler removed before the clean four-check rerun."
+  },
+  "formalFullGate": {
+    "status": "NOT RUN",
+    "reason": "The four targeted offline checks do not execute the full30 checker inventory; the source lanes retain five skips."
+  },
+  "content": {
+    "status": "PASS",
+    "files": 15,
+    "items": 50,
+    "textFields": 4343,
+    "errors": 0,
+    "warnings": 0,
+    "voiceHits": 0
+  },
+  "voice": {
+    "existingAuditHits": 614,
+    "placeholderHits": 0,
+    "strings": 23059,
+    "modules": 287,
+    "skippedModules": 12,
+    "newOpeningModuleHits": 0,
+    "wholeRepositoryVoiceClean": false
+  },
+  "benchmark": {
+    "units": "milliseconds except save characters",
+    "v071": {
+      "create18": 4710,
+      "actions": 15,
+      "walk": 29,
+      "ageUp": 131,
+      "saveCharacters": 711240
+    },
+    "v0711": {
+      "create18": 4525,
+      "actions": 18,
+      "walk": 25,
+      "ageUp": 147,
+      "saveCharacters": 711240
+    },
+    "scope": "Single bench-seed-1 command before the large test runs; diagnostic only."
+  },
+  "browser": {
+    "captionControls": "PASS",
+    "scope": "Old common farmer capture, normal import and Settings controls; 1440x900/390x844,100%/150%,numbersoff/on.",
+    "report": "docs/measures/farmer-v0711-ui.json",
+    "default200pxTarget": "NOT MET for the legacy birthday layout:271.578125desktop,277.984375phone.",
+    "screenReader": "NOT RUN",
+    "publishedVersionObserved": "0.71.1",
+    "publishedRetainedLife": {
+      "age": 16,
+      "gold": 43,
+      "date": "1 Snowfall, Year17",
+      "originalSaveTimestampPreserved": true
+    }
+  },
+  "humanPlaytest": {
+    "status": "NOT RUN",
+    "laterPhaseStillGated": true
+  },
+  "proofArchive": {
+    "path": "docs/measures/farmer-v0711-proofs.tar.gz",
+    "bytes": 1588738,
+    "members": 1483,
+    "rawBytes": 13636136,
+    "sha256": "42c634b5e0b98dffaa72762408170e9d9854d42f0f3148377dc750d484b50a35",
+    "manifest": "docs/measures/farmer-v0711-proof-manifest.json",
+    "manifestSha256": "e8d65bda04b0f9928e6445366eb82509dc144bf48a150d72520986a0370ad703"
+  },
+  "publication": {
+    "siteVersion": 105,
+    "sitesSourceCommit": "5e9c2de55bbb25c4a10c6c606f085f0c2cd6e2a6",
+    "deploymentId": "appgdep_6adc2e0d662881919adec44b79886488",
+    "deploymentStatus": "succeeded",
+    "url": "https://hearth-and-oath-v1-a73f.nilled463.chatgpt.site/",
+    "audience": "public",
+    "mergeStatus": "pending"
+  },
+  "ci": {
+    "returnedStatuses": [],
+    "returnedPullRequestWorkflowRuns": [],
+    "claim": "No hosted CI pass is claimed."
+  }
+}

@@ -20,18 +20,10 @@ assert.ok(start >= 0 && end > start);
 let code = html.slice(start + tag.length, end); html = null;
 assert.doesNotMatch(code, /^import\s/m);
 const compiled = compileOfflineModule(code, { filename: 'exact-full-module-v71.js' }); code = null;
-const seed = 'farm-ui-v071';
-let opening = E.createBirthGame({ seed, name: 'Edra Merrow', household: 'poor', station: rollBirthCircumstances(seed, 'common', 'human') });
-for (let guard = 0; guard < 1200 && opening.phase !== 'retired' && opening.event?.id !== 'farm_ambition'; guard++) {
-  if (opening.event) {
-    const choice = opening.event.choices.find(c => ['continue', 'endure', 'plead', 'rest', 'present', 'contest'].includes(c.id) && !c.disabledReason) || opening.event.choices.find(c => !c.disabledReason);
-    assert.ok(choice, 'the public childhood has a lawful continuation');
-    opening = E.chooseEventOption(opening, choice.id);
-  } else if (opening.timeline.yearTarget !== null) opening = E.continueAgeUp(opening);
-  else if (opening.age < 16) opening = E.ageUp(opening);
-  else break;
-}
-assert.equal(opening.age, 16); assert.equal(opening.event?.id, 'farm_ambition'); assert.ok(E.validateSave(opening));
+// This genuine v0.71 export still contains the old generic captions. The
+// compiled game must improve only their presentation, keeping the capture.
+const opening = E.migrateSave(JSON.parse(read('docs/playtests/farmer-v071/common-freeholder-age16.json')));
+assert.equal(opening.age, 16); assert.equal(opening.event?.id, 'birth_year_16'); assert.ok(E.validateSave(opening));
 const old = E.migrateSave(JSON.parse(gunzipSync(read('tests/fixtures/v30-explore-travel.json.gz'))).states.base);
 assert.ok(E.validateSave(old)); assert.equal(old.farm, undefined, 'an old life acquires no invented field');
 function adultFarmerCostFixture(){
@@ -87,6 +79,17 @@ function parity(label) {
 }
 await ui.click('title-continue'); parity('resume');
 assert.ok(ui.root.querySelector('[data-farmer-day]'));
+assert.doesNotMatch(ui.root.markup, /Choose this (?:action|approach)\./, 'compiled birthday cards do not show the old filler');
+for (const row of ui.root.querySelectorAll('.choice-card')) assert.match(row.textContent, /No time passes\. No gold to pay\./);
+const birthdayCare = ui.root.querySelector('[data-op="choice"][data-id="care"]');
+assert.match(birthdayCare.textContent, /Strain may rise\./);
+assert.match(birthdayCare.textContent, /A bond may fray\./);
+assert.doesNotMatch(ui.root.markup, /Stress \+3|bond −2/, 'exact effect numbers stay behind the numbers setting');
+assert.equal(wanted[0].event.choices[0].description, 'Choose this action.', 'reading keeps the actual old caption in the saved state');
+wanted[0] = E.chooseEventOption(wanted[0], 'care');
+await ui.click('choice', 'care'); parity('actual captured birthday choice');
+assert.equal(wanted[0].hero.gold, 44, 'the existing one-gold birthday gift is paid once');
+assert.equal(wanted[0].event?.id, 'farm_ambition');
 for (const row of ui.root.querySelectorAll('.farm-choice')) assert.ok(row.querySelector('[data-farm-choice-cost]'));
 wanted[0] = E.chooseEventOption(wanted[0], 'keep');
 await ui.click('choice', 'keep'); parity('actual ambition choice');
@@ -132,4 +135,4 @@ assert.equal(networkAttempts, 0);
 
 await validateUnchangedOfflineIdentity(root.pathname, identity);
 assert.deepEqual(await verificationIdentity(root.pathname), verification, 'checker/helper/source/fixture inputs remain frozen throughout');
-console.log(JSON.stringify({ status: 'PASS', mode: 'complete unchanged SourceTextModule', version: identity.version, artifactSha256: identity.sha256, sessions: 1, cases: ['actual async startup', 'module lexical privacy', 'farmer first choice and visible costs', 'whole-state ambition parity', 'Book read immutability', 'exact current-life export', 'three-slot metadata and backup preservation', 'old-save no invented farm', 'adult compiled own-fee and household-keep disclosure', 'adult complete paid-command parity', 'zero network attempts'], limits: 'A bounded semantic fake DOM session; browser layout and human farmer playtest remain separate.' }, null, 2));
+console.log(JSON.stringify({ status: 'PASS', mode: 'complete unchanged SourceTextModule', version: identity.version, artifactSha256: identity.sha256, sessions: 1, cases: ['actual async startup', 'module lexical privacy', 'captured old birthday has useful default cost and risk captions', 'old birthday capture remains unchanged until chosen', 'exact captured birthday command and single gift', 'farmer first choice and visible costs', 'whole-state ambition parity', 'Book read immutability', 'exact current-life export', 'three-slot metadata and backup preservation', 'old-save no invented farm', 'adult compiled own-fee and household-keep disclosure', 'adult complete paid-command parity', 'zero network attempts'], limits: 'A bounded semantic fake DOM session; browser layout and human farmer playtest remain separate.' }, null, 2));

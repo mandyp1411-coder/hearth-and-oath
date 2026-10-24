@@ -9,17 +9,24 @@ Human playtest: NOT RUN. No participants or survey answers are claimed.
 The farmer remains the only Volume II livelihood being proved until
 this gate passes. The trader, healer and general engines are later work.
 
-The implemented v0.71.0 software is a playtest candidate in
-[PR #15](https://github.com/mandyp1411-coder/hearth-and-oath/pull/15).
-The [software evidence](../measures/farmer-v071-verification.md) records
-3,939 selected passing assertions and five skips across documented composite
-checks; a strict single-snapshot software-gate PASS is not claimed.
-Mechanical simulations supply no human participant or acceptance verdict.
+The current playtest candidate is v0.71.1, Sites version 105. The farmer
+foundation shipped in [PR #15](https://github.com/mandyp1411-coder/hearth-and-oath/pull/15);
+[PR #17](https://github.com/mandyp1411-coder/hearth-and-oath/pull/17) repairs
+the age-sixteen opening captions. Its [software evidence](../measures/farmer-v0711-verification.md)
+records complete fresh source lanes with 3,947 cases passed, zero failed
+and five skipped, plus four targeted offline checks. The formal full gate
+is NOT RUN. Mechanical evidence supplies no human participant or verdict.
+
+The starter files themselves remain the genuine untouched v0.71.0 exports.
+Their original generation manifest and bytes are preserved; v0.71.1 improves
+their displayed captions while keeping saved history intact. Record the
+actual game build used in each human session.
 
 | Candidate field | Result |
 | --- | --- |
-| Source/build to play | v0.71.0, Sites 104; runtime `43559063337c7bc243bc152ad153d672a9c933d61d85a494f17d3f46bddfa311` |
-| Merge commit | `6d692f1fd0184ef4ae0efcd527b70ab1e5819d7c` (PR #15) |
+| Source/build to play | v0.71.1, Sites 105; runtime `cee3675cd16e1883722a69d8f6e015689c72fe381e1043b767d0a7bfd2e9b926` |
+| Farmer foundation merge | `6d692f1fd0184ef4ae0efcd527b70ab1e5819d7c` (PR #15) |
+| Opening repair merge | PENDING (PR #17) |
 | Public candidate URL | [Play the farmer candidate](https://hearth-and-oath-v1-a73f.nilled463.chatgpt.site/) |
 
 The [edition ledger](../../claude/edition-progress.md) tracks the actual

@@ -1,5 +1,13 @@
 # Hearth & Oath
 
+Version 0.71.1 is The first choice, the farmer opening repair in
+[PR #17](https://github.com/mandyp1411-coder/hearth-and-oath/pull/17).
+New age-sixteen farmer birthdays keep their authored hints. Existing captured
+farmer birthdays at sixteen show time and risk from their saved facts, with exact numbers behind
+the existing detail setting. The save keeps its actual words and history.
+The [verification record](docs/measures/farmer-v0711-verification.md) separates
+the software checks from the real-player gate, which remains NOT RUN.
+
 Version 0.71.0 is The farmer's life: the first ordinary life in Design Bible
 Volume II. Its software implementation is a playtest candidate; the human
 gate is not yet passed.

@@ -1,0 +1,59 @@
+{
+  "desktopDefault": {
+    "canScroll": true,
+    "captions": [
+      "No time passes. No gold to pay. Strain may rise. A bond may fray.",
+      "No time passes. No gold to pay.",
+      "No time passes. No gold to pay."
+    ],
+    "firstChoiceTop": 271.578125,
+    "horizontalOverflow": false,
+    "numericDetailCount": 0
+  },
+  "phoneDefault": {
+    "canScroll": true,
+    "captions": [
+      "No time passes. No gold to pay. Strain may rise. A bond may fray.",
+      "No time passes. No gold to pay.",
+      "No time passes. No gold to pay."
+    ],
+    "firstChoiceTop": 277.984375,
+    "horizontalOverflow": false,
+    "numericDetailCount": 0
+  },
+  "phoneLargestNumbers": {
+    "canScroll": true,
+    "details": [
+      "No time passes. No gold to pay. Stress +3. Faskella Davenell: bond −2.",
+      "No time passes. No gold to pay.",
+      "No time passes. No gold to pay."
+    ],
+    "firstChoiceTop": 409.875,
+    "horizontalOverflow": false
+  },
+  "desktopLargestNumbers": {
+    "canScroll": true,
+    "details": [
+      "No time passes. No gold to pay. Stress +3. Faskella Davenell: bond −2.",
+      "No time passes. No gold to pay.",
+      "No time passes. No gold to pay."
+    ],
+    "firstChoiceTop": 332.1875,
+    "horizontalOverflow": false
+  },
+  "beforeChoice": {
+    "date": "Stormbay\n1 Snowfall · Year 17",
+    "gold": "43g"
+  },
+  "afterChoice": {
+    "date": "Stormbay\n1 Snowfall · Year 17",
+    "gold": "44g",
+    "scene": "Before the first furrow"
+  },
+  "method": "Real Chrome; unchanged v0.71 freeholder export imported through the normal reviewed slot control; actual Settings controls and birthday button used. Iframe viewports 1440x900 and390x844.",
+  "limits": [
+    "Caption/risk/control checks only; no human playtest or screen-reader assessment",
+    "The legacy birthday first-choice positions exceed the 200px default target; wider layout is not claimed complete",
+    "The preview used a retained fictional QA slot; compiled checks separately verify whole saves and backups"
+  ]
+}

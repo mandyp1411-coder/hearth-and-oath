@@ -1956,9 +1956,22 @@ function adultEvent(s,e) {
 
 function childhoodEvent(s,e) {
   if((s.age||0)>18)return adultEvent(s,e);
-  const captured=s?.timeline?.storybook?.pending?.scene;
+  const pending=s?.timeline?.storybook?.pending,captured=pending?.scene;
   const row=captured&&CHILDHOOD[captured.id];
-  if(row)return {title:row[0],body:expand(row[1],s),labels:Object.fromEntries((e.choices||[]).map((c,i)=>[c.id,row[2][i]||c.label]))};
+  if(row){
+    const choices=e.choices||[];
+    // The farmer enters at this birthday. Its authored hints must survive
+    // both editionScene and setEvent; the saved incident keeps its own words.
+    // Other birthdays retain their existing prose and quotation rules.
+    const opening=s.farm&&s.age===16&&e.id==='birth_year_16'
+      &&(s.hero?.station||s.householdBudget?.debt!==undefined)
+      &&pending.age===s.age&&pending.day===s.day
+      &&captured.title===e.title&&captured.body===e.body
+      &&choices.length===3&&captured.choices?.length===3&&new Set(choices.map(c=>c.id)).size===3
+      &&choices.every((c,i)=>c.id===captured.choices[i].id&&c.label===captured.choices[i].label);
+    return {title:row[0],body:expand(row[1],s),labels:Object.fromEntries(choices.map((c,i)=>[c.id,row[2][i]||c.label])),
+      ...(opening?{descriptions:Object.fromEntries(choices.map(c=>[c.id,c.description]))}:{})};
+  }
   if((s.age||0)<3)return sceneRow('A Small Beginning','Your days are filled with meals, sleep, familiar voices, and the people caring for you. Your caregiver chooses how to spend this little part of the day.');
   if(s.age<6)return sceneRow('A Day Close to Home',choose(s,contextKey(s,e),['There is time to play near home. The adults are busy, but a familiar person has stopped to see what you have been doing.','You have found something interesting to show the people at home. They make a little space beside their work.','The afternoon is yours for a small game, a question, or time with someone you know.']));
   if(s.age<12)return sceneRow('After Lessons',choose(s,contextKey(s,e),['The lesson has ended in {here}. There is still time to spend with friends before you are expected home.','You and the other learners gather your things. Someone has a question about the day, and you have a chance to answer.','A free afternoon opens after lessons. You can decide how to spend it without choosing your whole future.']));
@@ -19507,12 +19520,85 @@ function validateFaith(f, s) {
 
 return {ARREARS_DOOR,ARREARS_OUT,CALLED_DEVOTION,FAITH_EVENTS,KEEPER_STANDING,KEEPER_YEARS,NOVICE_MISSED,NOVICE_SEASONS,OFFICE_DAYS,PENANCE_DAYS,RANKS,STIPEND,TITHE,VOWS_STANDING,applyFaithAction,applyFaithChoice,applyFaithGates,cloth,faith,faithActions,faithRightNow,faithSeat,faithSummary,faithView,flushFaithEvent,inheritFaith,initializeFaith,joinReason,onFaithTime,validateFaith};
 })();
+const __farmer_opening = (() => {
+// Read the actual unanswered birthday, never today's childhood catalogue.
+// Old saves can have lost their captions while retaining the typed effects.
+const plain = value => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+const finite = value => typeof value === 'number' && Number.isFinite(value);
+const generic = text => /^Choose this (?:action|approach)\.$/.test(text);
+const PICKS = ['care', 'curiosity', 'courage'];
+const quoted = choice => ['days', 'durationDays', 'cost', 'quotedCost'].some(key => choice[key] !== undefined && choice[key] !== 0);
+
+function consequence(s, effect) {
+  const words = ['No time passes.'], figures = ['No time passes.'];
+  if (!plain(effect)) return null;
+  if (['money', 'health', 'stress'].some(key => effect[key] !== undefined && !finite(effect[key]))) return null;
+  if (effect.money < 0) {
+    if (!finite(effect.money) || !finite(s.hero?.gold) || s.hero.gold < 0) return null;
+    const lost = Math.min(s.hero.gold, -effect.money);
+    if (lost > 0) { words.push('Coin will leave your purse.'); figures.push(`Up to ${lost} gold lost from your purse.`); }
+    else { words.push('No gold to pay.'); figures.push('No gold to pay.'); }
+  }
+  else { words.push('No gold to pay.'); figures.push('No gold to pay.'); }
+  if (effect.health < 0) {
+    if (!finite(effect.health) || !finite(s.life?.health) || s.life.health < 0 || s.life.health > 100) return null;
+    const lost = Math.min(s.life.health, -effect.health);
+    if (lost > 0) { words.push('Your health may suffer.'); figures.push(`Bodily wellbeing −${lost}.`); }
+  }
+  if (effect.stress > 0) {
+    if (!finite(effect.stress) || !finite(s.life?.stress) || s.life.stress < 0 || s.life.stress > 100) return null;
+    const gained = Math.min(100 - s.life.stress, effect.stress);
+    if (gained > 0) { words.push('Strain may rise.'); figures.push(`Stress +${gained}.`); }
+  }
+  let frayed = false;
+  if (effect.bonds !== undefined && !plain(effect.bonds)) return null;
+  for (const [id, amount] of Object.entries(effect.bonds || {})) {
+    if (!finite(amount)) return null;
+    if (amount >= 0) continue;
+    // This is the same live-person lookup used by applyChildhoodScene.
+    const person = s.life?.people?.find(p => p.id === id && p.alive !== false);
+    if (!person) continue;
+    if (!finite(person.bond) || person.bond < 0 || person.bond > 100) return null;
+    const lost = Math.min(person.bond, -amount);
+    if (!lost) continue;
+    frayed = true;
+    const who = typeof person.name === 'string' && person.name.trim() ? person.name : 'Someone you know';
+    figures.push(`${who}: bond −${lost}.`);
+  }
+  if (frayed) words.push('A bond may fray.');
+  return { words: words.join(' '), figures: figures.join(' ') };
+}
+
+/** A pure presentation of a captured age-sixteen farmer birthday. */
+function farmerOpeningEvent(s, ev) {
+  if (!s?.farm || !(s.hero?.station || s.householdBudget?.debt !== undefined) || s.age !== 16 || s.timeline?.mode !== 'birth' || s.timeline.contentVersion !== 7 || ev?.id !== 'birth_year_16') return ev;
+  const pending = s.timeline.storybook?.pending, scene = pending?.scene;
+  if (!Number.isSafeInteger(s.day) || s.day < 0 || pending?.age !== s.age || pending?.day !== s.day || !plain(scene) || typeof scene.title !== 'string' || !scene.title.trim() || typeof scene.body !== 'string' || !scene.body.trim() || scene.title !== ev.title || scene.body !== ev.body || !Array.isArray(scene.choices) || !Array.isArray(ev.choices) || scene.choices.length !== 3 || ev.choices.length !== 3) return ev;
+  if (new Set(ev.choices.map(c => c?.id)).size !== 3 || ev.choices.some((c, i) => !plain(c) || !plain(scene.choices[i]) || c.id !== PICKS[i] || scene.choices[i].id !== c.id || typeof c.label !== 'string' || !c.label.trim() || c.label !== scene.choices[i].label || quoted(c) || quoted(scene.choices[i]))) return ev;
+  const costs = scene.choices.map(c => consequence(s, c.effect));
+  if (costs.some(value => value === null)) return ev;
+  let changed = false;
+  const choices = ev.choices.map((choice, i) => {
+    const risk = costs[i], caption = typeof choice.description === 'string' && !generic(choice.description) ? choice.description : '';
+    const description = caption.endsWith(risk.words) ? caption : `${caption}${caption ? ' ' : ''}${risk.words}`;
+    const prior = typeof choice.detail === 'string' && !generic(choice.detail) ? choice.detail : '';
+    const detail = prior.endsWith(risk.figures) ? prior : `${prior}${prior ? ' ' : ''}${risk.figures}`;
+    if (description === choice.description && detail === choice.detail) return choice;
+    changed = true;
+    return { ...choice, description, detail };
+  });
+  return changed ? { ...ev, choices } : ev;
+}
+
+return {farmerOpeningEvent};
+})();
 const __voice = (() => {
 const { settlementServices } = __world_services;
 const { schooling, isLiterate, tuitionDue, electiveOffer, institutionYearDue } = __schooling;
 const { member: guildMember, BUY_IN } = __guild;
 const { activeInjuries, INJURIES, loyaltyOf } = __battlecraft;
 const { cloth, faithRightNow } = __faith;
+const { farmerOpeningEvent } = __farmer_opening;
 // Voice: the game speaks as a terse, grim chronicle with a dry edge, in the
 // register of its engraved art. This module rewrites what the player reads
 // at the edge of the UI; the engine's own text (with its numbers) is kept
@@ -19714,6 +19800,7 @@ function voiceSchool(s, ev) {
 }
 function voiceEvent(s, ev) {
   if (!ev || !edition(s)) return ev;
+  if (ev.id === 'birth_year_16') return farmerOpeningEvent(s, ev);
   if (ev.id === 'health_concern') return voiceHealth(s, ev);
   if (ev.id === 'annual_deadline_review') return voiceDeadline(s, ev);
   if (ev.id === 'family_dilemma') return voiceFamily(s, ev);
@@ -29292,7 +29379,7 @@ const __edition = (() => {
 // (subsystems are added to an older edition life as it plays on), so they
 // carry `began: null` and read "begun before v0.70". Never guess a date.
 
-const GAME_VERSION = '0.71.0';
+const GAME_VERSION = '0.71.1';
 /** The migration step this build brings a new-rules life to. Each later
  * release that changes what a new-rules save holds adds a step here. */
 const EDITION_STEP = 71;
@@ -41271,7 +41358,7 @@ function navigationLabel(id,label){return id==='journal'&&game?.farm&&farmView(g
 function groupedNavigation(){return navigationGroups.map(([name,rows])=>`<details class="navigation-group" open><summary>${e(name)}</summary>${rows.map(([id,label])=>`<button type="button" class="nav-item ${tab===id?'active':''}" data-op="tab" data-id="${id}" ${tab===id?'aria-current="page"':''}>${uiIcon(id)}<span>${e(navigationLabel(id,label))}</span></button>`).join('')}</details>`).join('');}
 function sidebar() {
  const main=navigationGroups[0][1].map(([id,label])=>[id,navigationLabel(id,label)]);
- return `<aside class="sidebar game-rail"><button class="brand" type="button" data-op="menu" aria-label="Open game menu"><span class="brand-title">Hearth &amp; Oath</span><small>VOLUME I</small></button><nav aria-label="Main views">${main.map(([id,label])=>`<button type="button" class="nav-item ${tab===id?'active':''}" data-op="tab" data-id="${id}" aria-label="${label}" title="${label}" ${tab===id?'aria-current="page"':''}>${uiIcon(id)}<span>${label}</span></button>`).join('')}</nav><div class="rail-footer">${button('Character','tab','character','ghost small')}${button('Party','tab','party','ghost small')}${button('Main Menu','title-menu','','ghost small')}${button('Settings','game-settings','','ghost small')}<small>v0.71.0</small></div></aside>`;
+ return `<aside class="sidebar game-rail"><button class="brand" type="button" data-op="menu" aria-label="Open game menu"><span class="brand-title">Hearth &amp; Oath</span><small>VOLUME I</small></button><nav aria-label="Main views">${main.map(([id,label])=>`<button type="button" class="nav-item ${tab===id?'active':''}" data-op="tab" data-id="${id}" aria-label="${label}" title="${label}" ${tab===id?'aria-current="page"':''}>${uiIcon(id)}<span>${label}</span></button>`).join('')}</nav><div class="rail-footer">${button('Character','tab','character','ghost small')}${button('Party','tab','party','ghost small')}${button('Main Menu','title-menu','','ghost small')}${button('Settings','game-settings','','ghost small')}<small>v0.71.1</small></div></aside>`;
 }
 function ageControlState() {
   let reason='';
@@ -41337,7 +41424,7 @@ function titleScreen() {
   const card=state?returnLifeCardView(state,slotSaveHealth(recent.id,live),{live,readCommitment:getLifeCommitment}):null;
   const place=state?properPlaceName(state.world.locations.find(place=>place.id===state.locationId)?.name||state.world.name):'';
   const primary=state?`<article class="title-life" data-return-life-card data-slot-live="${live}" aria-label="Your current life"><button type="button" class="title-menu-item title-continue-card" data-op="title-continue" data-id="${recent.id}"><span class="title-life-portrait" aria-hidden="true">${renderAvatar(state.hero,{size:'small',age:state.age??18})}</span><span class="title-life-copy"><span class="title-action-label">Continue</span><strong>${e(state.hero.name)}</strong><small>Age ${state.age??18} · ${isIronman(state)?'Ironman · ':''}Slot ${recent.id+1}</small>${rulesMarkup(state,{compact:true})}<span class="title-life-place">${e(place)}</span>${card.context?`<span class="title-life-context">${e(card.context)}</span>`:''}</span><span class="menu-arrow" aria-hidden="true">→</span></button><p class="title-source-note" data-slot-source ${card.sourceNote?'':'hidden'}>${e(card.sourceNote)}</p>${saveHealthMarkup(recent.id,{live})}</article>`:menuItem('Begin a new life','title-new',{detail:'Choose an origin, a face and your first year.',className:'title-begin'});
-  return `<main class="title-screen" aria-labelledby="title-heading">${titleArtwork()}<header class="title-topline"><span>A DARK FANTASY LIFE</span>${button(fullscreenLabel(),'fullscreen','','ghost small')}</header><div class="title-content"><h1 id="title-heading" class="title-wordmark"><span>Hearth</span> <span><em>&amp;</em> Oath</span></h1><p class="title-tagline">The world is old.<br>${state?'Your story continues.':'Your story is unwritten.'}</p><nav class="title-menu" aria-label="Title menu">${primary}<div class="title-life-actions">${state?menuItem('New life','title-new'):''}${menuItem('Saved lives','title-load',{disabled:!occupied.length,detail:occupied.length?`${occupied.length} of 3 slots occupied`:'No lives saved in this browser'})}</div><div class="title-secondary">${menuItem('Settings','title-settings')}${menuItem('How to play','help')}${menuItem('Tactics rehearsal','practice-open',{id:'protect_ally',detail:'Practice with a fictional party'})}${menuItem('Import a saved life','import',{detail:'Open an exported save file'})}</div></nav>${!state?saveHealthMarkup(activeSlot):''}</div><footer class="title-footer"><div class="title-settings"><button type="button" class="button ghost small" data-op="music-toggle" aria-pressed="${getAudioSettings().musicEnabled}">♫ Music ${getAudioSettings().musicEnabled?'on':'off'}</button><span>Ambient score · adjustable in Settings</span></div><p class="title-save-note">Saves stay in this browser. Export a file to keep a separate copy.</p><div class="title-bottomline"><span>VOLUME I · THE BOOK OF A LIFE</span><span>v0.71.0</span></div></footer></main>`;
+  return `<main class="title-screen" aria-labelledby="title-heading">${titleArtwork()}<header class="title-topline"><span>A DARK FANTASY LIFE</span>${button(fullscreenLabel(),'fullscreen','','ghost small')}</header><div class="title-content"><h1 id="title-heading" class="title-wordmark"><span>Hearth</span> <span><em>&amp;</em> Oath</span></h1><p class="title-tagline">The world is old.<br>${state?'Your story continues.':'Your story is unwritten.'}</p><nav class="title-menu" aria-label="Title menu">${primary}<div class="title-life-actions">${state?menuItem('New life','title-new'):''}${menuItem('Saved lives','title-load',{disabled:!occupied.length,detail:occupied.length?`${occupied.length} of 3 slots occupied`:'No lives saved in this browser'})}</div><div class="title-secondary">${menuItem('Settings','title-settings')}${menuItem('How to play','help')}${menuItem('Tactics rehearsal','practice-open',{id:'protect_ally',detail:'Practice with a fictional party'})}${menuItem('Import a saved life','import',{detail:'Open an exported save file'})}</div></nav>${!state?saveHealthMarkup(activeSlot):''}</div><footer class="title-footer"><div class="title-settings"><button type="button" class="button ghost small" data-op="music-toggle" aria-pressed="${getAudioSettings().musicEnabled}">♫ Music ${getAudioSettings().musicEnabled?'on':'off'}</button><span>Ambient score · adjustable in Settings</span></div><p class="title-save-note">Saves stay in this browser. Export a file to keep a separate copy.</p><div class="title-bottomline"><span>VOLUME I · THE BOOK OF A LIFE</span><span>v0.71.1</span></div></footer></main>`;
 }
 /** The rules a life lives by, on its slot and its review: the label, and for an old-rules life the way to the archive. */
 function rulesMarkup(state,{slot=null,compact=false}={}){
