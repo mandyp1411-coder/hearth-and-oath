@@ -5,13 +5,21 @@ rulebook and Design Bible Volume II. This ledger keeps that handoff visible.
 
 ## Current release
 
-v0.71.1, The first choice, is a bounded farmer repair under verification on
-`codex/v0.71.1-first-choice`. It preserves new birthday hints and reads actual
-captured costs/risks for old pending birthdays without rewriting their past.
-Focused opening checks pass 8/8 and unchanged contribution checks 5/5;
-the content and offline build pass. Full lanes and compiled checks are
-pending in `docs/measures/farmer-v0711-verification.md`. The human gate
-remains NOT RUN. No later phase is opened by this patch.
+v0.71.1, The first choice, is published as Sites version 105 in
+[PR #17](https://github.com/mandyp1411-coder/hearth-and-oath/pull/17), with
+merge bookkeeping pending. The complete fresh FAST/SLOW lanes on clean
+`c369b934cb8a1abeeed04ee69b6db39bf7e32ee1` passed 3,947 cases with zero
+failures and five skips. Four targeted offline checks pass; the other 26
+are NOT RUN for this patch. Strict lanes remain FAIL for skips and the
+formal full gate remains NOT RUN. The proof, exact identities and browser
+limits are in `docs/measures/farmer-v0711-verification.md`.
+
+Deployment `appgdep_6adc2e0d662881919adec44b79886488` succeeded from Sites
+source `5e9c2de55bbb25c4a10c6c606f085f0c2cd6e2a6`. Its runtime is
+`cee3675cd16e1883722a69d8f6e015689c72fe381e1043b767d0a7bfd2e9b926`.
+The pure reader improves old pending birthday display without rewriting
+saved history, while new matched scenes retain their hints. No later phase
+is opened: the real farmer-and-heir gate remains NOT RUN.
 
 v0.71, The farmer's life, shipped as a playtest candidate from
 `codex/v0.71-farmers-life`, in

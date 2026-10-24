@@ -21,7 +21,11 @@ blank observer forms. Both starts passed full save validation and exact
 import checks; one was opened in the live browser. This prepares the gate
 without supplying a participant or a verdict. That kit did not change the runtime.
 
-v0.71.1 is a bounded repair of the farmer's first birthday, under verification.
+v0.71.1, the bounded repair of the farmer's first birthday, is published as
+Sites version 105 in [PR #17](https://github.com/mandyp1411-coder/hearth-and-oath/pull/17).
+Its merge is pending; fresh FAST/SLOW results are 3,947 passed, zero failed,
+five skipped, and four targeted offline checks pass. The formal full gate
+remains NOT RUN.
 It retains new authored hints and derives a display for existing captured
 choices from their actual effects. It does not rewrite history or add a
 later livelihood. See [the patch checks](measures/farmer-v0711-verification.md).

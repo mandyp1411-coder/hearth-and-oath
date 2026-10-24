@@ -240,6 +240,10 @@ quotes. Money loss is clamped to the actual purse; bodily wellbeing is
 distinct from combat Health; dead people receive no inferred bond effect.
 Neither the event nor the pending story is rewritten on display or import.
 The version is a bounded repair while the human gate remains NOT RUN.
+Full frozen FAST/SLOW runs passed 3,947 cases, zero failures and five skips;
+four targeted offline checks pass. The formal full gate is NOT RUN. Exact
+scopes, proof seals, publication and the 200px birthday-layout limit are in
+`docs/measures/farmer-v0711-verification.md`.
 
 ## Direction
 
