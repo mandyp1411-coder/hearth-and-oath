@@ -15,6 +15,31 @@ No later Volume II release is claimed complete. Phase 2 waits for the
 farmer's real playtest. The protocol and separate verdict are in
 `docs/playtests/farmer-v071.md`.
 
+The owner has authorized [v0.72 preparation](one-rulebook-v072.md): source
+inventory, save-preservation regressions and a storage boundary on a
+separate branch. Retained decoding and incoming-write admission are now
+separate; both rulebooks remain accepted by the current caller. A genuine
+v0.61 fixture protects debt-only new-rule lives. This widens no livelihood,
+removes no compatibility and waives neither gate.
+
+The [first storage implementation](measures/one-rulebook-v072-storage-verification.md)
+passed 448 selected save/Ironman/edition tests and one compiled session with
+14 bounded cases. Strict content, import-graph build and artifact identity
+passed. These are development results on draft PR #19; full FAST/SLOW,
+formal release certification and browser/human gates remain NOT RUN.
+
+The next v0.72 slice connects ordinary and Ironman simulation-entry fences,
+including queued imports and reattachment. Its current policy stays unset:
+both rulebooks remain accepted and no compatibility is removed. Raw old-save
+decoding/export UI and the outstanding acceptance gates remain prerequisites
+to the actual cutover.
+
+That connected entry slice's [fresh record](measures/one-rulebook-v072-entry-verification.md)
+has 500 selected tests passed across 31 files, zero failed/skipped, and one
+compiled session with 14 cases. Source/artifact guards and content/import-
+graph build pass. These development checks do not complete either acceptance
+gate or certify the full release; v0.72 remains unpublished.
+
 The [session materials](playtests/farmer-v071.md#ready-to-use-session-materials)
 shipped in [PR #16](https://github.com/mandyp1411-coder/hearth-and-oath/pull/16) with two genuine age-sixteen starts and separate
 blank observer forms. Both starts passed full save validation and exact

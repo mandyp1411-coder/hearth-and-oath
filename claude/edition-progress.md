@@ -29,6 +29,49 @@ browser transfers stalled, so the complete browser round trip is NOT RUN.
 The human farmer-and-heir gate remains NOT RUN. The owner stopped further
 opening-layout polish; no Phase 2 work or legacy deletion is included.
 
+## Next release in preparation
+
+The owner authorized beginning v0.72, One Rulebook. Branch
+`codex/v0.72-one-rulebook` starts with a repeatable source inventory and
+regressions for mixed old/new slots, whole-life exports and old backup
+recovery. The [cutover plan](../docs/one-rulebook-v072.md) identifies the
+shared decoder's occupied-slot risk and the older expedition modes that
+still belong to new-rule lives. The first runtime implementation separates
+the retained decoder from optional incoming-write admission; existing
+callers still accept both rulebooks. The genuine v0.61 fixture adds zero-debt,
+pre-station migration and write coverage without invented history. No
+compatibility is removed. The archive browser loop and real farmer/heir gate remain NOT RUN;
+this preparation is not a shipped v0.72 or a passed gate.
+
+[Draft PR #19](https://github.com/mandyp1411-coder/hearth-and-oath/pull/19)
+now contains that first storage implementation and its rebuilt standalone.
+On frozen local `27c924424a7577c08c0741e57918d448ee6890dc`, 448 selected
+tests in 25 files passed, zero failures/skips. One complete compiled-module
+session passed 14 bounded cases; content/import-graph and artifact checks
+passed. API source `11a21de2ab65f2bcfb8be80a83da706b36522cee` has the
+same tree `fcc8d1cf59d33f215a6d08258de17d57e9b6b585`. The
+[development record](../docs/measures/one-rulebook-v072-storage-verification.md)
+preserves closed raw proof. Full FAST/SLOW and the formal gate were NOT RUN;
+the PR stays draft and the live game stays Sites 106.
+
+The next implementation connects the app's unset entry policy to ordinary
+reviewed imports/creation, slot/resume/adoption guards and Ironman locked
+entry. It preserves captured review payloads, late-refused pending operations,
+raw exports/lifecycle and death cleanup. Restrictive policies are tested at
+the real coordinator/store/session boundaries; the current app still admits
+both rulebooks. Independent old-save decoding and export/recovery UI remain
+unfinished, and the same browser/human gates still precede any cutover.
+
+The connected entry slice now has its own [closed development proof](../docs/measures/one-rulebook-v072-entry-verification.md):
+500 selected tests in 31 files passed, zero failures/skips, on frozen local
+`11613fa2d5e9ad4e55869d6734c11f920f8d258e`. API source
+`375207e43ea674092533d4dbb720ba96b2644764` has the same tree
+`b78471afe20e3d2905ea8f563f86cf7dd963500f`. One compiled full-module
+session passed 14 cases. Strict content/import-graph build, exact artifact
+and unchanged-source guards pass. The earlier 448-test storage result stays
+separate; it is not added to this total. This remains draft work on PR #19,
+with no cutover, new version label or deployment.
+
 ## Earlier farmer releases
 
 v0.71.1, The first choice, is published as Sites version 105 in

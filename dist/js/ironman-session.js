@@ -1,5 +1,6 @@
 import { isIronman, validateIronman, ironmanHeroDeath } from './ironman.js';
 import { validIronmanRunId } from './ironman-storage.js';
+import { createPositionAdmission } from './position-admission.js';
 
 const copy = value => value == null ? value : structuredClone(value);
 const text = value => JSON.stringify(value);
@@ -11,7 +12,9 @@ const lifecycle = kind => ['archive', 'delete', 'reattach'].includes(kind);
 /** DOM-free acceptance coordinator. The immutable operation, not the view
  * epoch, owns a reserved mutation until its durable outcome is reconciled.
  * Neither status nor settled() exposes a playable candidate or a save token. */
-export function createIronmanSession({ store, readContext, onAdopt, onEnd = () => {}, onDetach = () => {}, onStatus = () => {} }) {
+export function createIronmanSession({ store, readContext, onAdopt, acceptPosition, onEnd = () => {}, onDetach = () => {}, onStatus = () => {} }) {
+  const admitsPosition = createPositionAdmission(acceptPosition);
+  const forPlay = request => acceptPosition === undefined ? request : { ...request, acceptForPlay: acceptPosition };
   let epoch = 0, sequence = 0, phase = 'dormant', reason = null;
   let binding = null, operation = null, ended = null, busy = false;
   let completion = Promise.resolve();
@@ -31,6 +34,8 @@ export function createIronmanSession({ store, readContext, onAdopt, onEnd = () =
   }
   function announce() { try { onStatus(snapshot()); } catch {} }
   function blocked(why) { phase = 'blocked'; reason = why || 'authority-unconfirmed'; announce(); }
+  function refusedBeforeReservation() { reason = 'position-not-admitted'; announce(); return false; }
+  const adoptionReason = (request, fallback) => request.entryRefused ? 'position-not-admitted' : fallback;
   function matches(source) {
     const current = context();
     return Boolean(current && source && current.state === source.state && current.slot === source.slot
@@ -62,6 +67,11 @@ export function createIronmanSession({ store, readContext, onAdopt, onEnd = () =
   }
   function adopt(request, state, authority, attemptEpoch, source = request.source, kind = request.kind) {
     if (operation !== request || epoch !== attemptEpoch || !matches(source)) return false;
+    if (acceptPosition !== undefined) {
+      if (!admitsPosition(state)) { request.entryRefused = true; return false; }
+      // A predicate cannot turn a stale requesting view into an owner.
+      if (operation !== request || epoch !== attemptEpoch || !matches(source)) return false;
+    }
     const fingerprint = text(state);
     const details = { ...authority, epoch, operationId: request.id, kind, message: request.message };
     // This function is called ONLY by the store's synchronous locked consumer.
@@ -104,7 +114,7 @@ export function createIronmanSession({ store, readContext, onAdopt, onEnd = () =
   }
   function launch(request, action) {
     if (busy) return completion.then(snapshot);
-    busy = true; phase = 'pending'; reason = null;
+    busy = true; phase = 'pending'; reason = null; request.entryRefused = false;
     const attemptEpoch = epoch;
     announce();
     completion = Promise.resolve().then(() => action(attemptEpoch)).catch(() => {
@@ -123,8 +133,8 @@ export function createIronmanSession({ store, readContext, onAdopt, onEnd = () =
   }
   async function commitAttempt(request, attemptEpoch) {
     const intent = request.kind === 'live' ? 'continue' : request.kind;
-    const result = await store.commitIronman(request.slot, request.candidate, { intent, token: request.token,
-      consume: (state, authority) => adopt(request, state, authority, attemptEpoch) });
+    const result = await store.commitIronman(request.slot, request.candidate, forPlay({ intent, token: request.token,
+      consume: (state, authority) => adopt(request, state, authority, attemptEpoch) }));
     if (request.resolved || operation !== request) return;
     if (['ended', 'ended-cleanup-pending'].includes(result.status)) {
       // commit's ended result need not prove that full-byte cleanup completed.
@@ -134,7 +144,7 @@ export function createIronmanSession({ store, readContext, onAdopt, onEnd = () =
       // An import identifies the retained browser head, never its JSON payload.
       dispose(request); operation = null; blocked('known-head'); return;
     }
-    if (result.status === 'committed') { blocked('view-invalidated-after-commit'); return; }
+    if (result.status === 'committed') { blocked(adoptionReason(request, 'view-invalidated-after-commit')); return; }
     if (result.status === 'blocked' && ['create', 'import'].includes(request.kind)
         && ['exclusive-coordination-unavailable', 'invalid-position', 'invalid-new-opening',
           'underlying-slot-occupied', 'ironman-slot-occupied', 'unsaved-target'].includes(result.reason)) {
@@ -153,11 +163,11 @@ export function createIronmanSession({ store, readContext, onAdopt, onEnd = () =
     else if (operation === request) blocked(result.reason || result.status);
   }
   async function loadAttempt(request, attemptEpoch) {
-    const result = await store.inspectIronman(request.runId, { intent: 'resume', slot: request.slot,
-      consume: (state, authority) => adopt(request, state, authority, attemptEpoch) });
+    const result = await store.inspectIronman(request.runId, forPlay({ intent: 'resume', slot: request.slot,
+      consume: (state, authority) => adopt(request, state, authority, attemptEpoch) }));
     if (request.resolved || operation !== request) return;
     if (result.status === 'ended') { await endKnownMarker(request); return; }
-    dispose(request); operation = null; blocked(result.reason || (result.status === 'ready' ? 'view-invalidated' : result.status));
+    dispose(request); operation = null; blocked(result.reason || adoptionReason(request, result.status === 'ready' ? 'view-invalidated' : result.status));
   }
   function finishDetach(request, deleted) {
     if (binding?.runId === request.runId) binding = null;
@@ -171,17 +181,17 @@ export function createIronmanSession({ store, readContext, onAdopt, onEnd = () =
     announce();
   }
   async function attachedAttempt(request, attemptEpoch) {
-    const result = await store.inspectIronman(request.runId, { intent: 'resume', slot: request.slot, token: request.expectedHeadToken,
+    const result = await store.inspectIronman(request.runId, forPlay({ intent: 'resume', slot: request.slot, token: request.expectedHeadToken,
       consume: (state, authority) => same(state, request.candidate)
-        && authority.token === request.expectedHeadToken && adopt(request, state, authority, attemptEpoch) });
+        && authority.token === request.expectedHeadToken && adopt(request, state, authority, attemptEpoch) }));
     if (request.resolved || operation !== request) return;
     if (result.status === 'ended') { await endKnownMarker(request); return; }
-    blocked(result.reason || 'reattached-authority-unconfirmed');
+    blocked(result.reason || adoptionReason(request, 'reattached-authority-unconfirmed'));
   }
   async function lifecycleAttempt(request, attemptEpoch) {
     const options = { reviewed: true, token: request.token };
     const result = request.kind === 'reattach'
-      ? await store.reattachIronman(request.runId, request.slot, options)
+      ? await store.reattachIronman(request.runId, request.slot, forPlay(options))
       : await store[request.kind === 'archive' ? 'archiveIronman' : 'deleteIronman'](request.runId, options);
     if (operation !== request) return;
     if (result.status === 'ended') { await endKnownMarker(request); return; }
@@ -197,7 +207,7 @@ export function createIronmanSession({ store, readContext, onAdopt, onEnd = () =
   }
   async function recoverAttachAttempt(request, attemptEpoch) {
     const target = request.recovery;
-    const result = await store.reattachIronman(request.runId, target.slot, { reviewed: true, token: target.token });
+    const result = await store.reattachIronman(request.runId, target.slot, forPlay({ reviewed: true, token: target.token }));
     if (operation !== request) return;
     if (result.status === 'ended') { await endKnownMarker(request); return; }
     if (result.status === 'committed') { await recoverInspect(request, attemptEpoch, false); return; }
@@ -205,16 +215,17 @@ export function createIronmanSession({ store, readContext, onAdopt, onEnd = () =
   }
   async function recoverInspect(request, attemptEpoch, retry) {
     let comparison = null;
-    const result = await store.inspectIronman(request.runId, { intent: 'resume', slot: request.recovery.slot,
+    const result = await store.inspectIronman(request.runId, forPlay({ intent: 'resume', slot: request.recovery.slot,
       consume: (state, authority) => {
         comparison = same(state, request.candidate) ? 'candidate' : 'different';
         // Recovery is NOT a fresh token for the old action. Only the already
         // authoritative exact candidate may resolve its original obligation.
         return comparison === 'candidate' && adopt(request, state, authority, attemptEpoch);
-      } });
+      } }));
     if (request.resolved || operation !== request) return;
     if (result.status === 'ended') { await endKnownMarker(request); return; }
-    if (comparison) { blocked(comparison === 'candidate' ? 'view-invalidated' : 'candidate-recovery-conflict'); return; }
+    if (comparison) { blocked(adoptionReason(request, comparison === 'candidate' ? 'view-invalidated' : 'candidate-recovery-conflict')); return; }
+    if (result.reason === 'position-not-admitted') { blocked(result.reason); return; }
     if (retry) await recoverAttachAttempt(request, attemptEpoch);
     else blocked(result.reason || 'reviewed-candidate-recovery-required');
   }
@@ -232,7 +243,7 @@ export function createIronmanSession({ store, readContext, onAdopt, onEnd = () =
       return;
     }
     let comparison = null;
-    const result = await store.inspectIronman(request.runId, { intent: 'resume', slot: request.slot,
+    const result = await store.inspectIronman(request.runId, forPlay({ intent: 'resume', slot: request.slot,
       consume: (state, authority) => {
         if (same(state, request.candidate)) {
           comparison = 'candidate';
@@ -240,10 +251,10 @@ export function createIronmanSession({ store, readContext, onAdopt, onEnd = () =
         }
         comparison = authority.token === request.token ? 'source' : 'different';
         return false;
-      } });
+      } }));
     if (request.resolved || operation !== request) return;
     if (result.status === 'ended') { await endKnownMarker(request); return; }
-    if (comparison === 'candidate') { blocked('view-invalidated'); return; }
+    if (comparison === 'candidate') { blocked(adoptionReason(request, 'view-invalidated')); return; }
     if (comparison === 'source') {
       if (retry) await commitAttempt(request, attemptEpoch);
       else blocked('same-candidate-retry-required');
@@ -253,7 +264,7 @@ export function createIronmanSession({ store, readContext, onAdopt, onEnd = () =
     if (['create', 'import'].includes(request.kind) && result.reason === 'missing-run-head') {
       // A first write may not have happened. Re-review only to compare the
       // ORIGINAL empty token, never to bless this old candidate with a new one.
-      const review = await store.inspectIronman(request.candidate, { intent: request.kind, slot: request.slot });
+      const review = await store.inspectIronman(request.candidate, forPlay({ intent: request.kind, slot: request.slot }));
       if (operation !== request) return;
       if (review.status === 'ended') { await endKnownMarker(request); return; }
       if (review.status === 'review' && review.token === request.token) {
@@ -266,6 +277,8 @@ export function createIronmanSession({ store, readContext, onAdopt, onEnd = () =
   }
   function beginAdmission(kind, slot, state, options = {}) {
     if (!isIronman(state) || !validateIronman(state) || terminal(state)) return false;
+    if (busy || operation?.obligation) return false;
+    if (!admitsPosition(state)) return refusedBeforeReservation();
     const request = reserve(kind, { runId: runOf(state), slot: Number(slot), candidate: state,
       token: options.token, afterAdopt: options.afterAdopt, message: options.message, obligation: true });
     if (request) launch(request, attemptEpoch => commitAttempt(request, attemptEpoch));
@@ -302,13 +315,13 @@ export function createIronmanSession({ store, readContext, onAdopt, onEnd = () =
     if (!request) return Promise.resolve(snapshot());
     return launch(request, async attemptEpoch => {
       let unchanged = false;
-      const result = await store.inspectIronman(request.runId, { intent: 'resume', slot: request.slot,
+      const result = await store.inspectIronman(request.runId, forPlay({ intent: 'resume', slot: request.slot,
         consume: (state, authority) => {
           unchanged = currentBinding() && authority.token === binding.token && text(state) === binding.fingerprint;
           if (unchanged && operation === request && epoch === attemptEpoch && matches(request.source)) {
             dispose(request); operation = null; phase = 'ready'; reason = null; announce();
           }
-        } });
+        } }));
       if (operation !== request) return;
       if (result.status === 'ended') { await endKnownMarker(request); return; }
       dispose(request); operation = null; blocked(result.reason || (unchanged ? 'view-invalidated' : 'stale-authority'));
@@ -345,6 +358,7 @@ export function createIronmanSession({ store, readContext, onAdopt, onEnd = () =
       // Standard is deliberately not an input conversion or persistence path.
       if (!isIronman(next) || !validateIronman(next) || !this.canMutate() || runOf(next) !== binding.runId) return false;
       const kind = terminal(next) ? 'terminal' : 'live';
+      if (kind !== 'terminal' && !admitsPosition(next)) return refusedBeforeReservation();
       const request = reserve(kind, { runId: binding.runId, slot: binding.slot, candidate: next, token: binding.token,
         afterAdopt: options.afterAdopt, message: options.message, obligation: true });
       if (request) launch(request, attemptEpoch => kind === 'terminal' ? endAttempt(request) : commitAttempt(request, attemptEpoch));
@@ -361,7 +375,7 @@ export function createIronmanSession({ store, readContext, onAdopt, onEnd = () =
       epoch++; request.afterAdopt = null;
       launch(request, async attemptEpoch => {
         let refused = 'stale-authority';
-        const result = await store.inspectIronman(runId, { intent: 'resume', slot: target, token,
+        const result = await store.inspectIronman(runId, forPlay({ intent: 'resume', slot: target, token,
           consume: (state, authority) => {
             const exactCandidate = request.kind !== 'terminal' && request.candidate && same(state, request.candidate);
             // Revision-only re-save of the pre-death body is NOT an escape.
@@ -369,10 +383,10 @@ export function createIronmanSession({ store, readContext, onAdopt, onEnd = () =
               refused = 'original-source-obligation'; return false;
             }
             return adopt(request, state, authority, attemptEpoch, source, 'reviewed-authority');
-          } });
+          } }));
         if (request.resolved || operation !== request) return;
         if (result.status === 'ended') { await endKnownMarker(request); return; }
-        blocked(result.reason || refused);
+        blocked(result.reason || adoptionReason(request, refused));
       });
       return false;
     },

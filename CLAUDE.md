@@ -267,6 +267,46 @@ farmer playtest remain NOT RUN. See `docs/measures/archive-v0712-verification.md
 The owner stopped further farmer-opening layout polish. No Phase 2 engine
 or legacy deletion is included.
 
+v0.72 preparation lives in `docs/one-rulebook-v072.md` and
+`scripts/plan-one-rulebook.mjs`. The inventory is textual discovery, not
+automatic deletion. Keep the shared save decoder able to retain complete
+old slots and backups: rejecting them there can make mixed occupied slots
+look empty. New-rule historical lives can still hold older maze/battle
+modes; their flags are not old-rule classification. The new retention tests
+protect occupancy, complete exports and backup review. No cutover is
+included before the outstanding archive/browser and human gates.
+
+The first v0.72 runtime refactor separates `createSaveStore`'s retained
+decoder from optional `acceptPosition` write admission. Default callers
+still accept both rulebooks. The predicate sees a detached decoded snapshot;
+only synchronous literal true admits an ordinary write/replacement or
+Ironman create/import/continue commit. Never apply that policy to retained
+reads, authority discovery, archive/delete, revocation or death cleanup.
+This is not the later simulation-entry policy. The genuine v0.61 fixture
+comes from its own merge engine: zero debt without a station is new rules.
+Keep the fixture's source/provenance and unedited historical output.
+The first storage slice's frozen development replay passes 448 tests in 25
+files with zero failures/skips, plus one full compiled session with 14 cases.
+`docs/measures/one-rulebook-v072-storage-verification.md` retains raw proof,
+exact identities and the omitted full release/browser/human gates. PR #19
+remains draft; the main Site is not redeployed by these checks.
+
+The next v0.72 slice connects an unset `positionAdmissionPolicy` through
+`life-entry.js`, the store and `ironman-session.js`; it still admits both
+rulebooks. Reviewed ordinary replacements capture their exact payload and
+check the current view and policy again inside the save lock. Ironman entry
+passes raw `acceptForPlay` callbacks for locked actual-head checks, while
+export/lifecycle/death cleanup remain unfiltered. Preserve uncertain request
+obligations on refusal. Never activate the cutover before raw old-save
+export/recovery and the archive/browser/human gates are complete.
+The connected entry slice's own frozen replay passes 500 selected tests in
+31 files, zero failures/skips, plus one compiled session with 14 cases.
+`docs/measures/one-rulebook-v072-entry-verification.md` records exact source,
+artifact and raw proof separately from the earlier storage-only snapshot.
+Current app handlers retain the unset policy; configured policies are tested
+at actual coordinator/store/session boundaries, not claimed as a complete
+restrictive-policy UI review. No cutover or publication is included.
+
 ## Direction
 
 The v0.59.0 analysis and the owner's design direction live in the Claude
