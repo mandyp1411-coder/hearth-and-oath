@@ -10,7 +10,7 @@ is waived. This is not a release verdict.
 | Check | Source | Result |
 | --- | --- | --- |
 | Fast lane, serial, 251 files | `c04ac2e`–`6130d94` (files ran as commits landed) | 3,256 passed, 1 failed, 3 skipped. The failure was `return-life-cards` #7, which pinned two lines this slice changed on purpose; updated in `f8ad2d6`, 7 of 7 |
-| App-mounting files re-run at the tip, serial | `f8ad2d6` | Running when this record was first written; the result is added below the table when it finishes |
+| App-mounting files re-run at the tip, serial | `f8ad2d6` | 109 files, 1,644 passed, 0 failed, 0 skipped |
 | Slow lane, serial, 36 files | `c04ac2e`–`6130d94` | 741 passed, 0 failed, 1 skipped |
 | Browser, two origins plus both offline files | `6130d94` (main), the pinned archive from `build-archive.mjs` | 32 of 32 ([record](archive-verification-v072-door.md)) |
 
