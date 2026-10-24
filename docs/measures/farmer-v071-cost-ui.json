@@ -1,0 +1,41 @@
+{
+  "desktopLargest": {
+    "allHouseholdQuotesInsideChoices": true,
+    "canScroll": true,
+    "firstChoiceTop": 207.875,
+    "horizontalOverflow": false
+  },
+  "desktopDefault": {
+    "firstChoiceTop": 169.375,
+    "horizontalOverflow": false,
+    "householdQuotes": [
+      "The house needs about 1 gold over this work.",
+      "The house needs about 1 gold over this work.",
+      "No gold for the house falls due over this work."
+    ]
+  },
+  "phoneDefault": {
+    "costs": [
+      "Sow barley3 days \u00b7 3 gold to pay \u00b7 Three days and three gold. A rich yield if the weather holds; blight can take much of it.The house needs about 1 gold over this work.",
+      "Sow beans3 days \u00b7 2 gold to pay \u00b7 Three days and two gold. A smaller crop, less easily lost to blight.The house needs about 1 gold over this work.",
+      "Let the soil rest1 day \u00b7 No gold to pay \u00b7 One day. No seed spent and no crop this year.No gold for the house falls due over this work.",
+      "Leave the seed sack shutNow \u00b7 No gold to pay \u00b7 No work today. There will be no harvest to sell or store this year."
+    ],
+    "firstChoiceTop": 165.78125,
+    "horizontalOverflow": false
+  },
+  "phoneLargest": {
+    "allHouseholdQuotesInsideChoices": true,
+    "canScroll": true,
+    "firstChoiceTop": 227.5625,
+    "horizontalOverflow": false
+  },
+  "largestReadingStyle": "--reading-scale: 1.5;",
+  "before": "Edra Merrow\nAge 18 \u00b7 A future unwritten\nStonebrace\n3 Bloom \u00b7 Year 19\n40\n\u25c8 100g\n\u25c7\nHealth\n53/53\nJoy\n51%\nFocus\n31/31\nStress\n22%",
+  "after": "Edra Merrow\nAge 18 \u00b7 A future unwritten\nStonebrace\n6 Bloom \u00b7 Year 19\n40\n\u25c8 96g\n\u25c7\nHealth\n53/53\nJoy\n51%\nFocus\n31/31\nStress\n22%",
+  "method": "Real cloud Chrome, imported valid adult farmer through normal file chooser, reading sizes changed with game controls; choice made through actual button.",
+  "limits": [
+    "Not a human playtest",
+    "No screen-reader assessment"
+  ]
+}

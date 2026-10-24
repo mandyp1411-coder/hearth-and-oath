@@ -1,24 +1,51 @@
 // The farmer's Day and Book. These are readers: all choices return through
 // the same public commands as the rest of the game.
+import { householdCostPreview } from './budget.js';
+
 const words = value => typeof value === 'string' ? value : '';
 const paragraphsOf = chapter => Array.isArray(chapter?.paragraphs) ? chapter.paragraphs : [words(chapter?.text)].filter(Boolean);
-const costOf = choice => {
-  const days = Number(choice.days ?? choice.cost?.days) || 0;
-  const gold = Number(typeof choice.cost === 'object' ? choice.cost.gold : choice.cost) || 0;
-  return [days ? `${days} ${days === 1 ? 'day' : 'days'}` : 'Now', gold ? `${gold} gold` : '', words(choice.risk)].filter(Boolean).join(' · ');
+const daysOf = choice => Number(choice.durationDays ?? choice.days ?? choice.cost?.days) || 0;
+const feeOf = choice => Number(choice.quotedCost ?? (typeof choice.cost === 'object' ? choice.cost.gold : choice.cost)) || 0;
+const costOf = (choice, risk, work) => {
+  const days = daysOf(choice), gold = feeOf(choice);
+  return [days ? `${days} ${days === 1 ? 'day' : 'days'}` : 'Now', gold ? `${gold} gold to pay` : work ? 'No more gold to pay' : 'No gold to pay', risk].filter(Boolean).join(' · ');
 };
+function householdWords(s, choice) {
+  const days = daysOf(choice);
+  if (!s?.householdBudget || !s.life || !Number.isFinite(s.day) || days <= 0) return null;
+  const keep = householdCostPreview(s, days);
+  if (!keep.days) return null;
+  // Normal actions can leave this coin due for later; scenes collect it
+  // after the days actually worked. The fee and the house stay distinct.
+  const text = keep.totalDue ? keep.outstanding ? `The house needs about ${keep.totalDue} gold in all. ${keep.outstanding} of that is already due from earlier days.` : `The house needs about ${keep.totalDue} gold over this work.` : 'No gold for the house falls due over this work.';
+  const remaining = Math.max(0, s.hero.gold - feeOf(choice)), short = Math.max(0, keep.totalDue - remaining);
+  let risk = '';
+  if (short && feeOf(choice) <= s.hero.gold) {
+    const nineteenth = s.timeline?.mode === 'birth' ? (s.timeline.birthDay || 0) + 19 * 365 : Infinity;
+    const carriedOnce = s.age < 19 && !s.householdBudget.graceUsed && s.day + days < nineteenth;
+    risk = s.householdBudget.debt === undefined ? 'Without other coin, the house will need help.'
+      : carriedOnce ? 'Without other coin, the neighbours carry the house this once.'
+        : `Without other coin, the house will owe about ${short} gold.`;
+  }
+  return { text, risk };
+}
 
 export function farmerDayVisible(s) {
   return Boolean(s?.farm && s.age >= Math.max(16, s.farm.openingAge || 16) && !s.battle && !s.delve && !s.maze && !s.dungeon && !s.rpg?.expedition && !s.adventuring?.expedition);
 }
 
 /** Costs and serious risks belong inside the choice, including without numbers. */
-export function renderFarmerChoices(choices, ui, { op = 'activity', showNumbers = false, reasonFor = choice => choice.disabledReason } = {}) {
+export function renderFarmerChoices(choices, ui, { op = 'activity', state = null, showNumbers = false, reasonFor = choice => choice.disabledReason } = {}) {
   const { e } = ui;
   return `<div class="farm-choices">${choices.map(choice => {
-    const reason = reasonFor(choice), risk = words(choice.risk), description = words(choice.description);
-    const extra = description && (!risk || !description.includes(risk)) ? description : '';
-    return `<button type="button" class="choice-card farm-choice" data-op="${op}" data-id="${e(choice.id)}"${reason ? ' disabled' : ''}><strong class="choice-label">${e(choice.label)}</strong><span class="farm-choice-cost" data-farm-choice-cost>${e(costOf(choice))}</span>${extra ? `<span class="choice-description">${e(extra)}</span>` : ''}${showNumbers && choice.detail ? `<small class="action-detail">${e(choice.detail)}</small>` : ''}${reason ? `<span class="disabled-reason">${e(reason)}</span>` : ''}</button>`;
+    const reason = reasonFor(choice), originalRisk = words(choice.risk), description = words(choice.description);
+    const work = op === 'choice' && state?.farm?.threads?.find(t => !t.closed && t.stage === 'open' && `farm_${t.def}` === state.event?.id && t.data.work?.remaining > 0 && t.data.work.pick === choice.id)?.data.work;
+    // Timed farm risks begin with the original price. A receipt replaces
+    // that sentence when only the remaining work is being offered again.
+    const risk = work ? originalRisk.replace(/^[^.]*\.\s*/, '') : originalRisk;
+    const extra = !work && description && (!risk || !description.includes(risk)) ? description : '';
+    const keep = householdWords(state, choice);
+    return `<button type="button" class="choice-card farm-choice" data-op="${op}" data-id="${e(choice.id)}"${reason ? ' disabled' : ''}><strong class="choice-label">${e(choice.label)}</strong><span class="farm-choice-cost" data-farm-choice-cost>${e(costOf(choice, risk, work))}</span>${work?.gold ? `<span class="choice-description" data-farm-prepaid>${e(work.gold)} gold already paid.</span>` : ''}${keep ? `<span class="choice-description" data-farm-household-cost>${e(keep.text)}</span>${keep.risk ? `<span class="choice-description" data-farm-debt-risk>${e(keep.risk)}</span>` : ''}` : ''}${extra ? `<span class="choice-description">${e(extra)}</span>` : ''}${showNumbers && choice.detail ? `<small class="action-detail">${e(choice.detail)}</small>` : ''}${reason ? `<span class="disabled-reason">${e(reason)}</span>` : ''}</button>`;
   }).join('')}</div>`;
 }
 
@@ -53,7 +80,7 @@ export function renderFarmerDay(s, view, actions, ui, { scene = '', continuation
   if (!view) return '';
   const { e, button, paragraphs } = ui;
   const offers = actions.filter(action => action.id.startsWith('farm_')).slice(0, 12);
-  const decision = scene || `<section class="farm-decisions" data-right-now><h2>${e(view.title)}</h2>${renderFarmerChoices(offers, ui, { showNumbers })}${!offers.length ? `<p>${e(view.summary)}</p>` : ''}</section>`;
+  const decision = scene || `<section class="farm-decisions" data-right-now><h2>${e(view.title)}</h2>${renderFarmerChoices(offers, ui, { state: s, showNumbers })}${!offers.length ? `<p>${e(view.summary)}</p>` : ''}</section>`;
   const ambition = view.ambition ? `<div class="farm-ambition"><span>What you seek</span><strong>${e(view.ambition.title)}</strong>${view.ambition.fulfilled ? '<span>Kept</span>' : ''}</div>` : '';
   const nextSeason = !scene && !continuation ? `<div class="farm-season">${button('Live the season', 'live-season', '', 'secondary', Boolean(seasonReason))}<p>${e(seasonReason || 'The field turns with the seasons. You stop when a choice comes to your door.')}</p></div>` : '';
   const plan = view.plan ? `<details class="farm-plan" data-disclosure="farm-plan"><summary>${e(view.plan.title)}</summary>${paragraphs(view.plan.text)}</details>` : '';

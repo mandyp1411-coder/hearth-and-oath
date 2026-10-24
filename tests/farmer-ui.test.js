@@ -31,8 +31,8 @@ test('the farmer Day is scoped to the new farmer and does not replace a fight or
 
 test('serious risk and the actual time and fee stay on every choice with numbers hidden', () => {
   const markup = renderFarmerChoices([offer(), offer({ id: 'farm_wait', days: 0, cost: 0, risk: 'Winter may reach the grain.' })], ui);
-  assert.match(markup, /data-farm-choice-cost>4 days · 6 gold · Blight may take the crop\./);
-  assert.match(markup, /data-farm-choice-cost>Now · Winter may reach the grain\./);
+  assert.match(markup, /data-farm-choice-cost>4 days · 6 gold to pay · Blight may take the crop\./);
+  assert.match(markup, /data-farm-choice-cost>Now · No gold to pay · Winter may reach the grain\./);
   assert.doesNotMatch(markup, /Forty in a hundred/);
   assert.match(renderFarmerChoices([offer()], ui, { showNumbers: true }), /Forty in a hundred/);
   assert.match(renderFarmerChoices([offer({ disabledReason: 'The chest is empty.' })], ui), /disabled[^>]*>.*The chest is empty\./);
@@ -42,7 +42,7 @@ test('a farmer scene keeps its full account and the public choice command', () =
   const scene = { id: 'farm_due', title: 'The reeve at the door', body: 'The reeve has come. Mara stands beside the cart, and the grain is still wet.', choices: [offer({ id: 'continue', days: undefined, cost: { days: 2, gold: 8 } })] };
   const markup = renderFarmerScene(scene, ui);
   assert.match(markup, /data-op="choice" data-id="continue"/);
-  assert.match(markup, /2 days · 8 gold/);
+  assert.match(markup, /2 days · 8 gold to pay/);
   assert.match(markup, /The reeve has come\./);
   assert.match(markup, /Mara stands beside the cart, and the grain is still wet\./);
   assert.ok(markup.indexOf('data-op="choice"') < markup.indexOf('farm-scene-account'));

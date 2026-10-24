@@ -801,7 +801,7 @@ function eventScene() {
   const event=voiceEvent(game,game.event);
   const roadPerson=event?.id.startsWith('travel_')?travelEncounterPerson(game):null;
   if(!event)return '';
-  if(event.id.startsWith('farm_'))return renderFarmerScene(event,uiHelpers(),{showNumbers:displaySettings.showNumbers});
+  if(event.id.startsWith('farm_'))return renderFarmerScene(event,uiHelpers(),{state:game,showNumbers:displaySettings.showNumbers});
   const customer=societyCustomerContext(game,event);
   const preparationNote=event.id==='quest_prepare'&&event.choices.some(c=>c.id==='refuge'&&/^Build /.test(c.label))?'<p class="small-copy" data-preparation-pledge>These preparation choices record pledges from willing hosts and crews using existing rooms, supplies and capacity. The refuge agreement sets aside that support for the transition.</p>':'';
   const route=game.dungeon?dungeonView(game):null;

@@ -35,12 +35,13 @@ function saveable(state) {
 
 function choose(state, id) {
   if(state.age<3&&state.event?.choices.length===1&&state.event.choices[0].id==='continue')id='continue';
-  assert.ok(state.event?.choices.some(choice => choice.id === id), `${state.event?.id} must offer ${id}`);
+  assert.ok(state.event?.choices.some(choice => choice.id === id && !choice.disabledReason), `${state.event?.id} must offer an enabled ${id}`);
   return transition(state, value => engine.chooseEventOption(value, id));
 }
 
 function act(state, id) {
-  if(state.event?.id==='health_concern')state=choose(state,'continue');
+  for(let step=0;step<20&&(state.event?.id==='health_concern'||state.event?.id.startsWith('farm_'));step++)state=choose(state,'continue');
+  assert.ok(state.event?.id!=='health_concern'&&!state.event?.id.startsWith('farm_'),'incidental decisions must have a bounded continuation');
   state=atService(state,id);
   state=knownCurseMeeting(state,id);
   const action = engine.getActions(state).find(item => item.id === id);
@@ -59,8 +60,13 @@ function grow(state, target) {
       if (state.event.id === 'lineage_bereavement') { state = choose(state, 'private'); continue; }
       if (state.event.id === 'hard_winter') { state = choose(state, 'endure'); continue; }
       if (state.event.id.startsWith('living_')) { state = choose(state, 'continue'); continue; } // the world takes its course
+      // These fixtures concern school, tools and privacy. Let the optional
+      // field take its stated course without buying work or making a promise.
+      if (state.event.id.startsWith('farm_')) { state = choose(state, 'continue'); continue; }
       assert.match(state.event.id, /^(birth_|fate_)/, 'growing policy must expose any unexpected interruption');
-      state = choose(state, state.event.choices.some(item => item.id === 'curiosity') ? 'curiosity' : state.event.choices[0].id);
+      const pick=state.event.choices.find(item=>item.id==='curiosity'&&!item.disabledReason)||state.event.choices.find(item=>!item.disabledReason);
+      assert.ok(pick,`${state.event.id} needs a lawful continuation`);
+      state = choose(state, pick.id);
     } else state = transition(state, value => value.timeline.yearTarget == null ? engine.ageUp(value) : engine.continueAgeUp(value));
   }
   assert.equal(state.age, target);
@@ -79,7 +85,7 @@ function move(state, id) {
   const picks = { lycan_fullmoon:'isolate',living_conscription:'continue',living_strike:'continue',living_wolves:'continue',living_purge:'continue',living_refugees:'continue',living_rival:'continue',living_lie:'continue',living_bedside:'continue',travel_messenger:'continue',travel_pilgrims:'continue',travel_grave_robber:'continue',travel_fortune:'continue',travel_wagon:'continue',travel_relic:'continue', travel_lore: 'continue', travel_witness: 'continue', travel_caravan: 'continue', travel_sick_traveler: 'continue', travel_bandits: 'avoid', travel_beasts: 'avoid', travel_weather: 'press', travel_delay: 'continue', health_concern: 'continue' };
   for (let step = 0; step < 60 && (state.timeline.journey || state.event); step += 1) {
     if (state.event) {
-      const pick = picks[state.event.id];
+      const pick = state.event.id.startsWith('farm_') ? 'continue' : picks[state.event.id];
       assert.ok(pick, `road policy must explicitly handle ${state.event.id}`);
       const before = state.day;
       state = choose(state, pick);

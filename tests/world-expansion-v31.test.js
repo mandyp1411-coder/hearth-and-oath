@@ -15,6 +15,7 @@ import { tradeInventory, newTradeDraft, quoteTrade } from '../dist/js/trading.js
 import { activeJournalQuests } from '../dist/js/journal-ui-v30.js';
 import { mountApp } from './helpers/ui-surface.mjs';
 import { seededRoll } from '../dist/js/world.js';
+import { householdCostPreview } from '../dist/js/budget.js';
 import { takeBattleAction } from '../dist/js/combat.js';
 import { culturalName } from '../dist/js/names.js';
 import { NAME_CULTURES_V31 } from '../dist/js/cultural-name-catalog-v31.js';
@@ -55,7 +56,16 @@ test('every tradition has a real shrine while some settlements have only a docto
  const s=fresh(),sites=s.world.locations.filter(p=>cityRooms(at(structuredClone(s),p.id)).length),shrines=sites.filter(p=>s.realm.sites[p.id].hasShrine);assert.equal(new Set(shrines.map(p=>s.realm.sites[p.id].faithId)).size,6);const plain=sites.find(p=>s.realm.sites[p.id].hasShrine===false);assert.ok(plain);const here=at(s,plain.id,'shrine');assert.equal(cityRooms(here).find(r=>r.id==='shrine').name,'Doctor’s House');assert.ok(settlementServices(here).some(r=>r.kind==='doctor'));assert.ok(!settlementServices(here).some(r=>r.kind==='keeper'));assert.ok(!E.getActions(here).some(a=>a.id.startsWith('realm_join_')));valid(here);
 });
 test('a shrine offers only its own religion, and its ritual requires that actual tradition',()=>{
- let s=at(fresh(),'home','shrine');const id=s.realm.sites.home.faithId,join=E.getActions(s).filter(a=>a.id.startsWith('realm_join_'));assert.equal(join.length,1);assert.equal(join[0].id,'realm_join_'+id);s=valid(E.chooseAction(s,join[0].id));assert.equal(s.realm.faithId,id);const other=s.world.locations.find(p=>s.realm.sites[p.id].hasShrine&&s.realm.sites[p.id].faithId!==id&&cityRooms(at(structuredClone(s),p.id)).length);assert.ok(other);s=at(s,other.id,'shrine');assert.notEqual(s.realm.sites[other.id].faithId,id);const rite=E.getActions(s).find(a=>a.id==='realm_ritual'&&!a.disabledReason);assert.ok(rite,'the traveler may keep a private observance abroad');assert.ok(!E.getActions(s).some(a=>a.id==='realm_join_'+id),'the foreign shrine does not enroll this tradition');const own=s.realm.faithId,local=s.realm.sites[other.id].faithId,day=s.day,gold=s.hero.gold;s=valid(E.chooseAction(s,'realm_ritual'));assert.equal(s.day,day+1);assert.equal(s.hero.gold,gold-6);assert.equal(s.realm.faithId,own);assert.equal(s.realm.sites[other.id].faithId,local);
+ let s=at(fresh(),'home','shrine');const id=s.realm.sites.home.faithId,join=E.getActions(s).filter(a=>a.id.startsWith('realm_join_'));assert.equal(join.length,1);assert.equal(join[0].id,'realm_join_'+id);s=valid(E.chooseAction(s,join[0].id));assert.equal(s.realm.faithId,id);const other=s.world.locations.find(p=>s.realm.sites[p.id].hasShrine&&s.realm.sites[p.id].faithId!==id&&cityRooms(at(structuredClone(s),p.id)).length);assert.ok(other);s=at(s,other.id,'shrine');assert.notEqual(s.realm.sites[other.id].faithId,id);const rite=E.getActions(s).find(a=>a.id==='realm_ritual'&&!a.disabledReason);assert.ok(rite,'the traveler may keep a private observance abroad');assert.ok(!E.getActions(s).some(a=>a.id==='realm_join_'+id),'the foreign shrine does not enroll this tradition');
+ const before=structuredClone(s),keep=householdCostPreview(s,rite.days),own=s.realm.faithId,local=s.realm.sites[other.id].faithId;
+ assert.equal(rite.days,1);assert.equal(rite.cost,6);assert.ok(before.hero.gold>=rite.cost+keep.totalDue,'this household can pay the rite and its actual day of keep');
+ s=valid(E.chooseAction(s,'realm_ritual'));
+ assert.equal(s.day,before.day+1);assert.equal(s.realm.devotion,before.realm.devotion+1);assert.equal(s.realm.uses.ritualDay,s.day);
+ assert.equal(s.householdBudget.billedGold-before.householdBudget.billedGold,keep.totalDue,'the actual day bills exactly the forecast keep');
+ assert.equal(s.householdBudget.paidGold-before.householdBudget.paidGold,keep.totalDue,'the funded household pays that bill once');
+ assert.equal(s.hero.gold,before.hero.gold-6-keep.totalDue,'the six-gold rite fee and household bill each leave the purse once');
+ for(const key of ['debt','borrowedGold','supportedGold'])assert.equal(s.householdBudget[key],before.householdBudget[key],`${key} cannot fund this affordable observance`);
+ assert.equal(s.realm.faithId,own);assert.equal(s.realm.sites[other.id].faithId,local);
 });
 test('home purchase is restricted to Homes and records an actual owned local home',()=>{
  let s=fresh();s.hero.gold=1000;const old=resources(s),remote=E.chooseAction(s,'life_home_cottage');assert.deepEqual(resources(remote),old);s=walk(s,'homes');const a=E.getActions(s).find(a=>a.id==='life_home_cottage');assert.ok(a&&!a.disabledReason);s=valid(E.chooseAction(s,a.id));assert.equal(s.life.home.source,'purchase');assert.equal(s.life.home.locationId,s.locationId);assert.equal(s.life.home.tier,'cottage');assert.equal(cityRooms(s).find(r=>r.id==='homes').private,false);
