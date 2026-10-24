@@ -9,11 +9,17 @@ implementation and evidence without editing the owner's original PDF.
 | Release | Scope | Status and evidence |
 | --- | --- | --- |
 | v0.70 | The archive and measuring tools | Merged as PR #14. The archive branch and packaging exist. `dist/js/archive-link.js` still has no published archive URL; packaging and browser fixtures do not prove a public deployment. Keep all compatibility code. |
-| v0.71 | One farmer's life | Implementation in progress on `codex/v0.71-farmers-life`. Automated verification and browser evidence belong to this release. The human playtest remains NOT RUN. |
+| v0.71 | One farmer's life | Implemented as a playtest candidate in [PR #15](https://github.com/mandyp1411-coder/hearth-and-oath/pull/15). Sites version 104 is [published](https://hearth-and-oath-v1-a73f.nilled463.chatgpt.site/); merge bookkeeping is PENDING. The [software record](measures/farmer-v071-verification.md) contains 3,939 selected passing assertions and five skips, with composite FAST/SLOW limits. The human playtest remains NOT RUN. |
 
 No later Volume II release is claimed complete. Phase 2 waits for the
 farmer's real playtest. The protocol and separate verdict are in
 `docs/playtests/farmer-v071.md`.
+
+The selected software results do not establish a strict single-snapshot
+software-gate PASS. Offline evidence must retain its actual terminal status,
+artifact identity and checker scope. The [edition ledger](../claude/edition-progress.md)
+keeps the exact source, merge and deployment fields; pending delivery is not
+reported as shipped.
 
 ## Save defaults for v0.71
 

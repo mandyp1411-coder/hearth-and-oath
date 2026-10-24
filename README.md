@@ -8,7 +8,9 @@ gate is not yet passed.
   the family's land from sixteen, or from the older age chosen at creation.
   Barley, beans or fallow; a harvest kept, sold or divided; the lord's due
   faced at the door. The displayed days and seed money are spent once, and
-  work interrupted by a birthday keeps its remaining days.
+  work interrupted by a birthday keeps its remaining days. Each choice shows
+  its direct payment and the house's keep; a lean purse can leave that keep
+  owed. Resuming prepaid work shows the money already paid.
 - **Two people, with memories.** The actual neighbour wants the lower ditch
   drained. A spouse has a place at the winter chest. Their opinion is
   separate from their bond, and conversations continue beyond one reply.
@@ -31,7 +33,15 @@ gate is not yet passed.
   in `docs/playtests/farmer-v071.md`; its human result is NOT RUN. No trader,
   healer or general-purpose life engine is declared finished by this slice.
 
-Version 0.70.0 is The archive: every save says which rules it lives by, the old rules are kept at their own address, and the measuring tools arrive. No rule changes; nothing is removed.
+The implementation is [PR #15](https://github.com/mandyp1411-coder/hearth-and-oath/pull/15).
+The [software evidence](docs/measures/farmer-v071-verification.md) records
+3,939 selected passing assertions and five skips. FAST/SLOW results combine
+documented snapshots and focused reruns; the strict single-snapshot software
+gate remains uncertified. [Play the published candidate](https://hearth-and-oath-v1-a73f.nilled463.chatgpt.site/).
+Merge bookkeeping and deployment provenance are kept in the
+[edition ledger](claude/edition-progress.md).
+
+Version 0.70.0 is The archive: every save says which rules it lives by, the old rules are preserved as a separate build, and the measuring tools arrive. Its public archive address remains unverified. No rule changes; nothing is removed.
 
 - **Two games, named.** The codebase has carried two rulebooks since v0.60: lives begun since then (a debt ledger from v0.61, a rolled station from v0.62) live by the new rules, and lives from before, or migrated from before, keep the rules they were written under. From this version every save says so in plain words: a slot, the title card, an export and an import review read **Old rules**, **New rules, begun before v0.70**, or **New rules, begun in v0.70**. A life begun before this version is never given a date after the fact. The exported file is named for its rules (`…-old-rules.json`, `…-new-rules.json`).
 - **The Old Rules archive.** The v0.69 game — the last build that carries both rulebooks — is kept as its own build with its own storage, so the two can never share a browser database: IndexedDB `hearth-and-oath-legacy`, every key under `hearth-and-oath-legacy:`, the offline file `hearth-and-oath-old-rules.html`. `node scripts/build-archive.mjs` packages it into `out-legacy/` from the `v0.69-archive` branch; the owner publishes that directory at an address of their choosing and names it in `dist/js/archive-link.js`. The archive labels its slots the same way, names its exports `…-archive.json`, and turns a new-rules import away in a line: it belongs in the main game.

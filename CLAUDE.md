@@ -153,12 +153,15 @@ the `v0.69-archive` branch (v0.69.0 with its storage renamed
 `hearth-and-oath-legacy`, the same labels, and an import that refuses a
 new-rules life); `scripts/build-archive.mjs` packages it into `out-legacy/`,
 and `dist/js/archive-link.js` is where the main game learns its address.
+That public address remains unverified; a packaged archive is not a verified
+deployment, and all compatibility code stays until it has a public home.
 `tests/fixtures/saves/` are real saves written by past releases' own engines
 (`scripts/fixtures/generate-release-saves.mjs` against a worktree at the
 release's merge commit); regenerate rather than hand-edit them. Volume II's
-measuring tools (`scripts/interface-harness.py`, `scripts/voice-lint.mjs`,
-`scripts/content/validate.mjs`) report and do not fail the build; their
-numbers for a release are committed under `docs/measures/`.
+interface and voice measuring tools report their findings. From v0.71,
+`npm run build` invokes the content validator with `--strict`, so invalid
+content fails the build. Their numbers for a release are committed under
+`docs/measures/`.
 
 Test fixtures that are not about birth should pin a station
 (`station: rollBirthCircumstances(seed, 'common', ancestry)`): a bound
@@ -193,8 +196,11 @@ The farmer's due replaces station dues while that same field is held, so
 the budget cannot charge it again. `inheritFarm` runs after `inheritSociety`
 and after the successor's people and budget are rebuilt: local peer IDs
 can be reused, so a remembered neighbour is rebound to the actual named,
-dated world person. The redundant public successor budget reset must not
-erase farm burdens. `validateFarm` checks the captured records.
+dated world person. Loans follow the actual retained lender or their existing
+stable lineage record, including a dead or absent relative. Harvest help
+captures its actual person, agreement day and target season; a replacement
+neighbour does not inherit that work. The redundant public successor budget
+reset must not erase farm burdens. `validateFarm` checks the captured records.
 
 Content is authored under `content/farmer/`. The build strictly validates
 the whole tree, then compiles only this production folder into
@@ -206,6 +212,14 @@ paladin. The six-to-eight-player gate remains NOT RUN until real session
 notes and a verdict exist in `docs/playtests/farmer-v071.md`. Do not widen
 this slice before that verdict, or remove legacy rules before the archive
 has a verified public home.
+
+The implementation is a playtest candidate in
+[PR #15](https://github.com/mandyp1411-coder/hearth-and-oath/pull/15).
+`docs/measures/farmer-v071-verification.md` records 3,939 selected passing
+assertions and five skips, with the composite FAST/SLOW snapshot limits.
+It is not a strict single-snapshot software-gate PASS. Sites version 104 is
+published; exact source, merge and deployment records live in
+`claude/edition-progress.md`. The human gate is NOT RUN.
 
 ## Direction
 

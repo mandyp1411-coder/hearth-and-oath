@@ -6,8 +6,26 @@ Software checks and simulated lives do not complete this gate.
 ## Status
 
 Human playtest: NOT RUN. No participants or survey answers are claimed.
-The farmer remains the only Volume II livelihood under development until
+The farmer remains the only Volume II livelihood being proved until
 this gate passes. The trader, healer and general engines are later work.
+
+The implemented v0.71.0 software is a playtest candidate in
+[PR #15](https://github.com/mandyp1411-coder/hearth-and-oath/pull/15).
+The [software evidence](../measures/farmer-v071-verification.md) records
+3,939 selected passing assertions and five skips across documented composite
+checks; a strict single-snapshot software-gate PASS is not claimed.
+Mechanical simulations supply no human participant or acceptance verdict.
+
+| Candidate field | Result |
+| --- | --- |
+| Source/build to play | v0.71.0, Sites 104; runtime `43559063337c7bc243bc152ad153d672a9c933d61d85a494f17d3f46bddfa311` |
+| Merge commit | PENDING |
+| Public candidate URL | [Play the farmer candidate](https://hearth-and-oath-v1-a73f.nilled463.chatgpt.site/) |
+
+The [edition ledger](../../claude/edition-progress.md) tracks the actual
+merge and deployment. Fill these session fields after successful delivery,
+then retain the exact build used by each participant even if a later fix
+ships.
 
 ## Participants and session
 
