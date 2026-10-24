@@ -153,8 +153,8 @@ the `v0.69-archive` branch (v0.69.0 with its storage renamed
 `hearth-and-oath-legacy`, the same labels, and an import that refuses a
 new-rules life); `scripts/build-archive.mjs` packages it into `out-legacy/`,
 and `dist/js/archive-link.js` is where the main game learns its address.
-That public address remains unverified; a packaged archive is not a verified
-deployment, and all compatibility code stays until it has a public home.
+The public archive is now published by v0.71.2 at its own address; the full
+browser handoff remains incomplete, and all compatibility code stays.
 `tests/fixtures/saves/` are real saves written by past releases' own engines
 (`scripts/fixtures/generate-release-saves.mjs` against a worktree at the
 release's merge commit); regenerate rather than hand-edit them. Volume II's
@@ -245,6 +245,27 @@ four targeted offline checks pass. The formal full gate is NOT RUN. Exact
 scopes, proof seals, publication and the 200px birthday-layout limit are in
 `docs/measures/farmer-v0711-verification.md`. PR #17 is merged and Sites
 version 105 is published; the edition ledger retains their exact IDs.
+
+## The archive's public home (v0.71.2)
+
+`archive-link.js` names the verified public archive. Old-rule slots and
+import reviews offer the link; exports remain complete copies. The archive
+builder pins `065d54cd91c8cfea390ba0f71fb046351153d6fa` and applies
+`scripts/archive-compatibility.patch` in a disposable worktree. It accepts
+only the additional old step 71, preserves that exact stamp, and rejects
+actual new-rule markers before migration. Its original gameplay and
+isolated storage remain. Hosting contains the small loader alias; the full
+standalone is kept under `artifacts/old-rules-archive/`. The final host size
+is checked after adding the archive manifest.
+
+Main Sites 106 and archive 1 are published in PR #18. Fresh complete
+FAST/SLOW runs passed 3,949 assertions, zero failed and five skipped;
+strict lanes remain FAIL. Sixteen source-engine cases and one compiled
+startup checker pass, with auxiliary evidence failures preserved. The
+formal full gate, other 29 offline checks, browser round trip and real
+farmer playtest remain NOT RUN. See `docs/measures/archive-v0712-verification.md`.
+The owner stopped further farmer-opening layout polish. No Phase 2 engine
+or legacy deletion is included.
 
 ## Direction
 

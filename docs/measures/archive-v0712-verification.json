@@ -1,0 +1,330 @@
+{
+  "version": "0.71.2",
+  "testedSource": {
+    "freeze": {
+      "version": "0.71.2",
+      "commit": "f82160cae5561f851f99c3c7fb1274fec04a30f7",
+      "runtimeSha256": "37a1ee3f84ef6b589d3daa9daca80d594e6a7c5320a31d100459eb5b6b4f518f",
+      "verificationSha256": "a2307d32771cc1066527c3e6e766c9e8a22e9b64c3f9a816acfa582eac6e5242",
+      "artifactSha256": "8e395a3b2b1a5a124bc34bb8138c434b11d686d8f304bca9aac465d113402c7b",
+      "engineSha256": "d8526974420a515bfb3c78a91d9efe515780d4fad0a66d4b48b8d09dab0b8813"
+    },
+    "runtime": {
+      "sha256": "37a1ee3f84ef6b589d3daa9daca80d594e6a7c5320a31d100459eb5b6b4f518f",
+      "files": 1053
+    },
+    "verification": {
+      "sha256": "a2307d32771cc1066527c3e6e766c9e8a22e9b64c3f9a816acfa582eac6e5242",
+      "files": 495
+    },
+    "artifact": {
+      "version": "0.71.2",
+      "bytes": 333660486,
+      "sha256": "8e395a3b2b1a5a124bc34bb8138c434b11d686d8f304bca9aac465d113402c7b",
+      "parts": 40,
+      "manifestSha256": "efe468347f1d38a7ec18dd8098aa1d7278cef106967210dd15d0551514a7e254",
+      "loaderSha256": "3a04d1cd7f7091eb36bd78c28afc99a2b24ccbac777be88b0668db25c75d19c5",
+      "source": {
+        "sha256": "37a1ee3f84ef6b589d3daa9daca80d594e6a7c5320a31d100459eb5b6b4f518f",
+        "files": 1053
+      },
+      "buildGit": {
+        "head": "255208670d65278d10b9383f226c17413d7ebc76",
+        "dirty": true
+      }
+    },
+    "tree": "930cade8eabd247d8003cd2213aca29e0c145b6d"
+  },
+  "lanes": {
+    "fast": {
+      "status": "FAIL",
+      "summary": {
+        "filesTotal": 244,
+        "filesTerminal": 244,
+        "filesPassed": 241,
+        "filesFailed": 3,
+        "filesBlocked": 0,
+        "filesNotRun": 0,
+        "passed": 3208,
+        "failed": 0,
+        "skipped": 4
+      },
+      "immutableSourceStatus": "PASS",
+      "immutableOutputStatus": "PASS",
+      "reportSha256": "2910e15685fefc225c44cb4f3c80917fc8c87a5383ff1ea79fd00f65aab49a0f"
+    },
+    "slow": {
+      "status": "FAIL",
+      "summary": {
+        "filesTotal": 36,
+        "filesTerminal": 36,
+        "filesPassed": 35,
+        "filesFailed": 1,
+        "filesBlocked": 0,
+        "filesNotRun": 0,
+        "passed": 741,
+        "failed": 0,
+        "skipped": 1
+      },
+      "immutableSourceStatus": "PASS",
+      "immutableOutputStatus": "PASS",
+      "reportSha256": "7f17205678b0ebc6c6a348074ca91f8993520c2baccfcd7c10bbf1dfed8e69ec"
+    }
+  },
+  "aggregateAssertions": {
+    "passed": 3949,
+    "failed": 0,
+    "skipped": 5
+  },
+  "archiveHandoff": {
+    "casesPassed": 16,
+    "genuineLegacyStates": 14,
+    "publicCommands": 22,
+    "reportSha256": "2bd0d3943245a2e5b3df8f81cc20daea91626d5752e3423026be4478f22d24f0"
+  },
+  "pinnedArchiveBaseline": {
+    "passed": 71,
+    "failed": 0,
+    "skipped": 0
+  },
+  "nativeChecker": {
+    "schemaVersion": 1,
+    "status": "PASS",
+    "kind": "selected-checker-result-derived-from-exact-closed-stdout",
+    "checkerExecutions": 1,
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "--experimental-vm-modules",
+      "scripts/verify-offline-module-startup-v71.mjs"
+    ],
+    "cwd": "/workspace/scratch/68d171ec368e/hearth-and-oath/artifacts/archive-v0712/qa/main",
+    "durationMs": 19175,
+    "terminal": {
+      "code": 0,
+      "signal": null
+    },
+    "immutableSourceAndArtifact": true,
+    "diagnostic": {
+      "vmMode": "complete unchanged SourceTextModule",
+      "filename": "exact-full-module-v71.js",
+      "inertMedia": "native per-realm JSON parse",
+      "codeSha256": "9c0d024e12a11fb8b3a5e28c501ae84eca063cf84252e3b31a4661c114664a65"
+    },
+    "semantic": {
+      "status": "PASS",
+      "mode": "complete unchanged SourceTextModule",
+      "version": "0.71.2",
+      "artifactSha256": "8e395a3b2b1a5a124bc34bb8138c434b11d686d8f304bca9aac465d113402c7b",
+      "sessions": 1,
+      "cases": [
+        "actual async startup",
+        "module lexical privacy",
+        "captured old birthday has useful default cost and risk captions",
+        "old birthday capture remains unchanged until chosen",
+        "exact captured birthday command and single gift",
+        "farmer first choice and visible costs",
+        "whole-state ambition parity",
+        "Book read immutability",
+        "exact current-life export",
+        "three-slot metadata and backup preservation",
+        "old-save no invented farm",
+        "adult compiled own-fee and household-keep disclosure",
+        "adult complete paid-command parity",
+        "zero network attempts"
+      ],
+      "limits": "A bounded semantic fake DOM session; browser layout and human farmer playtest remain separate."
+    },
+    "auxiliaryCapture": {
+      "status": "FAIL",
+      "processReport": "process.json",
+      "reason": "The original capture wrapper required one JSON document; actual checker stdout contains one diagnostic JSON line followed by one complete result JSON document. Its original failure and seals remain unchanged.",
+      "originalError": "Unexpected non-whitespace character after JSON at position 210 (line 2 column 1)"
+    },
+    "prelaunch": {
+      "report": "prelaunch-guard-failure.json",
+      "checkerExecutions": 0,
+      "repair": "prelaunch-repair.json"
+    },
+    "derivation": {
+      "source": "derive-closed-result.mjs",
+      "method": "Verify all original closed output seals, parse the entire first line as one diagnostic JSON document, then the entire remaining stdout as one result JSON document; no bytes omitted or altered and no checker re-executed."
+    },
+    "limits": [
+      "Exactly one bounded semantic SourceTextModule/fake-DOM session, not a native browser or human lifetime playtest.",
+      "Browser roundtrip remains NOT RUN.",
+      "The other 29 offline checks remain NOT RUN.",
+      "The original auxiliary capture-summary failure remains FAIL."
+    ],
+    "proofs": [
+      {
+        "path": "freeze.json",
+        "bytes": 1339,
+        "sha256": "58a8c08c194c3e6f8472c3b045bc8aae5244894810075bc874c66898f906e910"
+      },
+      {
+        "path": "main-preparation.json",
+        "bytes": 1417,
+        "sha256": "608d7f5c0e830edafbae3a2f899bf620fabfd21bce517757bc861093aa916774"
+      },
+      {
+        "path": "capture.mjs",
+        "bytes": 3951,
+        "sha256": "75764bd1251b0b3879dbd5b7938b8ed5ed82a3d46759e39ba3885c5c175450ef"
+      },
+      {
+        "path": "stdout.log",
+        "bytes": 1138,
+        "sha256": "21c0e6991433dc641e7a074a3d6c7878448d9700875e64d40ca40a47c3be3341"
+      },
+      {
+        "path": "stderr.log",
+        "bytes": 170,
+        "sha256": "e8bc5cc62ffdc9e6818ad4cb7b2f32d203e4cb33af4f991860ac74c1b3ccada3"
+      },
+      {
+        "path": "process.json",
+        "bytes": 3869,
+        "sha256": "4dfa96a9bfa62208c17fdb96d3ad38eeba8d839f46f5f88471dad88692d788e3"
+      }
+    ]
+  },
+  "browser": {
+    "mainOrigin": "https://hearth-and-oath-v1-a73f.nilled463.chatgpt.site/",
+    "mainVersionNumber": 105,
+    "mainGameVersion": "0.71.1",
+    "mainExport": {
+      "name": "Tamsin Reed",
+      "source": "genuine v0.60 eighteen fixture migrated by current engine, imported via real UI into an empty slot, then exported by the actual archive control",
+      "bytes": 1036749,
+      "sha256": "feb4b10aec9a5afb8f72e047e0a24ff1c45a5e2e775e988e2433acdb635c78a4",
+      "wholeStateMatches": true,
+      "edition": {
+        "rules": "old",
+        "began": null,
+        "step": 71
+      }
+    },
+    "archiveOrigin": "https://hearth-and-oath-old-rules.nilled463.chatgpt.site/",
+    "archiveVersionNumber": 1,
+    "publicArchiveOpened": true,
+    "observedText": [
+      "The world is old, and these are its old rules.",
+      "Bring a life written under them here.",
+      "V0.69.0 · OLD RULES ARCHIVE"
+    ],
+    "archiveImport": {
+      "status": "INTERRUPTED",
+      "toolResult": "aborted by user after 1670.4s",
+      "completeBrowserRoundTrip": "NOT RUN",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "INTERRUPTED",
+          "toolResult": "aborted by user after 1670.4s",
+          "completeBrowserRoundTrip": "NOT RUN"
+        },
+        {
+          "attempt": 2,
+          "status": "TOOL TIMEOUT",
+          "stagedFile": {
+            "path": "/home/oai/share/hearth-archive-handoff-20261024.json",
+            "bytes": 1036749,
+            "existenceConfirmed": true
+          },
+          "operation": "resumed existing chooser.setFiles",
+          "setFilesTimeoutMs": 10000,
+          "outerTimeoutMs": 15000,
+          "toolReportedWallSeconds": 12571.9272,
+          "toolError": "timed out awaiting tools/call after 300s",
+          "returnedBrowserReview": false,
+          "returnedAcceptance": false,
+          "completeBrowserRoundTrip": "NOT RUN"
+        }
+      ],
+      "furtherCuaAttempts": "STOPPED for this release"
+    },
+    "limits": [
+      "No browser IndexedDB inspection or full offline-file browser check is claimed.",
+      "No participant or human farmer-playtest verdict is supplied.",
+      "Both unsuccessful transfer tool attempts are preserved. No application failure is inferred from the Cua service interruption or timeout."
+    ]
+  },
+  "publication": {
+    "main": {
+      "id": "appgdep_6adc722f3ec08191aa0d964b478feac6",
+      "project_id": "appgprj_6acadbba85548191a714790fc6709510",
+      "title": "Hearth & Oath",
+      "version_id": "appgprj_6acadbba85548191a714790fc6709510~appgver_208699b19a9c81918fd9a02d81c2177a",
+      "type": "publish",
+      "status": "succeeded",
+      "url": "https://hearth-and-oath-v1-a73f.nilled463.chatgpt.site",
+      "has_mcp": false,
+      "screenshot_asset_pointer": null,
+      "provider_deployment_id": "site---6acadbba85548191a714790fc6709510",
+      "failure_message": null,
+      "env_set_revision": 0,
+      "updated_at": "2026-10-24T08:54:18.876304+00:00",
+      "version_number": 106,
+      "source_commit": "1ac4853f19c0f824ddaaecbb230264d03979a637",
+      "source_tree": "930cade8eabd247d8003cd2213aca29e0c145b6d",
+      "runtimeSha256": "37a1ee3f84ef6b589d3daa9daca80d594e6a7c5320a31d100459eb5b6b4f518f",
+      "archive_storage": {
+        "archive_format": "tar",
+        "sediment_file_id": "file_0000000088bc81f9bf7fa974b051b15e",
+        "content_hash": "sha256:432b73bfd9bbe7f9ee37244245af4b39455f930ed7da6c43ea8c56941dd37d8a",
+        "size_bytes": 265185280,
+        "file_count": 1056
+      },
+      "audience": "public"
+    },
+    "archive": {
+      "projectId": "appgprj_6adc3267d4748191adaba2c71704ff91",
+      "versionNumber": 1,
+      "savedVersionId": "appgprj_6adc3267d4748191adaba2c71704ff91~appgver_e6cc3eb1a6048191aa3413d274f04324",
+      "sourceCommit": "43ee1a8b1b48cb5aee8ad060d206a94bc09723b9",
+      "sourceTree": "848a699448cd4d1fa81bd71559f584ce74ce786a",
+      "runtimeSha256": "f4d05cc7efe20a433a67ef16a170999326b438cef7c7a0eda85ba124e2f73b28",
+      "deploymentId": "appgdep_6adc364b751c8191a42a75feade2fa53",
+      "deploymentStatus": "succeeded",
+      "url": "https://hearth-and-oath-old-rules.nilled463.chatgpt.site",
+      "audience": "public",
+      "archiveStorage": {
+        "contentHash": "sha256:3b848e9ebc05bd8d6e43f3fffc6db0112cc8740989542327bedad0c98ae64bdc",
+        "bytes": 263362560,
+        "files": 1050
+      },
+      "sourceUpload": {
+        "initialResult": "remote rejected receive-pack request exceeding maximum size",
+        "recovery": "Seven source batches, each under 40 MiB, pushed through the source helper; final tree matches the rejected full source tree; no shared history rewritten."
+      }
+    }
+  },
+  "proof": {
+    "archive": "archive-v0712-proofs.tar.gz",
+    "bytes": 1410452,
+    "sha256": "2a43c8a26d9a02840effdc7b793a2b2e3095eda108d3488230e025139ed1fc4c",
+    "manifest": "archive-v0712-proof-manifest.json",
+    "manifestSha256": "11eb2979cb714115c212476e99320c92635fdf86a3bb56b43214387f21b2472e",
+    "members": 1455,
+    "uncompressedBytes": 11254091,
+    "deterministicBuildsMatched": true,
+    "allMembersReadBack": true
+  },
+  "gates": {
+    "strictLanes": "FAIL: five skips",
+    "formalFullReleaseCheck": "NOT RUN",
+    "otherOfflineChecks": "29 NOT RUN",
+    "fullBrowserRoundTrip": "NOT RUN",
+    "humanFarmerPlaytest": "NOT RUN"
+  },
+  "ci": {
+    "checkedHead": "5ccf55b6bb055e390a9dfa885fc3f272929b6a07",
+    "statuses": [],
+    "workflowRuns": []
+  },
+  "pullRequest": {
+    "number": 18,
+    "url": "https://github.com/mandyp1411-coder/hearth-and-oath/pull/18",
+    "mergeStatus": "pending"
+  }
+}

@@ -1,15 +1,15 @@
 {
   "schemaVersion": 2,
-  "version": "0.71.1",
-  "bytes": 333660569,
-  "sha256": "5f7dc2ea79789a4c5f1e656bf8b2b4fbaa3a4c5808497c02fd3cb99b0783b79f",
+  "version": "0.71.2",
+  "bytes": 333660486,
+  "sha256": "8e395a3b2b1a5a124bc34bb8138c434b11d686d8f304bca9aac465d113402c7b",
   "loaderSha256": "3a04d1cd7f7091eb36bd78c28afc99a2b24ccbac777be88b0668db25c75d19c5",
   "source": {
-    "sha256": "cee3675cd16e1883722a69d8f6e015689c72fe381e1043b767d0a7bfd2e9b926",
+    "sha256": "37a1ee3f84ef6b589d3daa9daca80d594e6a7c5320a31d100459eb5b6b4f518f",
     "files": 1053
   },
   "buildGit": {
-    "head": "8af7b22f0d25e4740a37fc5eda5af2f497d475c9",
+    "head": "255208670d65278d10b9383f226c17413d7ebc76",
     "dirty": true
   },
   "parts": [
@@ -210,8 +210,8 @@
     },
     {
       "file": "game-40.part",
-      "bytes": 6504857,
-      "sha256": "625ab0eff148256915c7e392a78967da306739fe473e0d2b4417a94d50970273"
+      "bytes": 6504774,
+      "sha256": "d5082b05a1f17bd7625db3112ecc4cf321a63e687e1c99f741031d7ed2d1c92a"
     }
   ]
 }

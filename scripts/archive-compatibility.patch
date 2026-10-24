@@ -1,0 +1,27 @@
+diff --git a/dist/js/edition.js b/dist/js/edition.js
+--- a/dist/js/edition.js
++++ b/dist/js/edition.js
+@@ -64,7 +64,10 @@ export function validateEdition(v) {
+   if (v === undefined) return true;
+   if (!plain(v) || ![OLD, NEW].includes(v.rules)) return false;
+   if (!(v.began === null || typeof v.began === 'string' && /^0\.\d{2}(\.\d+)?$/.test(v.began))) return false;
+-  return Number.isInteger(v.step) && v.step >= 69 && v.step <= EDITION_STEP;
++  // Main's step 71 did not alter old-rule lives. Accept their exact exported
++  // stamp without changing it; new-rule lives retain this build's ceiling.
++  const lastStep = v.rules === OLD ? 71 : EDITION_STEP;
++  return Number.isInteger(v.step) && v.step >= 69 && v.step <= lastStep;
+ }
+ 
+ /** The exported file's name says which rules the life lives by. */
+diff --git a/dist/js/app.js b/dist/js/app.js
+--- a/dist/js/app.js
++++ b/dist/js/app.js
+@@ -1966,7 +1966,7 @@
+   const input=event.target,file=input.files[0],request=++importReadRun,origin=practiceContext(),originEpoch=ironmanSession.status().epoch,owner=viewOwner();
+   const stillCurrent=()=>{const current=practiceContext();return ownsView(owner)&&originEpoch===ironmanSession.status().epoch&&!ironmanFenced()&&request===importReadRun&&input.isConnected!==false&&input.files?.[0]===file&&!practiceController.current()&&!practiceController.pending()&&Object.keys(origin).every(key=>origin[key]===current[key]);};
+   if(file.size>MAX_SAVE_FILE_BYTES){toast('That file is too large for a saved life.');focusReturn=importOpener?.dataset;importOpener=null;restoreModalFocus();return;}
+-  try {const text=await file.text();if(!stillCurrent())return;const state=migrateSave(JSON.parse(text));if(!state)throw new Error('Invalid');if(!stillCurrent())return;if(!archiveAccepts(state)){toast(ARCHIVE_REFUSAL);focusReturn=importOpener?.dataset;importOpener=null;restoreModalFocus();return;}pendingImport=state;importSlot=saveStore.empty()??activeSlot;importToken=isIronman(state)?null:saveStore.reviewToken(importSlot);openModal('import-review',importOpener);importOpener=null;if(isIronman(state))await inspectIronmanImport();}
++  try {const text=await file.text();if(!stillCurrent())return;const incoming=JSON.parse(text);if(!archiveAccepts(incoming)){toast(ARCHIVE_REFUSAL);focusReturn=importOpener?.dataset;importOpener=null;restoreModalFocus();return;}const state=migrateSave(incoming);if(!state)throw new Error('Invalid');if(!stillCurrent())return;if(!archiveAccepts(state)){toast(ARCHIVE_REFUSAL);focusReturn=importOpener?.dataset;importOpener=null;restoreModalFocus();return;}pendingImport=state;importSlot=saveStore.empty()??activeSlot;importToken=isIronman(state)?null:saveStore.reviewToken(importSlot);openModal('import-review',importOpener);importOpener=null;if(isIronman(state))await inspectIronmanImport();}
+   catch {if(stillCurrent()){toast('This is not a compatible Hearth & Oath save. Your current life is safe.');focusReturn=importOpener?.dataset;importOpener=null;restoreModalFocus();}}
+ });
+ 

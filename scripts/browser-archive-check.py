@@ -5,7 +5,7 @@ games never share a browser database; and both open from their offline files.
 
     python3 scripts/browser-archive-check.py [--main dist] [--archive out-legacy]
         [--main-offline artifacts/hearth-and-oath.html]
-        [--archive-offline out-legacy/hearth-and-oath-old-rules.html]
+        [--archive-offline artifacts/old-rules-archive/hearth-and-oath-old-rules.html]
         [--snapshot docs/measures/archive-verification-v070.md]
 
 The main game is served from `dist/` (what `npm start` serves) and the
@@ -142,7 +142,7 @@ def main():
     ap.add_argument('--main', default='dist')
     ap.add_argument('--archive', default='out-legacy')
     ap.add_argument('--main-offline', default='artifacts/hearth-and-oath.html')
-    ap.add_argument('--archive-offline', default='out-legacy/hearth-and-oath-old-rules.html')
+    ap.add_argument('--archive-offline', default='artifacts/old-rules-archive/hearth-and-oath-old-rules.html')
     ap.add_argument('--snapshot', default=None)
     ap.add_argument('--chromium', default=None)
     args = ap.parse_args()
