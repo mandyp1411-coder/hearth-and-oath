@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "startedAt": "2026-10-24T02:57:55.299Z",
+  "completedAt": "2026-10-24T02:57:56.735Z",
+  "before": {
+    "runtime": {
+      "sha256": "43559063337c7bc243bc152ad153d672a9c933d61d85a494f17d3f46bddfa311",
+      "files": 1052
+    },
+    "git": {
+      "head": "d525f326495971a8596f9f1319f372dcabcdc9e4",
+      "dirty": true
+    }
+  },
+  "after": {
+    "runtime": {
+      "sha256": "43559063337c7bc243bc152ad153d672a9c933d61d85a494f17d3f46bddfa311",
+      "files": 1052
+    },
+    "git": {
+      "head": "d525f326495971a8596f9f1319f372dcabcdc9e4",
+      "dirty": true
+    }
+  },
+  "creationCallsThisVerification": 0,
+  "totalCreationCalls": 3,
+  "deliveredCreationSuccesses": 2,
+  "priorFailures": [
+    "The first creation call returned a valid life but an incorrect hero.alive===true harness assertion stopped the process before writing it.",
+    "The recovery run wrote both untouched creations, then an unnecessary diagnostic home-location equality assertion stopped the initial manifest; the tenant’s genuine past ends away from its field."
+  ],
+  "format": "Complete unwrapped standard-game JSON state, exactly the in-game Export format; no slot envelope, no Ironman wrapper.",
+  "method": "Each delivered file is the untouched return value of production createLifeAtAge with the recorded current-creator inputs. Earlier years were generated through actual engine operations. This verification reads those snapshots, validates full saves, proves exact import, and answers the birthday only in disposable clones. No station, age, money, people or history was assigned by the harness.",
+  "humanPlaytest": "NOT RUN",
+  "personalData": "Every person and name is generated game fiction; no participant details are present.",
+  "starters": [
+    {
+      "file": "common-freeholder-age16.json",
+      "sha256": "833c078a21e0e9c90cca4e5abe5a248ecc85fb9de0668b92561722d8ee1474b8",
+      "bytes": 1058413,
+      "config": {
+        "seed": "farmer-v071-first-hearth",
+        "startAge": 16,
+        "originId": "human_bellward",
+        "appearance": {
+          "ancestry": "human"
+        },
+        "difficulty": "balanced"
+      },
+      "actualSeed": "farmer-v071-first-hearth",
+      "name": "Isven Terassi",
+      "age": 16,
+      "day": 5840,
+      "difficulty": "balanced",
+      "station": "common",
+      "freedom": "free",
+      "tenure": "freeholder",
+      "locationId": "city",
+      "locationName": "Stormbay",
+      "homeId": "city",
+      "homeName": "Stormbay",
+      "startsAtField": true,
+      "baseRouteHome": {
+        "route": [
+          "city"
+        ],
+        "days": 0,
+        "legs": [],
+        "description": "0 days on the road. Follow the marked roads.",
+        "disabledReason": "You are already here.",
+        "status": "thriving",
+        "services": [
+          "academy",
+          "order",
+          "market",
+          "smith",
+          "hearth",
+          "mentor"
+        ]
+      },
+      "event": "birth_year_16",
+      "ambition": null,
+      "gold": 43,
+      "profession": "Unemployed",
+      "edition": {
+        "rules": "new",
+        "began": "0.71.0",
+        "step": 71
+      },
+      "journalEntries": 169,
+      "valid": true,
+      "exactImportRoundTrip": true,
+      "diagnosticOnly": {
+        "commands": [
+          {
+            "event": "birth_year_16",
+            "choice": "care",
+            "label": "Ask who is speaking",
+            "dayBefore": 5840,
+            "dayAfter": 5840,
+            "goldBefore": 43,
+            "goldAfter": 44
+          }
+        ],
+        "resultingEvent": "farm_ambition",
+        "ambition": null,
+        "retainedAsStarter": false
+      }
+    },
+    {
+      "file": "bound-tenant-age16.json",
+      "sha256": "314b9b48aa8cb72d0e5af4b0b7b6a19d8f90651ea2a0cbba788d933c9eaf61ee",
+      "bytes": 1061681,
+      "config": {
+        "seed": "farmer-v071-low-ditch",
+        "startAge": 16,
+        "originId": "human_bellward",
+        "appearance": {
+          "ancestry": "human"
+        },
+        "difficulty": "balanced"
+      },
+      "actualSeed": "farmer-v071-low-ditch",
+      "name": "Marei Laveno",
+      "age": 16,
+      "day": 5840,
+      "difficulty": "balanced",
+      "station": "bound",
+      "freedom": "bound",
+      "tenure": "tenant",
+      "locationId": "wells",
+      "locationName": "Tide Light",
+      "homeId": "gate",
+      "homeName": "The Beacon Cistern Arch",
+      "startsAtField": false,
+      "baseRouteHome": {
+        "route": [
+          "wells",
+          "gate"
+        ],
+        "days": 2,
+        "legs": [
+          {
+            "from": "wells",
+            "to": "gate",
+            "days": 2,
+            "danger": 3
+          }
+        ],
+        "description": "2 days on the road. Follow the marked roads.",
+        "disabledReason": "Resolve your current moment before setting out.",
+        "status": "thriving",
+        "services": [
+          "order",
+          "guide"
+        ]
+      },
+      "event": "birth_year_16",
+      "ambition": null,
+      "gold": 8,
+      "profession": "Unemployed",
+      "edition": {
+        "rules": "new",
+        "began": "0.71.0",
+        "step": 71
+      },
+      "journalEntries": 159,
+      "valid": true,
+      "exactImportRoundTrip": true,
+      "diagnosticOnly": {
+        "commands": [
+          {
+            "event": "birth_year_16",
+            "choice": "care",
+            "label": "Go to the meeting",
+            "dayBefore": 5840,
+            "dayAfter": 5840,
+            "goldBefore": 8,
+            "goldAfter": 8
+          }
+        ],
+        "resultingEvent": "farm_ambition",
+        "ambition": null,
+        "retainedAsStarter": false
+      }
+    }
+  ]
+}

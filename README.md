@@ -41,6 +41,12 @@ gate remains uncertified. [Play the published candidate](https://hearth-and-oath
 Merge bookkeeping and deployment provenance are kept in the
 [edition ledger](claude/edition-progress.md).
 
+For the farmer sessions, the [playtest materials](docs/playtests/farmer-v071.md)
+include two genuine age-sixteen starts, a short player guide and separate
+blank observer forms. Use the [player bundle](docs/playtests/farmer-v071/farmer-starts.zip)
+to cover freeholder and tenant lives without rerolling for a station. No
+human verdict is filled in by these materials.
+
 Version 0.70.0 is The archive: every save says which rules it lives by, the old rules are preserved as a separate build, and the measuring tools arrive. Its public archive address remains unverified. No rule changes; nothing is removed.
 
 - **Two games, named.** The codebase has carried two rulebooks since v0.60: lives begun since then (a debt ledger from v0.61, a rolled station from v0.62) live by the new rules, and lives from before, or migrated from before, keep the rules they were written under. From this version every save says so in plain words: a slot, the title card, an export and an import review read **Old rules**, **New rules, begun before v0.70**, or **New rules, begun in v0.70**. A life begun before this version is never given a date after the fact. The exported file is named for its rules (`…-old-rules.json`, `…-new-rules.json`).
