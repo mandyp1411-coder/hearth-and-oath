@@ -1,6 +1,6 @@
 # Hearth & Oath
 
-Version 0.71.1 is The first choice, the farmer opening repair in
+Version 0.71.1 is The first choice, the farmer opening repair merged in
 [PR #17](https://github.com/mandyp1411-coder/hearth-and-oath/pull/17).
 New age-sixteen farmer birthdays keep their authored hints. Existing captured
 farmer birthdays at sixteen show time and risk from their saved facts, with exact numbers behind

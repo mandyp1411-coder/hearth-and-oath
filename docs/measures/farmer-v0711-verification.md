@@ -122,7 +122,10 @@ characters. Numbers diagnose performance; they are not browser-speed promises.
 [The public game](https://hearth-and-oath-v1-a73f.nilled463.chatgpt.site/)
 uses Sites version 105, successful deployment
 `appgdep_6adc2e0d662881919adec44b79886488`. Its public audience is preserved.
-PR #17's merge is recorded separately after its actual result.
+PR #17 merged as `02a79c80f849dee67a4c93797ed8806b13473aeb`,
+from head `dc894e78e5762d22a8aa88934374c43c119e8bfe` and final evidence tree
+`9fb63914a1b613dcb3887f11b642e6bf17bb7c01`. Deployment and GitHub
+commit metadata are kept separate.
 
 The [proof archive](farmer-v0711-proofs.tar.gz) has 1,483 members, 13,636,136
 raw bytes and 1,588,738 compressed bytes. Two normalized builds match, and

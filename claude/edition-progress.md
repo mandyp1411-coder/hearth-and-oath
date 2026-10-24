@@ -7,7 +7,7 @@ rulebook and Design Bible Volume II. This ledger keeps that handoff visible.
 
 v0.71.1, The first choice, is published as Sites version 105 in
 [PR #17](https://github.com/mandyp1411-coder/hearth-and-oath/pull/17), with
-merge bookkeeping pending. The complete fresh FAST/SLOW lanes on clean
+merge `02a79c80f849dee67a4c93797ed8806b13473aeb` complete. The complete fresh FAST/SLOW lanes on clean
 `c369b934cb8a1abeeed04ee69b6db39bf7e32ee1` passed 3,947 cases with zero
 failures and five skips. Four targeted offline checks pass; the other 26
 are NOT RUN for this patch. Strict lanes remain FAIL for skips and the

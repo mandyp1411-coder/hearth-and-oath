@@ -305,7 +305,10 @@
     "deploymentStatus": "succeeded",
     "url": "https://hearth-and-oath-v1-a73f.nilled463.chatgpt.site/",
     "audience": "public",
-    "mergeStatus": "pending"
+    "mergeStatus": "merged",
+    "mergeCommit": "02a79c80f849dee67a4c93797ed8806b13473aeb",
+    "pullRequestHead": "dc894e78e5762d22a8aa88934374c43c119e8bfe",
+    "evidenceTree": "9fb63914a1b613dcb3887f11b642e6bf17bb7c01"
   },
   "ci": {
     "returnedStatuses": [],

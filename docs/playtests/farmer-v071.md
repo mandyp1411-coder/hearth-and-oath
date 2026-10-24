@@ -26,7 +26,7 @@ actual game build used in each human session.
 | --- | --- |
 | Source/build to play | v0.71.1, Sites 105; runtime `cee3675cd16e1883722a69d8f6e015689c72fe381e1043b767d0a7bfd2e9b926` |
 | Farmer foundation merge | `6d692f1fd0184ef4ae0efcd527b70ab1e5819d7c` (PR #15) |
-| Opening repair merge | PENDING (PR #17) |
+| Opening repair merge | `02a79c80f849dee67a4c93797ed8806b13473aeb` (PR #17) |
 | Public candidate URL | [Play the farmer candidate](https://hearth-and-oath-v1-a73f.nilled463.chatgpt.site/) |
 
 The [edition ledger](../../claude/edition-progress.md) tracks the actual
