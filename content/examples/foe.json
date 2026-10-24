@@ -1,0 +1,50 @@
+{
+  "kind": "foe",
+  "schemaVersion": 1,
+  "note": "Examples for the schema, not game content. The first entry is the Briar wolf as content/expansion-v27/encounter_design_v27.json writes it, wrapped unchanged, to show the v27 species fit the kind; the second is a farmer's foe with the fields a species may add.",
+  "items": [
+    {
+      "id": "wolf",
+      "name": "Briar wolf",
+      "role": "beast",
+      "pattern": "pack",
+      "signature": "Two wolves coordinate against the same exposed prey. The second pack strike loses its bonus when its partner is defeated or the prey guards.",
+      "weakness": "fire",
+      "resistances": [],
+      "cadence": {
+        "cycle": [
+          { "action": "mark_prey", "target": "least_armored", "status": "pack_mark", "counter": "Defend to clear the prey mark." },
+          { "action": "pack_strike", "target": "marked_prey", "amount": 3, "counter": "Defeat another pack member or guard the marked ally." }
+        ],
+        "advance": "Advance once after this enemy acts; skipped ritual/charge states must retain a truthful next intent.",
+        "requires": ["party_prey_mark", "pack_member_bonus"]
+      },
+      "context": {
+        "regionIds": ["blackgrove", "bellwater", "rainward"],
+        "terrains": ["forest", "grassland"],
+        "siteTypes": ["forest", "village"],
+        "requiredTags": ["woodland"],
+        "descentThemes": ["roots"],
+        "contractTypes": ["hunt", "bounty", "relic", "escort"],
+        "selectionRule": "Match physical setting and the contract creature before applying the seeded personality modifier. A coastal tag requires an actual coast or a clearly identified copied account."
+      },
+      "telegraph": "The wolf watches a companion rather than rushing you; another muzzle turns in the same direction."
+    },
+    {
+      "id": "granary-rat-king",
+      "name": "Granary rat-king",
+      "role": "beast",
+      "pattern": "leech",
+      "tier": 1,
+      "weakness": "fire",
+      "resistances": ["poison"],
+      "signature": "A knot of rats grown into one another in the dark of the grain. It does not fight so much as eat, and what it eats it takes from the barn as well as from you.",
+      "telegraph": "The grain shifts without wind, and the dog will not go into the barn.",
+      "habits": [
+        "Found in a barn where grain was held past the spring.",
+        "Comes out at the lantern, not away from it.",
+        "Leaves the barn a quarter lighter than it was."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "kind": "thread",
+  "schemaVersion": 1,
+  "note": "Examples for the schema, not game content. A thread routes scenes to someone the player knows, some seasons apart.",
+  "items": [
+    {
+      "id": "the-lords-rent",
+      "roles": [
+        { "id": "lord", "kind": "lord", "required": true }
+      ],
+      "opens": "age >= 18 and hero.station.id == 'common' and knows('lord') and season == 'autumn' and gold < 60",
+      "closes": "hero.station.id != 'common'",
+      "cooldown": 8,
+      "stages": [
+        { "id": "door", "scene": "rent-door", "after": { "seasons": 0 } },
+        { "id": "reckoning", "scene": "rent-reckoning", "after": { "seasons": 1 }, "when": "not flag('rent_paid')" }
+      ]
+    },
+    {
+      "id": "the-fence",
+      "roles": [
+        { "id": "neighbour", "kind": "neighbour", "required": true }
+      ],
+      "opens": "age >= 16 and knows('neighbour') and in(season, 'spring', 'summer') and not flag('fence_let_lie')",
+      "stages": [
+        { "id": "line", "scene": "fence-between", "after": { "seasons": 0 } }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,171 @@
+{
+  "kind": "scene",
+  "schemaVersion": 1,
+  "note": "Examples for the schema, not game content. Three scenes from a farmer's year: a boundary, what comes of it, and the lord's man at the door.",
+  "items": [
+    {
+      "id": "fence-between",
+      "title": "The fence between",
+      "text": "{neighbour.name} has moved the hurdles a cart's width into your field over the winter, and says the old line was always there, and that {neighbour.their} father said so. The furrow says otherwise. It is a cart's width of barley a year, and it is {neighbour.name}, who lent you the ox.",
+      "when": "age >= 16 and knows('neighbour') and in(season, 'spring', 'summer')",
+      "once": true,
+      "roles": [
+        { "id": "neighbour", "kind": "neighbour", "required": true }
+      ],
+      "choices": [
+        {
+          "id": "move",
+          "label": "Move the hurdles back by night",
+          "risk": "If {neighbour.they} see you, the ox is not lent again.",
+          "tags": ["take", "deceit"],
+          "effects": [
+            { "op": "bond", "role": "neighbour", "by": -12 },
+            { "op": "followUp", "scene": "fence-after", "seasons": 1, "chance": 50 },
+            { "op": "memory", "text": "Moved {neighbour.name}'s hurdles back by night." }
+          ],
+          "result": "You carry the hurdles back a cart's width by moonlight and tread the furrow in again. In the morning {neighbour.name} stands at the line a long while and says nothing, and that is worse than saying."
+        },
+        {
+          "id": "ask",
+          "label": "Ask the reeve to walk the line",
+          "cost": { "days": 1 },
+          "tags": ["truth", "prudence"],
+          "effects": [
+            { "op": "standing", "who": "villagers", "by": 2 },
+            { "op": "bond", "role": "neighbour", "by": -4 },
+            { "op": "journal", "title": "The line walked", "text": "The reeve walked the line with the old roll in his hand and found for you by half a cart's width, which satisfied nobody." }
+          ],
+          "result": "The reeve comes with the roll and a stick and walks the line while the village watches. Half a cart's width to you, half to {neighbour.name}. Everyone goes home with less than they wanted, which the reeve says is what a line is for."
+        },
+        {
+          "id": "give",
+          "label": "Let {neighbour.them} have it",
+          "nature": "generous",
+          "tags": ["give"],
+          "effects": [
+            { "op": "bond", "role": "neighbour", "by": 10 },
+            { "op": "gold", "by": -6 },
+            { "op": "tie", "kind": "knows", "role": "neighbour", "note": "has a cart's width of your barley and knows it" }
+          ],
+          "result": "A cart's width of barley is a cart's width of barley. You tell {neighbour.name} the line can stay, and {neighbour.they} look at you as if you had said something in another tongue, and the ox is at your gate before dawn the next ploughing."
+        },
+        {
+          "id": "continue",
+          "label": "Say nothing this year",
+          "effects": [
+            { "op": "stress", "by": 4 },
+            { "op": "flag", "id": "fence_let_lie", "value": true }
+          ],
+          "result": "You plough to the hurdles where they stand. A cart's width is a cart's width, and next year it may be two. You find you think about it while you eat."
+        }
+      ]
+    },
+    {
+      "id": "fence-after",
+      "title": "What the moon saw",
+      "text": "{neighbour.name} comes to your door with the matter already decided in {neighbour.their} face. Somebody saw a lantern on the line the night the hurdles walked, and the somebody was {neighbour.their} daughter, and she is not a liar.",
+      "roles": [
+        { "id": "neighbour", "kind": "neighbour", "required": true }
+      ],
+      "choices": [
+        {
+          "id": "own",
+          "label": "Own it",
+          "tags": ["truth"],
+          "effects": [
+            { "op": "bond", "role": "neighbour", "by": 6 },
+            { "op": "standing", "who": "villagers", "by": -2 }
+          ],
+          "result": "You say it was you, and why, and {neighbour.name} says the ox was lent to a man who would do that, then, and goes. Some of it comes back over the years. Not the ox."
+        },
+        {
+          "id": "continue",
+          "label": "Deny it",
+          "tags": ["deceit"],
+          "effects": [
+            { "op": "bond", "role": "neighbour", "by": -20 },
+            { "op": "tie", "kind": "hates", "role": "neighbour", "note": "knows who moved the hurdles and heard you deny it" },
+            { "op": "mark", "id": "deceitful" }
+          ],
+          "result": "You say the girl saw a lantern and a lantern is not a name. {neighbour.name} nods slowly, the way people nod when they have stopped arguing and started remembering."
+        }
+      ]
+    },
+    {
+      "id": "rent-door",
+      "title": "The lord's man at the door",
+      "text": "{lord.name}'s steward is at the door with the roll and two men who are not there to help carry anything. The rent on the field is {hero.their} to pay by the first frost, and the frost is early, and the barley is still standing.",
+      "roles": [
+        { "id": "lord", "kind": "lord", "required": true }
+      ],
+      "choices": [
+        {
+          "id": "pay",
+          "label": "Pay it from what is in the chest",
+          "cost": { "gold": 30 },
+          "locked": { "when": "gold < 30", "reason": "There is not thirty gold in the chest." },
+          "effects": [
+            { "op": "standing", "who": "order", "by": 1 },
+            { "op": "memory", "text": "Paid the field's rent from the chest with the barley still standing." }
+          ],
+          "result": "Thirty gold into the steward's bag, counted twice. He makes a mark on the roll and does not thank you, and the two men go back to the cart looking a little disappointed."
+        },
+        {
+          "id": "plead",
+          "label": "Ask for the harvest first",
+          "tags": ["truth", "patience"],
+          "effects": [
+            { "op": "stress", "by": 6 },
+            { "op": "followUp", "scene": "rent-reckoning", "seasons": 1 },
+            { "op": "memory", "text": "Asked the steward to wait for the harvest." }
+          ],
+          "result": "The steward looks past you at the field and then at the sky and writes something that is not a mark. A season, he says. He says it the way the frost says it."
+        },
+        {
+          "id": "continue",
+          "label": "Send him away",
+          "nature": "brave",
+          "tags": ["courage", "reckless"],
+          "effects": [
+            { "op": "standing", "who": "order", "by": -4 },
+            { "op": "evidence", "by": 1, "text": "The steward's roll has a line beside the field: rent refused at the door." },
+            { "op": "followUp", "scene": "rent-reckoning", "seasons": 1 }
+          ],
+          "result": "You tell the steward the field pays when the field pays. The two men come forward a step and he lifts a hand, and they stop, and he writes. It is a short word."
+        }
+      ]
+    },
+    {
+      "id": "rent-reckoning",
+      "title": "The reckoning",
+      "text": "The barley is in, what the frost left of it, and so is the steward. {lord.name} has the roll open on the cart's tail. The rent, and the season's waiting on top of it, and the two men.",
+      "roles": [
+        { "id": "lord", "kind": "lord", "required": true }
+      ],
+      "choices": [
+        {
+          "id": "pay",
+          "label": "Pay what is owed",
+          "cost": { "gold": 36 },
+          "locked": { "when": "gold < 36", "reason": "There is not thirty-six gold in the house." },
+          "effects": [
+            { "op": "journal", "title": "The rent paid", "text": "Thirty-six gold to the steward on the cart's tail: the rent and the waiting. The roll has a mark, and the house has a thin winter coming." }
+          ],
+          "result": "You count it out on the cart's tail and he counts it again. A mark on the roll. The thin winter begins at once."
+        },
+        {
+          "id": "continue",
+          "label": "Let him take what he will",
+          "effects": [
+            { "op": "gold", "by": -20 },
+            { "op": "place", "prosperity": -2 },
+            { "op": "tie", "kind": "owes", "role": "lord", "note": "holds the field's arrears against the house" },
+            { "op": "stress", "by": 10 },
+            { "op": "journal", "title": "The ox", "text": "The steward's men took the ox and twenty gold against the field's rent, and wrote the rest against the house. The plough stands in the yard with nothing to pull it." }
+          ],
+          "result": "The two men take the ox. The steward takes twenty gold and writes the rest against the house in {lord.name}'s roll, where it will sit until it is paid or you are."
+        }
+      ]
+    }
+  ]
+}
