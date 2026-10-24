@@ -57,7 +57,8 @@ is counted as a participant.
 ## v0.71.2: the old lives have a home
 
 Main Sites 106 and the separate public archive version 1 are published in
-[PR #18](https://github.com/mandyp1411-coder/hearth-and-oath/pull/18).
+[PR #18](https://github.com/mandyp1411-coder/hearth-and-oath/pull/18),
+merged as `d1e218259b81e09fb33a2cb65913106a727e2996`.
 The pinned archive accepts the exact old step-71 metadata without changing
 its gameplay or a save's history. The builder keeps its standalone separate
 from the size-checked host. Full fresh FAST/SLOW lanes have 3,949 passing

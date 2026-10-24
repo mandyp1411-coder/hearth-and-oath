@@ -1,6 +1,7 @@
 # Hearth & Oath
 
-Version 0.71.2 is The old lives have a home. Old Rules saves now have a
+Version 0.71.2 is The old lives have a home. Merged in
+[PR #18](https://github.com/mandyp1411-coder/hearth-and-oath/pull/18). Old Rules saves now have a
 [public archive](https://hearth-and-oath-old-rules.nilled463.chatgpt.site/),
 linked from their slots and import review. Their full exports and actual
 history are kept. Main is published as Sites 106, the archive as version 1.

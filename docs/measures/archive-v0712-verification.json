@@ -318,13 +318,17 @@
     "humanFarmerPlaytest": "NOT RUN"
   },
   "ci": {
-    "checkedHead": "5ccf55b6bb055e390a9dfa885fc3f272929b6a07",
+    "checkedHead": "14a2876901feb22f8912cdc0d72d5443bf93253f",
     "statuses": [],
-    "workflowRuns": []
+    "workflowRuns": [],
+    "codeHead": "5ccf55b6bb055e390a9dfa885fc3f272929b6a07"
   },
   "pullRequest": {
     "number": 18,
     "url": "https://github.com/mandyp1411-coder/hearth-and-oath/pull/18",
-    "mergeStatus": "pending"
+    "mergeStatus": "merged",
+    "mergeCommit": "d1e218259b81e09fb33a2cb65913106a727e2996",
+    "headCommit": "14a2876901feb22f8912cdc0d72d5443bf93253f",
+    "evidenceTree": "c976c20a8ecba7597dc39163a3f69da49fb99310"
   }
 }

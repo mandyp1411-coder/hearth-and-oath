@@ -7,7 +7,8 @@ rulebook and Design Bible Volume II. This ledger keeps that handoff visible.
 
 v0.71.2, The old lives have a home, is published as main Sites version 106
 and archive version 1 in [PR #18](https://github.com/mandyp1411-coder/hearth-and-oath/pull/18),
-with merge bookkeeping pending. The full fresh FAST/SLOW lanes on clean
+merged as `d1e218259b81e09fb33a2cb65913106a727e2996` from head
+`14a2876901feb22f8912cdc0d72d5443bf93253f`. The full fresh FAST/SLOW lanes on clean
 `f82160cae5561f851f99c3c7fb1274fec04a30f7` passed 3,949 assertions, with
 zero assertion failures and five skips. Both immutable-input/output guards
 passed; strict lanes remain FAIL for skips. Sixteen source-engine cases

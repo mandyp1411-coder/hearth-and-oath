@@ -258,7 +258,7 @@ isolated storage remain. Hosting contains the small loader alias; the full
 standalone is kept under `artifacts/old-rules-archive/`. The final host size
 is checked after adding the archive manifest.
 
-Main Sites 106 and archive 1 are published in PR #18. Fresh complete
+PR #18 is merged; main Sites 106 and archive 1 are published. Fresh complete
 FAST/SLOW runs passed 3,949 assertions, zero failed and five skipped;
 strict lanes remain FAIL. Sixteen source-engine cases and one compiled
 startup checker pass, with auxiliary evidence failures preserved. The
