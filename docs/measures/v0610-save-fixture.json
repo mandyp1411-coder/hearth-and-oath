@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Genuine debt-only new-rule saves for the One Rulebook cutover; zero debt is a defined edition marker before stations existed.",
+  "historicalSource": {
+    "repository": "mandyp1411-coder/hearth-and-oath",
+    "mergeCommit": "55b8a510097db90424c2d692e44bfb7a72a4d509",
+    "tree": "b73c26d6253e571249a918936a557e4e7be695f4",
+    "javascriptTree": "1b20ec51705465148ed9519e1dca906e01299a25",
+    "version": "0.61.0",
+    "engineSha256": "6bf6969475b9ebee621055467d0782b3edf557bafc69cc77befe1c4fa73f9ea6",
+    "worktreeClean": true
+  },
+  "generator": {
+    "path": "scripts/fixtures/generate-release-saves.mjs",
+    "sha256": "251cb1f89e6e2e415ffa9d707d2690edf17bb65fa974102de47700fb69dd6c67",
+    "node": "v24.19.0",
+    "changed": false,
+    "seed": "release-save-0.61.0",
+    "configuration": {
+      "seed": "release-save-0.61.0",
+      "name": "Tamsin Reed",
+      "appearance": {
+        "ancestry": "human"
+      }
+    },
+    "stationOption": "not supplied; station.js did not exist in this release",
+    "commands": [
+      [
+        "node",
+        "scripts/fixtures/generate-release-saves.mjs",
+        "artifacts/one-rulebook-v072/fixture-source",
+        "0.61.0",
+        "artifacts/one-rulebook-v072/v0610-generation-1.json"
+      ],
+      [
+        "node",
+        "scripts/fixtures/generate-release-saves.mjs",
+        "artifacts/one-rulebook-v072/fixture-source",
+        "0.61.0",
+        "artifacts/one-rulebook-v072/v0610-generation-2.json"
+      ]
+    ]
+  },
+  "reproducibility": {
+    "runs": 2,
+    "wholeJsonBytesIdentical": true,
+    "excludedFields": [],
+    "rawBytes": 1779023,
+    "rawSha256": "ebb98e9b195fc8f45cc83864b9ad0a7dbad61d9b91638ef64a0baf37ac389cd5",
+    "historicalOwnEngineValidation": "All three states passed the release engine validator in each generator run."
+  },
+  "fixture": {
+    "path": "tests/fixtures/saves/v0610.json.gz",
+    "compression": "Python gzip.compress(raw, mtime=0); two compressions matched and decompression equals the untouched generator output.",
+    "bytes": 229752,
+    "sha256": "a6067fb59368e23147356f38904a40c781842be9f9a7f4e0407fe83233375993",
+    "sourceMetadata": {
+      "version": "0.61.0",
+      "checkout": "fixture-source",
+      "seed": "release-save-0.61.0",
+      "madeBy": "scripts/fixtures/generate-release-saves.mjs",
+      "date": "2026-10-24"
+    }
+  },
+  "states": {
+    "birth": {
+      "age": 0,
+      "day": 0,
+      "phase": "childhood",
+      "stationPresent": false,
+      "debt": 0,
+      "editionStampPresent": false
+    },
+    "eighteen": {
+      "age": 18,
+      "day": 6570,
+      "phase": "adult",
+      "stationPresent": false,
+      "debt": 0,
+      "editionStampPresent": false
+    },
+    "later": {
+      "age": 18,
+      "day": 6750,
+      "phase": "adult",
+      "stationPresent": false,
+      "debt": 0,
+      "editionStampPresent": false
+    }
+  },
+  "limits": [
+    "Only the three untouched generated states are historical fixtures; no earnings, people, station, history or current metadata was injected.",
+    "This is fixture-generation evidence, not browser/archive transfer or a human farmer/heir playtest.",
+    "Current-engine migration and public continuation are covered by tests/edition-v70.test.js; its actual run result is reported separately."
+  ]
+}

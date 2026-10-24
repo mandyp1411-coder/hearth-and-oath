@@ -1,8 +1,9 @@
 # Hearth & Oath
 
 v0.72, One Rulebook, is [in preparation](docs/one-rulebook-v072.md) on a
-separate branch. It begins with a source inventory and preservation checks
-for mixed old/new saves and backups. The published release remains below;
+separate branch. The first storage refactor separates retained save decoding
+from incoming-write admission, with genuine historical save coverage and a
+cutover inventory. Both rulebooks still play. The published release remains below;
 the archive browser loop and real farmer/heir verdict still precede cutover.
 
 Version 0.71.2 is The old lives have a home. Merged in

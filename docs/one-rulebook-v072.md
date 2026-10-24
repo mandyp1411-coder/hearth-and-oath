@@ -1,8 +1,10 @@
 # v0.72: One Rulebook — preparation
 
 The owner has authorized beginning this release. The published game remains
-v0.71.2. This branch first protects saved lives and maps the cutover; it does
-not remove compatibility, change admission, or claim the release shipped.
+v0.71.2. This branch first protects saved lives and maps the cutover. The
+first runtime change separates durable decoding from incoming-write
+admission; the current game still admits both rulebooks. No compatibility
+is removed and v0.72 is not claimed shipped.
 
 ## Gates before the cutover
 
@@ -39,6 +41,32 @@ The store treats a rejected decoded slot as `state: null`. A mixed envelope
 remains compatible if another life survives, and rejected backups are
 omitted. Making `migrateSave` refuse old rules before separating storage
 retention from simulation admission could expose an occupied slot as empty.
+
+## Implemented storage boundary
+
+`createSaveStore(storage, decodeStoredLife, {acceptPosition})` now separates
+retained reads from incoming writes. Existing callers omit the optional
+predicate and keep their behavior. A future policy can reject a decoded
+incoming position without changing old slots, backups, selection, revision
+tokens or earlier unsaved work. Decoding remains able to read both rulebooks.
+
+The predicate receives a detached snapshot and only literal `true` admits.
+Exceptions and nonboolean results refuse the candidate. Admission is
+synchronous; a native Promise is refused and its rejection consumed. A
+predicate cannot mutate the accepted candidate through its snapshot.
+
+The boundary applies to ordinary write/replacement and Ironman
+create/import/continue commits. Read, reload, backup/export, existing-head
+inspection, revocation, archive/delete, reattachment and terminal marker
+cleanup still use the decoder. Ironman inspection may offer a review that
+the later commit refuses with `position-not-admitted`; the eventual UI must
+check simulation admission before adopting or writing the position.
+
+This is not yet the simulation-entry cutover, nor an independent raw-old-save
+decoder. `app.js` continues using the current decoder and default policy.
+Removing old engine decoding before its read/export replacement exists would
+still be wrong. `tests/save-admission.test.js` exercises stricter policies on
+real historical snapshots while keeping the live game's policy unchanged.
 
 ## Order of the eventual cutover
 
@@ -82,9 +110,14 @@ retention from simulation admission could expose an occupied slot as empty.
 
 The genuine v5 and v0.60 exports are old rules. Genuine v0.62/v0.66 exports
 are new rules with earlier expedition systems; v0.69 has the later systems.
-No genuine v0.61 fixture is currently committed: obtain one from that
-release's own engine before certifying the debt-only transition. Do not
-edit a modern save to claim historical coverage.
+The new genuine v0.61 fixture comes from release merge
+`55b8a510097db90424c2d692e44bfb7a72a4d509`. Birth, eighteen and later all
+have no station and a defined zero-debt ledger. Two runs of the unchanged
+historical generator produced identical complete JSON; the
+[provenance](measures/v0610-save-fixture.json) pins the source and bytes.
+The edition tests check migration and public continuation; write-admission
+tests accept these actual debt-only lives. No modern save was edited to
+claim historical coverage.
 
 An unfinished older maze or battle on a new-rule life cannot be sent to the
 current archive: the archive correctly refuses new-rule lives. Removing
@@ -105,15 +138,22 @@ Run the focused preservation and inventory checks with:
 node --test --test-concurrency=1 tests/one-rulebook-retention.test.js tests/one-rulebook-inventory.test.js tests/archive-link.test.js tests/save-snapshot-fixtures.test.js tests/edition-v70.test.js
 ```
 
+The new storage-boundary regressions run with
+`node --test tests/save-admission.test.js`. Before any merge, run the save,
+concurrency and Ironman regressions and the release checks appropriate to
+the final cutover; a focused development pass is not a release verdict.
+
 These are preparation checks, not the complete FAST/SLOW lanes, the formal
 release gate, browser evidence, or the human verdict. The generated inventory
 stores the source identity actually read; regenerate it after source changes.
 
 The initial focused run passed 17 checks, zero failed and zero skipped.
-The current source inventory has 299 JavaScript files and 338 textual
+That initial source inventory had 299 JavaScript files and 338 textual
 references: 80 station, 33 debt, 24 edition-policy and 201 saved-mode.
-The JavaScript inventory identity is
+Its pre-refactor JavaScript inventory identity is
 `93e0f538ef012168920eec8767ab93f2cf43eb7750844743f9b39950aa2d1517`.
-No `dist/`, package/version, fixture or release-contract bytes change in
-this preparation. No build, deployment, full release gate or browser/human
-check is claimed for it.
+That first preparation commit changed no runtime files. The later storage
+boundary changes `dist/js/saves.js` and adds the genuine fixture and its
+regressions. The package/version and release contract remain unchanged.
+No deployment, full release gate or browser/human check is claimed here;
+actual development results belong to the PR findings.

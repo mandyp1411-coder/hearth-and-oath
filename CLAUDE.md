@@ -273,8 +273,18 @@ automatic deletion. Keep the shared save decoder able to retain complete
 old slots and backups: rejecting them there can make mixed occupied slots
 look empty. New-rule historical lives can still hold older maze/battle
 modes; their flags are not old-rule classification. The new retention tests
-protect occupancy, complete exports and backup review. No cutover or runtime
-change is included before the outstanding archive/browser and human gates.
+protect occupancy, complete exports and backup review. No cutover is
+included before the outstanding archive/browser and human gates.
+
+The first v0.72 runtime refactor separates `createSaveStore`'s retained
+decoder from optional `acceptPosition` write admission. Default callers
+still accept both rulebooks. The predicate sees a detached decoded snapshot;
+only synchronous literal true admits an ordinary write/replacement or
+Ironman create/import/continue commit. Never apply that policy to retained
+reads, authority discovery, archive/delete, revocation or death cleanup.
+This is not the later simulation-entry policy. The genuine v0.61 fixture
+comes from its own merge engine: zero debt without a station is new rules.
+Keep the fixture's source/provenance and unedited historical output.
 
 ## Direction
 

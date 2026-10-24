@@ -36,8 +36,11 @@ The owner authorized beginning v0.72, One Rulebook. Branch
 regressions for mixed old/new slots, whole-life exports and old backup
 recovery. The [cutover plan](../docs/one-rulebook-v072.md) identifies the
 shared decoder's occupied-slot risk and the older expedition modes that
-still belong to new-rule lives. No runtime admission or compatibility is
-changed. The archive browser loop and real farmer/heir gate remain NOT RUN;
+still belong to new-rule lives. The first runtime implementation separates
+the retained decoder from optional incoming-write admission; existing
+callers still accept both rulebooks. The genuine v0.61 fixture adds zero-debt,
+pre-station migration and write coverage without invented history. No
+compatibility is removed. The archive browser loop and real farmer/heir gate remain NOT RUN;
 this preparation is not a shipped v0.72 or a passed gate.
 
 ## Earlier farmer releases

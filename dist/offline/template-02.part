@@ -39514,8 +39514,28 @@ function createSaveCoordinator(locks = globalThis.window?.navigator?.locks) {
   return coordinate;
 }
 
-/** Keep full simulation snapshots, including an unfinished turn, in separate lives. */
-function createSaveStore(storage, validate = value => value, options = {}) {
+/** Keep full simulation snapshots, including an unfinished turn, in separate lives.
+ * Decoding retained data is separate from admitting an incoming write. A life
+ * refused by acceptPosition must still occupy its slot and remain exportable. */
+function createSaveStore(storage, decodeStoredLife = value => value, options = {}) {
+  const acceptPosition = options.acceptPosition;
+  if (acceptPosition !== undefined && typeof acceptPosition !== 'function') throw new TypeError('acceptPosition must be a function.');
+  function acceptsIncomingPosition(state) {
+    if (acceptPosition === undefined) return true;
+    // A predicate receives a disposable snapshot. Neither its mutations nor
+    // an exception may alter the caller's position or any retained state.
+    // Admission is synchronous: native Promises are refused, with rejection
+    // consumed without awaiting them or assimilating arbitrary thenables.
+    try {
+      const accepted = acceptPosition(copy(state));
+      if (accepted && typeof accepted === 'object') {
+        try { Promise.prototype.then.call(accepted, () => {}, () => {}); }
+        catch {} // Not a native Promise; it still cannot grant admission.
+      }
+      return accepted === true;
+    }
+    catch { return false; }
+  }
   const coordinate = options.coordinate === undefined ? createSaveCoordinator() : options.coordinate;
   const exclusive = coordinators.get(coordinate);
   const crypto = options.crypto === undefined ? globalThis.crypto : options.crypto;
@@ -39543,14 +39563,14 @@ function createSaveStore(storage, validate = value => value, options = {}) {
         compatible = true;
         slots = slots.map(slot => {
           const candidate = raw.slots.find(value => value?.id === slot.id);
-          const state = candidate?.state && !isIronman(candidate.state) ? validate(candidate.state) : null;
+          const state = candidate?.state && !isIronman(candidate.state) ? decodeStoredLife(candidate.state) : null;
           return { ...slot, state, updatedAt: state && typeof candidate.updatedAt === 'string' ? candidate.updatedAt : null,
             ...(typeof candidate?.revision === 'string' ? { revision: candidate.revision } : {}) };
         });
         activeSlot = Number.isInteger(raw.activeSlot) && raw.activeSlot >= 0 && raw.activeSlot < SAVE_SLOT_COUNT ? raw.activeSlot : 0;
         if (!slots.some(slot => slot.state) && raw.slots.some(slot => slot?.state != null)) compatible = false;
         for (const slot of slots) {
-          const previous = raw.backups?.[slot.id], state = previous?.state && !isIronman(previous.state) ? validate(previous.state) : null;
+          const previous = raw.backups?.[slot.id], state = previous?.state && !isIronman(previous.state) ? decodeStoredLife(previous.state) : null;
           if (state) backups[slot.id] = { state, updatedAt: typeof previous.updatedAt === 'string' ? previous.updatedAt : null };
         }
       }
@@ -39560,7 +39580,7 @@ function createSaveStore(storage, validate = value => value, options = {}) {
     if (!compatible) {
       try {
         if (legacyText == null) legacyText = storage?.getItem(LEGACY_SAVE_KEY) ?? null;
-        const legacy = JSON.parse(legacyText || 'null'), state = legacy && !isIronman(legacy) ? validate(legacy) : null;
+        const legacy = JSON.parse(legacyText || 'null'), state = legacy && !isIronman(legacy) ? decodeStoredLife(legacy) : null;
         if (state) { slots[0] = { id: 0, state, updatedAt: null }; activeSlot = 0; }
       } catch { readable = false; }
     }
@@ -39660,7 +39680,7 @@ function createSaveStore(storage, validate = value => value, options = {}) {
     try {
       const raw = storage.getItem(SLOT_KEY), legacy = storage.getItem(LEGACY_SAVE_KEY);
       if (sharedIronmanClaim(raw, legacy)) return { ok: false, reason: 'unsupported-shared-mortality' };
-      return rawIronmanBase(raw, legacy, id, validate);
+      return rawIronmanBase(raw, legacy, id, decodeStoredLife);
     }
     catch { return { ok: false, reason: 'unreadable-underlying' }; }
   }
@@ -39703,7 +39723,7 @@ function createSaveStore(storage, validate = value => value, options = {}) {
         const marker = markerFor(runId);
         if (!marker.ok) return { ok: false, reason: 'unreadable-ended-marker' };
         if (marker.marker) { ended.set(runId, marker.marker); continue; }
-        const raw = storage.getItem(key), record = raw === null ? null : decodeIronmanRecord(raw, runId, validate);
+        const raw = storage.getItem(key), record = raw === null ? null : decodeIronmanRecord(raw, runId, decodeStoredLife);
         if (!record) return { ok: false, reason: 'unreadable-run-record' };
         records.set(runId, record);
       }
@@ -39764,7 +39784,7 @@ function createSaveStore(storage, validate = value => value, options = {}) {
       casualties: copy(state?.ironman.casualties ?? prior.casualties), attachment: copy(attachment) };
   }
   function persistRecord(record) {
-    if (!decodeIronmanRecord(record, record.runId, validate)) return failure('invalid-run-record');
+    if (!decodeIronmanRecord(record, record.runId, decodeStoredLife)) return failure('invalid-run-record');
     const key = ironmanRecordKey(record.runId), bytes = JSON.stringify(record);
     try {
       storage.setItem(key, bytes);
@@ -39787,7 +39807,7 @@ function createSaveStore(storage, validate = value => value, options = {}) {
   const inputRunId = input => typeof input === 'string' ? input : isIronman(input) ? input.ironman?.runId : null;
   function validatedPosition(input, terminal = false) {
     try {
-      const state = validate(copy(input));
+      const state = decodeStoredLife(copy(input));
       return state && isIronman(state) && validateIronman(state) && same(state, input)
         && (terminal || !ironmanCombatStopped(state.battle)) ? state : null;
     } catch { return null; }
@@ -39868,6 +39888,7 @@ function createSaveStore(storage, validate = value => value, options = {}) {
   function commitRun(slot, input, { intent, token, consume } = {}) {
     const id = idFor(slot), state = validatedPosition(input), runId = inputRunId(input);
     if (id === null || !state || !['create', 'import', 'continue'].includes(intent)) return failure('invalid-position');
+    if (!acceptsIncomingPosition(state)) return failure('position-not-admitted');
     const found = discover(); if (!found.ok) return failure(found.reason);
     const marker = markerFor(runId); if (!marker.ok) return failure('unreadable-ended-marker');
     if (marker.marker) return { status: 'ended', runId };
@@ -40050,7 +40071,8 @@ function createSaveStore(storage, validate = value => value, options = {}) {
     },
     replace(id, state, { reviewed = false, token } = {}) {
       if (isIronman(state)) return false;
-      const valid = validate(state), index = idFor(id);
+      const valid = decodeStoredLife(state), index = idFor(id);
+      if (valid && index !== null && !acceptsIncomingPosition(valid)) return false;
       if (index !== null && protectedTarget(index)) return false;
       if (!valid || index == null || (slots[index].state && !reviewed)) return false;
       validatedSnapshot = null;
@@ -40064,7 +40086,8 @@ function createSaveStore(storage, validate = value => value, options = {}) {
     select(id) { const index = idFor(id); if (index == null) return false; activeSlot = index; return true; },
     write(id, state) {
       if (isIronman(state)) return false;
-      const valid = validate(state), index = idFor(id);
+      const valid = decodeStoredLife(state), index = idFor(id);
+      if (valid && index !== null && !acceptsIncomingPosition(valid)) return false;
       if (index !== null && protectedTarget(index)) return false;
       if (!valid || index == null) return false;
       this.invalidateHealth(index);
