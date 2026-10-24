@@ -1,0 +1,100 @@
+{
+  "status": "PASS",
+  "humanPlaytest": "NOT RUN",
+  "checks": [
+    {
+      "file": "common-freeholder-age16.json",
+      "sha256": "833c078a21e0e9c90cca4e5abe5a248ecc85fb9de0668b92561722d8ee1474b8",
+      "currentPlaceId": "city",
+      "fieldPlaceId": "city",
+      "startsAtField": true,
+      "rawDayEligible": true,
+      "rawScene": "birth_year_16",
+      "rawFarmSummary": "One strip at Stormbay. 0 sacks in the chest. A free hand, and the common grazing due.",
+      "diagnosticDayEligible": true,
+      "diagnosticScene": "farm_ambition",
+      "diagnosticFarmSummary": "One strip at Stormbay. 0 sacks in the chest. A free hand, and the common grazing due.",
+      "diagnosticPendingChoices": [
+        {
+          "id": "keep",
+          "label": "Keep the family's field",
+          "enabled": true
+        },
+        {
+          "id": "fed",
+          "label": "Keep the children fed",
+          "enabled": true
+        },
+        {
+          "id": "sea",
+          "label": "See the sea",
+          "enabled": true
+        },
+        {
+          "id": "love",
+          "label": "Build a marriage chosen for love",
+          "enabled": true
+        },
+        {
+          "id": "peace",
+          "label": "Be a neighbour worth keeping",
+          "enabled": true
+        },
+        {
+          "id": "continue",
+          "label": "Leave the question open",
+          "enabled": true
+        }
+      ],
+      "ordinaryActionsWhileDecisionPending": [],
+      "proofScope": "Production Day eligibility and farm read models plus one actual zero-day public birthday command in a disposable clone. No browser interaction is claimed, and no delivered state was changed."
+    },
+    {
+      "file": "bound-tenant-age16.json",
+      "sha256": "314b9b48aa8cb72d0e5af4b0b7b6a19d8f90651ea2a0cbba788d933c9eaf61ee",
+      "currentPlaceId": "wells",
+      "fieldPlaceId": "gate",
+      "startsAtField": false,
+      "rawDayEligible": true,
+      "rawScene": "birth_year_16",
+      "rawFarmSummary": "One strip at The Beacon Cistern Arch. 0 sacks in the chest. The land is Bariela Davenell's; the harvest is yours to risk.",
+      "diagnosticDayEligible": true,
+      "diagnosticScene": "farm_ambition",
+      "diagnosticFarmSummary": "One strip at The Beacon Cistern Arch. 0 sacks in the chest. The land is Bariela Davenell's; the harvest is yours to risk.",
+      "diagnosticPendingChoices": [
+        {
+          "id": "keep",
+          "label": "Keep the family's field",
+          "enabled": true
+        },
+        {
+          "id": "fed",
+          "label": "Keep the children fed",
+          "enabled": true
+        },
+        {
+          "id": "sea",
+          "label": "See the sea",
+          "enabled": true
+        },
+        {
+          "id": "love",
+          "label": "Build a marriage chosen for love",
+          "enabled": true
+        },
+        {
+          "id": "freedom",
+          "label": "Buy the family free of the lord's due",
+          "enabled": true
+        },
+        {
+          "id": "continue",
+          "label": "Leave the question open",
+          "enabled": true
+        }
+      ],
+      "ordinaryActionsWhileDecisionPending": [],
+      "proofScope": "Production Day eligibility and farm read models plus one actual zero-day public birthday command in a disposable clone. No browser interaction is claimed, and no delivered state was changed."
+    }
+  ]
+}

@@ -26,6 +26,30 @@ The [edition ledger](../../claude/edition-progress.md) tracks the actual
 merge and deployment. Retain the exact build used by each participant even
 if a later fix ships.
 
+## Ready-to-use session materials
+
+Give players only the [short player guide](farmer-v071/player-guide.md)
+and their assigned fresh age-sixteen start from the
+[player bundle](farmer-v071/farmer-starts.zip). The two starts were made with
+this release's normal character-creation simulation; the birthday and
+private purpose are unanswered. Use an empty save slot when importing.
+
+The creator deliberately leaves station to fate. These fixed exports let
+the group cover both a common freeholder and a bound tenant without asking
+players to reroll for a class. Assign both starts across the group; they
+do not represent all births or seeds. Exact generation inputs, actual
+opening positions and checksums are in the
+[starter manifest](farmer-v071/starter-manifest.json). The
+[preparation checks](farmer-v071/preparation-checks.md) distinguish actual
+live import, engine validation and the human sessions still to come.
+
+The observer uses the [blank session record](farmer-v071/session-record.md)
+and [blank aggregate verdict](farmer-v071/verdict-template.md). Keep the
+recall questions and acceptance criteria from players before play. Capture
+the initial account before follow-up prompts. Preserve unfinished sessions
+and resume them; a time limit or one succession click does not establish a
+completed farmer life and heir chapter.
+
 ## Participants and session
 
 Recruit six to eight people who have not played Hearth & Oath, plus the
@@ -51,7 +75,7 @@ Ask the player to tell the life in a few sentences, then ask:
 2. Which choice changed the direction of the life?
 3. What was this life trying to do?
 4. Did you understand why things happened? Which cost surprised you?
-5. Do you want to play the heir? Why, or why not?
+5. Do you want to keep playing as the heir? Why, or why not?
 
 Most participants must name at least two people unprompted, identify a
 turning point caused by their own choice, describe the life's purpose,

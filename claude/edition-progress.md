@@ -42,6 +42,21 @@ diagnose mechanics; they supply no participant, recall answer or human
 playtest verdict.
 The [human protocol](../docs/playtests/farmer-v071.md) remains NOT RUN.
 
+## Farmer session preparation
+
+The [session kit](../docs/playtests/farmer-v071.md#ready-to-use-session-materials)
+provides two untouched production age-sixteen starts, one common freeholder
+and one bound tenant. Both pass full validation and exact import round trips;
+disposable clones reach the unanswered farmer ambition. One freeholder
+import was observed in live Chrome. The player ZIP has three verified
+members and excludes the separate blank observer and aggregate forms.
+Its checks and actual opening positions are in
+`docs/playtests/farmer-v071/preparation-checks.md`.
+
+The runtime remains the published version 104 bytes. This is preparation for
+the owner's session and six to eight new players; no human answer or gate
+verdict is claimed. v0.72 remains pending that verdict.
+
 ## Delivery
 
 | Field | Result |

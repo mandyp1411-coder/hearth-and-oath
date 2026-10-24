@@ -15,6 +15,12 @@ No later Volume II release is claimed complete. Phase 2 waits for the
 farmer's real playtest. The protocol and separate verdict are in
 `docs/playtests/farmer-v071.md`.
 
+The [session materials](playtests/farmer-v071.md#ready-to-use-session-materials)
+now provide a player bundle with two genuine age-sixteen starts and separate
+blank observer forms. Both starts passed full save validation and exact
+import checks; one was opened in the live browser. This prepares the gate
+without supplying a participant or a verdict. The runtime is unchanged.
+
 The selected software results do not establish a strict single-snapshot
 software-gate PASS. Offline evidence must retain its actual terminal status,
 artifact identity and checker scope. The [edition ledger](../claude/edition-progress.md)
