@@ -35,11 +35,14 @@ export function rulesLabel(s) {
 }
 
 /** The sentence a slot or an import review adds under the label. */
-export function rulesNote(s) {
-  return rulesOf(s) === OLD
+export function rulesNote(s, { admitted = true } = {}) {
+  if (rulesOf(s) !== OLD) return null;
+  return admitted
     ? 'This life was written under the old rules. It plays on here for now; the archive keeps those rules for good, and a life exported from here opens there.'
-    : null;
+    : 'This life was written under the old rules, and the archive keeps them now. Export it and open it there. Its place here is kept until you do.';
 }
+/** What the door says to an old life arriving by file while this page refuses it. */
+export const OLD_RULES_DOOR = 'This life lives by the old rules. It belongs in the archive; open it there. Nothing here was changed.';
 
 /** Steps a new-rules save is brought through, in order. Each states the
  * default it gives a life that predates the system it concerns; none

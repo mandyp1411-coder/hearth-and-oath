@@ -4995,6 +4995,11 @@ body.title-mode .title-screen .title-continue-card { display:grid; grid-template
 .title-screen .title-life-place,.title-screen .title-life-context { display:block; margin-top:5px; font:calc(13px * var(--reading-scale,1))/1.45 var(--sans); color:#bdb39f; }
 .title-screen .title-life-context { color:#d4c4a5; margin-top:9px; }
 .title-screen .title-source-note { margin:0; padding:10px 14px; border-inline:1px solid #71634770; background:#15140ff5; color:#e0c89c; font:calc(12px * var(--reading-scale,1))/1.5 var(--sans); }
+/* A life kept for the archive: shown, never opened here; its note carries the export and the way there. */
+body.title-mode .title-screen .title-kept-card { grid-template-columns:72px minmax(0,1fr); cursor:default; border-color:#71634780; background:linear-gradient(110deg,#25221bed,#121210f5); }
+.title-screen .title-life-kept .slot-archive-note { border:1px solid #71634770; border-top:0; background:#11110fed; }
+.save-slot[data-refused-life] { opacity:1; cursor:default; }
+.save-slot[data-refused-life] .menu-arrow { color:#c9b78f; }
 .title-screen .title-life .save-health { margin:0; border:1px solid #71634770; border-top:0; background:#11110fed; padding:10px 14px; }
 .title-screen .title-life .save-health-warning { border-color:#a38b59; }
 .title-screen .title-life-actions { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr)); gap:10px; }

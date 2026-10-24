@@ -196,7 +196,7 @@ export function fakeSurface() {
 let importedApps = 0;
 
 /** Install one isolated handler surface. No browser or CSS geometry is modeled. */
-export async function mountApp(t, { states = [], activeSlot = 0, width = 1440, height = 900, storageEntries = [], locks = null } = {}) {
+export async function mountApp(t, { states = [], activeSlot = 0, width = 1440, height = 900, storageEntries = [], locks = null, rehearseCutover = false } = {}) {
   const surface = fakeSurface(), originals = new Map(), windowListeners = new Map();
   surface.windowEvent = async (type, extra = {}) => { const event = { defaultPrevented:false, preventDefault(){this.defaultPrevented=true;}, ...extra }; for(const handler of windowListeners.get(type)||[])await handler(event); return event; };
   const spatialTimers=new Map(),touchTimers=new Map();let timerId=0;
@@ -212,6 +212,8 @@ export async function mountApp(t, { states = [], activeSlot = 0, width = 1440, h
   const globals = {
     document: surface.document, localStorage: surface.storage, FormData: surface.FormData,
     window: { innerWidth: width, innerHeight: height, scrollTo() {}, scrollBy() {}, ...(locks ? { navigator: { locks } } : {}), addEventListener(type,handler){const handlers=windowListeners.get(type)||[];handlers.push(handler);windowListeners.set(type,handlers);} },
+    // rulebook.js reads this once at load: the page refuses old-rules lives as the v0.72 cutover will.
+    ...(rehearseCutover ? { __hearthRehearseCutover: true } : {}),
     requestAnimationFrame: callback => { callback(); return 1; },
     getComputedStyle: () => ({ paddingLeft: '0', paddingTop: '0' }),
     setTimeout: (callback,delay) => {const id=++timerId;if(delay===520)spatialTimers.set(id,callback);if(delay===220)touchTimers.set(id,callback);return id;}, clearTimeout(id) {spatialTimers.delete(id);touchTimers.delete(id);},
