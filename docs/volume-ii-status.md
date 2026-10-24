@@ -19,7 +19,13 @@ The [session materials](playtests/farmer-v071.md#ready-to-use-session-materials)
 shipped in [PR #16](https://github.com/mandyp1411-coder/hearth-and-oath/pull/16) with two genuine age-sixteen starts and separate
 blank observer forms. Both starts passed full save validation and exact
 import checks; one was opened in the live browser. This prepares the gate
-without supplying a participant or a verdict. The runtime is unchanged.
+without supplying a participant or a verdict. That kit did not change the runtime.
+
+v0.71.1 is a bounded repair of the farmer's first birthday, under verification.
+It retains new authored hints and derives a display for existing captured
+choices from their actual effects. It does not rewrite history or add a
+later livelihood. See [the patch checks](measures/farmer-v0711-verification.md).
+The human farmer-and-heir gate remains NOT RUN.
 
 The selected software results do not establish a strict single-snapshot
 software-gate PASS. Offline evidence must retain its actual terminal status,

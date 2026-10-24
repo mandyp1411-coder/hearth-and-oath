@@ -291,9 +291,22 @@ function adultEvent(s,e) {
 
 function childhoodEvent(s,e) {
   if((s.age||0)>18)return adultEvent(s,e);
-  const captured=s?.timeline?.storybook?.pending?.scene;
+  const pending=s?.timeline?.storybook?.pending,captured=pending?.scene;
   const row=captured&&CHILDHOOD[captured.id];
-  if(row)return {title:row[0],body:expand(row[1],s),labels:Object.fromEntries((e.choices||[]).map((c,i)=>[c.id,row[2][i]||c.label]))};
+  if(row){
+    const choices=e.choices||[];
+    // The farmer enters at this birthday. Its authored hints must survive
+    // both editionScene and setEvent; the saved incident keeps its own words.
+    // Other birthdays retain their existing prose and quotation rules.
+    const opening=s.farm&&s.age===16&&e.id==='birth_year_16'
+      &&(s.hero?.station||s.householdBudget?.debt!==undefined)
+      &&pending.age===s.age&&pending.day===s.day
+      &&captured.title===e.title&&captured.body===e.body
+      &&choices.length===3&&captured.choices?.length===3&&new Set(choices.map(c=>c.id)).size===3
+      &&choices.every((c,i)=>c.id===captured.choices[i].id&&c.label===captured.choices[i].label);
+    return {title:row[0],body:expand(row[1],s),labels:Object.fromEntries(choices.map((c,i)=>[c.id,row[2][i]||c.label])),
+      ...(opening?{descriptions:Object.fromEntries(choices.map(c=>[c.id,c.description]))}:{})};
+  }
   if((s.age||0)<3)return sceneRow('A Small Beginning','Your days are filled with meals, sleep, familiar voices, and the people caring for you. Your caregiver chooses how to spend this little part of the day.');
   if(s.age<6)return sceneRow('A Day Close to Home',choose(s,contextKey(s,e),['There is time to play near home. The adults are busy, but a familiar person has stopped to see what you have been doing.','You have found something interesting to show the people at home. They make a little space beside their work.','The afternoon is yours for a small game, a question, or time with someone you know.']));
   if(s.age<12)return sceneRow('After Lessons',choose(s,contextKey(s,e),['The lesson has ended in {here}. There is still time to spend with friends before you are expected home.','You and the other learners gather your things. Someone has a question about the day, and you have a chance to answer.','A free afternoon opens after lessons. You can decide how to spend it without choosing your whole future.']));

@@ -5,6 +5,14 @@ rulebook and Design Bible Volume II. This ledger keeps that handoff visible.
 
 ## Current release
 
+v0.71.1, The first choice, is a bounded farmer repair under verification on
+`codex/v0.71.1-first-choice`. It preserves new birthday hints and reads actual
+captured costs/risks for old pending birthdays without rewriting their past.
+Focused opening checks pass 8/8 and unchanged contribution checks 5/5;
+the content and offline build pass. Full lanes and compiled checks are
+pending in `docs/measures/farmer-v0711-verification.md`. The human gate
+remains NOT RUN. No later phase is opened by this patch.
+
 v0.71, The farmer's life, shipped as a playtest candidate from
 `codex/v0.71-farmers-life`, in
 [PR #15](https://github.com/mandyp1411-coder/hearth-and-oath/pull/15).
