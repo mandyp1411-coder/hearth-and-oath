@@ -1,3 +1,6 @@
+// Art and audio use one frozen table from the exact inert element; native per-realm asset allocation is separate evidence.
+// Legacy semantic probes use the exact graph prefix in classic scope and the unchanged async module tail; complete module scope is separately verified by v71.
+import { compileOfflineModule } from './lib/offline-module-vm.mjs';
 // Focused compiled-shell acceptance for the reconstructed story increment.
 // Disposable semantic DOM only: no browser geometry/native-storage claim.
 import assert from 'node:assert/strict';
@@ -18,7 +21,7 @@ const root=fileURLToPath(new URL('../',import.meta.url)),plain=v=>JSON.parse(JSO
 const identity=await validateOfflineIdentity(root);
 let html=installOfflineDocument(readFileSync(new URL('../artifacts/hearth-and-oath.html',import.meta.url),'utf8'));
 const tag='<script type="module">',start=html.indexOf(tag),end=html.indexOf('</script>',start+tag.length);assert.ok(start>=0&&end>start);assert.equal(html.indexOf(tag,end),-1);
-let code=html.slice(start+tag.length,end);html=null;assert.doesNotMatch(code,/^import\s/m);let compiled=new Script(code,{filename:'standalone-winter-levy-aftermath.js'});code=null;globalThis.gc();
+let code=html.slice(start+tag.length,end);html=null;assert.doesNotMatch(code,/^import\s/m);let compiled=compileOfflineModule(code,{filename:'standalone-winter-levy-aftermath.js', legacyProbes: true, shareInertMedia: true});code=null;globalThis.gc();
 
 // Actual source producer earns the original outcome, household trust and seven
 // elapsed days. No quest/money/health/relationship shortcuts are used here.
@@ -36,7 +39,7 @@ async function session(label,entries,run){
   context=createContext({document:ui.document,localStorage:ui.storage,FormData:ui.FormData,Blob,URL,TextEncoder,TextDecoder,queueMicrotask,console,
    window:{innerWidth:390,innerHeight:844,scrollTo(){},scrollBy(){},addEventListener(){},navigator:{sendBeacon:forbidden},...blocked},navigator:{sendBeacon:forbidden},location:{href:'file:///downloads/hearth-and-oath.html',protocol:'file:'},
    requestAnimationFrame:fn=>{fn();return 1;},getComputedStyle:()=>({paddingLeft:'0',paddingTop:'0'}),setTimeout(fn,delay){const id=++timerId;timers.set(id,{fn,delay});return id;},clearTimeout:id=>timers.delete(id),...blocked});
-  new Script('globalThis.structuredClone=value=>JSON.parse(JSON.stringify(value));').runInContext(context);compiled.runInContext(context,{timeout:30000});sessions++;
+  new Script('globalThis.structuredClone=value=>JSON.parse(JSON.stringify(value));').runInContext(context);await compiled.evaluate(context,{timeout:30000});sessions++;
   embedded=new Script('({engine:__engine,levy:__winter_levy_aftermath,society:__society})').runInContext(context);
   function persisted(){const d=JSON.parse(ui.storage.getItem(KEY));assert.equal(d.version,1);assert.equal(d.activeSlot,0);assert.deepEqual(d.slots.map(s=>s.id),[0,1,2]);assert.deepEqual(d.slots[0].state,JSON.parse(ui.storage.getItem(MIRROR)),label+': authoritative slot equals mirror');assert.deepEqual(d.slots[0].state,ui.current(),label+': authoritative slot equals current');assert.equal(JSON.stringify(d.slots[1]),neighborBytes);assert.equal(JSON.stringify(d.slots[2]),emptyBytes);assert.equal(JSON.stringify(d.backups),backupBytes);}
   function transfer(s){context.qaJson=JSON.stringify(s);const result=new Script('JSON.parse(globalThis.qaJson)').runInContext(context);delete context.qaJson;return result;}

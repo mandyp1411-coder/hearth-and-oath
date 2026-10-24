@@ -1,20 +1,20 @@
 {
   "schemaVersion": 3,
   "version": "0.71.0",
-  "bytes": 333652466,
-  "sha256": "491f3cdd829c806d277c1c7a55a9a2750e610e6e86e22717e8d6b370df0c3d23",
+  "bytes": 333654873,
+  "sha256": "2884cbaac99290b8093852515930ca0f587543113d9e7b2c1aaa3a18887c10a6",
   "loaderSha256": "3a04d1cd7f7091eb36bd78c28afc99a2b24ccbac777be88b0668db25c75d19c5",
   "source": {
-    "sha256": "87c37bbb6b9cb00b82af8908c2960a653e4f1616168e6e57bbcc5f4f6b009c78",
+    "sha256": "43559063337c7bc243bc152ad153d672a9c933d61d85a494f17d3f46bddfa311",
     "files": 1052
   },
   "buildGit": {
-    "head": "cc119a3bdaebf7baf6f8b4ad85b4effc7a8e5ed7",
+    "head": "f8637926c2db25070435b50cb12311ef82d1afcd",
     "dirty": true
   },
-  "templateBytes": 12761754,
-  "templateSha256": "77b0fd9775a51cde09f5679b5905007a0792a6ea02f85a178a27821778280422",
-  "inputBytes": 249278144,
+  "templateBytes": 12764161,
+  "templateSha256": "07d87f86b686e9fc96ec3dd4bd86471d3c22ecc99ab696798885bc855e99b0a8",
+  "inputBytes": 249280551,
   "templateParts": [
     {
       "file": "template-01.part",
@@ -23,8 +23,8 @@
     },
     {
       "file": "template-02.part",
-      "bytes": 4373146,
-      "sha256": "c98655d91338c81f7a9046fe1d71c6954e3fbdbc6779619f37402a82fc7d74a3"
+      "bytes": 4375553,
+      "sha256": "a2087bf72259d9b0f6243bb8dfc98553280fd432a8aa75d71ae74c8516d0a11a"
     }
   ],
   "assets": [

@@ -1,3 +1,6 @@
+// Art and audio use one frozen table from the exact inert element; native per-realm asset allocation is separate evidence.
+// Legacy semantic probes use the exact graph prefix in classic scope and the unchanged async module tail; complete module scope is separately verified by v71.
+import { compileOfflineModule } from './lib/offline-module-vm.mjs';
 import { isDeepStrictEqual } from 'node:util';
 // Exact shipped graph; disposable semantic UI, never browser/layout evidence.
 import assert from 'node:assert/strict';
@@ -19,7 +22,7 @@ console.log('Reading the exact compiled graph.');
 let bytes=readFileSync(root+'/artifacts/hearth-and-oath.html');assert.equal(hash(bytes),identity.sha256);
 let html=installOfflineDocument(bytes.toString('utf8'));bytes=null;const tag='<script type="module">',start=html.indexOf(tag),end=html.indexOf('</script>',start+tag.length);
 assert.ok(start>=0&&end>start);let code=html.slice(start+tag.length,end);html=null;assert.doesNotMatch(code,/^import\s/m);
-let compiled=new Script(code,{filename:'exact-life-context-v59.js'});code=null;globalThis.gc?.();console.log('Compiled graph parsed.');
+let compiled=compileOfflineModule(code,{filename:'exact-life-context-v59.js', legacyProbes: true, shareInertMedia: true});code=null;globalThis.gc?.();console.log('Standalone module bytes prepared.');
 const KEY='hearth-and-oath:slots:v1',MIRROR='hearth-and-oath:life:v1';
 let networkAttempts=0,handlerChecks=0;
 async function run(state,check){
@@ -34,7 +37,7 @@ async function run(state,check){
  context=createContext({document:ui.document,localStorage:ui.storage,FormData:ui.FormData,window,navigator:window.navigator,location:{href:'file:///qa/hearth-and-oath.html',protocol:'file:'},requestAnimationFrame:fn=>{fn();return 1;},getComputedStyle:()=>({paddingLeft:'0',paddingTop:'0'}),setTimeout(fn,delay){const id=++timer;timers.set(id,{fn,delay});return id;},clearTimeout:id=>timers.delete(id),Blob,URL,TextEncoder,TextDecoder,queueMicrotask,console,fetch:blocked,XMLHttpRequest:class{constructor(){blocked();}},WebSocket:class{constructor(){blocked();}}});
  try{
   new Script('globalThis.structuredClone=value=>JSON.parse(JSON.stringify(value));').runInContext(context);
-  compiled.runInContext(context,{timeout:30000});const click=async(op,id)=>{await ui.click(op,id);for(let i=0;i<4;i++)await turn();handlerChecks++;};
+  await compiled.evaluate(context,{timeout:30000});const click=async(op,id)=>{await ui.click(op,id);for(let i=0;i<4;i++)await turn();handlerChecks++;};
   await click('title-continue');assert.deepEqual(ui.current(),state);await check(ui,click);
   const saved=JSON.parse(ui.storage.getItem(KEY));for(let i=1;i<3;i++)assert.ok(isDeepStrictEqual(saved.slots[i],slots[i]),'Complete independent neighboring slot '+i+' remains unchanged.');
  }finally{timers.clear();context=null;ui=null;globalThis.gc?.();}
@@ -53,4 +56,4 @@ await run(inbox,async(ui,click)=>{
  assert.match(ui.root.querySelector('.inbox-letter').textContent,/Preserved words 0/);assert.deepEqual(ui.current(),roundtrip(markNotificationsRead(inbox,oldest.id)));assert.equal(ui.current().inbox.archive[0].read,true);
 });
 compiled=null;globalThis.gc?.();assert.equal(networkAttempts,0);assert.equal(hash(readFileSync(new URL(import.meta.url))),hash(own));await validateUnchangedOfflineIdentity(root,identity);
-console.log(JSON.stringify({version:identity.version,artifactSha256:identity.sha256,handlerChecks,networkAttempts,checks:['exact unmodified compiled graph','Plans/calendar and causal views','free routine review and safe cancellation','canonical routine full-state parity','81 unread notices with exact archived words and read receipt','independent neighboring saves preserved'],limits:'Disposable semantic DOM and controlled existing-save fixtures. No native geometry, physical phone, screen reader, natural-lifetime balance or browser-latency certification.'},null,2));
+console.log(JSON.stringify({version:identity.version,artifactSha256:identity.sha256,handlerChecks,networkAttempts,checks:['exact unmodified compiled graph','Plans/calendar and causal views','free routine review and safe cancellation','canonical routine full-state parity','81 unread notices with exact archived words and read receipt','independent neighboring saves preserved'],limits:'Art and audio use one frozen table from the exact inert element; native per-realm asset allocation is separate evidence. Legacy semantic probes use the exact graph prefix in classic scope and the unchanged async module tail; complete module scope is separately verified by v71. Disposable semantic DOM and controlled existing-save fixtures. No native geometry, physical phone, screen reader, natural-lifetime balance or browser-latency certification.'},null,2));

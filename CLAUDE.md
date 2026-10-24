@@ -217,3 +217,18 @@ anatomy as the curses; dungeons and combat are deadly and tactical; the world
 moves without the player and its stories reach them through their own people.
 Edition policy: new systems apply to new lives; old saves keep loading on the
 version that made them.
+
+The farmer's cards use the pure `householdCostPreview`: a direct payment and
+the house's keep are different costs, and both stay visible without the
+numbers toggle. Ordinary actions may leave keep due for a later collection;
+timed scenes collect it after actual work. A prepaid birthday resume shows
+remaining days, the original payment and the current keep estimate. Do not
+repeat the original full price as though it were due again.
+
+Offline checkers use `scripts/lib/offline-module-vm.mjs` to await the
+standalone's asynchronous entry. Full module scope is the default and the
+v71 checker exercises native startup, farmer costs, exports and save
+isolation. Older lexical or repeated-session probes explicitly use the
+unchanged graph prefix plus module entry; seventeen share only the exact
+frozen inert artwork/music table to bound VM memory, restoring native JSON
+parsing before app startup. Their reports must retain that scope limit.

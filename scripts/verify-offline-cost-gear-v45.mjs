@@ -1,3 +1,4 @@
+import { compileOfflineModule } from './lib/offline-module-vm.mjs';
 // Execute the exact downloaded module graph against controlled synthetic lives.
 // This is actual-handler semantic parity, not browser layout or physical touch.
 import assert from 'node:assert/strict';
@@ -43,7 +44,7 @@ const end = html.indexOf('</script>', start + startTag.length);
 assert.ok(end > start, 'embedded module graph has a closing tag');
 let code = html.slice(start + startTag.length, end); html = null;
 assert.doesNotMatch(code, /^import\s/m, 'standalone has no external static module import');
-let compiled = new Script(code, { filename: 'standalone-cost-gear-v45.js' }); code = null;
+let compiled = compileOfflineModule(code,{filename: 'standalone-cost-gear-v45.js' }); code = null;
 globalThis.gc?.();
 
 function valid(state) {
@@ -103,7 +104,7 @@ const context = createContext({
   fetch() { networkAttempts++; throw Error('Network forbidden during standalone verification'); },
 });
 new Script('globalThis.structuredClone=value=>JSON.parse(JSON.stringify(value));').runInContext(context);
-compiled.runInContext(context); compiled = null; globalThis.gc?.();
+await compiled.evaluate(context); compiled = null; globalThis.gc?.();
 let slot = 0;
 const expected = () => expectedSlots[slot];
 function parity(label) {
