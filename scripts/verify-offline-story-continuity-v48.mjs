@@ -1,3 +1,5 @@
+// Legacy semantic probes use the exact graph prefix in classic scope and the unchanged async module tail; complete module scope is separately verified by v71.
+import { compileOfflineModule } from './lib/offline-module-vm.mjs';
 // Run serially, after the exact current v0.48-or-later build:
 // node --max-old-space-size=1536 --expose-gc scripts/verify-offline-story-continuity-v48.mjs
 // One unmodified standalone module graph, actual delegated handlers, disposable
@@ -63,7 +65,7 @@ assert.equal([...html.matchAll(/<script\b/g)].length, 3,
 assert.ok(html.includes('<script id="boot-guard">'), 'production boot guard is retained');
 let code = html.slice(start + moduleTag.length, end); html = null;
 assert.doesNotMatch(code, /^import\s/m, 'embedded module graph has no external static imports');
-let compiled = new Script(code, { filename: 'standalone-story-continuity-v48.js' }); code = null;
+let compiled = compileOfflineModule(code,{filename: 'standalone-story-continuity-v48.js' , legacyProbes: true}); code = null;
 globalThis.gc?.();
 
 function valid(state, label = 'controlled whole save') {
@@ -200,7 +202,7 @@ const context = createContext({
   WebSocket: class { constructor() { noNetwork(); } },
 });
 new Script('globalThis.structuredClone = value => JSON.parse(JSON.stringify(value));').runInContext(context);
-compiled.runInContext(context, { timeout: 30000 }); compiled = null; globalThis.gc?.();
+await compiled.evaluate(context, { timeout: 30000 }); compiled = null; globalThis.gc?.();
 const embeddedValidity = new Script('__engine.validateSave(JSON.parse(globalThis.qaSave))');
 const embeddedMigration = new Script('__engine.migrateSave(JSON.parse(globalThis.qaSave))');
 const durable = () => JSON.parse(ui.storage.getItem(slotsKey));
@@ -388,5 +390,5 @@ console.log(JSON.stringify({
   ],
   storage: 'disposable in-memory Map only; no live browser or user storage',
   network: 'forbidden; zero attempts',
-  limits: 'bounded compiled-handler/semantic-DOM behavior only; not browser, native layout, screen-reader, physical keyboard, performance, naturally played death, earned lifetime or balance certification',
+  limits:'Legacy semantic probes use the exact graph prefix in classic scope and the unchanged async module tail; complete module scope is separately verified by v71. bounded compiled-handler/semantic-DOM behavior only; not browser, native layout, screen-reader, physical keyboard, performance, naturally played death, earned lifetime or balance certification',
 }, null, 2));

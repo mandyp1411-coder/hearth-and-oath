@@ -1,3 +1,6 @@
+import { exportFileName } from '../dist/js/edition.js';
+// Legacy semantic probes use the exact graph prefix in classic scope and the unchanged async module tail; complete module scope is separately verified by v71.
+import { compileOfflineModule } from './lib/offline-module-vm.mjs';
 // Run serially, only after the exact current v0.49-or-later build:
 // node --max-old-space-size=1536 --expose-gc scripts/verify-offline-save-guide-v49.mjs
 // IDs20–22 only. One unchanged compiled graph, one semantic surface, captured
@@ -53,7 +56,7 @@ assert.equal([...html.matchAll(/<script\b/g)].length, 3, 'embedded graph, inert 
 assert.ok(html.includes('<script id="boot-guard">'));
 let code = html.slice(start + tag.length, end); html = null;
 assert.doesNotMatch(code, /^import\s/m); assert.doesNotMatch(code, /(?<![\w.])import\s*\(/);
-let compiled = new Script(code, { filename: 'standalone-save-guide-v49.js' }); code = null;
+let compiled = compileOfflineModule(code,{filename: 'standalone-save-guide-v49.js' , legacyProbes: true}); code = null;
 globalThis.gc?.();
 
 function valid(state, label) { assert.ok(state && E.validateSave(state), label); return state; }
@@ -131,7 +134,7 @@ const context = createContext({ AudioContext: audioProbe.AudioContext, navigator
   EventSource: class { constructor() { noNetwork(); } }, Worker: class { constructor() { noNetwork(); } },
 });
 new Script('globalThis.structuredClone = value => JSON.parse(JSON.stringify(value));').runInContext(context);
-compiled.runInContext(context, { timeout: 30000 }); compiled = null; globalThis.gc?.();
+await compiled.evaluate(context, { timeout: 30000 }); compiled = null; globalThis.gc?.();
 function recordMessages(node) { let value = node.textContent; const messages = []; Object.defineProperty(node, 'textContent', { configurable: true, get: () => value, set(next) { value = next; if (next) messages.push(next); } }); return messages; }
 const outcomeMessages = recordMessages(ui.viewStatus), toastMessages = recordMessages(ui.toast);
 let guideFeedbackChecks = 0, repeatedGuideCloses = 0;
@@ -204,7 +207,7 @@ async function exportExact(id, state, within = ui.root, key = null, op = 'export
   else await click(op, commandId, within);
   assert.equal(exportedCount, prior + 1); assert.equal(lastBlob.type, 'application/json');
   assert.deepEqual(JSON.parse(await lastBlob.text()), state, 'exact whole-life export from the actual handler'); lastBlob = null;
-  assert.equal(lastAnchor.download, `hearth-and-oath-${state.hero.name.replace(/[^a-zA-Z0-9_-]/g, '-')}.json`);
+  assert.equal(lastAnchor.download, exportFileName(state));
   assert.equal(ui.document.activeElement, control); assert.equal(control.isConnected, true);
   assert.deepEqual(diskBytes(), before, 'export changes neither durable envelope nor mirror');
   assert.match(ui.toast.textContent, /Browser save status is unchanged/);
@@ -436,5 +439,5 @@ console.log(JSON.stringify({ version, scope: 'IDs20–22 only', schemaVersion: 2
   ],
   storage: 'disposable in-memory Map only; no live browser or user storage',
   network: 'forbidden; terminal zero-attempt assertion',
-  limits: 'bounded compiled-handler/semantic-DOM evidence only; no browser/layout, screen-reader, physical-keyboard, performance, balance, generated-year/lifetime or full-suite claims',
+  limits:'Legacy semantic probes use the exact graph prefix in classic scope and the unchanged async module tail; complete module scope is separately verified by v71. bounded compiled-handler/semantic-DOM evidence only; no browser/layout, screen-reader, physical-keyboard, performance, balance, generated-year/lifetime or full-suite claims',
 }, null, 2));

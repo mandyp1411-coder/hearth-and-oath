@@ -1,3 +1,4 @@
+import { compileOfflineModule } from './lib/offline-module-vm.mjs';
 // Execute the exact standalone UI/module graph with synthetic saves and no network.
 // This is semantic handler verification, not browser geometry or physical touch.
 import assert from 'node:assert/strict';
@@ -24,7 +25,7 @@ assert.equal(total, manifest.bytes); assert.equal(partsHash.digest('hex'), sha25
 let html = installOfflineDocument(bytes.toString('utf8')); bytes = null; assert.ok(html.includes('v' + version));
 const code = html.match(/<script type="module">([\s\S]*?)<\/script>/)[1]; html = null;
 assert.doesNotMatch(code, /^import\s/m);
-const compiled = new Script(code, { filename: 'standalone-journal-maze-v44.js' }); globalThis.gc?.();
+const compiled = compileOfflineModule(code,{filename: 'standalone-journal-maze-v44.js' }); globalThis.gc?.();
 const base = E.migrateSave(JSON.parse(gunzipSync(read('tests/fixtures/v30-explore-travel.json.gz'))).states.base);
 function walk(s, room) { for (const id of settlementWalkPath(s, room) || []) s = E.chooseAction(s, 'atlas_room_' + id); return s; }
 let journal = walk(structuredClone(base), settlementServices(base).find(r => r.kind === 'work').roomId);
@@ -45,7 +46,7 @@ ui.storage.setItem('hearth-and-oath:slots:v1', JSON.stringify({version:1,activeS
 ui.storage.setItem('hearth-and-oath:life:v1', JSON.stringify(journal));
 const context = createContext({document:ui.document,localStorage:ui.storage,FormData:ui.FormData,window:{innerWidth:390,innerHeight:844,scrollTo(){},scrollBy(){}},requestAnimationFrame:cb=>{cb();return 1;},getComputedStyle:()=>({paddingLeft:'0',paddingTop:'0'}),setTimeout:()=>1,clearTimeout(){},Blob,URL,TextEncoder,TextDecoder,console,queueMicrotask,fetch(){throw Error('Network forbidden during standalone verification');}});
 new Script('globalThis.structuredClone=value=>JSON.parse(JSON.stringify(value));').runInContext(context);
-compiled.runInContext(context); globalThis.gc?.();
+await compiled.evaluate(context); globalThis.gc?.();
 await ui.click('title-continue'); await ui.click('tab','journal');
 const commission = journal.careers.active, storyId = journal.stories.arcs[0].id;
 assert.ok(ui.root.querySelector('[data-journal-commitments]'));

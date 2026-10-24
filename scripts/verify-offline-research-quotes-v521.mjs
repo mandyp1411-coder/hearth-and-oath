@@ -1,3 +1,7 @@
+// Art and audio use one frozen table from the exact inert element; native per-realm asset allocation is separate evidence.
+// Legacy semantic probes use the exact graph prefix in classic scope and the unchanged async module tail; complete module scope is separately verified by v71.
+import { exportFileName } from '../dist/js/edition.js';
+import { compileOfflineModule } from './lib/offline-module-vm.mjs';
 // Corrective v0.52.1 gate. Run serially only after the final source/build:
 // node --max-old-space-size=1536 --expose-gc scripts/verify-offline-research-quotes-v521.mjs
 // Exact unchanged standalone handlers in three disposable fake-surface sessions.
@@ -60,8 +64,8 @@ let html=installOfflineDocument(bytes.toString('utf8'));bytes=null;
 const tag='<script type="module">',start=html.indexOf(tag),end=html.indexOf('</script>',start+tag.length);
 assert.ok(start>=0&&end>start);assert.equal(html.indexOf(tag,end),-1);assert.equal([...html.matchAll(/<script\b/g)].length,3);
 let code=html.slice(start+tag.length,end);html=null;assert.doesNotMatch(code,/^import\s/m);assert.doesNotMatch(code,/(?<![\w.])import\s*\(/);
-let compiled=new Script(code,{filename:'standalone-research-quotes-v521.js'});code=null;globalThis.gc?.();
-stage('exact standalone compiled once; no app bindings exposed');
+let compiled=compileOfflineModule(code,{filename:'standalone-research-quotes-v521.js', legacyProbes: true, shareInertMedia: true});code=null;globalThis.gc?.();
+stage('exact standalone module bytes prepared once for isolated sessions; no app bindings exposed');
 const totals={sessions:0,handlerChecks:0,parityChecks:0,transitionChecks:0,renderedQuoteChecks:0,pendingPacketChecks:0,exports:0,downloadClicks:0,disabledHandlerChecks:0,staleHandlerChecks:0,sourceRejectionChecks:0,selfOnlyChecks:0,draftChecks:0,networkAttempts:0};
 const delivered=[];
 
@@ -91,7 +95,7 @@ async function runBatch(batch){
  // Platform shim only. The exact compiled app is neither instrumented nor
  // rewritten; source reducers are used solely outside its context for parity.
  new Script('globalThis.structuredClone=value=>JSON.parse(JSON.stringify(value));').runInContext(context);
- stage('start disposable standalone session',{batch:batch.name});compiled.runInContext(context,{timeout:30000});totals.sessions++;
+ stage('start disposable standalone session',{batch:batch.name});await compiled.evaluate(context,{timeout:30000});totals.sessions++;
  const metadata=initial.slots.map(({revision,updatedAt})=>({revision,updatedAt}));
  const disk=()=>JSON.parse(ui.storage.getItem(KEY)),storageBytes=()=>JSON.stringify([...ui.values]);
  const button=id=>ui.root.querySelector(`[data-op="choice"][data-id="${id}"]`);
@@ -111,7 +115,7 @@ async function runBatch(batch){
   assert.ok(lastBlob&&lastAnchor,'no previous export can satisfy a current export check');assert.equal(lastAnchor.clickCount,1);assert.equal(lastBlob.type,'application/json');
   const exported=JSON.parse(await lastBlob.text());assert.deepEqual(exported,wanted[slot],'fresh ordinary exact complete-session export');
   if(wanted[slot].event?.id==='research_conclude')assert.equal(JSON.stringify(exported.event),rawPackets[slot],'export retains the historical pending scene bytes');
-  assert.equal(lastAnchor.download,`hearth-and-oath-${wanted[slot].hero.name.replace(/[^a-zA-Z0-9_-]/g,'-')}.json`);
+  assert.equal(lastAnchor.download,exportFileName(wanted[slot]));
   for(const [id,t]of [...timers])if(t.delay===1000){timers.delete(id);t.fn();}
   assert.equal(urls.size,0);await ui.key('Escape');await turn();
   assert.equal(storageBytes(),before,'ordinary export changes no slot, backup, mirror or workspace byte');assert.equal(writes,writeStart);totals.exports++;totals.downloadClicks++;parity('fresh exact export');
@@ -219,4 +223,4 @@ console.log(JSON.stringify({version:identity.version,sha256:identity.sha256,runt
   'real recorded-death vacancy with an actual present public successor: all three deliveries disabled, source-rejected, actual disabled and earlier-enabled stale handlers change zero bytes and make zero writes; no automatic custody transfer',
   'all three complete saved states, full nonempty backups, mirror and exact neighbor revision/timestamp metadata per session; fresh ordinary exact exports, no old Blob or anchor reuse; completed and pending reloads',
   'zero attempted network APIs in all three isolated standalone sessions'
- ],limits:'Controlled source captures from immutable played v30 data, plus one explicit recorded-death/reconciliation fixture, in disposable fake semantic DOM/Map storage. The current exact standalone module is unmodified. Not natural life/death, physical-browser resource loading or geometry, screen-reader behavior, travel/balance, performance benchmarking, full-suite certification or a claim about publication.'},null,2));
+ ],limits:'Art and audio use one frozen table from the exact inert element; native per-realm asset allocation is separate evidence. Legacy semantic probes use the exact graph prefix in classic scope and the unchanged async module tail; complete module scope is separately verified by v71. Controlled source captures from immutable played v30 data, plus one explicit recorded-death/reconciliation fixture, in disposable fake semantic DOM/Map storage. The current exact standalone module is unmodified. Not natural life/death, physical-browser resource loading or geometry, screen-reader behavior, travel/balance, performance benchmarking, full-suite certification or a claim about publication.'},null,2));

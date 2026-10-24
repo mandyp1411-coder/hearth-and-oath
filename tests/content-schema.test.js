@@ -222,9 +222,10 @@ test('schema: the whole content tree validates with zero errors and the report r
   assert.equal(report.voiceHits, 0);
   assert.ok(report.files >= 12 && report.items >= 22 && report.texts > 1000);
   assert.equal(report.byKind['design-asset'].files, 4, 'the three v27 assets and the example');
-  assert.deepEqual(report.dialogue, { target: [15, 20], linesByRole: { spouse: 4 } });
+  assert.deepEqual(report.dialogue, { target: [15, 20], linesByRole: { spouse: 19, neighbour: 15 } });
   const md = toMarkdown(report, { when: '2026-10-23' });
-  assert.match(md, /\| spouse \| 4 \| 11 short \|/);
+  assert.match(md, /\| spouse \| 19 \|/);
+  assert.match(md, /\| neighbour \| 15 \|/);
   assert.match(md, /## Errors\n\nNone\./);
 });
 
@@ -261,7 +262,7 @@ test('vocabularies: the lists copied from engine constants still match the engin
 test('compile: the examples compile into frozen modules with named exports the offline build can inline', async () => {
   const out = mkdtempSync(path.join(os.tmpdir(), 'hearth-content-'));
   try {
-    const { written, report } = compile(path.join(project, 'content'), out);
+    const { written, report } = compile(path.join(project, 'content/examples'), out);
     assert.equal(report.errors, 0);
     assert.deepEqual(written.map(w => w.kind), Object.keys(EXPORT_NAMES));
     const scenes = await import(path.join(out, 'scene.js'));

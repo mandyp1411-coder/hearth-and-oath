@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "release": "0.71.0",
+  "purpose": "Farmer playtest candidate; not formal full release certification",
+  "pullRequest": "https://github.com/mandyp1411-coder/hearth-and-oath/pull/15",
+  "source": {
+    "runtime": {
+      "sha256": "43559063337c7bc243bc152ad153d672a9c933d61d85a494f17d3f46bddfa311",
+      "files": 1052
+    },
+    "originalBVerification": {
+      "sha256": "e29573a844cc4197051f84b8e418c88f8ecf52e16d072d41048f93480d5a22f9",
+      "files": 491
+    },
+    "finalVerificationSha256": "d4b20442467f085b8b20a14cc1e854cc3d6171ef870f1c22c1ae0e1fa108b6ce",
+    "offline": {
+      "version": "0.71.0",
+      "bytes": 333654873,
+      "sha256": "2884cbaac99290b8093852515930ca0f587543113d9e7b2c1aaa3a18887c10a6",
+      "parts": 40,
+      "manifestSha256": "1d36a837e698688606a756910d60007cde3820b6a111ca019b3742f21ed88ba5",
+      "loaderSha256": "3a04d1cd7f7091eb36bd78c28afc99a2b24ccbac777be88b0668db25c75d19c5",
+      "source": {
+        "sha256": "43559063337c7bc243bc152ad153d672a9c933d61d85a494f17d3f46bddfa311",
+        "files": 1052
+      },
+      "buildGit": {
+        "head": "f8637926c2db25070435b50cb12311ef82d1afcd",
+        "dirty": true
+      }
+    },
+    "sourceTree": "23b90750a5e8d243e117716512d1cec6db602335",
+    "githubSourceCommit": "e1b99c656abb1b6408bd394653a3af858d3a49df",
+    "sitesSourceCommit": "e783d8175e4ca5b3b76621ea48aa77e8ba2a2c36"
+  },
+  "selectedTests": {
+    "passed": 3939,
+    "failed": 0,
+    "skipped": 5,
+    "fast": {
+      "actualNode": {
+        "files": 242,
+        "allSelectedActualProcessesExitedZero": true,
+        "tests": 3202,
+        "suites": 0,
+        "passed": 3198,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 4,
+        "todo": 0
+      },
+      "scope": "Explicit composite of 241 retained B FAST files and one corrected full twenty-case PRIMARY test-file recheck; not one continuous full run of the changed verification tree.",
+      "status": "FAIL",
+      "report": {
+        "path": "artifacts/farmer-v071/fast-final-composite.json",
+        "sha256": "93195f6e48f55a365f6df04d25e52af34078964778877aa52bba25d8cbb5739e"
+      }
+    },
+    "slow": {
+      "summary": {
+        "filesTotal": 36,
+        "filesFromA": 34,
+        "filesRerunInB": 2,
+        "filesTerminal": 36,
+        "filesPassed": 35,
+        "filesFailed": 1,
+        "filesBlocked": 0,
+        "filesNotRun": 0,
+        "passed": 741,
+        "failed": 0,
+        "skipped": 1,
+        "allSelectedNodeExitZero": true
+      },
+      "scope": "A/B composite only: 34 unchanged test files retain their actual A results; two repaired fixture files were rerun completely in frozen B. This is not one full immutable B SLOW run.",
+      "status": "FAIL",
+      "report": {
+        "path": "artifacts/farmer-v071/slow-composite.json",
+        "sha256": "3988f9e0d6303f926d8d60742cb4436b10b38a32957b912ee87294ac054935b2"
+      }
+    }
+  },
+  "formalGate": {
+    "status": "NOT RUN",
+    "selectedStrictAggregate": "FAIL",
+    "reason": "Composites retain five skipped tests and do not replace one final immutable release:check run."
+  },
+  "offlineChecks": {
+    "status": "PASS",
+    "selectedChecks": 30,
+    "scope": "29 sealed B checks plus corrected native fixture on identical runtime/helper/artifact; not one unchanged all-30 run.",
+    "report": {
+      "path": "artifacts/farmer-v071/offline-composite-b.json",
+      "sha256": "cec55f47280a011dc385ec0034d38247920a3bf174f73c01efcf6c8f80fb6823"
+    },
+    "fullModuleChecks": 10,
+    "olderScopedProbes": 20,
+    "inertMediaSharingProbes": 17,
+    "originalB": {
+      "passed": 29,
+      "failed": 1
+    },
+    "correctedNative": {
+      "passed": true,
+      "durationMs": 17381,
+      "logSha256": "2aa649bd808196c36776509b2578ff4e0e6243ec3eb6053b872c69cd70efd30b"
+    }
+  },
+  "content": {
+    "status": "PASS",
+    "files": 15,
+    "items": 50,
+    "textFields": 4343,
+    "errors": 0,
+    "warnings": 0,
+    "voiceHits": 0
+  },
+  "voice": {
+    "existingAuditHits": 614,
+    "placeholderHits": 0,
+    "newFarmerModuleHits": 0,
+    "wholeRepositoryClean": false
+  },
+  "browser": {
+    "status": "PASS",
+    "scope": "Observed farmer ambition/Day/Book/adult seed cost only",
+    "reports": [
+      "docs/measures/farmer-v071-ui.json",
+      "docs/measures/farmer-v071-cost-ui.json"
+    ],
+    "screenReader": "NOT RUN"
+  },
+  "benchmark": {
+    "seed": "bench-seed-1",
+    "units": "milliseconds except JSON characters",
+    "v070": {
+      "create18": 4720,
+      "actions": 12,
+      "walk": 21,
+      "ageUp": 89,
+      "saveCharacters": 708470
+    },
+    "v071": {
+      "create18": 4710,
+      "actions": 15,
+      "walk": 29,
+      "ageUp": 131,
+      "saveCharacters": 711240
+    }
+  },
+  "humanPlaytest": {
+    "status": "NOT RUN",
+    "protocol": "docs/playtests/farmer-v071.md",
+    "laterLivelihoodsRemainGated": true
+  },
+  "publication": {
+    "mergeStatus": "pending",
+    "siteVersion": 104,
+    "deploymentStatus": "succeeded",
+    "deploymentId": "appgdep_6adc1bce2cec8191992fa580abd14fca",
+    "url": "https://hearth-and-oath-v1-a73f.nilled463.chatgpt.site/",
+    "browserObservedVersion": "0.71.0",
+    "audience": "public"
+  },
+  "limits": [
+    "FAST is 241 unchanged B files plus one corrected full creator-file replay.",
+    "SLOW is 34 unchanged A files plus two corrected full B files; engine unchanged.",
+    "No original failure is silently overwritten.",
+    "Four tests skip because reference-art originals are absent; Python Playwright interface harness is also skipped.",
+    "No CI status checks were returned for the source head.",
+    "Real Chrome checks and mechanical diagnostics are not human playtest results."
+  ],
+  "proofArchive": {
+    "path": "docs/measures/farmer-v071-proofs.tar.gz",
+    "sha256": "7fbd27bc704c274b6da296d409c9e14fae787524af7295887a74e171c7d93431",
+    "bytes": 2703796,
+    "members": 2783,
+    "manifest": "docs/measures/farmer-v071-proof-manifest.json",
+    "manifestSha256": "eb57efea70ffd9cc8834c04544c603a47e21f473c81fc58101907d43ad10e99d"
+  },
+  "finalIdentityAudit": {
+    "runtime": "PASS",
+    "verification": "PASS",
+    "offlineArtifact": "PASS",
+    "sourceByteChangesSinceSelectedChecks": false
+  }
+}

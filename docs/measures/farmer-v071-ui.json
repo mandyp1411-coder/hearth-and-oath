@@ -1,0 +1,81 @@
+{
+  "method": "Real cloud Chrome, same-origin game iframe sized with visible test controls. Actual save imported through the game file chooser. Reading scale changed through Sound & display.",
+  "viewports": {
+    "desktop": [
+      1440,
+      900
+    ],
+    "phone": [
+      390,
+      844
+    ]
+  },
+  "desktopDefault": {
+    "choiceCount": 6,
+    "contentWidth": 1244,
+    "costs": [
+      "Now \u00b7 A wish of your own. Keeping the field will take years of work.",
+      "Now \u00b7 A wish of your own. Raise your children to sixteen, with a winter fed from your field.",
+      "Now \u00b7 A wish of your own. The road costs days and leaves the field behind.",
+      "Now \u00b7 A wish of your own. Another person must freely choose the life with you.",
+      "Now \u00b7 A wish of your own. Trust grows through help given and quarrels laid to rest.",
+      "Now \u00b7 No oath is made. The question can be answered another day."
+    ],
+    "decisionWithinContent": 169.375,
+    "horizontalOverflow": false
+  },
+  "phoneDefault": {
+    "choices": [
+      {
+        "hasVisibleCost": true,
+        "text": "Keep the family's fieldNow \u00b7 A wish of your own. Keeping the field will take years of work."
+      },
+      {
+        "hasVisibleCost": true,
+        "text": "Keep the children fedNow \u00b7 A wish of your own. Raise your children to sixteen, with a winter fed from your field."
+      },
+      {
+        "hasVisibleCost": true,
+        "text": "See the seaNow \u00b7 A wish of your own. The road costs days and leaves the field behind."
+      },
+      {
+        "hasVisibleCost": true,
+        "text": "Build a marriage chosen for loveNow \u00b7 A wish of your own. Another person must freely choose the life with you."
+      },
+      {
+        "hasVisibleCost": true,
+        "text": "Be a neighbour worth keepingNow \u00b7 A wish of your own. Trust grows through help given and quarrels laid to rest."
+      },
+      {
+        "hasVisibleCost": true,
+        "text": "Leave the question openNow \u00b7 No oath is made. The question can be answered another day."
+      }
+    ],
+    "contentWidth": 380,
+    "decisionWithinContent": 165.78125,
+    "horizontalOverflow": false
+  },
+  "desktopLargest": {
+    "allCostsPresent": true,
+    "canScroll": true,
+    "decisionWithinContent": 207.875,
+    "horizontalOverflow": false
+  },
+  "phoneLargest": {
+    "allCostsPresent": true,
+    "canScroll": true,
+    "decisionWithinContent": 257.25,
+    "horizontalOverflow": false
+  },
+  "interactionChecks": [
+    "Actual sixteen-year-old farmer imported and resumed",
+    "Ambition choice preserved visible date and gold",
+    "The Book opened and showed the chosen purpose"
+  ],
+  "limits": [
+    "Not a human playtest",
+    "No screen-reader assessment",
+    "Coverage is farmer ambition/Day/Book; later global interface redesign remains future work"
+  ],
+  "farmModuleSha256": "9273cfd7a98ce59ef61165f2b2730b48ab7fa1e4d05285f93464ad8fbcf9b51a"
+}

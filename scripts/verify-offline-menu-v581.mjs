@@ -1,3 +1,6 @@
+// Art and audio use one frozen table from the exact inert element; native per-realm asset allocation is separate evidence.
+// Legacy semantic probes use the exact graph prefix in classic scope and the unchanged async module tail; complete module scope is separately verified by v71.
+import { compileOfflineModule } from './lib/offline-module-vm.mjs';
 // Bounded exact-artifact handler smoke. Disposable semantic surface only.
 // Run only after the build has finished and runtime source is frozen:
 // node --max-old-space-size=2048 --expose-gc scripts/verify-offline-menu-v581.mjs
@@ -33,7 +36,7 @@ const tag='<script type="module">',start=html.indexOf(tag),end=html.indexOf('</s
 assert.ok(start>=0&&end>start);assert.equal(html.indexOf(tag,end),-1);
 let code=html.slice(start+tag.length,end);html=null;
 assert.doesNotMatch(code,/^import\s/m);assert.doesNotMatch(code,/(?<![\w.])import\s*\(/);
-let compiled=new Script(code,{filename:'exact-standalone-ironman-smoke.js'});code=null;globalThis.gc();
+let compiled=compileOfflineModule(code,{filename:'exact-standalone-ironman-smoke.js', legacyProbes: true, shareInertMedia: true});code=null;globalThis.gc();
 let sessions=0,handlerChecks=0,exports=0,lockEntries=0,networkAttempts=0;
 const flush=async()=>{for(let n=0;n<8;n++)await turn();};
 const standardBytes=ui=>[ui.storage.getItem(KEY),ui.storage.getItem(MIRROR)];
@@ -61,7 +64,7 @@ async function session(label,entries,run){
   Blob,URL:OfflineURL,AbortController,AbortSignal,Uint8Array,Uint32Array,ArrayBuffer,TextEncoder,TextDecoder,queueMicrotask,console,...blocked});
  try{
   new Script('globalThis.structuredClone=value=>JSON.parse(JSON.stringify(value));').runInContext(context);
-  compiled.runInContext(context,{timeout:30000});sessions++;await flush();
+  await compiled.evaluate(context,{timeout:30000});sessions++;await flush();
   const api={get ui(){return ui;},blobs,head:()=>head(ui),bytes:()=>standardBytes(ui),phase:()=>phase(ui),
    async click(op,id){await ui.click(op,id);await flush();handlerChecks++;},
    async submit(){await ui.submit();await flush();handlerChecks++;},
@@ -197,6 +200,6 @@ await validateUnchangedOfflineIdentity(project,identity);
 assert.equal(hash(readFileSync(new URL(import.meta.url))),ownHash);assert.equal(networkAttempts,0);
 const report={version:identity.version,artifactSha256:identity.sha256,runtimeSha256:identity.source.sha256,buildGit:identity.buildGit,verifierSha256:ownHash,sessions,handlerChecks,exports,lockEntries,networkAttempts,
  checks:['exact themed boot shell and unchanged save-safe guard embedded in standalone','compiled empty title, correct keyboard wrapping and Home navigation','compiled How to play opens actual help topics and returns focus','compiled Settings and rehearsal preserve title focus and saved bytes','compiled Continue previews and enters the exact active life','compiled Standard unsaved session returns immediately after pre-write lock failure and retries exactly','compiled creator final review and exact generated first-save retry','compiled portrait previews cancel without committing','compiled Runestone last flip is free, held input is ignored, board focus is local and explicit Finish spends exactly one day','compiled personal-note navigation retention and focused Write Note entry','compiled held note save retains text until durability','compiled quota retry creates exactly one note','compiled herbal review and cancellation are non-mutating; commit discloses actual result','compiled Settings and Load route focus','one exact unchanged embedded graph','real creator Standard default and explicit Ironman retained between steps','guarded newborn first save with Standard bytes unchanged','held exclusive lock keeps one living candidate detached; stale control fenced; unload protected','protected rehearsal Defend/leave leaves live head unchanged','fresh locked exact export','fresh VM actual slot load and exact re-export','pending save keeps the game visible without a confirmation screen','newborn observation control and no infant letters','creator retains life-mode selector without rules block','letter body remains visible during its pending read save; authority fence retained','reopening a read letter performs no save transaction','artifact/runtime/parts/loader identity unchanged before and after'],
- limits:'Controlled fakeSurface DOM, Map storage and real-shaped serialized Web Lock callbacks only. No native browser storage, actual browser Web Locks, downloads, rendering, accessibility, physical device, two-tab or offline transport certification. No full life, earned route, mortality fixture, full regression or release certification.'};
+ limits:'Art and audio use one frozen table from the exact inert element; native per-realm asset allocation is separate evidence. Legacy semantic probes use the exact graph prefix in classic scope and the unchanged async module tail; complete module scope is separately verified by v71. Controlled fakeSurface DOM, Map storage and real-shaped serialized Web Lock callbacks only. No native browser storage, actual browser Web Locks, downloads, rendering, accessibility, physical device, two-tab or offline transport certification. No full life, earned route, mortality fixture, full regression or release certification.'};
 console.log(JSON.stringify(report,null,2));
 if(process.argv[2])writeFileSync(new URL(process.argv[2],new URL('../',import.meta.url)),JSON.stringify(report,null,2)+'\n');

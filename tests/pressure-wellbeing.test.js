@@ -3,16 +3,26 @@ import assert from 'node:assert/strict';
 import * as engine from '../dist/js/engine.js';
 import { rollBirthCircumstances } from '../dist/js/station.js';
 
+function answer(s) {
+  const offered = s.event.choices.filter(c => !c.disabledReason);
+  const preferred = s.event.id === 'hard_winter' ? 'endure'
+    : s.event.id.startsWith('farm_') ? 'continue' : null;
+  assert.ok(offered.length, `${s.event.id} has an available answer`);
+  return (offered.find(c => c.id === preferred) || offered[0]).id;
+}
 function adult(seed = 'pressure-wellbeing') {
   let s = engine.createBirthGame({ seed, station: rollBirthCircumstances(seed, 'common', 'human') });
-  for (let n = 0; n < 400 && s.age < 18; n++) s = s.event ? engine.chooseEventOption(s, s.event.choices[0].id) : engine.ageUp(s);
-  for (let n = 0; s.event && n < 20; n++) s = engine.chooseEventOption(s, s.event.choices[0].id);
+  for (let n = 0; n < 400 && s.age < 18; n++) s = s.event ? engine.chooseEventOption(s, answer(s)) : engine.ageUp(s);
+  for (let n = 0; s.event && n < 20; n++) s = engine.chooseEventOption(s, answer(s));
+  assert.equal(s.age, 18, 'the controlled fixture reaches adulthood');
+  assert.equal(s.phase, 'adult');
+  assert.equal(s.event, null, 'incidental decisions have a finite continuation');
   return s;
 }
 function liveYear(s) {
   const age = s.age;
-  for (let n = 0; n < 60 && s.age === age; n++) s = s.event ? engine.chooseEventOption(s, s.event.choices[0].id) : engine.ageUp(s);
-  for (let n = 0; s.event && n < 20; n++) s = engine.chooseEventOption(s, s.event.choices[0].id);
+  for (let n = 0; n < 60 && s.age === age; n++) s = s.event ? engine.chooseEventOption(s, answer(s)) : engine.ageUp(s);
+  for (let n = 0; s.event && n < 20; n++) s = engine.chooseEventOption(s, answer(s));
   return s;
 }
 
@@ -44,7 +54,7 @@ test('at 100 stress something gives: the break is answered and leaves a mark', (
   let seen = null;
   for (let n = 0; n < 80 && !seen; n++) {
     if (s.event?.id === 'health_break') { seen = s.event; break; }
-    s = s.event ? engine.chooseEventOption(s, s.event.choices[0].id) : engine.ageUp(s);
+    s = s.event ? engine.chooseEventOption(s, answer(s)) : engine.ageUp(s);
     if (s.event?.id !== 'health_break') { s.life.stress = 100; }
   }
   assert.ok(seen, 'the break event was offered');
@@ -55,7 +65,7 @@ test('at 100 stress something gives: the break is answered and leaves a mark', (
   assert.equal(engine.validateSave(after), true);
   // Not again within the year.
   let again = after; again.life.stress = 100;
-  for (let n = 0; n < 6; n++) { again = again.event ? engine.chooseEventOption(again, again.event.choices[0].id) : engine.ageUp(again); assert.notEqual(again.event?.id, 'health_break'); if (again.age > after.age) break; }
+  for (let n = 0; n < 6; n++) { again = again.event ? engine.chooseEventOption(again, answer(again)) : engine.ageUp(again); assert.notEqual(again.event?.id, 'health_break'); if (again.age > after.age) break; }
 });
 
 test('a worn-down worker earns less for a shift', () => {

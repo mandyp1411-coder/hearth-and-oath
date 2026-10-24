@@ -153,12 +153,15 @@ the `v0.69-archive` branch (v0.69.0 with its storage renamed
 `hearth-and-oath-legacy`, the same labels, and an import that refuses a
 new-rules life); `scripts/build-archive.mjs` packages it into `out-legacy/`,
 and `dist/js/archive-link.js` is where the main game learns its address.
+That public address remains unverified; a packaged archive is not a verified
+deployment, and all compatibility code stays until it has a public home.
 `tests/fixtures/saves/` are real saves written by past releases' own engines
 (`scripts/fixtures/generate-release-saves.mjs` against a worktree at the
 release's merge commit); regenerate rather than hand-edit them. Volume II's
-measuring tools (`scripts/interface-harness.py`, `scripts/voice-lint.mjs`,
-`scripts/content/validate.mjs`) report and do not fail the build; their
-numbers for a release are committed under `docs/measures/`.
+interface and voice measuring tools report their findings. From v0.71,
+`npm run build` invokes the content validator with `--strict`, so invalid
+content fails the build. Their numbers for a release are committed under
+`docs/measures/`.
 
 Test fixtures that are not about birth should pin a station
 (`station: rollBirthCircumstances(seed, 'common', ancestry)`): a bound
@@ -180,6 +183,44 @@ after a `school_`/`career_`/`health_` action the engine overwrites the last
 new journal line of that tag with a receipt ("… 2 days passed.") unless the
 line was written with `ctx.journalLiteral` (schooling.js's `note()`).
 
+## The farmer's life (v0.71)
+
+`farmer.js` is the bounded Volume II proof, not the later general engines.
+`state.farm` is created only at a new common/bound birth, with an
+`openingAge` of sixteen or the older chosen start. Step 71 invents no farm
+for an older save. Its actions and scenes go through the public engine;
+the time hook queues turns and reconciliation opens them after the current
+handler. Scene work keeps its captured choice, fee and remaining days when
+a birthday interrupts it. Manual action fees are paid by the engine once.
+The farmer's due replaces station dues while that same field is held, so
+the budget cannot charge it again. `inheritFarm` runs after `inheritSociety`
+and after the successor's people and budget are rebuilt: local peer IDs
+can be reused, so a remembered neighbour is rebound to the actual named,
+dated world person. Loans follow the actual retained lender or their existing
+stable lineage record, including a dead or absent relative. Harvest help
+captures its actual person, agreement day and target season; a replacement
+neighbour does not inherit that work. The redundant public successor budget
+reset must not erase farm burdens. `validateFarm` checks the captured records.
+
+Content is authored under `content/farmer/`. The build strictly validates
+the whole tree, then compiles only this production folder into
+`dist/js/content/`; examples remain examples. `farmer-ui.js` reads the Day,
+people, plan and Book without creating people or advancing the world.
+Private ambitions and personal promises are distinct; the acquired
+`oathbreaker` mark records a broken personal promise without requiring a
+paladin. The six-to-eight-player gate remains NOT RUN until real session
+notes and a verdict exist in `docs/playtests/farmer-v071.md`. Do not widen
+this slice before that verdict, or remove legacy rules before the archive
+has a verified public home.
+
+The implementation is a playtest candidate in
+[PR #15](https://github.com/mandyp1411-coder/hearth-and-oath/pull/15).
+`docs/measures/farmer-v071-verification.md` records 3,939 selected passing
+assertions and five skips, with the composite FAST/SLOW snapshot limits.
+It is not a strict single-snapshot software-gate PASS. Sites version 104 is
+published; exact source, merge and deployment records live in
+`claude/edition-progress.md`. The human gate is NOT RUN.
+
 ## Direction
 
 The v0.59.0 analysis and the owner's design direction live in the Claude
@@ -190,3 +231,18 @@ anatomy as the curses; dungeons and combat are deadly and tactical; the world
 moves without the player and its stories reach them through their own people.
 Edition policy: new systems apply to new lives; old saves keep loading on the
 version that made them.
+
+The farmer's cards use the pure `householdCostPreview`: a direct payment and
+the house's keep are different costs, and both stay visible without the
+numbers toggle. Ordinary actions may leave keep due for a later collection;
+timed scenes collect it after actual work. A prepaid birthday resume shows
+remaining days, the original payment and the current keep estimate. Do not
+repeat the original full price as though it were due again.
+
+Offline checkers use `scripts/lib/offline-module-vm.mjs` to await the
+standalone's asynchronous entry. Full module scope is the default and the
+v71 checker exercises native startup, farmer costs, exports and save
+isolation. Older lexical or repeated-session probes explicitly use the
+unchanged graph prefix plus module entry; seventeen share only the exact
+frozen inert artwork/music table to bound VM memory, restoring native JSON
+parsing before app startup. Their reports must retain that scope limit.

@@ -1,3 +1,5 @@
+// Legacy semantic probes use the exact graph prefix in classic scope and the unchanged async module tail; complete module scope is separately verified by v71.
+import { compileOfflineModule } from './lib/offline-module-vm.mjs';
 // Inspect the exact standalone bytes and execute their embedded module graph.
 // This is semantic QA, not a real browser or physical-device test.
 import assert from 'node:assert/strict';
@@ -14,14 +16,14 @@ for(const part of manifest.parts){const chunk=read('dist/offline/'+part.file);as
 assert.equal(total,bytes.length);assert.equal(partsHash.digest('hex'),expectedHash);
 let html=installOfflineDocument(bytes.toString('utf8'));bytes=null;
 assert.ok(html.includes('v'+version),'standalone displays the exact current release version');const code=html.match(/<script type="module">([\s\S]*?)<\/script>/)[1];html=null;globalThis.gc?.();
-assert.doesNotMatch(code,/^import\s/m);const compiled=new Script(code,{filename:'standalone-save-protection-v431.js'});
+assert.doesNotMatch(code,/^import\s/m);const compiled=compileOfflineModule(code,{filename:'standalone-save-protection-v431.js', legacyProbes: true});
 const ui=fakeSurface(),original=E.createBirthGame({name:'Offline Original',seed:'standalone-save-original'}),neighbor=E.createBirthGame({name:'Offline Neighbor',seed:'standalone-save-neighbor'});
 ui.storage.setItem('hearth-and-oath:slots:v1',JSON.stringify({version:1,activeSlot:0,backups:{},slots:[{id:0,state:original,updatedAt:null},{id:1,state:null,updatedAt:null},{id:2,state:null,updatedAt:null}]}));
 ui.storage.setItem('hearth-and-oath:life:v1',JSON.stringify(original));
 const exports=[];ui.document.createElement=()=>({click(){}});
 const URLSurface={createObjectURL(blob){exports.push(blob);return 'blob:offline-qa-export';},revokeObjectURL(){}};
 const context=createContext({document:ui.document,localStorage:ui.storage,FormData:ui.FormData,window:{innerWidth:431,innerHeight:900,scrollTo(){},scrollBy(){}},requestAnimationFrame:callback=>{callback();return 1;},getComputedStyle:()=>({paddingLeft:'0',paddingTop:'0'}),setTimeout:()=>1,clearTimeout(){},Blob,URL:URLSurface,TextEncoder,TextDecoder,console,queueMicrotask,fetch(){throw Error('Network forbidden during standalone verification');}});
-new Script('globalThis.structuredClone=value=>JSON.parse(JSON.stringify(value));').runInContext(context);compiled.runInContext(context);globalThis.gc?.();
+new Script('globalThis.structuredClone=value=>JSON.parse(JSON.stringify(value));').runInContext(context);await compiled.evaluate(context);globalThis.gc?.();
 const embedded=new Script('({saves:__saves,engine:__engine,combat:__combat})').runInContext(context);
 await ui.click('title-continue');const other=embedded.saves.createSaveStore(ui.storage,embedded.engine.migrateSave);
 // Validation intentionally rejects foreign-realm objects. Transfer the fixture

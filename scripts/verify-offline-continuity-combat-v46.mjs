@@ -1,3 +1,4 @@
+import { compileOfflineModule, controlledTimers } from './lib/offline-module-vm.mjs';
 // Run serially after the current build:
 // node --max-old-space-size=1536 --expose-gc scripts/verify-offline-continuity-combat-v46.mjs
 // Execute one exact downloaded module graph against controlled fixture copies.
@@ -63,7 +64,7 @@ assert.match(bootMarkup, /JavaScript is needed[\s\S]*then reload[\s\S]*does not 
 assert.match(headMarkup, /<noscript><style>#boot-message \{ display: none; \}[^<]*<\/style><\/noscript>/);
 let code = html.slice(moduleStart + moduleTag.length, moduleEnd); html = null;
 assert.doesNotMatch(code, /^import\s/m, 'downloaded graph has no external static imports');
-let compiled = new Script(code, { filename: 'standalone-continuity-combat-v46.js' }); code = null;
+let compiled = compileOfflineModule(code,{filename: 'standalone-continuity-combat-v46.js' }); code = null;
 const compiledGuard = new Script(guardCode, { filename: 'standalone-boot-guard-v46.js' });
 globalThis.gc?.();
 
@@ -113,19 +114,21 @@ function bootSurface(href = 'file:///downloads/hearth-and-oath.html') {
   };
 }
 function quietBoot(href) {
-  const boot = bootSurface(href);
+  const boot = bootSurface(href), clock = controlledTimers();
+  boot.clock = clock; boot.expectedTimers = 0;
   for (const [key, value] of [['hearth-and-oath:slots:v1', '{"synthetic":"existing slots"}'], ['hearth-and-oath:life:v1', '{"synthetic":"current life"}'], ['unrelated-setting', 'preserve me']]) boot.ui.storage.setItem(key, value);
   const before = [...boot.ui.values];
   const context = createContext({
     document: boot.ui.document, window: boot.window, location: boot.location, URL,
     get localStorage() { boot.stats.storageAccesses++; throw Error('Boot must not access browser storage'); },
     fetch() { boot.stats.networkCalls++; throw Error('Boot must not request another resource'); },
-    setTimeout() { boot.stats.timers++; throw Error('Slow startup must not be timed out'); },
+    setTimeout(callback, delay) { boot.stats.timers++; return clock.setTimeout(callback, delay); },
+    clearTimeout(id) { clock.clearTimeout(id); },
   });
   compiledGuard.runInContext(context, { timeout: 1000 });
   boot.safe = () => {
     assert.deepEqual([...boot.ui.values], before, 'startup recovery preserves every stored byte');
-    assert.deepEqual({ storageAccesses: boot.stats.storageAccesses, networkCalls: boot.stats.networkCalls, timers: boot.stats.timers }, { storageAccesses: 0, networkCalls: 0, timers: 0 });
+    assert.deepEqual({ storageAccesses: boot.stats.storageAccesses, networkCalls: boot.stats.networkCalls, timers: boot.stats.timers }, { storageAccesses: 0, networkCalls: 0, timers: boot.expectedTimers });
   };
   boot.clean = () => {
     assert.equal(boot.listeners(boot.window, 'error').length, 0, 'temporary startup error guard detached');
@@ -151,7 +154,13 @@ for (const href of ['file:///downloads/hearth-and-oath.html', 'https://game.inva
   await Promise.resolve();
   for (const event of [{ target: { tagName: 'IMG' } }, { filename: 'chrome-extension://example/content.js' }, { filename: 'https://other.invalid/js/app.js' }, { filename: '' }]) delayed.emit(delayed.window, 'error', event);
   assert.match(delayed.message(), /^Loading Hearth & Oath/); assert.equal(delayed.failed(), false); delayed.safe();
-  delayed.emit(delayed.ui.document, 'DOMContentLoaded'); retryOnce(delayed);
+  delayed.emit(delayed.ui.document, 'DOMContentLoaded');
+  delayed.expectedTimers = 1;
+  assert.equal(delayed.failed(), false, 'an unresolved asynchronous inline entry is allowed to keep opening');
+  assert.equal(delayed.clock.pending.size, 1);
+  assert.equal([...delayed.clock.pending.values()][0].delay, 15000, 'the real inline-entry startup deadline is retained');
+  delayed.clock.advance(14999); assert.equal(delayed.failed(), false); delayed.safe();
+  delayed.clock.advance(1); retryOnce(delayed);
   const resource = quietBoot(href);
   resource.emit(resource.window, 'error', { target: resource.entry });
   const message = resource.ui.root.querySelector('#boot-message');
@@ -244,7 +253,7 @@ const context = createContext({
 });
 new Script('globalThis.structuredClone=value=>JSON.parse(JSON.stringify(value));').runInContext(context);
 compiledGuard.runInContext(context, { timeout: 1000 });
-compiled.runInContext(context, { timeout: 30000 }); compiled = null; globalThis.gc?.();
+await compiled.evaluate(context, { timeout: 30000 }); compiled = null; globalThis.gc?.();
 boot.emit(ui.document, 'DOMContentLoaded');
 assert.equal(ui.root.querySelector('#boot-state'), null, 'the actual downloaded graph replaces its original opening shell');
 assert.equal(boot.failed(), false);

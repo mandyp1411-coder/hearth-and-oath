@@ -1,0 +1,48 @@
+{
+  "kind": "ambition",
+  "schemaVersion": 1,
+  "items": [
+    {
+      "id": "farm_keep",
+      "title": "Keep the family's field",
+      "offeredTo": "age >= 16 and in(hero.station.id, 'common', 'bound')",
+      "fulfilled": "flag('farm_keep')",
+      "saying": "{hero.name} kept the field through lean years. The plough handle is worn where their hands held it."
+    },
+    {
+      "id": "farm_freedom",
+      "title": "Buy the family free of the lord's due",
+      "offeredTo": "age >= 16 and hero.station.id == 'bound'",
+      "fulfilled": "flag('farm_freedom')",
+      "saying": "{hero.name} paid the last due. Our name is no longer written under another person's hand."
+    },
+    {
+      "id": "farm_fed",
+      "title": "Keep the children fed",
+      "offeredTo": "age >= 16 and in(hero.station.id, 'common', 'bound')",
+      "fulfilled": "flag('farm_fed')",
+      "saying": "When winter came, {hero.name} kept food in the house. The children remember the bread before the fear."
+    },
+    {
+      "id": "farm_sea",
+      "title": "See the sea",
+      "offeredTo": "age >= 16 and here.type != 'coast'",
+      "fulfilled": "flag('farm_sea')",
+      "saying": "{hero.name} followed the road until the water had no farther bank. The field was never quite the edge of the world again."
+    },
+    {
+      "id": "farm_love",
+      "title": "Build a marriage chosen for love",
+      "offeredTo": "age >= 16 and in(hero.station.id, 'common', 'bound')",
+      "fulfilled": "flag('farm_love')",
+      "saying": "{hero.name} made a household with someone who chose to stay. That is the part of the house we still live in."
+    },
+    {
+      "id": "farm_peace",
+      "title": "Be a neighbour worth keeping",
+      "offeredTo": "age >= 16 and in(hero.station.id, 'common', 'bound')",
+      "fulfilled": "flag('farm_peace')",
+      "saying": "When the ditch rose and the roofs failed, {hero.name} crossed the boundary with willing hands. The houses beside ours still remember."
+    }
+  ]
+}

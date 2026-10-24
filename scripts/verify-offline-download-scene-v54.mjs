@@ -1,3 +1,7 @@
+// Art and audio use one frozen table from the exact inert element; native per-realm asset allocation is separate evidence.
+// Legacy semantic probes use the exact graph prefix in classic scope and the unchanged async module tail; complete module scope is separately verified by v71.
+import { exportFileName } from '../dist/js/edition.js';
+import { compileOfflineModule } from './lib/offline-module-vm.mjs';
 // IDs36/37 composed with27/28/35 and29–33. Run SERIAL after the final build:
 // timeout 600s node --max-old-space-size=1536 --expose-gc scripts/verify-offline-download-scene-v54.mjs
 // Source-prepared semantic handler gate, not browser resource loading, native
@@ -56,7 +60,7 @@ assert.match(bootScript.outerHTML,/DOMContentLoaded/);assert.match(bootScript.ou
 assert.match(html,/data:image\//,'standalone retains embedded art');assert.match(html,/data:audio\/ogg;base64,/,'standalone retains embedded music');
 assert.doesNotMatch(headMarkup,/<link[^>]+rel="stylesheet"[^>]+href="\.\//);
 let code=html.slice(moduleStart+moduleTag.length,moduleEnd);assert.doesNotMatch(code,/^import\s/m);assert.doesNotMatch(code,/(?<![\w.])import\s*\(/);
-let compiled=new Script(code,{filename:'standalone-download-scene-v54.js'});code=null;html=null;globalThis.gc?.();
+let compiled=compileOfflineModule(code,{filename:'standalone-download-scene-v54.js', legacyProbes: true, shareInertMedia: true});code=null;html=null;globalThis.gc?.();
 const staticPrefix='<!doctype html><html lang="en"><head>'+headMarkup+'</head><body><div id="app">'+bootMarkup+'</div><div id="view-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>';
 const staticParts=[staticPrefix,scripts.map(s=>s.outerHTML).join('\n'),'</body></html>'];
 const staticHash=createHash('sha256');let staticBytes=0;for(const part of staticParts){staticHash.update(part);staticBytes+=Buffer.byteLength(part);}const staticSha256=staticHash.digest('hex');
@@ -94,7 +98,7 @@ async function session(name,states,run,{hosted=false}={}){
  Blob,URL:OfflineURL,AbortController,AbortSignal,Uint8Array,ArrayBuffer,TextEncoder,TextDecoder,queueMicrotask,console,...blocked});
  // Standard platform compatibility only, never an app variable/debug export.
  new Script('globalThis.structuredClone=value=>JSON.parse(JSON.stringify(value));').runInContext(context);
- stage('start disposable exact standalone session',{name});compiled.runInContext(context,{timeout:30000});totals.sessions++;
+ stage('start disposable exact standalone session',{name});await compiled.evaluate(context,{timeout:30000});totals.sessions++;
  const metadata=initial.slots.map(({revision,updatedAt})=>({revision,updatedAt}));
  const disk=()=>JSON.parse(ui.storage.getItem(KEY)),snapshot=()=>JSON.stringify([...ui.values]);
  const durable=()=>JSON.stringify([ui.storage.getItem(KEY),ui.storage.getItem(MIRROR)]);
@@ -109,7 +113,7 @@ async function session(name,states,run,{hosted=false}={}){
  function unchanged(mark,label){assert.equal(snapshot(),mark.before,label+': every storage byte unchanged');assert.equal(writes,mark.writes,label+': zero attempted writes');parity(label);}
  function freshDownload(mark,label){assert.equal(urlCount,mark.urlCount+1,label+': one NEW URL');assert.equal(clicks,mark.clicks+1,label+': one NEW click');assert.ok(lastBlob instanceof Blob&&lastAnchor,label+': this call supplies both fresh records');assert.equal(lastAnchor.clickCount,1);assert.ok(urls.has(lastAnchor.href));assert.equal(anchors.at(-1),lastAnchor);totals.downloadClicks++;}
  function revoke(delay){for(const [id,timer]of [...timers])if(timer.delay===delay){timers.delete(id);timer.fn();}}
- async function exportLife(){await menu();const mark=resetDownload();await click('export');freshDownload(mark,'exact ordinary life export');assert.equal(lastBlob.type,'application/json');assert.deepEqual(JSON.parse(await lastBlob.text()),wanted[slot],'fresh complete source-equal JSON');assert.equal(lastAnchor.download,`hearth-and-oath-${wanted[slot].hero.name.replace(/[^a-zA-Z0-9_-]/g,'-')}.json`);revoke(1000);assert.equal(urls.size,0);unchanged(mark,'fresh exact life export');totals.exports++;await ui.key('Escape');await turn();}
+ async function exportLife(){await menu();const mark=resetDownload();await click('export');freshDownload(mark,'exact ordinary life export');assert.equal(lastBlob.type,'application/json');assert.deepEqual(JSON.parse(await lastBlob.text()),wanted[slot],'fresh complete source-equal JSON');assert.equal(lastAnchor.download,exportFileName(wanted[slot]));revoke(1000);assert.equal(urls.size,0);unchanged(mark,'fresh exact life export');totals.exports++;await ui.key('Escape');await turn();}
  async function inert(node,label){assert.ok(node,label+': actual captured handler target');const mark={before:snapshot(),writes},count=urlCount;await ui.fire('click',node);await turn();totals.handlerChecks++;assert.equal(urlCount,count,label+': no file');unchanged(mark,label);totals.staleChecks++;}
  async function area(room){await click('place-open');const path=settlementWalkPath(wanted[slot],room);assert.ok(path);if(path.length)await commit('place-area',room,s=>{for(const id of path)s=act(s,'atlas_room_'+id);return s;});else await click('place-area',room);parity('source-equal exact room');}
  async function service(kind){const r=sceneProvider(wanted[slot],kind);if(wanted[slot].cartography.interior)await area(r.roomId);else await click('place-open');await commit('service-open',r.id,s=>E.visitService(s,r.id));assert.equal(ui.root.querySelector('[data-service-person]').dataset.servicePerson,r.personId);return r;}
@@ -244,4 +248,4 @@ console.log(JSON.stringify({version:identity.version,sha256:identity.sha256,byte
  ...outcomes,
  'every ordinary export resets records and needs one NEW URL+click, live href, whole exact JSON/name/revoke, zero writes; all three complete states, backups, mirror, neighboring revisions and timestamps after every commit',
  'zero attempted uncontrolled network APIs at terminal; controlled hosted-loader session serves ONLY actual manifest and exact existing ordered part files with request/controller chain accounting; all other sessions attempt no fetch'
-],limits:'Four bounded disposable semantic fake-DOM VM sessions of one unchanged compiled graph. Standard typed-array constructors share the served-file realm. Browser resource loading/native downloads/layout/assistive technology, earned resources/party/routes/lifetimes, balance/full circuit/bout, full pure/mounted combinations and full-suite certification are separate evidence. No live user saves, browser data, app-variable injection, source rewriting, debug exports or publication.'},null,2));
+],limits:'Art and audio use one frozen table from the exact inert element; native per-realm asset allocation is separate evidence. Legacy semantic probes use the exact graph prefix in classic scope and the unchanged async module tail; complete module scope is separately verified by v71. Four bounded disposable semantic fake-DOM VM sessions of one unchanged compiled graph. Standard typed-array constructors share the served-file realm. Browser resource loading/native downloads/layout/assistive technology, earned resources/party/routes/lifetimes, balance/full circuit/bout, full pure/mounted combinations and full-suite certification are separate evidence. No live user saves, browser data, app-variable injection, source rewriting, debug exports or publication.'},null,2));

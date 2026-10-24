@@ -33,6 +33,7 @@ export const ACQUIRED_TRAITS=Object.freeze([
   acquired('withdrawn','Withdrawn',['rest'],['care'],'You went inward and stayed there. Being needed by others costs you.'),
   acquired('driven','Driven',['work'],['rest'],'You answered the worst of it with work, and work is what you trust. Idleness unsettles you.'),
   acquired('bereaved','Bereaved',['care'],[],'You buried a sibling before you were grown. You do not take the people you have for granted.'),
+  acquired('oathbreaker','Oathbreaker',[],['truth'],'A promise made to someone living was broken. They remember.'),
 ]);
 export function personalityTrait(id){return PERSONALITY_TRAITS.find(t=>t.id===id)||ACQUIRED_TRAITS.find(t=>t.id===id)||null;}
 /** Every trait a life carries: the chosen nature and what was written on it. */

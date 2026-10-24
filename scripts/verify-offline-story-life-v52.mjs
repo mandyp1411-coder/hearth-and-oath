@@ -1,3 +1,5 @@
+import { exportFileName } from '../dist/js/edition.js';
+import { compileOfflineModule } from './lib/offline-module-vm.mjs';
 // IDs29/30/31. Run serially only after the final source and offline build:
 // node --max-old-space-size=1536 --expose-gc scripts/verify-offline-story-life-v52.mjs
 // This executes the unchanged standalone module through its actual app handlers.
@@ -40,7 +42,7 @@ const tag='<script type="module">',start=html.indexOf(tag),end=html.indexOf('</s
 assert.ok(start>=0&&end>start);assert.equal(html.indexOf(tag,end),-1);assert.equal([...html.matchAll(/<script\b/g)].length,3);
 let code=html.slice(start+tag.length,end);html=null;
 assert.doesNotMatch(code,/^import\s/m);assert.doesNotMatch(code,/(?<![\w.])import\s*\(/);
-let compiled=new Script(code,{filename:'standalone-story-life-v52.js'});code=null;globalThis.gc?.();
+let compiled=compileOfflineModule(code,{filename:'standalone-story-life-v52.js'});code=null;globalThis.gc?.();
 stage('standalone compiled; start source parent capture');
 
 // Slot1 is deliberately a captured public retirement proposal. Its adult family
@@ -93,7 +95,7 @@ const context=createContext({document:ui.document,localStorage:ui.storage,FormDa
 // reducer is exposed, rewritten or called from the outside of the bundle.
 new Script('globalThis.structuredClone=value=>JSON.parse(JSON.stringify(value));').runInContext(context);
 stage('start standalone boot');
-compiled.runInContext(context,{timeout:30000});compiled=null;globalThis.gc?.();
+await compiled.evaluate(context,{timeout:30000});compiled=null;globalThis.gc?.();
 stage('standalone boot complete');
 
 let slot=0,handlerChecks=0,parityChecks=0,sourceRejectionChecks=0,staleHandlerChecks=0,transitionChecks=0;
@@ -122,7 +124,7 @@ async function exportLife(){
  const before=storageBytes(),writeStart=writes,exportStart=exports,clickStart=downloadClicks;lastBlob=null;lastAnchor=null;
  await click('menu');await click('export');assert.equal(exports,exportStart+1,'this call must create exactly one fresh export URL');assert.equal(downloadClicks,clickStart+1,'this call must click one fresh download anchor');assert.ok(lastBlob&&lastAnchor,'no prior export artifact can satisfy this call');assert.equal(lastAnchor.clickCount,1);assert.equal(lastBlob.type,'application/json');
  assert.deepEqual(JSON.parse(await lastBlob.text()),wanted[slot],'ordinary exact complete-session export');
- assert.equal(lastAnchor.download,`hearth-and-oath-${wanted[slot].hero.name.replace(/[^a-zA-Z0-9_-]/g,'-')}.json`);
+ assert.equal(lastAnchor.download,exportFileName(wanted[slot]));
  for(const [id,t]of [...timers])if(t.delay===1000){timers.delete(id);t.fn();}
  assert.equal(urls.size,0,'ordinary export revokes its object URL');
  await ui.key('Escape');await turn();

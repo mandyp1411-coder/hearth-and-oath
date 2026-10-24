@@ -1,3 +1,7 @@
+// Art and audio use one frozen table from the exact inert element; native per-realm asset allocation is separate evidence.
+// Legacy semantic probes use the exact graph prefix in classic scope and the unchanged async module tail; complete module scope is separately verified by v71.
+import { exportFileName } from '../dist/js/edition.js';
+import { compileOfflineModule } from './lib/offline-module-vm.mjs';
 // IDs32/33 composed with IDs28/29/30/31/35. Run serially after final build:
 // node --max-old-space-size=1536 --expose-gc scripts/verify-offline-claims-tournament-v53.mjs
 // Source-prepared, explicitly controlled captures in a semantic fake DOM/Map.
@@ -52,8 +56,8 @@ let html=installOfflineDocument(bytes.toString('utf8'));bytes=null;
 const tag='<script type="module">',start=html.indexOf(tag),end=html.indexOf('</script>',start+tag.length);
 assert.ok(start>=0&&end>start);assert.equal(html.indexOf(tag,end),-1);assert.equal([...html.matchAll(/<script\b/g)].length,3);
 let code=html.slice(start+tag.length,end);html=null;assert.doesNotMatch(code,/^import\s/m);assert.doesNotMatch(code,/(?<![\w.])import\s*\(/);
-let compiled=new Script(code,{filename:'standalone-claims-tournament-v53.js'});code=null;globalThis.gc?.();
-stage('exact unchanged standalone compiled once');
+let compiled=compileOfflineModule(code,{filename:'standalone-claims-tournament-v53.js', legacyProbes: true, shareInertMedia: true});code=null;globalThis.gc?.();
+stage('unchanged standalone bytes prepared for awaited module sessions');
 const totals={sessions:0,handlerChecks:0,parityChecks:0,transitionChecks:0,exports:0,downloadClicks:0,staleHandlerChecks:0,disabledHandlerChecks:0,practiceBackgroundChecks:0,sourceRejectionChecks:0,sourceBattlePolicyChecks:0,battleCommands:0,bouts:0,compiledHostVacancyChecks:0,sourceEntrantVacancyChecks:0,lateCustodyChecks:0,renderedCustodyChecks:0,networkAttempts:0};
 const outcomes=[];
 
@@ -151,7 +155,7 @@ async function runBatch(name,states,run){
   Blob,URL:OfflineURL,TextEncoder,TextDecoder,queueMicrotask,console,...blockedApis});
  // Platform compatibility only. Never expose or replace an app lexical binding.
  new Script('globalThis.structuredClone=value=>JSON.parse(JSON.stringify(value));').runInContext(context);
- stage('start disposable exact standalone session',{batch:name});compiled.runInContext(context,{timeout:30000});totals.sessions++;
+ stage('start disposable exact standalone session',{batch:name});await compiled.evaluate(context,{timeout:30000});totals.sessions++;
  const metadata=initial.slots.map(({revision,updatedAt})=>({revision,updatedAt}));
  const disk=()=>JSON.parse(ui.storage.getItem(KEY)),storageBytes=()=>JSON.stringify([...ui.values]);
  const control=(id,op='activity')=>ui.root.querySelector(`[data-op="${op}"][data-id="${id}"]`);
@@ -173,7 +177,7 @@ async function runBatch(name,states,run){
   const before=storageBytes(),writeStart=writes,urlStart=exportCount,clickStart=downloadClicks;lastBlob=null;lastAnchor=null;
   await click('menu');await click('export');assert.equal(exportCount,urlStart+1,'this export creates exactly one fresh URL');assert.equal(downloadClicks,clickStart+1,'this export clicks exactly one fresh anchor');
   assert.ok(lastBlob&&lastAnchor,'an earlier export cannot satisfy this call');assert.equal(lastAnchor.clickCount,1);assert.equal(lastBlob.type,'application/json');assert.ok(urls.has(lastAnchor.href),'the exact anchor keeps this call\'s live URL until revocation');
-  assert.deepEqual(JSON.parse(await lastBlob.text()),wanted[slot],'ordinary fresh exact full-session export');assert.equal(lastAnchor.download,`hearth-and-oath-${wanted[slot].hero.name.replace(/[^a-zA-Z0-9_-]/g,'-')}.json`);
+  assert.deepEqual(JSON.parse(await lastBlob.text()),wanted[slot],'ordinary fresh exact full-session export');assert.equal(lastAnchor.download,exportFileName(wanted[slot]));
   for(const [id,t]of [...timers])if(t.delay===1000){timers.delete(id);t.fn();}
   assert.equal(urls.size,0,'ordinary export revokes its URL');await ui.key('Escape');await turn();
   assert.equal(storageBytes(),before,'export changes no state, backup, mirror or workspace byte');assert.equal(writes,writeStart,'export performs zero durable writes');totals.exports++;totals.downloadClicks++;parity('fresh exact export');
@@ -444,4 +448,4 @@ console.log(JSON.stringify({version:identity.version,sha256:identity.sha256,runt
   'explicit source lifecycle vacancy preserves exact people; compiled unavailable-captain disabled/resume/close and separate source unavailable-entrant close invent no replacement, result or prize',
   'actual compiled preparation/allegation/defense/late-arrest/surrender chain retains one paid day and immediately valid paused card through mandatory arrest/custody and a rendered enabled Serve one day control (not an attended sentence), with no repeated payment, result or prize',
   'detached practice blocks real connected background crime, research, manuscript and tournament controls with zero changed bytes and zero writes; all three full states/backups/mirror/neighbor revisions/timestamps; every export requires its own fresh live URL, Blob and clicked anchor, exact full JSON/name, revocation and zero writes; zero attempted network APIs'
- ],limits:'Controlled source captures and explicitly declared existing-site/home/resource/deadline/date/recorded-death/report preconditions in four disposable semantic fake-DOM/Map sessions. Source-only invalid-command, unavailable-entrant and interrupted-departure variants are not compiled-handler or natural-lifetime evidence. The current exact compiled script is never rewritten or instrumented and completed battle packets arise only from real public resolver commands. No physical-browser resource loading, geometry, accessibility, natural aging/death, road travel, balance, performance benchmarking, full-suite certification or publication claim. Long variants remain in source tests; the serial 600-second/1536-MiB command is an intended execution budget, not measured evidence from this file.'},null,2));
+ ],limits:'Art and audio use one frozen table from the exact inert element; native per-realm asset allocation is separate evidence. Legacy semantic probes use the exact graph prefix in classic scope and the unchanged async module tail; complete module scope is separately verified by v71. Controlled source captures and explicitly declared existing-site/home/resource/deadline/date/recorded-death/report preconditions in four disposable semantic fake-DOM/Map sessions. Source-only invalid-command, unavailable-entrant and interrupted-departure variants are not compiled-handler or natural-lifetime evidence. The current exact compiled script is never rewritten or instrumented and completed battle packets arise only from real public resolver commands. No physical-browser resource loading, geometry, accessibility, natural aging/death, road travel, balance, performance benchmarking, full-suite certification or publication claim. Long variants remain in source tests; the serial 600-second/1536-MiB command is an intended execution budget, not measured evidence from this file.'},null,2));

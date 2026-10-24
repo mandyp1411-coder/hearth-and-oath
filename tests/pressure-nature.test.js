@@ -7,11 +7,20 @@ import { debtReckoning, applyDebtReckoningChoice, householdAnnualCost } from '..
 import { flushWinterEvent, applyWinterChoice } from '../dist/js/fortune.js';
 import { rollBirthCircumstances } from '../dist/js/station.js';
 
-const answer = s => s.event.id === 'health_concern' && s.event.choices.some(c => c.id === 'rest') ? 'rest' : s.event.choices[0].id;
+function answer(s) {
+  const offered = s.event.choices.filter(c => !c.disabledReason);
+  const preferred = s.event.id === 'health_concern' && offered.some(c => c.id === 'rest') ? 'rest' : s.event.id === 'hard_winter' ? 'endure'
+    : s.event.id.startsWith('farm_') ? 'continue' : null;
+  assert.ok(offered.length, `${s.event.id} has an available answer`);
+  return (offered.find(c => c.id === preferred) || offered[0]).id;
+}
 function adult(seed, traits = []) {
   let s = engine.createBirthGame({ seed, station: rollBirthCircumstances(seed, 'common', 'human') });
   for (let n = 0; n < 700 && s.age < 18 && s.phase !== 'retired'; n++) s = s.event ? engine.chooseEventOption(s, answer(s)) : engine.ageUp(s);
   for (let n = 0; s.event && n < 20; n++) s = engine.chooseEventOption(s, answer(s));
+  assert.equal(s.age, 18, 'the nature fixture reaches adulthood');
+  assert.equal(s.phase, 'adult');
+  assert.equal(s.event, null, 'incidental decisions have a finite continuation');
   if (traits.length) applyPersonalityBuild(s, traits, { creation: true });
   return s;
 }

@@ -12,6 +12,9 @@ export const fingerprint = value => createHash('sha256').update(JSON.stringify(v
 // These are choices for incidental interruptions, not assertions that all lives
 // should share a personality. A run supplies its own policy for its main story.
 export function ordinaryChoice(event) {
+  // These runs are about other lives. Let the new field scenes take their
+  // stated course instead of buying work or making promises for the player.
+  if (event.id.startsWith('farm_')) return event.choices.find(c => c.id === 'continue' && !c.disabledReason)?.id || null;
   const known = { career_year:'care', life_birthday:'people', plague_letter:'later', deadline_review:'pause', health_concern:'support', lineage_bereavement:'share', retirement:'settle', road_bandits:'avoid', road_beasts:'avoid', road_weather:'wait', road_caravan:'decline', road_witness:'listen', road_sick:'comfort', road_lore:'listen' };
   const preferred = known[event.id];
   if (preferred && event.choices.some(c => c.id === preferred)) return preferred;

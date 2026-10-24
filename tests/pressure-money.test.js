@@ -5,10 +5,20 @@ import { rollBirthCircumstances } from '../dist/js/station.js';
 import { settleHouseholdBudget, chargeDebtInterest, debtReckoning, applyDebtReckoningChoice, householdAnnualCost, DEBT_INTEREST } from '../dist/js/budget.js';
 import { onFortuneTime, fortuneIncomeFactor } from '../dist/js/fortune.js';
 
+function answer(s) {
+  const offered = s.event.choices.filter(c => !c.disabledReason);
+  const preferred = s.event.id === 'hard_winter' ? 'endure'
+    : s.event.id.startsWith('farm_') ? 'continue' : null;
+  assert.ok(offered.length, `${s.event.id} has an available answer`);
+  return (offered.find(c => c.id === preferred) || offered[0]).id;
+}
 function adult(seed = 'pressure-money') {
   let s = engine.createBirthGame({ seed, station: rollBirthCircumstances(seed, 'common', 'human') });
-  for (let n = 0; n < 400 && s.age < 18; n++) s = s.event ? engine.chooseEventOption(s, s.event.choices[0].id) : engine.ageUp(s);
-  for (let n = 0; s.event && n < 20; n++) s = engine.chooseEventOption(s, s.event.choices[0].id);
+  for (let n = 0; n < 400 && s.age < 18; n++) s = s.event ? engine.chooseEventOption(s, answer(s)) : engine.ageUp(s);
+  for (let n = 0; s.event && n < 20; n++) s = engine.chooseEventOption(s, answer(s));
+  assert.equal(s.age, 18, 'the controlled fixture reaches adulthood');
+  assert.equal(s.phase, 'adult');
+  assert.equal(s.event, null, 'incidental decisions have a finite continuation');
   return s;
 }
 const journal = () => { const rows = []; return { rows, ctx: { journal: (title, text, tag) => rows.push({ title, text, tag }), setEvent: () => {} } }; };
@@ -68,7 +78,7 @@ test('bonded labour clears the debt and pays the creditor instead of you', () =>
 
 test('fortune never rolls in childhood, catches up nothing, and a cost beyond cash becomes debt', () => {
   let s = engine.createBirthGame({ seed: 'pressure-fortune' });
-  for (let n = 0; n < 400 && s.age < 18; n++) s = s.event ? engine.chooseEventOption(s, s.event.choices[0].id) : engine.ageUp(s);
+  for (let n = 0; n < 400 && s.age < 18; n++) s = s.event ? engine.chooseEventOption(s, answer(s)) : engine.ageUp(s);
   assert.ok(s.fortune.history.every(h => h.id === 'hard_winter'), 'no money shocks before adulthood; only winters');
   assert.equal(s.fortune.lastSeason, Math.floor(s.day / 92));
   // A clock moved by many seasons at once rolls nothing.
@@ -86,7 +96,7 @@ test('fortune never rolls in childhood, catches up nothing, and a cost beyond ca
   assert.ok(fortuneIncomeFactor(copy) >= 0 && fortuneIncomeFactor(copy) <= 2);
   // Through the public engine, lived seasons keep the save valid.
   let lived = s;
-  for (let n = 0; n < 12 && lived.age < 21; n++) lived = lived.event ? engine.chooseEventOption(lived, lived.event.choices[0].id) : engine.ageUp(lived);
+  for (let n = 0; n < 12 && lived.age < 21; n++) lived = lived.event ? engine.chooseEventOption(lived, answer(lived)) : engine.ageUp(lived);
   assert.equal(engine.validateSave(lived), true);
   assert.ok(lived.fortune.lastSeason >= Math.floor(lived.day / 92) - 1);
 });

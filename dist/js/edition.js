@@ -15,10 +15,10 @@
 // (subsystems are added to an older edition life as it plays on), so they
 // carry `began: null` and read "begun before v0.70". Never guess a date.
 
-export const GAME_VERSION = '0.70.0';
+export const GAME_VERSION = '0.71.0';
 /** The migration step this build brings a new-rules life to. Each later
  * release that changes what a new-rules save holds adds a step here. */
-export const EDITION_STEP = 70;
+export const EDITION_STEP = 71;
 export const OLD = 'old', NEW = 'new';
 
 const plain = v => Boolean(v) && typeof v === 'object' && !Array.isArray(v);
@@ -47,6 +47,9 @@ export function rulesNote(s) {
 const STEPS = [
   // 70: the stamp itself. Lives begun earlier keep `began: null`.
   { step: 70, apply() {} },
+  // 71: farmer lives begin prospectively. Earlier saves receive no field,
+  // people, ambition, or past harvests; their existing rules stay intact.
+  { step: 71, apply() {} },
 ];
 
 /** Stamp a save with its rules. Idempotent; never overwrites `began`. */
