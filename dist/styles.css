@@ -5000,6 +5000,8 @@ body.title-mode .title-screen .title-kept-card { grid-template-columns:72px minm
 .title-screen .title-life-kept .slot-archive-note { border:1px solid #71634770; border-top:0; background:#11110fed; }
 .save-slot[data-refused-life] { opacity:1; cursor:default; }
 .save-slot[data-refused-life] .menu-arrow { color:#c9b78f; }
+.save-slot[data-refused-life]:disabled > .menu-arrow { display:inline; }
+.slot-info .slot-rules { width:fit-content; }
 .title-screen .title-life .save-health { margin:0; border:1px solid #71634770; border-top:0; background:#11110fed; padding:10px 14px; }
 .title-screen .title-life .save-health-warning { border-color:#a38b59; }
 .title-screen .title-life-actions { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr)); gap:10px; }
