@@ -307,6 +307,24 @@ Current app handlers retain the unset policy; configured policies are tested
 at actual coordinator/store/session boundaries, not claimed as a complete
 restrictive-policy UI review. No cutover or publication is included.
 
+`rulebook.js` is now the one place the entry policy comes from: `MAIN_ADMITS`
+is `both`, so `admissionPolicy()` is `undefined` and every life plays. A page
+that sets `globalThis.__hearthRehearseCutover = true` before load rehearses the
+cutover (old rules refused, by markers only); the switch can only refuse.
+Tests mount the app that way with `mountApp(t, {rehearseCutover: true})`.
+Under refusal the app shows the old life's door and opens nothing: the title
+continues the newest admitted life or shows the kept one, the slot is Kept
+for the archive, an old file meets `OLD_RULES_DOOR`, and a kept Ironman run
+exports its head through the store's `export` inspection without adoption.
+The store keeps a stored life it cannot decode (`slot.kept`,
+`backups[id].kept`, `store.kept(id)`): written back byte for byte, never
+empty, never overwritten by a live write, replaced or deleted only by review.
+In app code, ask `occupantOf(id)` rather than `saveStore.read(id)` when the
+question is whether a slot is free. Whole-life comparisons in tests should
+compare JSON text: a failing `deepEqual` on two whole lives renders a diff
+that can exhaust the machine's memory. Old Ironman records still need their
+own kept path before the decoder may refuse old rules.
+
 ## Direction
 
 The v0.59.0 analysis and the owner's design direction live in the Claude

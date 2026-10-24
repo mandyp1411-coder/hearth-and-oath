@@ -262,7 +262,42 @@ def main():
             record('the main game keeps its saves in hearth-and-oath', 'hearth-and-oath' in s_main['dbs'] and all(k.startswith('hearth-and-oath:') for k in s_main['keys']), json.dumps(s_main)[:200])
             record('the archive keeps its saves in hearth-and-oath-legacy and nowhere else', s_arch['dbs'] == ['hearth-and-oath-legacy'] and all(k.startswith('hearth-and-oath-legacy:') for k in s_arch['keys']), json.dumps(s_arch)[:200])
 
-            # 8. The offline files open and take the same imports.
+            # 8. The cutover rehearsed (rulebook.js): a page on the main origin that
+            #    refuses the old rules shares the saves above. The old slot is kept,
+            #    not opened; it exports exactly what it held; the archive takes it;
+            #    an old file meets the archive's door. The live game is unchanged.
+            rehearsed = ctx.new_page()
+            rehearsed_errors = []
+            rehearsed.on('pageerror', lambda e: rehearsed_errors.append(str(e)))
+            rehearsed.add_init_script('globalThis.__hearthRehearseCutover = true;')
+            title(rehearsed, main_url)
+            saved_lives = rehearsed.locator('[data-op="title-load"]').inner_text()
+            record('rehearsed cutover: the title counts the lives kept for the archive', 'kept for the archive' in saved_lives, saved_lives.replace('\n', ' ')[:120])
+            op(rehearsed, 'title-load')
+            rehearsed.locator('.save-slots-screen').wait_for(timeout=15000)
+            kept_slot = rehearsed.locator('.save-slot[data-id="0"]')
+            record('rehearsed cutover: the old slot is kept, not opened', kept_slot.is_disabled() and kept_slot.get_attribute('data-refused-life') is not None and 'Kept for the archive' in kept_slot.inner_text(), kept_slot.inner_text().replace('\n', ' ')[:120])
+            rehearsed.screenshot(path=str(out / 'rehearsed-kept-slot.png'), full_page=True)
+            with rehearsed.expect_download(timeout=20000) as download:
+                rehearsed.locator('[data-archive-note] [data-op="export-session"][data-id="0"]').first.click()
+            kept_export = out / ('rehearsed-' + download.value.suggested_filename)
+            download.value.save_as(str(kept_export))
+            same_life = json.loads(kept_export.read_text()) == json.loads(exported_old.read_text())
+            record('rehearsed cutover: the kept slot exports exactly what it held', kept_export.name.endswith('-old-rules.json') and same_life, kept_export.name)
+            to_slots(archive)
+            op(archive, 'import')
+            import_file(archive, kept_export)
+            archive_review = archive.locator('.modal').inner_text() if archive.locator('.modal').count() else ''
+            confirm_import(archive)
+            record('rehearsed cutover: the archive takes the kept life and opens it', 'Old rules' in archive_review and archive.locator('.app-shell.has-life').count() == 1, archive_review.strip().replace('\n', ' ')[:100])
+            op(rehearsed, 'import')
+            import_file(rehearsed, old_file, review=False)
+            door = rehearsed.locator('[data-archive-door]')
+            record('rehearsed cutover: an old file meets the archive’s door, with no slot offered', door.count() == 1 and rehearsed.locator('[data-op="confirm-import"]').count() == 0, door.first.inner_text() if door.count() else 'no door')
+            record('rehearsed cutover: no page errors', not rehearsed_errors, str(rehearsed_errors[:2]))
+            rehearsed.close()
+
+            # 9. The offline files open and take the same imports.
             for name, path, label_expected in (('main offline file', project / args.main_offline, 'Old rules'), ('archive offline file', project / args.archive_offline, 'Old rules')):
                 if not path.exists():
                     record(f'{name} opens from disk', False, f'{path} is not built')

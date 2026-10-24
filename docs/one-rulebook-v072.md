@@ -108,6 +108,55 @@ Ironman/edition files passed, zero failures/skips, plus one compiled session
 with 14 bounded cases. Source, HEAD and artifact guards passed. Full release
 certification, browser handoff and real farmer/heir acceptance remain NOT RUN.
 
+## The old life's door (step 3)
+
+`rulebook.js` holds the one decision: `MAIN_ADMITS` is `both`, and
+`admissionPolicy()` gives `life-entry.js`, the store and the Ironman session
+`undefined` until the cutover. The cutover can be rehearsed: a page that sets
+`globalThis.__hearthRehearseCutover = true` before load refuses old-rules lives
+exactly as the cutover will (station or debt ledger, never a claimed stamp).
+The switch can only refuse; nothing widens `MAIN_ADMITS`.
+
+Under that policy the app shows the door, and opens nothing:
+
+- The title continues the newest admitted life and counts the kept ones
+  ("2 kept for the archive"); with no admitted life it shows the kept life
+  with its export, the archive link and Begin a new life.
+- An old slot says Kept for the archive, does not load, and keeps Export,
+  Export for the archive and the delete review. A forced click opens nothing
+  and writes nothing.
+- An old file meets the archive's door (`OLD_RULES_DOOR`) instead of a slot.
+- A kept Ironman run is exported from its authoritative head through the
+  store's `export` inspection under the save lock, without being adopted.
+  While both rulebooks play, an Ironman run is still resumed to export, as
+  before.
+
+`tests/old-life-door.test.js` mounts the actual app with the rehearsal on
+genuine v0.60 and v0.69 saves (8 tests), and holds that nothing changes
+while both rulebooks play.
+
+## Lives this build cannot read are kept (step 1)
+
+The store used to read a life it could not decode as an empty slot. The next
+save of any other slot then wrote the envelope back without it and without
+its backup, and a new life could take its slot unreviewed. That happens today
+to a save written by a later build, and would happen to every old life the
+day the engine stops decoding the old rules. `saves.js` now keeps such a life
+exactly as stored (`slot.kept`, `backups[id].kept`): commit writes it back
+byte for byte, `empty()` passes it over, a live position never writes over
+it, replacing it needs review and makes it the slot's backup, deleting it
+needs the same review as any life, and `store.kept(id)` gives its export.
+Only a plain object naming a person is kept; anything else is still read as
+nothing. The app shows it occupied (Kept as it was written, or Kept for the
+archive for old rules), exports it whole (`export-kept`), and asks before a
+new life takes its slot. `tests/kept-life.test.js` (7 tests) covers a later
+build's life and the genuine v0.60 lives under the cutover's decoder.
+
+Still open before the cutover: the Ironman records. `decodeIronmanRecord`
+uses the same decoder, so under a decoder that refuses old rules an old
+Ironman record would make run discovery fail as unreadable. That needs its
+own kept path before the engine drops the old rules.
+
 ## Order of the eventual cutover
 
 1. Preserve occupied old slots, backups and their complete exports before
@@ -120,7 +169,8 @@ certification, browser handoff and real farmer/heir acceptance remain NOT RUN.
    Ironman adoption. Classify by actual station **or** defined debt ledger,
    including a zero debt. Never trust a claimed edition stamp alone.
 3. For old lives, offer their complete export and the public archive route
-   without entering the main simulation or silently replacing anything.
+   without entering the main simulation or silently replacing anything. *(Built and
+   rehearsable: see the old life's door above.)*
    Test a mixed envelope, all-old envelope, mirror-only life, backups,
    cross-tab changes and both ordinary/Ironman ownership flows.
 4. Review the branches below individually through public engine commands.

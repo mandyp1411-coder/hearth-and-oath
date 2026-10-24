@@ -40,6 +40,16 @@ compiled session with 14 cases. Source/artifact guards and content/import-
 graph build pass. These development checks do not complete either acceptance
 gate or certify the full release; v0.72 remains unpublished.
 
+The next slice builds step 3 and closes a step-1 hazard. Under a refusing
+policy, an old life meets its door: kept on the title and in its slot, never
+opened, exported whole, sent to the archive; an old file is pointed there; a
+kept Ironman run exports its head without adoption. `rulebook.js` still
+admits both rulebooks; the door is tested by rehearsing the cutover through
+the actual app. The store now keeps a life it cannot decode instead of
+dropping it on the next save. Old Ironman records still need their own kept
+path. Neither gate is waived and no compatibility is removed. See
+[the plan](one-rulebook-v072.md#the-old-lifes-door-step-3).
+
 The [session materials](playtests/farmer-v071.md#ready-to-use-session-materials)
 shipped in [PR #16](https://github.com/mandyp1411-coder/hearth-and-oath/pull/16) with two genuine age-sixteen starts and separate
 blank observer forms. Both starts passed full save validation and exact
