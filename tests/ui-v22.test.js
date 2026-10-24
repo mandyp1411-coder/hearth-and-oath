@@ -214,7 +214,10 @@ test('display preference changes remain separate from saves and reviewed imports
   assert.equal(surface.documentStyle.get('--reading-scale'), '1.5');
   assert.deepEqual(surface.current(), before); assert.deepEqual(surface.lives(), slots);
   await surface.click('close-modal');
-  const incoming = createBirthGame({ seed: 'v22-reviewed-import', name: 'A separately imported child' });
+  // This build is the archive: a life that lives by the new rules is turned away; one under the old rules is reviewed.
+  const born = createBirthGame({ seed: 'v22-reviewed-import', name: 'A separately imported child' });
+  await surface.import(JSON.stringify(born)); assert.match(surface.toast.textContent, /lives by the new rules/); assert.deepEqual(surface.lives(), slots);
+  const incoming = structuredClone(born); for (const k of ['debt','borrowedGold','debtInterestPaid','lastInterestYear','graceUsed']) delete incoming.householdBudget[k]; delete incoming.hero.station; delete incoming.edition;
   await surface.import(JSON.stringify(incoming));
   assert.match(surface.root.innerHTML, /Choose where this life belongs/); assert.deepEqual(surface.lives(), slots);
   await surface.key('Escape'); assert.deepEqual(surface.lives(), slots);

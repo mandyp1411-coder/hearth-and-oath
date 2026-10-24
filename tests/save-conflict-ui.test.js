@@ -9,7 +9,10 @@ const key='hearth-and-oath-legacy:slots:v1';
 let original;
 function fixture(){original ||= decisionLife();return structuredClone(original);}
 const named=new Map();
-function renamed(name){if(!named.has(name))named.set(name,createBirthGame({name,seed:'handler-'+name}));return structuredClone(named.get(name));}
+function renamed(name){if(!named.has(name))named.set(name,asOldRules(createBirthGame({name,seed:'handler-'+name})));return structuredClone(named.get(name));}
+/** This build is the archive: an incoming life must live by the old rules to be reviewed, so the fixtures bring theirs without a debt ledger or a station. */
+function asOldRules(s){const o=structuredClone(s);if(o.householdBudget){for(const k of ['debt','borrowedGold','debtInterestPaid','lastInterestYear','graceUsed'])delete o.householdBudget[k];}delete o.hero.station;delete o.edition;return migrateSave(o);}
+
 function captureExports(t, surface) {
   const blobs=[],create=URL.createObjectURL,revoke=URL.revokeObjectURL;
   URL.createObjectURL=blob=>{blobs.push(blob);return 'blob:save-conflict-test';};URL.revokeObjectURL=()=>{};

@@ -1,4 +1,5 @@
 import {decisionLife} from './helpers/decision-life.mjs';
+import {exportFileName} from '../dist/js/edition.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { setImmediate as settle } from 'node:timers/promises';
@@ -33,7 +34,7 @@ test('quota-held exact latest session exports directly from game, title and slot
   const restore=blockWrites(ui),expected=chooseEventOption(before,before.event.choices[0].id),blobs=capture(t,ui),durable=ui.storage.getItem(KEY);
   await ui.click('choice',before.event.choices[0].id);assert.equal(label(ui),'Not saved — export needed');assert.equal(status(ui).dataset.saveAt,STAMP);assert.equal((await ui.windowEvent('beforeunload')).defaultPrevented,true);
   const escape=status(ui).querySelector('[data-op="export-session"]');assert.equal(escape.hidden,false);assert.equal(escape.getAttribute('aria-label'),'Export latest session from slot 1');
-  await ui.click('export-session','0');assert.deepEqual(JSON.parse(await blobs[0].text()),expected);assert.ok(ui.toast.textContent.includes('Download started: hearth-and-oath-'+expected.hero.name.replace(/[^a-z0-9_-]/gi,'-')+'.json'));assert.match(ui.toast.textContent,/Browser save status is unchanged/);
+  await ui.click('export-session','0');assert.deepEqual(JSON.parse(await blobs[0].text()),expected);assert.ok(ui.toast.textContent.includes('Download started: '+exportFileName(expected,{archive:true})));assert.match(ui.toast.textContent,/Browser save status is unchanged/);
   assert.equal(label(ui),'Not saved — export needed');assert.equal((await ui.windowEvent('beforeunload')).defaultPrevented,true);assert.equal(ui.storage.getItem(KEY),durable);
   await ui.click('title-menu');assert.ok(ui.root.querySelector('.title-screen'));assert.equal(label(ui),'Not saved — export needed');await ui.click('export-session','0');assert.deepEqual(JSON.parse(await blobs[1].text()),expected);
   await ui.click('title-load');assert.ok(ui.root.querySelector('.save-slots-screen'));assert.equal(label(ui),'Not saved — export needed');await ui.click('export-session','0');assert.deepEqual(JSON.parse(await blobs[2].text()),expected);
