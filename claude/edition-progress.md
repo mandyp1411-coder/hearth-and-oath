@@ -5,6 +5,31 @@ rulebook and Design Bible Volume II. This ledger keeps that handoff visible.
 
 ## Current release
 
+v0.71.2, The old lives have a home, is published as main Sites version 106
+and archive version 1 in [PR #18](https://github.com/mandyp1411-coder/hearth-and-oath/pull/18),
+with merge bookkeeping pending. The full fresh FAST/SLOW lanes on clean
+`f82160cae5561f851f99c3c7fb1274fec04a30f7` passed 3,949 assertions, with
+zero assertion failures and five skips. Both immutable-input/output guards
+passed; strict lanes remain FAIL for skips. Sixteen source-engine cases
+cover fourteen genuine old states and twenty-two public commands. One
+compiled offline startup checker passed; its auxiliary parser failure and
+separate strict closed-output derivation remain visible. Other 29 offline
+checks and the formal full gate are NOT RUN.
+
+Main deployment `appgdep_6adc722f3ec08191aa0d964b478feac6` succeeded from
+Sites source `1ac4853f19c0f824ddaaecbb230264d03979a637`, tree
+`930cade8eabd247d8003cd2213aca29e0c145b6d`. The archive deployment
+`appgdep_6adc364b751c8191a42a75feade2fa53` succeeded from source
+`43ee1a8b1b48cb5aee8ad060d206a94bc09723b9`.
+The [verification record](../docs/measures/archive-v0712-verification.md)
+retains complete identities, proof and limits. Chrome opened the public
+archive and produced an exact old-save export in main; both subsequent
+browser transfers stalled, so the complete browser round trip is NOT RUN.
+The human farmer-and-heir gate remains NOT RUN. The owner stopped further
+opening-layout polish; no Phase 2 work or legacy deletion is included.
+
+## Earlier farmer releases
+
 v0.71.1, The first choice, is published as Sites version 105 in
 [PR #17](https://github.com/mandyp1411-coder/hearth-and-oath/pull/17), with
 merge `02a79c80f849dee67a4c93797ed8806b13473aeb` complete. The complete fresh FAST/SLOW lanes on clean
@@ -33,9 +58,9 @@ The human playtest is NOT RUN. Implementation and mechanical evidence do not
 complete the Bible's gate. The farmer remains the only Volume II livelihood
 being proved until real sessions and a verdict exist.
 
-Main's preceding release is v0.70.0, The archive (PR #14). Its unresolved
-public archive address is tracked in `docs/volume-ii-status.md`. No legacy
-rules are removed in v0.71.
+Before the farmer release came v0.70.0, The archive (PR #14). Its public
+home is now published above; the browser handoff remains incomplete. No
+legacy rules are removed.
 
 ## Software evidence
 
@@ -76,7 +101,8 @@ verdict is claimed. v0.72 remains pending that verdict.
 The preparation kit merged in [PR #16](https://github.com/mandyp1411-coder/hearth-and-oath/pull/16) as
 `67733f9d036b5979bd3fdbb4225cec9f72ad75e0`, from source
 `d8546a6a1721e0140f0f473fe874ede5627a3303`. This is a materials-only merge;
-Sites version 104 remains the game build for these sessions.
+Sites version 104 was the build at that materials-only merge; the current
+candidate is version 106 above.
 
 ## Delivery
 

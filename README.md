@@ -1,5 +1,13 @@
 # Hearth & Oath
 
+Version 0.71.2 is The old lives have a home. Old Rules saves now have a
+[public archive](https://hearth-and-oath-old-rules.nilled463.chatgpt.site/),
+linked from their slots and import review. Their full exports and actual
+history are kept. Main is published as Sites 106, the archive as version 1.
+The [verification record](docs/measures/archive-v0712-verification.md) keeps
+3,949 passing assertions, five skips and the incomplete browser handoff
+separate. The farmer layout is unchanged; no legacy rules are removed.
+
 Version 0.71.1 is The first choice, the farmer opening repair merged in
 [PR #17](https://github.com/mandyp1411-coder/hearth-and-oath/pull/17).
 New age-sixteen farmer birthdays keep their authored hints. Existing captured
@@ -35,8 +43,8 @@ gate is not yet passed.
   burdens, remembered neighbour, feud and family saying. The Book keeps
   the turning points in prose, including before an heir can work the land.
 - **Saves keep their past.** Step 71 gives an older save no farm, people,
-  ambition or invented harvest. No legacy code is removed. The archive's
-  public address still needs verification before the later cleanup.
+  ambition or invented harvest. No legacy code is removed. The archive now has a public
+  home; the browser handoff and human gate still precede the later cleanup.
 - **Prove before spreading.** The farmer's six-to-eight-player protocol is
   in `docs/playtests/farmer-v071.md`; its human result is NOT RUN. No trader,
   healer or general-purpose life engine is declared finished by this slice.

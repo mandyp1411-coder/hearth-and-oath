@@ -9,7 +9,7 @@ Human playtest: NOT RUN. No participants or survey answers are claimed.
 The farmer remains the only Volume II livelihood being proved until
 this gate passes. The trader, healer and general engines are later work.
 
-The current playtest candidate is v0.71.1, Sites version 105. The farmer
+The current playtest candidate is v0.71.2, Sites version 106. The farmer
 foundation shipped in [PR #15](https://github.com/mandyp1411-coder/hearth-and-oath/pull/15);
 [PR #17](https://github.com/mandyp1411-coder/hearth-and-oath/pull/17) repairs
 the age-sixteen opening captions. Its [software evidence](../measures/farmer-v0711-verification.md)
@@ -24,7 +24,7 @@ actual game build used in each human session.
 
 | Candidate field | Result |
 | --- | --- |
-| Source/build to play | v0.71.1, Sites 105; runtime `cee3675cd16e1883722a69d8f6e015689c72fe381e1043b767d0a7bfd2e9b926` |
+| Source/build to play | v0.71.2, Sites 106; runtime `37a1ee3f84ef6b589d3daa9daca80d594e6a7c5320a31d100459eb5b6b4f518f` |
 | Farmer foundation merge | `6d692f1fd0184ef4ae0efcd527b70ab1e5819d7c` (PR #15) |
 | Opening repair merge | `02a79c80f849dee67a4c93797ed8806b13473aeb` (PR #17) |
 | Public candidate URL | [Play the farmer candidate](https://hearth-and-oath-v1-a73f.nilled463.chatgpt.site/) |

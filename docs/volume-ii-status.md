@@ -8,7 +8,7 @@ implementation and evidence without editing the owner's original PDF.
 
 | Release | Scope | Status and evidence |
 | --- | --- | --- |
-| v0.70 | The archive and measuring tools | Merged as PR #14. The archive branch and packaging exist. `dist/js/archive-link.js` still has no published archive URL; packaging and browser fixtures do not prove a public deployment. Keep all compatibility code. |
+| v0.70 | The archive and measuring tools | Merged as PR #14. The archive is now public as Sites version 1 through v0.71.2, and the main link is enabled in Sites 106. The full browser handoff remains NOT RUN after two service stalls. Keep all compatibility code. |
 | v0.71 | One farmer's life | Shipped as a playtest candidate in [PR #15](https://github.com/mandyp1411-coder/hearth-and-oath/pull/15). Sites version 104 is [published](https://hearth-and-oath-v1-a73f.nilled463.chatgpt.site/); merge `6d692f1fd0184ef4ae0efcd527b70ab1e5819d7c` is complete. The [software record](measures/farmer-v071-verification.md) contains 3,939 selected passing assertions and five skips, with composite FAST/SLOW limits. The human playtest remains NOT RUN. |
 
 No later Volume II release is claimed complete. Phase 2 waits for the
@@ -53,3 +53,20 @@ heir's first chapter. Most must remember two people, a choice-led turning
 point, the life's purpose and understandable consequences, and want to
 continue as the heir. Simulations measure mechanics; no simulated reviewer
 is counted as a participant.
+
+## v0.71.2: the old lives have a home
+
+Main Sites 106 and the separate public archive version 1 are published in
+[PR #18](https://github.com/mandyp1411-coder/hearth-and-oath/pull/18).
+The pinned archive accepts the exact old step-71 metadata without changing
+its gameplay or a save's history. The builder keeps its standalone separate
+from the size-checked host. Full fresh FAST/SLOW lanes have 3,949 passing
+assertions, zero failed assertions and five skips; strict lanes remain FAIL.
+Sixteen source-engine cases cover fourteen genuine old states; one compiled
+startup check passes. Complete proof and auxiliary evidence limits are in
+[the release record](measures/archive-v0712-verification.md).
+
+Chrome opened the public archive and main exported a complete actual old
+save. The full browser transfer loop remains NOT RUN after service stalls.
+No human farmer verdict is supplied, no legacy code is removed, and no
+later phase or further farmer-opening layout polish is included.
