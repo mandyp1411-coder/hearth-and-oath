@@ -45,7 +45,17 @@ test('every quest category keeps connected focus, exposes selection and announce
 });
 test('Journal shelves retain selected state and useful focus without accepting an offer',async t=>{
  const ui=await resume(t,fresh(),'quests'),before=ui.current(),slots=ui.lives();
- for(const id of ['journal:archive','journal:notes','journal:active']){await activate(ui,'workspace-section',id);focused(ui,'workspace-section',id);assert.equal(command(ui,'workspace-section',id).getAttribute('aria-pressed'),'true');unchanged(ui,before,slots);}
+ for(const id of ['journal:archive','journal:notes','journal:active']){await activate(ui,'workspace-section',id);focused(ui,'workspace-section',id);assert.equal(command(ui,'workspace-section',id).getAttribute('aria-pressed'),'true');if(before.farm){assert.ok(ui.root.querySelector('[data-farm-book]'));assert.equal(ui.root.querySelector('.farm-errands').open,true,'the selected shelf stays reachable in the open Errands leaf');}unchanged(ui,before,slots);}
+});
+test('farmer Book shelves clear another slot\'s search and category without changing either life',async t=>{
+ const first=fresh(),second=fresh();assert.ok(first.farm,'this current life exercises the farmer Book');
+ const ui=await mountApp(t,{states:[first,second]});await ui.click('title-continue');await ui.click('tab','journal');
+ await activate(ui,'journal-category','side');
+ const search=ui.root.querySelector('#journal-search');search.querySelector('#journal-query').value='a search belonging to the first slot';await ui.fire('submit',search);
+ await ui.click('title-menu');await ui.click('title-load');await ui.click('slot-load','1');await ui.click('tab','journal');
+ const before=ui.current(),slots=ui.lives();
+ assert.equal(ui.root.querySelector('#journal-query').value,'');onlyPressed(ui,'.journal-categories button','all');
+ for(const id of ['journal:notes','journal:archive','journal:active']){await activate(ui,'workspace-section',id);focused(ui,'workspace-section',id);unchanged(ui,before,slots);}
 });
 test('all inventory categories support Space activation with restored focus and selected state',async t=>{
  const ui=await resume(t,fresh(),'inventory'),before=ui.current(),slots=ui.lives();

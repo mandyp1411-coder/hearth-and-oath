@@ -1,5 +1,36 @@
 # Hearth & Oath
 
+Version 0.71.0 is The farmer's life: the first ordinary life in Design Bible
+Volume II. Its software implementation is a playtest candidate; the human
+gate is not yet passed.
+
+- **A field with a year of its own.** New common and bound lives can work
+  the family's land from sixteen, or from the older age chosen at creation.
+  Barley, beans or fallow; a harvest kept, sold or divided; the lord's due
+  faced at the door. The displayed days and seed money are spent once, and
+  work interrupted by a birthday keeps its remaining days.
+- **Two people, with memories.** The actual neighbour wants the lower ditch
+  drained. A spouse has a place at the winter chest. Their opinion is
+  separate from their bond, and conversations continue beyond one reply.
+  A witnessed boundary or a stone moved by moonlight returns next season.
+- **A hope, and the words you give.** The farmer chooses a private ambition.
+  Changing that hope is not a broken promise. A winter promise belongs to
+  the person who heard it; keeping, breaking or releasing it has its own
+  consequence.
+- **The lean year opens another door.** Blight, a neighbour's help, the
+  reckoning, a bond or a lost strip change what the life must do next.
+  Credit remembers the actual person who paid. Work and the road remain
+  available, and land lost can be worked back.
+- **The hand after yours.** The heir receives the actual field or its loss,
+  burdens, remembered neighbour, feud and family saying. The Book keeps
+  the turning points in prose, including before an heir can work the land.
+- **Saves keep their past.** Step 71 gives an older save no farm, people,
+  ambition or invented harvest. No legacy code is removed. The archive's
+  public address still needs verification before the later cleanup.
+- **Prove before spreading.** The farmer's six-to-eight-player protocol is
+  in `docs/playtests/farmer-v071.md`; its human result is NOT RUN. No trader,
+  healer or general-purpose life engine is declared finished by this slice.
+
 Version 0.70.0 is The archive: every save says which rules it lives by, the old rules are kept at their own address, and the measuring tools arrive. No rule changes; nothing is removed.
 
 - **Two games, named.** The codebase has carried two rulebooks since v0.60: lives begun since then (a debt ledger from v0.61, a rolled station from v0.62) live by the new rules, and lives from before, or migrated from before, keep the rules they were written under. From this version every save says so in plain words: a slot, the title card, an export and an import review read **Old rules**, **New rules, begun before v0.70**, or **New rules, begun in v0.70**. A life begun before this version is never given a date after the fact. The exported file is named for its rules (`…-old-rules.json`, `…-new-rules.json`).

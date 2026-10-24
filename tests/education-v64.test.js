@@ -8,11 +8,23 @@ import { civilianEntryReason } from '../dist/js/career-entry.js';
 import { applyPersonalityBuild } from '../dist/js/personality.js';
 import { whatMatters } from '../dist/js/voice.js';
 
-const answer = s => s.event.id === 'health_concern' && s.event.choices.some(c => c.id === 'rest') ? 'rest' : s.event.id === 'hard_winter' ? 'endure' : s.event.id === 'school_exam' ? 'present' : s.event.choices[0].id;
+const answer = s => {
+  const offered = s.event.choices.filter(c => !c.disabledReason);
+  const preferred = s.event.id === 'health_concern' ? 'rest' : s.event.id === 'hard_winter' ? 'endure'
+    : s.event.id === 'school_exam' ? 'present' : s.event.id.startsWith('farm_') ? 'continue' : null;
+  // These are schooling fixtures. Incidental field decisions take their
+  // lawful continuation instead of retrying a rent the purse cannot pay.
+  assert.ok(offered.length, `${s.event.id} has an available answer`);
+  return (offered.find(c => c.id === preferred) || offered[0]).id;
+};
 function born(seed, station, extra = {}) { return engine.createBirthGame({ seed, station: { ...rollBirthCircumstances(seed, station, 'human'), ...extra } }); }
 function grow(s, to) {
   for (let n = 0; n < 900 && s.age < to && s.phase !== 'retired'; n++) s = s.event ? engine.chooseEventOption(s, answer(s)) : engine.ageUp(s);
   for (let n = 0; n < 20 && s.event && s.phase !== 'retired'; n++) s = engine.chooseEventOption(s, answer(s));
+  if (s.phase !== 'retired') {
+    assert.equal(s.age, to, `the schooling fixture reaches ${to}`);
+    assert.equal(s.event, null, 'incidental decisions have a finite continuation');
+  }
   return s;
 }
 const journal = () => { const rows = []; return { rows, ctx: { journal: (title, text, tag) => rows.push({ title, text, tag }), spendDays: n => n } }; };

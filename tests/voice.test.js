@@ -4,7 +4,13 @@ import * as engine from '../dist/js/engine.js';
 import { rollBirthCircumstances } from '../dist/js/station.js';
 import { voiceAction, voiceActions, voiceEvent, epitaph, chapterHeading, chapterOf, whatMatters } from '../dist/js/voice.js';
 
-const answer = s => s.event.id === 'health_concern' && s.event.choices.some(c => c.id === 'rest') ? 'rest' : s.event.id === 'hard_winter' ? 'endure' : s.event.choices[0].id;
+const answer = s => {
+  const offered = s.event.choices.filter(c => !c.disabledReason);
+  const preferred = s.event.id === 'health_concern' ? 'rest' : s.event.id === 'hard_winter' ? 'endure'
+    : s.event.id.startsWith('farm_') ? 'continue' : null;
+  assert.ok(offered.length, `${s.event.id} has an available answer`);
+  return (offered.find(c => c.id === preferred) || offered[0]).id;
+};
 function adult(seed, station = 'common') {
   let s = engine.createBirthGame({ seed, station: rollBirthCircumstances(seed, station, 'human') });
   for (let n = 0; n < 700 && s.age < 18 && s.phase !== 'retired'; n++) s = s.event ? engine.chooseEventOption(s, answer(s)) : engine.ageUp(s);
@@ -32,7 +38,7 @@ test('a season is a quarter of a year that stops only for things that matter, an
   const a = engine.liveSeason(adult('voice-season')), b = engine.liveSeason(adult('voice-season'));
   assert.deepEqual(a, b);
   // Older lives do not have it: the command falls back to Age up.
-  const old = adult('voice-season-old'); delete old.hero.station;
+  const old = adult('voice-season-old'); delete old.hero.station; delete old.farm;
   const year = engine.liveSeason(old);
   assert.ok(year.timeline.yearTarget === null ? year.age === 19 : year.timeline.yearTarget - (year.timeline.birthDay || 0) === 19 * 365);
 });
@@ -85,7 +91,7 @@ test('the voice rewrites what the player reads and keeps the engine’s figures 
   const unknown = { id: 'some_other_thing', label: 'X', description: 'Y' };
   assert.deepEqual(voiceAction(s, unknown), unknown);
   // Not for older lives.
-  const old = structuredClone(s); delete old.hero.station; delete old.householdBudget.debt;
+  const old = structuredClone(s); delete old.hero.station; delete old.farm; delete old.householdBudget.debt;
   assert.equal(voiceActions(old, [{ id: 'career_work', label: 'Work a shift at the yard', description: 'Earn 25 gold.' }])[0].detail, undefined);
   // Through the real action list every voiced action keeps its id, days and cost.
   const real = engine.getActions(s), voiced = voiceActions(s, real);
@@ -154,6 +160,6 @@ test('right now: three to five things that matter today, chosen from what is off
   // Never during a scene, never for an older life.
   s.event = { id: 'x', title: 't', category: 'c', body: 'b', choices: [{ id: 'a', label: 'A', description: '' }] };
   assert.deepEqual(whatMatters(s, actions), []);
-  const old = structuredClone(adult('voice-now')); delete old.hero.station; delete old.householdBudget.debt;
+  const old = structuredClone(adult('voice-now')); delete old.hero.station; delete old.farm; delete old.householdBudget.debt;
   assert.deepEqual(whatMatters(old, engine.getActions(old)), []);
 });

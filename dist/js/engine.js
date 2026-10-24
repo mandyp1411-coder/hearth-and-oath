@@ -101,6 +101,7 @@ import { initializeDelves, isDelveEntry, delveEntryReason, enterDelve, delveActi
 import { initializeBattlecraft, onBattlecraftTime, battlecraftActions, applyBattlecraftAction, applyBattlecraftGates, afterBattlecraftBattle, flushBattlecraftEvent, applyBattlecraftChoice, validateBattlecraft, BATTLECRAFT_EVENTS, FIELD_VERSION, artById } from './battlecraft.js';
 import { initializeFaith, onFaithTime, faithActions, applyFaithAction, applyFaithGates, flushFaithEvent, applyFaithChoice, validateFaith, FAITH_EVENTS } from './faith.js';
 import { stampEdition, validateEdition } from './edition.js';
+import { initializeFarm, onFarmTime, farmActions, applyFarmAction, applyFarmGates, flushFarmEvent, applyFarmChoice, validateFarm, FARM_EVENTS } from './farmer.js';
 import { inflictCondition } from './health.js';
 import { initializeHouseholdBudget, accrueHouseholdBudget, settleHouseholdBudget, chargeDebtInterest, debtReckoning, applyDebtReckoningChoice, DEBT_RECKONING_EVENT, applyAnnualFocus, annualWorkRatio, householdCostPreview, householdBudgetActions, applyHouseholdBudgetAction, validateHouseholdBudget } from './budget.js';
 import { initializeSociety, societyActions, applySocietyAction, applySocietyChoice, societyEventIds, onSocietyTime, flushSocietyEvent, validateSociety, inheritSociety, societyCustomerChoiceReason } from './society.js';
@@ -328,7 +329,7 @@ function spendDays(state, days, { outdoors = false, night, expeditionDayKind = '
       onSocialTime(state,{oldDay,newDay:state.day},ctx);
       onPastimeTime(state,{oldDay,newDay:state.day},ctx);
       const worldClockContext=childClock?{...ctx,onSettlementAvailability:event=>recordAdultChildSiteChange(childClock,event)}:ctx;
-      onRegionalTime(state,oldDay,state.day,worldClockContext);onRealmTime(state,oldDay,state.day,worldClockContext);onLivingTime(state,{oldDay,newDay:state.day},ctx);onGuildTime(state,{oldDay,newDay:state.day},ctx);onFaithTime(state,{oldDay,newDay:state.day},ctx);onDelveTime(state,{oldDay,newDay:state.day},ctx);onBattlecraftTime(state,{oldDay,newDay:state.day},ctx);initializeRegionalWorld(state);onRpgTime(state,{oldDay,newDay:state.day},ctx);onJusticeTime(state,days,ctx);onAdventuringTime(state);
+      onRegionalTime(state,oldDay,state.day,worldClockContext);onRealmTime(state,oldDay,state.day,worldClockContext);onLivingTime(state,{oldDay,newDay:state.day},ctx);onGuildTime(state,{oldDay,newDay:state.day},ctx);onFaithTime(state,{oldDay,newDay:state.day},ctx);onFarmTime(state,{oldDay,newDay:state.day},ctx);onDelveTime(state,{oldDay,newDay:state.day},ctx);onBattlecraftTime(state,{oldDay,newDay:state.day},ctx);initializeRegionalWorld(state);onRpgTime(state,{oldDay,newDay:state.day},ctx);onJusticeTime(state,days,ctx);onAdventuringTime(state);
       settleAdultChildClock(state,childClock);
       recordLifeAtmosphere(state,oldDay,state.day,(title,text,tag,options)=>addJournal(state,title,text,tag,options));
     }
@@ -517,8 +518,8 @@ function unfilteredActions(state) {
     if (state.campaign && state.phase === 'adult' && !state.life?.plan) actions.push(...campaignActions(state));
     if (state.age >= 16 && state.phase === 'adult' && state.dungeon === null) actions.push(...explorationActions(state));
     if (state.revision >= 4) actions.push(...researchActions(state),...householdActions(state), ...originActions(state), ...workshopActions(state), ...loreActions(state));
-    if (state.revision >= 5) actions.push(...careerActions(state), ...lineageActions(state), ...healthActions(state), ...householdBudgetActions(state),...experienceActions(state),...yardActions(state),...guildActions(state),...battlecraftActions(state),...faithActions(state));
-    return applyFaithGates(state,applyBattlecraftGates(state,applyGuildGates(state,[...actions,...questJournalActions(state,campaignView(state).quests),...upbringingActions(state)])));
+    if (state.revision >= 5) actions.push(...careerActions(state), ...lineageActions(state), ...healthActions(state), ...householdBudgetActions(state),...experienceActions(state),...yardActions(state),...guildActions(state),...battlecraftActions(state),...faithActions(state),...farmActions(state));
+    return applyFarmGates(state,applyFaithGates(state,applyBattlecraftGates(state,applyGuildGates(state,[...actions,...questJournalActions(state,campaignView(state).quests),...upbringingActions(state)]))));
   }
   const actions = [...fieldActions(state),...curseActions(state),...cartographyActions(state),...getAgeActivities(state),...personalityActions(state), ...dialogueActions(state),...realmActions(state),...regionalActions(state),...adventureActions(state),...justiceActions(state)];
   if (state.age >= 16) {
@@ -535,8 +536,8 @@ function unfilteredActions(state) {
   }
   actions.push(...campaignActions(state));
   if (state.revision >= 4) actions.push(...researchActions(state),...householdActions(state), ...originActions(state), ...workshopActions(state), ...loreActions(state));
-  if (state.revision >= 5) actions.push(...careerActions(state), ...lineageActions(state), ...healthActions(state), ...householdBudgetActions(state),...experienceActions(state),...yardActions(state),...guildActions(state),...battlecraftActions(state),...faithActions(state));
-  applyFaithGates(state,applyBattlecraftGates(state,applyGuildGates(state,actions)));
+  if (state.revision >= 5) actions.push(...careerActions(state), ...lineageActions(state), ...healthActions(state), ...householdBudgetActions(state),...experienceActions(state),...yardActions(state),...guildActions(state),...battlecraftActions(state),...faithActions(state),...farmActions(state));
+  applyFarmGates(state,applyFaithGates(state,applyBattlecraftGates(state,applyGuildGates(state,actions))));
   for (const row of actions) if (!/^(tournament_|research_|polity_|atlas_|stories_|recovery_|workshop_|society_|community_|fellowship_|sanctuary_|lineage_adoption_|social_|pastime_)/.test(row.id) && row.days > 0 && state.day + row.days >= nextBirthday(state)) row.disabledReason = 'Your next birthday is due. Choose Age up before starting this activity.';
   return [...actions,...questJournalActions(state,campaignView(state).quests),...upbringingActions(state)];
 }
@@ -566,9 +567,9 @@ export function getActions(state){
  // The canonical producer owns spatial precedence too: an interrupted maze
  // project still uses maze_work_*; custody still uses justice_*.
  const visible=owner?unfilteredActions(state):rows;
- if(state?.worldServicesVersion!==1)return visible;
+ if(state?.worldServicesVersion!==1)return applyFarmGates(state,visible);
  const services=settlementServices(state);
- return applyFaithGates(state,applyGuildGates(state,visible.map(a=>{if(state.trail&&['health_rest','life_rest'].includes(a.id))a={...a,description:a.description+' Rest also restores '+(a.id==='life_rest'?'all':'up to three quarters of your')+' Focus.'};let reason=serviceAccessReason(state,a.id,services);if(/^(talk_|confide_)/.test(a.id)){const id=a.id.replace(/^(talk_quest_|talk_|confide_)/,''),p=contacts.find(p=>p.id===id);if(p?.roomId&&p.roomId!==(state.cartography?.interior?.roomId||'gate'))reason='Meet this person in their part of the settlement.';}const match=/^life_(visit|gift|court|commit|separate|endcourt|values)_(.+)$/.exec(a.id);if(match){const p=contacts.find(p=>p.id===match[2]);if(!p||p.available===false||p.locationId!==state.locationId||p.roomId&&p.roomId!==(state.cartography?.interior?.roomId||'gate'))reason='Meet this person where they actually are.';else if(state.socialLife&&['court','commit'].includes(match[1]))reason=romanceReason(state,p)||reason;}return reason?{...a,disabledReason:reason}:a;})));
+ return applyFarmGates(state,applyFaithGates(state,applyGuildGates(state,visible.map(a=>{if(state.trail&&['health_rest','life_rest'].includes(a.id))a={...a,description:a.description+' Rest also restores '+(a.id==='life_rest'?'all':'up to three quarters of your')+' Focus.'};let reason=serviceAccessReason(state,a.id,services);if(/^(talk_|confide_)/.test(a.id)){const id=a.id.replace(/^(talk_quest_|talk_|confide_)/,''),p=contacts.find(p=>p.id===id);if(p?.roomId&&p.roomId!==(state.cartography?.interior?.roomId||'gate'))reason='Meet this person in their part of the settlement.';}const match=/^life_(visit|gift|court|commit|separate|endcourt|values)_(.+)$/.exec(a.id);if(match){const p=contacts.find(p=>p.id===match[2]);if(!p||p.available===false||p.locationId!==state.locationId||p.roomId&&p.roomId!==(state.cartography?.interior?.roomId||'gate'))reason='Meet this person where they actually are.';else if(state.socialLife&&['court','commit'].includes(match[1]))reason=romanceReason(state,p)||reason;}return reason?{...a,disabledReason:reason}:a;}))));
 }
 export function visitService(original,id){if(terminalRun(original))return copy(original);
  if(observationalInfancy(original))return {...copy(original),notice:infantAgencyReason(original)};
@@ -701,6 +702,7 @@ export function createBirthGame(config = {}) {
   const omen = { ember: 'Cold ash warmed your blanket although the hearth was dark.', echo: 'An unpulled bell answered your first cry.', thorn: 'A winter seed sprouted beside your cradle, its roots pointing toward the burial ground.' }[state.campaign.fate];
   if(state.timeline.contentVersion<7)state.event.body += ` ${omen}`;
   refreshNarrativeRecords(state);
+  initializeFarm(state,{born:true,startAge:config.startAge});
   stampEdition(state,{born:true});
   return copy(state);
 }
@@ -1003,6 +1005,7 @@ function reconcile(state) {
     if (!waiting(state)) flushDelveEvent(state,ctx);
     if (!waiting(state)) flushBattlecraftEvent(state,ctx);
     if (!waiting(state)) flushFaithEvent(state,ctx);
+    if (!waiting(state)) flushFarmEvent(state,ctx);
     if (!waiting(state)) flushLineageEvent(state,ctx);
     if (!waiting(state)&&!state.justice?.prison) flushSanctuaryEvent(state,ctx);
     if (!waiting(state)) flushFellowshipEvent(state,ctx);
@@ -1053,7 +1056,7 @@ export function chooseAction(original,id){if(terminalRun(original))return copy(o
   next.notice=receipt+((next.event||next.battle)&&next.notice?' '+next.notice:'');
  }
  return next;}
-export function chooseEventOption(original,id){if(terminalRun(original))return copy(original);if(observationalInfancy(original))return performEventOption(original,id);const next=performEventOption(original,id);if(terminalRun(next))return next;if(next.phase!=='retired'&&original.event&&personalityImpact(original,{kind:'choice',eventId:original.event.id,id,intentTags:original.event.choices.find(c=>c.id===id)?.intentTags}).impacts.length&&committedChange(original,next))applyPersonalityImpact(next,{kind:'choice',eventId:original.event.id,id,intentTags:original.event.choices.find(c=>c.id===id)?.intentTags});if(!researchTransition(original,next)&&!countingTableTransition(original,next)&&!originTransition(original,next)&&!flavoredCompletion(original,next)&&!original.event?.id.startsWith('tournament_')&&!original.event?.id.startsWith('yard_')&&!original.event?.id.startsWith('repertoire_')&&!['country_danger','rpg_intrigue','health_concern','life_values','curse_rare_meeting','vampire_offer','lycan_offer','quest_followup'].includes(original.event?.id)&&!(original.event?.id==='rpg_faction'&&(original.rpg?.pending?.firstOffer||original.rpg?.pending?.objectiveDecision))&&original.narrativeEdition===30&&next.phase!=='retired'&&original.event&&committedChange(original,next)&&!(next.event?.id===original.event.id&&next.event?.body===original.event.body)){
+export function chooseEventOption(original,id){if(terminalRun(original))return copy(original);if(observationalInfancy(original))return performEventOption(original,id);const next=performEventOption(original,id);if(terminalRun(next))return next;if(next.phase!=='retired'&&original.event&&personalityImpact(original,{kind:'choice',eventId:original.event.id,id,intentTags:original.event.choices.find(c=>c.id===id)?.intentTags}).impacts.length&&committedChange(original,next))applyPersonalityImpact(next,{kind:'choice',eventId:original.event.id,id,intentTags:original.event.choices.find(c=>c.id===id)?.intentTags});if(!researchTransition(original,next)&&!countingTableTransition(original,next)&&!originTransition(original,next)&&!flavoredCompletion(original,next)&&!original.event?.id.startsWith('farm_')&&!original.event?.id.startsWith('tournament_')&&!original.event?.id.startsWith('yard_')&&!original.event?.id.startsWith('repertoire_')&&!['country_danger','rpg_intrigue','health_concern','life_values','curse_rare_meeting','vampire_offer','lycan_offer','quest_followup'].includes(original.event?.id)&&!(original.event?.id==='rpg_faction'&&(original.rpg?.pending?.firstOffer||original.rpg?.pending?.objectiveDecision))&&original.narrativeEdition===30&&next.phase!=='retired'&&original.event&&committedChange(original,next)&&!(next.event?.id===original.event.id&&next.event?.body===original.event.body)){
  const c=original.event.choices.find(c=>c.id===id);
  if(c){const commitment=getLifeCommitment(next),completedStory=original.event.id==='stories_chapter'&&next.stories?.history.findLast(h=>!original.stories.history.some(old=>old.id===h.id)),result=commitment&&commitment.remainingDays>0?`You begin the activity. ${commitment.remainingDays} days remain.`:completedStory?.text||groundedOutcome(original,{eventId:original.event.id,choice:c}),changes=[];const gold=next.hero.gold-original.hero.gold,hp=next.hero.hp-original.hero.hp;
  if(gold)changes.push(`${gold>0?'+':''}${gold} Gold`);if(hp)changes.push(`${hp>0?'+':''}${hp} Health`);
@@ -1119,10 +1122,10 @@ function performAction(original, id) {
     ['calling_', applyCallingAction], ['talk_', applyDialogueAction],['confide_',applyDialogueAction],
     ['family_', applyHouseholdAction], ['school_', applyHouseholdAction], ['lore_', applyLoreAction],
     ['career_', applyCareerAction], ['lineage_', applyLineageAction], ['health_', applyHealthAction], ['travel_', applyTravelAction],
-    ['budget_', applyHouseholdBudgetAction], ['guild_', applyGuildAction], ['battlecraft_', applyBattlecraftAction], ['faith_', applyFaithAction],
+    ['budget_', applyHouseholdBudgetAction], ['guild_', applyGuildAction], ['battlecraft_', applyBattlecraftAction], ['faith_', applyFaithAction], ['farm_', applyFarmAction],
   ];
   for (const [prefix, handler] of handlers) if (id.startsWith(prefix)) {
-    if (handler(state, id, engineContext(state,{annual:id.startsWith('travel_')}))) { if(terminalRun(state))return copy(state);enjoyCompleted(); recordPlanGold(state, goldAfterFee); return afterAction(state); }
+    if (handler(state, id, {...engineContext(state,{annual:id.startsWith('travel_')}),...(id.startsWith('farm_')?{offeredAction:selected,actionDays:state.day-oldDay}: {})})) { if(terminalRun(state))return copy(state);enjoyCompleted(); recordPlanGold(state, goldAfterFee); return afterAction(state); }
     return { ...copy(original), notice: 'This activity could not be started; no time or resources were spent.' };
   }
   switch (id) {
@@ -1491,7 +1494,7 @@ function performEventOption(original, id) {
   const moduleChoices = [ ['tournament_',applyTournamentChoice], ['repertoire_',applyRepertoireChoice], ['origin_',applyOriginChoice], ['yard_',applyYardChoice], ['rpg_',applyRpgChoice],
     ['country_',applyWildernessChoice],['way_',applyFieldChoice],
     ['curse_',applyCurseChoice],
-    ['nature_',applyPersonalityChoice],['hard_',applyWinterChoice],['schooling_',applySchoolingChoice],['living_',applyLivingChoice],['guild_',applyGuildChoice],['delve_',applyDelveChoice],['battlecraft_',applyBattlecraftChoice],['faith_',applyFaithChoice],
+    ['nature_',applyPersonalityChoice],['hard_',applyWinterChoice],['schooling_',applySchoolingChoice],['living_',applyLivingChoice],['guild_',applyGuildChoice],['delve_',applyDelveChoice],['battlecraft_',applyBattlecraftChoice],['faith_',applyFaithChoice],['farm_',applyFarmChoice],
     ['birth_', applyBirthChoice], ['calling_', applyCallingChoice], ['fate_', applyCampaignChoice],
     ['quest_', applyCampaignChoice], ['dungeon_', applyExplorationChoice],
     ['family_', applyHouseholdChoice], ['school_', applyHouseholdChoice], ['lore_', applyLoreChoice],
@@ -1502,7 +1505,7 @@ function performEventOption(original, id) {
   ];
   for (const [prefix, handler] of moduleChoices) if (activeEvent.id.startsWith(prefix) && activeEvent.id !== 'family_visit') {
     const before = state.hero.gold;
-    if (handler(state, activeEvent.id, id, engineContext(state,{annual:birthMode(state)||activeEvent.id.startsWith('justice_counting_')||activeEvent.id.startsWith('tournament_')||activeEvent.id.startsWith('origin_')||activeEvent.id.startsWith('travel_'),resolvingNeed:activeEvent.id.startsWith('curse_')?'vampire':sanctuaryNeedsBypass(state,null,activeEvent.id,id)}))) { if(activeEvent.id.startsWith('tournament_')&&state.day>original.day||activeEvent.id.startsWith('origin_')&&state.day>original.day||activeEvent.id.startsWith('rpg_')||activeEvent.id.startsWith('yard_')&&state.day>original.day||activeEvent.id.startsWith('justice_counting_')&&state.day>original.day)settleHouseholdBudget(state,engineContext(state));recordPlanGold(state, before); return afterAction(state); }
+    if (handler(state, activeEvent.id, id, engineContext(state,{annual:birthMode(state)||activeEvent.id.startsWith('justice_counting_')||activeEvent.id.startsWith('tournament_')||activeEvent.id.startsWith('origin_')||activeEvent.id.startsWith('travel_'),resolvingNeed:activeEvent.id.startsWith('curse_')?'vampire':sanctuaryNeedsBypass(state,null,activeEvent.id,id)}))) { if(activeEvent.id.startsWith('tournament_')&&state.day>original.day||activeEvent.id.startsWith('origin_')&&state.day>original.day||activeEvent.id.startsWith('rpg_')||activeEvent.id.startsWith('yard_')&&state.day>original.day||activeEvent.id.startsWith('justice_counting_')&&state.day>original.day||activeEvent.id.startsWith('farm_')&&state.day>original.day)settleHouseholdBudget(state,engineContext(state));recordPlanGold(state, before); return afterAction(state); }
     return { ...copy(original), notice: 'This decision is still waiting for a valid approach.' };
   }
   const goldBeforeChoice = state.hero.gold;
@@ -1848,7 +1851,7 @@ function endLife(state, cause) {
 export function continueAsChild(original, childId) {if(terminalRun(original))return copy(original);
   if(original.revision<5||original.phase!=='retired')return {...copy(original),notice:'Close this chapter before continuing as a child.'};
   const next=createSuccessor(original,childId,createBirthGame);
-  if(next){initializeHouseholdBudget(next,{reset:true,edition:original.householdBudget?.debt!==undefined});if(original.fortune)initializeFortune(next);initializeConversations(next);inheritRpg(next,original);inheritStoryMazes(next,original);settlePublicRoster(next,{migration:true});}
+  if(next){if(!next.farm)initializeHouseholdBudget(next,{reset:true,edition:original.householdBudget?.debt!==undefined});if(original.fortune)initializeFortune(next);initializeConversations(next);inheritRpg(next,original);inheritStoryMazes(next,original);settlePublicRoster(next,{migration:true});}
   return next && next !== false && validateSave(next) ? next : {...copy(original),notice:'That child cannot continue this family story.'};
 }
 
@@ -2575,7 +2578,7 @@ export function validateSave(value) {
     if (!Array.isArray(value.journal) || !value.journal.length || !value.journal.every(item => plain(item) && textField(item.id, 120) && integer(item.day) && integer(item.age, birthMode(value) ? 0 : 7, 5000) && textField(item.title, 1000) && textField(item.text, 10000) && textField(item.tag, 80) && (item.capturedReceipt===undefined||typeof item.capturedReceipt==='boolean') && (item.generation===undefined||integer(item.generation,1,5000)))) return false;
     if (value.event !== null) {
       const event = value.event;
-      const allowed = { ...EVENT_CHOICES, ...yardEventIds(), ...tournamentEventIds(), ...lifeEventIds(), ...birthEventIds(), ...callingEventIds(), ...campaignEventIds(), ...explorationEventIds(), ...dialogueEventIds(), ...householdEventIds(), ...researchEventIds(), ...originEventIds(), ...loreEventIds(), ...careerEventIds(), ...lineageEventIds(), ...healthEventIds(), ...travelEventIds(),...societyEventIds(),...communityEventIds(),...fellowshipEventIds(),...sanctuaryEventIds(),...socialEventIds(),...pastimeEventIds(),...repertoireEventIds(),...storyEventIds(),...rpgEventIds(),...personalityEventIds(),...justiceEventIds(),...adventureEventIds(),...curseEventIds(),...WINTER_EVENT.ids(), ...DEBT_RECKONING_EVENT.ids(), ...SCHOOLING_EVENTS.ids(), ...LIVING_EVENTS.ids(),...GUILD_EVENTS.ids(),...DELVE_EVENTS.ids(),...BATTLECRAFT_EVENTS.ids(),...FAITH_EVENTS.ids() };
+      const allowed = { ...EVENT_CHOICES, ...yardEventIds(), ...tournamentEventIds(), ...lifeEventIds(), ...birthEventIds(), ...callingEventIds(), ...campaignEventIds(), ...explorationEventIds(), ...dialogueEventIds(), ...householdEventIds(), ...researchEventIds(), ...originEventIds(), ...loreEventIds(), ...careerEventIds(), ...lineageEventIds(), ...healthEventIds(), ...travelEventIds(),...societyEventIds(),...communityEventIds(),...fellowshipEventIds(),...sanctuaryEventIds(),...socialEventIds(),...pastimeEventIds(),...repertoireEventIds(),...storyEventIds(),...rpgEventIds(),...personalityEventIds(),...justiceEventIds(),...adventureEventIds(),...curseEventIds(),...WINTER_EVENT.ids(), ...DEBT_RECKONING_EVENT.ids(), ...SCHOOLING_EVENTS.ids(), ...LIVING_EVENTS.ids(),...GUILD_EVENTS.ids(),...DELVE_EVENTS.ids(),...BATTLECRAFT_EVENTS.ids(),...FAITH_EVENTS.ids(),...FARM_EVENTS.ids() };
       for(const need of ['life_hunger','vampire_feeding'])if(value.sanctuaries&&allowed[need])allowed[need]=[...allowed[need],'agreement'];
       if (!plain(event) || !(Object.hasOwn(allowed, event.id) || event.id === 'lycan_confidant') || ![event.title, event.category, event.body].every(item => textField(item))) return false;
       if (!Array.isArray(event.choices) || !event.choices.length || event.choices.length > 8 || new Set(event.choices.map(item => item?.id)).size !== event.choices.length) return false;
@@ -2623,6 +2626,7 @@ export function validateSave(value) {
       if(!validateDelve(value))return false;
       if(!validateBattlecraft(value))return false;
       if(!validateFaith(value.faith,value))return false;
+      if(!validateFarm(value.farm,value))return false;
       if(!validateEdition(value.edition))return false;
       if(value.society!==undefined&&!validateSociety(value.society,value))return false;
       if(value.community!==undefined&&!validateCommunity(value.community,value))return false;

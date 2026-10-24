@@ -7,10 +7,20 @@ import { householdAnnualCost } from '../dist/js/budget.js';
 import { onFortuneTime, flushWinterEvent, applyWinterChoice } from '../dist/js/fortune.js';
 
 const journal = () => { const rows = []; return { rows, ctx: { journal: (title, text, tag) => rows.push({ title, text, tag }), setEvent: () => {}, killPerson: () => false } }; };
-const answer = s => s.event.id === 'health_concern' && s.event.choices.some(c => c.id === 'rest') ? 'rest' : s.event.choices[0].id;
+function answer(s) {
+  const offered = s.event.choices.filter(c => !c.disabledReason);
+  const preferred = s.event.id === 'health_concern' && offered.some(c => c.id === 'rest') ? 'rest' : s.event.id === 'hard_winter' ? 'endure'
+    : s.event.id.startsWith('farm_') ? 'continue' : null;
+  assert.ok(offered.length, `${s.event.id} has an available answer`);
+  return (offered.find(c => c.id === preferred) || offered[0]).id;
+}
 function grow(s, to) {
   for (let n = 0; n < 700 && s.age < to && s.phase !== 'retired'; n++) s = s.event ? engine.chooseEventOption(s, answer(s)) : engine.ageUp(s);
   for (let n = 0; n < 20 && s.event && s.phase !== 'retired'; n++) s = engine.chooseEventOption(s, answer(s));
+  if (s.phase !== 'retired') {
+    assert.equal(s.age, to, 'the station fixture reaches its requested age');
+    assert.equal(s.event, null, 'incidental decisions have a finite continuation');
+  }
   return s;
 }
 
@@ -84,8 +94,12 @@ test('at eighteen the house hands over a portion, or the family’s debt and bon
   assert.equal(owing.householdBudget.debt, 200);
   assert.equal(owing.householdBudget.bondedUntil, owing.day + 730, 'two years of labour owed on the bond');
   assert.match(o.rows[0].text, /yours now/);
-  assert.equal(stationDues(owing), 80);
-  assert.ok(householdAnnualCost(owing) >= 180 + 80, 'dues are part of what the year costs');
+  assert.equal(stationDues(owing), 0, 'a new farmer meets the due in its own scene, without a second annual charge');
+  const oldBudget = structuredClone(owing);
+  delete oldBudget.farm; // A pre-farmer household retains the annual-budget rule.
+  assert.equal(stationDues(oldBudget), 80);
+  assert.equal(householdAnnualCost(oldBudget) - householdAnnualCost(owing), 80, 'the same due is charged in one place');
+  assert.ok(householdAnnualCost(oldBudget) >= 180 + 80, 'pre-farmer dues remain part of what the year costs');
 });
 
 test('through the public engine a bound life comes of age owing, and a gentry one comes of age with rents', () => {

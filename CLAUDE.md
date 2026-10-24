@@ -180,6 +180,33 @@ after a `school_`/`career_`/`health_` action the engine overwrites the last
 new journal line of that tag with a receipt ("… 2 days passed.") unless the
 line was written with `ctx.journalLiteral` (schooling.js's `note()`).
 
+## The farmer's life (v0.71)
+
+`farmer.js` is the bounded Volume II proof, not the later general engines.
+`state.farm` is created only at a new common/bound birth, with an
+`openingAge` of sixteen or the older chosen start. Step 71 invents no farm
+for an older save. Its actions and scenes go through the public engine;
+the time hook queues turns and reconciliation opens them after the current
+handler. Scene work keeps its captured choice, fee and remaining days when
+a birthday interrupts it. Manual action fees are paid by the engine once.
+The farmer's due replaces station dues while that same field is held, so
+the budget cannot charge it again. `inheritFarm` runs after `inheritSociety`
+and after the successor's people and budget are rebuilt: local peer IDs
+can be reused, so a remembered neighbour is rebound to the actual named,
+dated world person. The redundant public successor budget reset must not
+erase farm burdens. `validateFarm` checks the captured records.
+
+Content is authored under `content/farmer/`. The build strictly validates
+the whole tree, then compiles only this production folder into
+`dist/js/content/`; examples remain examples. `farmer-ui.js` reads the Day,
+people, plan and Book without creating people or advancing the world.
+Private ambitions and personal promises are distinct; the acquired
+`oathbreaker` mark records a broken personal promise without requiring a
+paladin. The six-to-eight-player gate remains NOT RUN until real session
+notes and a verdict exist in `docs/playtests/farmer-v071.md`. Do not widen
+this slice before that verdict, or remove legacy rules before the archive
+has a verified public home.
+
 ## Direction
 
 The v0.59.0 analysis and the owner's design direction live in the Claude

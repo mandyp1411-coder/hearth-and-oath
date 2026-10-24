@@ -76,7 +76,8 @@ test('new NPCs keep their observed complexion, hair family, coat and species thr
 
 // On a new-edition life a nature is a trade-off; the attribute points a trait
 // once bought belong to older saves. These two tests play an older life.
-const olderLife=async()=>{const s=structuredClone(await adultLife());delete s.householdBudget.debt;delete s.householdBudget.borrowedGold;delete s.householdBudget.debtInterestPaid;delete s.householdBudget.lastInterestYear;delete s.householdBudget.graceUsed;delete s.hero.station;delete s.edition;stampEdition(s);assert.ok(validateSave(s));return s;};
+// The controlled legacy fixture also has no prospective v0.71 family field.
+const olderLife=async()=>{const s=structuredClone(await adultLife());delete s.householdBudget.debt;delete s.householdBudget.borrowedGold;delete s.householdBudget.debtInterestPaid;delete s.householdBudget.lastInterestYear;delete s.householdBudget.graceUsed;delete s.hero.station;delete s.farm;delete s.edition;stampEdition(s);assert.ok(validateSave(s));return s;};
 test('trait attribute gains are real, are applied once, and survive an export and reload',async()=>{
   let s=await olderLife(),base=structuredClone(s.hero.attributes);s=choosePersonalityTrait(s,'brave');s=choosePersonalityTrait(s,'curious');
   const bonus=traitAttributeBonuses(['brave','curious']);for(const [key,v] of Object.entries(base))assert.equal(s.hero.attributes[key],v+(bonus[key]||0));

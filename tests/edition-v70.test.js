@@ -17,7 +17,7 @@ const legacy = JSON.parse(readFileSync(new URL('./fixtures/legacy-v5.json', impo
 test('a life born now is stamped with the rules it lives by and the version it began in', () => {
   const s = born('ed-born-1');
   assert.deepEqual(s.edition, { rules: NEW, began: GAME_VERSION, step: EDITION_STEP });
-  assert.equal(rulesLabel(s), 'New rules, begun in v0.70');
+  assert.equal(rulesLabel(s), `New rules, begun in v${GAME_VERSION.replace(/\.0$/, '')}`);
   assert.equal(rulesNote(s), null);
   assert.equal(exportFileName(s), `hearth-and-oath-${s.hero.name.replace(/[^a-zA-Z0-9_-]/g, '-')}-new-rules.json`);
   assert.equal(archiveAccepts(s), false);

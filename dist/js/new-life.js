@@ -20,6 +20,9 @@ function pastChoice(s,attempt=0) {
   if(id==='sanctuary_case_capture')preferred='service';
   // The cloth is the living player's story: a generated past keeps its children at home, leaves a vow in the dark, and lets the house's other scenes take their course.
   if(id.startsWith('faith_'))preferred='continue';
+  // Private purpose belongs to the player who enters the life. Generated
+  // years leave it open, and let the field's ordinary turns take their course.
+  if(id.startsWith('farm_'))preferred='continue';
   // A choice the scene refused (a fee the purse cannot meet) is not tried twice: the next sitting takes the next door.
   if(attempt>0)return safe[(seededRoll(s.seed,`past:choice:${id}:${s.age}:${s.day}`,safe.length)+attempt)%safe.length];
   return safe.find(c=>c.id===preferred)||safe[seededRoll(s.seed,`past:choice:${id}:${s.age}:${s.day}`,safe.length)];

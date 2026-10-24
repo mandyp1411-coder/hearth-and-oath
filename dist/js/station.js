@@ -98,6 +98,9 @@ export function comingOfAgePortion(s) { return stationById(s.hero.station?.id)?.
 export function stationIncome(s) { return s.hero.station && s.phase !== 'retired' ? stationById(s.hero.station.id)?.income || 0 : 0; }
 /** What a bound household owes the land each year; an owned one owes more. */
 export function stationDues(s) {
+  // A working field faces the lord's man in person. Its due belongs to
+  // that scene, rather than being taken a second time in household costs.
+  if (s.farm && s.age >= (s.farm.openingAge || 16) && s.farm.field?.status === 'held') return 0;
   const station = stationById(s.hero.station?.id);
   if (!station || !station.dues) return 0;
   return s.hero.station.freedom === 'owned' ? station.dues * 2 : station.dues;

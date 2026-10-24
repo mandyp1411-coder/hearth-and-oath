@@ -27,12 +27,12 @@ function transition(state, operation) {
 function preserveFields(original,migrated,path='state'){assertMigrationMechanics(original,migrated,path);}
 
 function choose(state, id) {
-  assert.ok(state.event?.choices.some(choice => choice.id === id), `${state.event?.id} must offer ${id}`);
+  assert.ok(state.event?.choices.some(choice => choice.id === id && !choice.disabledReason), `${state.event?.id} must offer an enabled ${id}`);
   return transition(state, value => engine.chooseEventOption(value, id));
 }
 
 function act(state, id) {
-  while(['health_concern','birth_adult_year'].includes(state.event?.id))state=choose(state,state.event.id==='health_concern'?'continue':'care');
+  while(['health_concern','birth_adult_year'].includes(state.event?.id)||state.event?.id.startsWith('farm_'))state=choose(state,state.event.id==='birth_adult_year'?'care':'continue');
   state=atService(state,id);
   state=knownCurseMeeting(state,id);
   const offered = engine.getActions(state).find(action => action.id === id);
@@ -76,8 +76,10 @@ function win(state) {
 
 function childhoodChoice(state, preference = []) {
   assert.ok(state.event, 'a childhood decision must be pending');
-  const preferred = preference.find(id => state.event.choices.some(choice => choice.id === id));
-  return preferred || state.event.choices[0].id;
+  const preferred = preference.find(id => state.event.choices.some(choice => choice.id === id && !choice.disabledReason));
+  const offered = preferred || state.event.choices.find(choice => !choice.disabledReason)?.id;
+  assert.ok(offered, `${state.event.id} needs a lawful continuation`);
+  return offered;
 }
 
 function growTo(state, target, preference = []) {
@@ -94,6 +96,9 @@ function growTo(state, target, preference = []) {
       if (state.event.id === 'lineage_bereavement') { state = choose(state, 'private'); continue; }
       if (state.event.id === 'hard_winter') { state = choose(state, 'endure'); continue; }
       if (state.event.id.startsWith('living_')) { state = choose(state, 'continue'); continue; } // the world takes its course
+      // These campaign/class fixtures leave the optional field to its own course.
+      // Every farm scene has an explicit, unpriced continuation; no crop or promise is accepted.
+      if (state.event.id.startsWith('farm_')) { state = choose(state, 'continue'); continue; }
       assert.ok(state.event.id.startsWith('birth_') || state.event.id.startsWith('fate_'), `childhood policy cannot hide an unrelated adult scene: ${state.event.id}`);
       moments.push({ id: state.event.id, body: state.event.body, age: state.age });
       state = choose(state, childhoodChoice(state, preference));
@@ -121,7 +126,7 @@ function move(state, id) {
   const picks = { birth_adult_year:'care',life_hunger:'animal',career_year:'care',lineage_bereavement:'private',living_conscription:'continue',living_strike:'continue',living_wolves:'continue',living_purge:'continue',living_refugees:'continue',living_rival:'continue',living_lie:'continue',living_bedside:'continue',travel_messenger:'continue',travel_pilgrims:'continue',travel_grave_robber:'continue',travel_fortune:'continue',travel_wagon:'continue',travel_relic:'continue', travel_lore: 'continue', travel_witness: 'continue', travel_caravan: 'continue', travel_sick_traveler: 'continue', travel_bandits: 'avoid', travel_beasts: 'avoid', travel_weather: 'press', travel_delay: 'continue', health_concern: 'continue' };
   for (let step = 0; step < 60 && (state.timeline.journey || state.event); step += 1) {
     if (state.event) {
-      const pick = picks[state.event.id];
+      const pick = state.event.id.startsWith('farm_') ? 'continue' : picks[state.event.id];
       assert.ok(pick, `road policy must explicitly handle ${state.event.id}`);
       const before = state.day;
       state = choose(state, pick);
@@ -209,6 +214,7 @@ function campaignUntil(state, stop = 'complete', policy = {}) {
   if(state.questLog?.main!=='active')state=act(state,'journal_main_accept');
   const battles = [];
   for (let step = 0; step < 30 && state.campaign.stage !== stop && state.campaign.stage !== 'complete'; step += 1) {
+    while (state.event?.id.startsWith('farm_')) state = choose(state, 'continue');
     assert.equal(state.event, null);
     assert.equal(state.battle, null);
     assert.equal(state.dungeon, null);

@@ -5099,6 +5099,52 @@ html[data-reading-motion="reduced"] *,html[data-reading-motion="reduced"] *::bef
 .right-now .section-heading .eyebrow { margin: 0; }
 .right-now .quick-actions { margin-top: 10px; }
 
+/* v0.71: the farmer's choice comes before the household's books. */
+body.game-mode .farmer-day-content { padding-block-start: 12px; }
+body.game-mode .farmer-day-content .workspace-sections { margin-block-end: 10px; }
+body.game-mode .farmer-day { width: 100%; max-width: 940px; margin-inline: auto; }
+body.game-mode .farmer-day :is(p,small,summary,.farm-choice-cost,.choice-description,.disabled-reason) { font-size: calc(12px * var(--reading-scale,1)); }
+body.game-mode .farmer-day :is(.farm-decisions,.farm-scene) > h2 { margin: 0 0 8px; font-size: calc(21px * var(--reading-scale,1)); line-height: 1.2; }
+body.game-mode .app-shell.has-life .game-content .farm-scene { padding: 0; border: 0; background: transparent; }
+body.game-mode .farm-scene-lead { margin: 0 0 10px; max-width: 72ch; line-height: 1.5; }
+body.game-mode .farm-choices { display: grid; grid-template-columns: minmax(0,1fr); gap: 0; }
+body.game-mode .farm-choices .farm-choice { display: flex; flex-direction: column; align-items: stretch; gap: 5px; width: 100%; min-width: 0; min-height: 48px; padding: 13px 12px; border: 0; border-block-start: 1px solid var(--game-rule); border-radius: 0; text-align: start; white-space: normal; overflow-wrap: anywhere; background: transparent; }
+body.game-mode .farm-choice .choice-label { color: var(--game-bone); font: 600 calc(15px * var(--reading-scale,1))/1.4 var(--sans); }
+body.game-mode .farm-choice :is(.farm-choice-cost,.choice-description) { display: block; margin: 0; line-height: 1.5; }
+body.game-mode .farm-choice-cost { color: var(--game-brass); }
+body.game-mode .farm-choice .choice-description { color: var(--game-muted); }
+body.game-mode .farm-choices .farm-choice:hover:not(:disabled) { background: var(--game-pane); }
+body.game-mode .farm-choices .farm-choice:disabled { background: #24231f; color: #a9a497; }
+body.game-mode .farm-scene-account { padding-block: 12px; border-block-end: 1px solid var(--game-rule); }
+body.game-mode .farm-scene-account p { margin-block: 8px; }
+body.game-mode .farm-hearth { padding-block-start: 12px; }
+body.game-mode .farm-hearth > details { border-block-end: 1px solid var(--game-rule); padding-block: 4px; }
+body.game-mode .farm-hearth summary { min-height: 44px; line-height: 1.5; }
+body.game-mode .farm-ambition { display: flex; flex-wrap: wrap; gap: 6px 12px; padding-block: 10px; font-size: calc(12px * var(--reading-scale,1)); }
+body.game-mode .farm-ambition > span { color: var(--game-muted); }
+body.game-mode .farm-season { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 16px; padding-block: 14px; }
+body.game-mode .farm-season p { flex: 1 1 220px; margin: 0; color: var(--game-muted); }
+body.game-mode .farm-people-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px; padding-block: 8px 20px; }
+body.game-mode .farm-person { min-width: 0; }
+body.game-mode .farm-person > header { display: flex; align-items: center; gap: 12px; }
+body.game-mode .farm-person > header :is(h3,p) { margin: 0; }
+body.game-mode .farm-person > header .fantasy-avatar { width: 52px; height: 66px; flex: 0 0 52px; }
+body.game-mode .farm-person-regard { color: var(--game-muted); }
+body.game-mode .farm-memory { padding-inline-start: 12px; border-inline-start: 1px solid var(--game-brass); }
+body.game-mode .farm-book { max-width: 76ch; font-size: calc(14px * var(--reading-scale,1)); }
+body.game-mode .farm-book :is(p,small,summary) { font-size: calc(14px * var(--reading-scale,1)); }
+body.game-mode .farm-book-chapter { padding-block: 18px; border-block-end: 1px solid var(--game-rule); }
+body.game-mode .farm-book-chapter h3 { margin-block: 0 12px; }
+body.game-mode .farm-book :is(.farm-book-purpose,.farm-book-promises) { padding-block: 14px; }
+body.game-mode .farm-further-links { display: flex; flex-wrap: wrap; gap: 8px; }
+body.game-mode .header-ambition { display: block; max-width: 32ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--game-brass); font: calc(12px * var(--reading-scale,1))/1.35 var(--sans); }
+@media(max-width:760px) {
+ body.game-mode .farmer-day-content { padding: 10px 12px 28px; }
+ body.game-mode .farm-choices .farm-choice { padding-inline: 0; }
+ body.game-mode .farm-people-grid { grid-template-columns: minmax(0,1fr); gap: 20px; }
+ body.game-mode .header-ambition { max-width: 18ch; }
+}
+
 /* v0.64.1 · the school page's second slice: institution, bond, credentials, studies, the bench */
 .schooling-panel { display: grid; gap: 10px; margin: 12px 0; }
 .schooling-row { border-top: 1px solid var(--line, rgba(255,255,255,.08)); padding-top: 10px; }
