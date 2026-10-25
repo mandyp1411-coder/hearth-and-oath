@@ -12,12 +12,13 @@ import { regionAt, realmActions, validateRealm } from '../dist/js/realm.js';
 import { isSettlement } from '../dist/js/world.js';
 import { refreshAdventureBoard } from '../dist/js/adventuring.js';
 import { FOE_ATLASES } from '../dist/js/foe-catalog.js';
+import { mazeLayout } from '../dist/js/maze-v31.js';
 import { ENEMY_SPECIES, validEnemyIllustration, renderEnemyPortrait } from '../dist/js/enemies.js';
 import { adventurePage, realmPage, merchantPanel } from '../dist/js/rpg-ui.js';
 import { CONTRACT_FLAVOR } from '../dist/js/realm-content-v18.js';
 
 function clear(s){for(let i=0;i<80&&s.event;i++)s=engine.chooseEventOption(s,s.event.choices.find(c=>['later','leave','continue','keep'].includes(c.id))?.id||s.event.choices[0].id);return s;}
-async function adult(seed='rpg-v18'){const s=clear(await createLifeAtAge({seed,startAge:18}));if(!isSettlement(s.world,s.locationId))s.locationId=s.world.locations.find(p=>isSettlement(s.world,p.id)).id;s.cartography.interior=null;s.cartography.offsite=false;syncCartography(s);refreshAdventureBoard(s);const prepared=engine.migrateSave(s);delete prepared.mazeBook;delete prepared.maze;delete prepared.delves;return prepared;}
+async function adult(seed='rpg-v18'){const s=clear(await createLifeAtAge({seed,startAge:18}));if(!isSettlement(s.world,s.locationId))s.locationId=s.world.locations.find(p=>isSettlement(s.world,p.id)).id;s.cartography.interior=null;s.cartography.offsite=false;syncCartography(s);refreshAdventureBoard(s);return engine.migrateSave(s);}
 function fixture(s){s.hero.gold=4000;s.hero.hp=s.hero.maxHp=500;s.hero.mp=s.hero.maxMp=300;s.hero.attributes.strength=12;s.hero.skills.weapons=12;s.hero.skills.arcana=8;s.hero.skills.devotion=8;return s;}
 // Controlled legacy encounter snapshot: retired one-click roam commands remain absent.
 function freeEncounter(s,type){
@@ -50,15 +51,7 @@ test('merchant stock, prices, purchased equipment and resale conserve actual res
   let s=fixture(await adult('shop-v18')),m=s.realm.sites[s.locationId].merchant;assert.ok(m.name&&m.character.archetype==='craft');const purchase=engine.getActions(s).find(a=>a.id.startsWith('gear_buy_'));assert.ok(purchase);const key=purchase.id.slice(9),stock=m.stock[key],gold=s.hero.gold;
   s=command(s,purchase.id);assert.equal(s.hero.gold,gold-purchase.cost);assert.equal(s.realm.sites[s.locationId].merchant.stock[key],stock-1);assert.ok(s.equipment.owned.includes(key));s=engine.equipGear(s,key);assert.ok(engine.getActions(s).find(a=>a.id==='realm_sellgear_'+key).disabledReason);s=engine.equipGear(s,'unequip_'+Object.keys(s.equipment.equipped).find(slot=>s.equipment.equipped[slot]===key));const before=s.hero.gold;s=command(s,'realm_sellgear_'+key);assert.ok(s.hero.gold>before&&s.hero.gold<gold);assert.ok(!s.equipment.owned.includes(key));assert.ok(engine.validateSave(s));
 });
-test('accepted contracts need matching destination and earned proof before exactly one payment',async()=>{
-  let s=fixture(await adult('contract-v18')),c=s.adventuring.contracts.find(c=>c.status==='offered');s=command(s,'adventure_accept_'+c.id);assert.ok(!engine.getActions(s).some(a=>a.id==='adventure_claim_'+c.id));s.locationId=c.destinationId;refreshAdventureBoard(s);s=command(s,'adventure_pursue_'+c.id);const started=structuredClone(s);const forged={...s.battle,context:{...s.battle.context,token:'wrong'},outcome:'victory'};assert.equal(engine.resolveBattle(s,forged).adventuring.contracts.find(x=>x.id===c.id)?.status,'active');assert.deepEqual(engine.resolveBattle(s,forged).battle,started.battle);
-  s=finish(s).state;c=s.adventuring.contracts.find(x=>x.id===c.id);assert.equal(c.status,'ready');assert.ok(c.proof.battleId);assert.ok(engine.getActions(s).find(a=>a.id==='adventure_claim_'+c.id).disabledReason);s.locationId=c.boardId;refreshAdventureBoard(s);s=clear(s);const gold=s.hero.gold;s=command(s,'adventure_claim_'+c.id);assert.equal(s.hero.gold,gold+c.reward);const replay=engine.chooseAction(s,'adventure_claim_'+c.id);assert.equal(replay.hero.gold,s.hero.gold);assert.ok(engine.validateSave(s));
-});
-test('six-floor descent keeps its real chamber, once-only gains and withdrawals across reloads',async()=>{
-  let s=fixture(await adult('descent-v18'));s=command(s,'realm_ration');assert.equal(s.adventuring.rations,1);s=command(s,'adventure_descend');assert.equal(s.adventuring.rations,0);let rooms=0;const doorways=new Set();
-  for(let n=0;n<90&&s.adventuring.expedition;n++){assert.ok(engine.validateSave(s));assert.deepEqual(engine.migrateSave(JSON.parse(JSON.stringify(s))).adventuring,s.adventuring);if(s.battle){s=finish(s).state;rooms++;continue;}if(s.event?.id==='adventure_room'){const x=s.adventuring.expedition,offered=s.event.choices.filter(c=>!c.disabledReason),prefix=`${x.floor}:${x.room}:`,work=offered.find(c=>['fight','open','disarm','rush','leave','talk','study','descend'].includes(c.id)),door=offered.find(c=>c.id.startsWith('route_')&&!doorways.has(prefix+c.id)),want=rooms>=8?'withdraw':work?.id||door?.id||'withdraw';if(want.startsWith('route_'))doorways.add(prefix+want);s=engine.chooseEventOption(s,want);if(want!=='withdraw')rooms++;}else if(s.event)s=clear(s);else s=command(s,'adventure_continue');}
-  assert.ok(!s.adventuring.expedition);assert.ok(s.adventuring.history.length===1);assert.ok(rooms>3);assert.ok(engine.validateSave(s));
-});
+// The single-battle contract and the six-floor descent left in v0.72.4; a contract's maze, its proof and its one payment are walked in world-expansion-v31.
 test('regional sentences last through actual calendar days and block travel, year skipping and equipment',async()=>{
   let s=fixture(await adult('prison-v18'));const originalLocation=s.locationId,region=regionAt(s);s.legal.incidents.push({locationId:s.locationId,evidence:3,description:'A named witness identifies a market theft.'});s=command(s,'justice_surrender');assert.equal(s.justice.prison.totalDays,3*region.law.prisonDaysPerEvidence);const before=s.day;s=engine.travelTo(s,'city');assert.equal(s.locationId,originalLocation);s=engine.ageUp(s);assert.equal(s.day,before);assert.ok(engine.equipmentActionReason(s));let served=0;while(s.justice.prison&&served++<160){s=clear(s);s=command(s,'justice_serve');assert.ok(engine.validateSave(s));}
   assert.ok(!s.justice.prison);assert.equal(s.day-before,3*region.law.prisonDaysPerEvidence);assert.equal(s.legal.incidents.filter(i=>i.locationId===originalLocation).length,0);assert.equal(s.justice.history.at(-1).outcome,'served');
@@ -77,12 +70,24 @@ test('recognized stewardship and coercive levies have lasting, paid settlement e
   let s=fixture(await adult('holding-v18'));s.factions.villagers=30;s.realm.sites[s.locationId].prosperity=65;const gold=s.hero.gold,paid=s.householdBudget.paidGold;s=command(s,'realm_charter');assert.equal(s.hero.gold,gold-250-(s.householdBudget.paidGold-paid));assert.equal(s.realm.sites[s.locationId].rule,'charter');const site=structuredClone(s.realm.sites[s.locationId]),before=s.hero.gold,paidBefore=s.householdBudget.paidGold;s=command(s,'realm_govern_tithe');assert.equal(s.hero.gold,before+50-(s.householdBudget.paidGold-paidBefore));assert.equal(s.realm.sites[s.locationId].prosperity,Math.max(0,site.prosperity-8));assert.ok(engine.getActions(s).find(a=>a.id==='realm_govern_tithe').disabledReason);assert.ok(engine.validateSave(s));
 });
 
+// A contract's descent is a saved maze (the single-battle contract left in v0.72.4): the bounty is met at its guardian.
+function walkMaze(s,to){
+  for(let n=0;n<80&&s.maze.position!==to;n++){
+    s=clear(s);for(const id of ['maze_sneak','maze_disarm'])if(engine.getActions(s).some(a=>a.id===id&&!a.disabledReason))s=clear(engine.chooseAction(s,id));
+    const l=mazeLayout(s.maze),queue=[[s.maze.position]],seen=new Set([s.maze.position]);let path;
+    for(let i=0;i<queue.length&&!path;i++){const p=queue[i],at=p.at(-1);if(at===to)path=p;for(const d of l.cells[at].doors)if(!seen.has(d)){seen.add(d);queue.push([...p,d]);}}
+    s=clear(engine.chooseAction(s,'maze_step_'+path[1]));
+  }
+  assert.equal(s.maze.position,to);return s;
+}
 test('a living bounty requires weakening the real named target before a nonlethal capture',async()=>{
-  let s=fixture(await adult('capture-v18'));s.hero.attributes.strength=1;s.hero.skills.weapons=0;
-  const c=s.adventuring.contracts[0],f=CONTRACT_FLAVOR.find(f=>f.type==='bounty'&&f.targetType==='bandit');Object.assign(c,{flavorId:f.id,type:f.type,targetType:f.targetType,status:'active',acceptedDay:s.day});s.locationId=c.destinationId;refreshAdventureBoard(s);s=command(s,'adventure_pursue_'+c.id);let b=s.battle;
+  let s=fixture(await adult('capture-v18'));s.hero.attributes.strength=1;s.hero.skills.weapons=0;s.hero.skills.stealth=s.hero.skills.survival=100;
+  const c=s.adventuring.contracts[0],f=CONTRACT_FLAVOR.find(f=>f.type==='bounty'&&f.targetType==='bandit');Object.assign(c,{flavorId:f.id,type:f.type,targetType:f.targetType,status:'active',acceptedDay:s.day});s.locationId=c.destinationId;refreshAdventureBoard(s);s=command(s,'adventure_pursue_'+c.id);assert.equal(s.maze.kind,'contract');
+  const l=mazeLayout(s.maze);s=walkMaze(s,l.guardian);s=engine.chooseAction(s,'maze_fight');let b=s.battle;
   assert.equal(b.captureAllowed,true);assert.ok(getBattleActions(b).find(a=>a.id==='capture').disabledReason);const mp=b.actors.find(a=>a.id==='hero').mp;b=takeBattleAction(b,'capture','enemy-1');assert.equal(b.actors.find(a=>a.id==='hero').mp,mp);
   for(let n=0;n<30&&!b.outcome;n++){const target=b.actors.find(a=>a.id==='enemy-1');if(target.hp<=Math.ceil(target.maxHp*.35)){b=takeBattleAction(b,'capture',target.id);break;}b=takeBattleAction(b,'attack',target.id);}
-  assert.equal(b.actors.find(a=>a.id==='enemy-1').status.captured,true);for(let n=0;n<100&&!b.outcome;n++)b=takeBattleAction(b,'attack',b.actors.find(a=>a.side==='enemy'&&a.hp>0)?.id);assert.equal(b.outcome,'victory');s=engine.resolveBattle(s,b);assert.equal(s.adventuring.contracts.find(x=>x.id===c.id).proof.captured,true);s.locationId=c.boardId;refreshAdventureBoard(s);s=clear(s);const before=s.hero.gold;s=command(s,'adventure_claim_'+c.id);assert.equal(s.hero.gold,before+c.reward+15);
+  assert.equal(b.actors.find(a=>a.id==='enemy-1').status.captured,true);for(let n=0;n<100&&!b.outcome;n++)b=takeBattleAction(b,'attack',b.actors.find(a=>a.side==='enemy'&&a.hp>0)?.id);assert.equal(b.outcome,'victory');s=clear(engine.resolveBattle(s,b));
+  s=walkMaze(s,l.goal);s=clear(engine.chooseAction(s,'maze_objective'));assert.equal(s.adventuring.contracts.find(x=>x.id===c.id).proof.captured,true);s=clear(engine.chooseAction(s,'maze_exit'));assert.equal(s.maze,null);s.locationId=c.boardId;refreshAdventureBoard(s);s=clear(s);const before=s.hero.gold;s=command(s,'adventure_claim_'+c.id);assert.equal(s.hero.gold,before+c.reward+15);
 });
 
 test('a forged enemy portrait or combatant strength cannot settle a battle',async()=>{
