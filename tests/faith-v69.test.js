@@ -233,12 +233,13 @@ test('ways out and the legacy: lapsing, the heir with a name in the book, the de
   assert.ok(faithSummary(s)); assert.equal(faithSummary(s).member, 'out (lapsed)');
 });
 
-test('legacy: a life without a station has no cloth, and a save from before it loads', () => {
-  const legacy = engine.createBirthGame({ seed: 'fa-legacy-1', station: null });
-  assert.equal(legacy.faith, undefined); assert.equal(engine.validateSave(legacy), true);
+test('one rulebook: a life without a station has the cloth too, and a save from before it begins it when read', () => {
+  const plain = engine.createBirthGame({ seed: 'fa-legacy-1', station: null });
+  assert.ok(plain.faith); assert.equal(plain.faith.member, null); assert.equal(engine.validateSave(plain), true);
   const s = ready('fa-legacy-2'); if (!s) return;
-  const copy = structuredClone(s); delete copy.faith; assert.equal(engine.validateSave(copy), true);
-  assert.ok(!engine.getActions(toRoom(copy, 'shrine')).some(a => a.id.startsWith('faith_')));
+  const copy = structuredClone(s); delete copy.faith; assert.equal(engine.validateSave(copy), true, 'a save from before v0.69 loads');
+  const read = engine.migrateSave(JSON.parse(JSON.stringify(copy)));
+  assert.ok(read?.faith, 'the cloth begins when the life is read (step 72)'); assert.equal(read.faith.member, null, 'no vow is written after the fact');
 });
 
 test('the page: the cloth on the realm page, and Right now', () => {

@@ -15,6 +15,7 @@ import { isSettlement } from '../dist/js/world.js';
 import { CONTRACT_FLAVOR } from '../dist/js/realm-content-v18.js';
 import { adventurePage } from '../dist/js/rpg-ui.js';
 import { mountApp } from './helpers/ui-surface.mjs';
+import {contractDescent} from './helpers/one-rulebook.mjs';
 
 // Controlled resource fixtures test existing rules, not earned-life difficulty.
 function sample(steps=0,mp=10) {
@@ -115,9 +116,10 @@ test('modern entry selection preserves authored records, regional saved descents
 
 let base=await createLifeAtAge({seed:'maze-resource-rules',startAge:18,difficulty:'gentle'});
 function drain(s){for(let n=0;s.event&&n<100;n++)s=E.chooseEventOption(s,(s.event.choices.find(c=>['continue','keep','care','pause','leave','later','friends'].includes(c.id)&&!c.disabledReason)||s.event.choices.find(c=>!c.disabledReason)).id);return s;}
-base=drain(base);delete base.delves; // these fixtures are about the maze; an edition life goes to the delve otherwise
+base=drain(base);
 function roundtrip(s){assert.ok(E.validateSave(s),s.notice);assert.deepEqual(E.migrateSave(JSON.parse(JSON.stringify(s))),s);return s;}
-function delve(){const s=structuredClone(base);s.adventuring.rations=2;return roundtrip(E.chooseAction(s,'adventure_descend'));}
+// One rulebook (v0.72.3): a contract's descent is the native maze.
+function delve(){const s=structuredClone(base);s.adventuring.rations=2;return roundtrip(E.chooseAction(s,contractDescent(s)));}
 function contractBoard(){
  const s=structuredClone(base);s.locationId=s.world.locations.find(p=>isSettlement(s.world,p.id)).id;
  s.cartography.pending=null;s.cartography.offsite=false;s.cartography.interior=null;syncCartography(s);refreshAdventureBoard(s);

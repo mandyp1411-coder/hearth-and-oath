@@ -11,7 +11,8 @@ const SEASON = 92;
 // A bad season happens about one year in three; a good one about one in eight.
 const SHOCKS = [
   { id: 'bad_harvest', weight: 22, title: 'A thin harvest', text: ({ gold }) => `The harvest came in thin and every price in the market knows it. Provisions cost you ${gold} gold more than they should this season.`, gold: s => 20 + Math.floor(annualCost(s) * 0.12) },
-  { id: 'war_tax', weight: 12, onlyIf: s => !s.living, title: 'The levy', text: ({ gold }) => `The court's men come through with ledgers. A war tax of ${gold} gold, and no one asks whether you can spare it.`, gold: s => 25 + Math.floor(annualCost(s) * 0.15), onlyIf: s => s.realm?.wars?.some(w => w.status === 'active') },
+  // The levy falls while a war is being fought: on a living world the courts start the wars (v0.65).
+  { id: 'war_tax', weight: 12, title: 'The levy', text: ({ gold }) => `The court's men come through with ledgers. A war tax of ${gold} gold, and no one asks whether you can spare it.`, gold: s => 25 + Math.floor(annualCost(s) * 0.15), onlyIf: s => s.realm?.wars?.some(w => w.status === 'active') },
   { id: 'theft', weight: 10, title: 'Robbed', text: ({ gold }) => `Someone knew where you kept it. ${gold} gold gone, and the lock was not even forced.`, gold: s => Math.min(Math.max(10, Math.floor(s.hero.gold * 0.25)), 150) },
   { id: 'lost_work', weight: 18, title: 'No work this season', text: () => `The work dried up. Whatever you earn this season, half of it goes to simply waiting for the next.`, incomeFactor: 0.5 },
   { id: 'repair', weight: 14, title: 'The roof', text: ({ gold }) => `The roof gave in the first hard rain. ${gold} gold to make it right, or live under the hole.`, gold: s => 15 + Math.floor(annualCost(s) * 0.1), onlyIf: s => !!s.life?.home?.tier && s.life.home.tier !== 'lodgings' },

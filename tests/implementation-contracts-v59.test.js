@@ -5,7 +5,7 @@ import {MAX_SAVE_CHARS} from '../dist/js/save-limits.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as E from '../dist/js/engine.js';
-import { freshStory, act, pick, walk, roundtrip, adultFamily, introduceFamily } from './helpers/story-life-fixtures.mjs';
+import { freshStory, act, pick, walk, roundtrip, adultFamily, introduceFamily, valid } from './helpers/story-life-fixtures.mjs';
 import { routineOffers, routineReview, executeRoutine } from '../dist/js/routine-planner.js';
 import { lifeCalendarRows, lifeChapterView, independentLifeRows, renderLifeContext } from '../dist/js/life-context.js';
 import { childhoodScene } from '../dist/js/childhood-stories.js';
@@ -91,10 +91,14 @@ test('all three native descent sizes retain exact archived geometry beside a lat
  const sizes=new Set();
  for(let run=1;run<=30&&sizes.size<3;run++){
   const s=freshStory();s.mazeBook.nextRun=run;s.adventuring.rations=10;s.hero.hp=s.hero.maxHp;s.hero.mp=s.hero.maxMp;
-  const original=structuredClone(s),entered=act(s,'adventure_descend'),m=entered.maze;assert.ok(m);assert.equal(m.layoutVersion,1);assert.equal(mazeLayout(m).cells.length,m.layoutSize*m.layoutSize);assert.deepEqual(s,original);roundtrip(entered);sizes.add(m.layoutSize);
+  // One rulebook (v0.72.3): the board's descent is a delve for every life; a contract's descent is the
+  // native maze that varies its length. Controlled setup, as maze-resource-rules does: the contract is accepted here.
+  const c=s.adventuring.contracts[0];Object.assign(c,{status:'active',acceptedDay:s.day,destinationId:s.locationId});const descend='adventure_pursue_'+c.id;
+  const original=structuredClone(s),entered=act(s,descend),m=entered.maze;assert.ok(m);assert.equal(m.layoutVersion,1);assert.equal(mazeLayout(m).cells.length,m.layoutSize*m.layoutSize);assert.deepEqual(s,original);roundtrip(entered);sizes.add(m.layoutSize);
   const malformed=structuredClone(entered);malformed.maze.layoutSize=[5,7,11].find(n=>n!==m.layoutSize);assert.equal(E.validateSave(malformed),false);
   const left=act(entered,'maze_exit');roundtrip(left);assert.equal(left.maze,null);assert.equal(left.mazeBook.records.at(-1).layoutSize,m.layoutSize);
-  const returned=act(left,'adventure_descend');assert.notEqual(returned.maze.seed,m.seed);assert.equal(mazeLayout(returned.maze).cells.length,returned.maze.layoutSize**2);assert.deepEqual(returned.mazeBook.records,left.mazeBook.records);assert.deepEqual(mazeLayout(returned.mazeBook.records.at(-1)),mazeLayout(m));roundtrip(returned);
+  const later=structuredClone(left),c2=later.adventuring.contracts[1];Object.assign(c2,{status:'active',acceptedDay:later.day,destinationId:later.locationId});
+  const returned=act(valid(later),'adventure_pursue_'+c2.id);assert.notEqual(returned.maze.seed,m.seed);assert.equal(mazeLayout(returned.maze).cells.length,returned.maze.layoutSize**2);assert.deepEqual(returned.mazeBook.records,left.mazeBook.records);assert.deepEqual(mazeLayout(returned.mazeBook.records.at(-1)),mazeLayout(m));roundtrip(returned);
  }
  assert.deepEqual([...sizes].sort((a,b)=>a-b),[5,7,11]);
 });

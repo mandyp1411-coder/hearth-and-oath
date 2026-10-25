@@ -7,7 +7,8 @@
 // halls; the lair left alone reaches the village; and what you carry out has an
 // owner above. The five authored campaign dungeons are rebuilt on it first.
 //
-// New-edition lives only (`hero.station`): legacy saves keep their mazes.
+// Every life's dungeons from v0.72.3 (a life that predates the delve begins it when read);
+// a maze already begun is finished in the maze, and the regional and contract descents are mazes.
 // `state.delve` is the walk in progress; `state.delves.places[id]` is what the
 // place remembers between visits (seen, cleared, the lair, the threat).
 import { seededRoll, isSettlement, generatePersonName, withArticle } from './world.js';
@@ -16,8 +17,8 @@ import { isLiterate, studyLevel, useStudy } from './schooling.js';
 import { hasNature } from './personality.js';
 import { addStationTie } from './station.js';
 import { seasonOf, raidFromBelow } from './living-world.js';
+import { mazeBegun } from './maze-rules.js';
 
-const edition = s => !!s?.hero?.station;
 export const TORCH_HOURS = 4, PACK_COST = 6, DAY_HOURS = 12, AWAKE = 60, STIRRING = 90;
 const LIMITS = Object.freeze({ places: 40, log: 30, finds: 12 });
 export const NOISE = Object.freeze({ step: 1, search: 3, fight: 12, oil: 15, hazard: 5, retreat: 6, camp: -15 });
@@ -161,11 +162,11 @@ function premiseFor(s, id, questId) {
 
 // ---------------------------------------------------------------------------
 // Going in.
-export function initializeDelves(s) { if (edition(s) && !s.delves) s.delves = { version: 1, places: {}, descents: 0 }; }
+export function initializeDelves(s) { if (!s.delves) s.delves = { version: 1, places: {}, descents: 0 }; }
 const placeRecord = (s, id) => { s.delves.places[id] ||= { id, visits: 0, seen: [], cleared: [], lairCleared: false, objectiveDone: false, floorsCleared: 0, awake: false, threat: 0, lastDay: s.day, relicTaken: false, secretFound: false }; return s.delves.places[id]; };
-export function isDelveEntry(s, id) { return edition(s) && !!s.delves && (id === 'adventure_descend' || id.startsWith('explore_enter_') && Object.hasOwn(AUTHORED, id.slice(14))); }
+export function isDelveEntry(s, id) { return !!s.delves && (id === 'adventure_descend' || id.startsWith('explore_enter_') && Object.hasOwn(AUTHORED, id.slice(14)) && !mazeBegun(s, id.slice(14))); }
 export function delveEntryReason(s, id) {
-  if (!edition(s) || !s.delves || s.phase === 'retired' || s.age < 16) return 'Not for you, not yet.';
+  if (!s.delves || s.phase === 'retired' || s.age < 16) return 'Not for you, not yet.';
   if (s.delve) return 'You are already below.';
   if (s.hero.hp < Math.ceil(s.hero.maxHp * 0.3)) return 'You would not come back. Rest first.';
   if (id === 'adventure_descend' && (s.adventuring?.rations || 0) < 1) return 'Nobody goes down without bread. Buy a ration.';
@@ -173,7 +174,7 @@ export function delveEntryReason(s, id) {
 }
 /** The door: what you carry decides how long you can stay. A pack of torches, rope, oil and chalk for six gold, if you have it. */
 export function enterDelve(s, id, questId = null, ctx = {}) {
-  if (!edition(s) || !s.delves || s.delve || s.event || s.battle || s.phase === 'retired' || s.age < 16) return false;
+  if (!s.delves || s.delve || s.event || s.battle || s.phase === 'retired' || s.age < 16) return false;
   let did = id.startsWith('explore_enter_') ? id.slice(14) : id;
   if (id === 'adventure_descend') { if ((s.adventuring?.rations || 0) < 1) return false; s.adventuring.rations--; s.delves.descents++; const theme = ['ossuary', 'roots', 'tower', 'abyss'][seededRoll(s.seed, `delve:theme:${s.delves.descents}`, 4)]; did = `descent-${theme}-${s.delves.descents}`; }
   const premise = premiseFor(s, did, questId); if (!premise) return false;

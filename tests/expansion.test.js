@@ -122,7 +122,8 @@ function finishYear(state) {
       const id = state.event.id;
       // One rulebook (v0.72.2): an untreated severe fever can kill, so the year's policy seeks what care it can.
       const open = c => state.event.choices.some(item => item.id === c && !item.disabledReason);
-      const optionId = id === 'lycan_fullmoon' ? (state.event.choices.some(item => item.id === 'safe') ? 'safe' : 'isolate') : id === 'health_concern' ? ['care', 'rest', 'continue'].find(open) : yearChoices[id];
+      // One rulebook (v0.72.3): every life has the whole world; this year keeps to its own plan and lets it take its course.
+      const optionId = id === 'lycan_fullmoon' ? (state.event.choices.some(item => item.id === 'safe') ? 'safe' : 'isolate') : id === 'health_concern' ? ['care', 'rest', 'continue'].find(open) : /^(living|guild|faith|delve|battlecraft)_/.test(id) ? 'continue' : yearChoices[id];
       assert.ok(optionId, `year policy needs a deliberate choice for ${id}`);
       events.push({ id, body: state.event.body, choice: optionId });
       state = choose(state, optionId);

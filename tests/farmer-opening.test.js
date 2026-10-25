@@ -6,6 +6,7 @@ import {createLifeAtAge} from '../dist/js/new-life.js';
 import {farmerOpeningEvent} from '../dist/js/farmer-opening.js';
 import {voiceEvent} from '../dist/js/voice.js';
 import {mountApp} from './helpers/ui-surface.mjs';
+import {EDITION_STEP} from '../dist/js/edition.js';
 
 // These are the two genuine v0.71.0 exports distributed for the farmer
 // playtest. They retain their original pending birthday and captured words.
@@ -24,7 +25,8 @@ const specs=[
 const archived=specs.map(spec=>JSON.parse(readFileSync(new URL('../docs/playtests/farmer-v071/'+spec.file,import.meta.url),'utf8')));
 const clone=value=>structuredClone(value),generic=/Choose this (?:action|approach)\./;
 function saved(index=0){return clone(archived[index]);}
-function imported(index=0){const old=saved(index),before=clone(old),s=engine.migrateSave(old);assert.deepEqual(old,before);assert.ok(engine.validateSave(s));assert.deepEqual(s,before,'import keeps every captured value, not just the mechanical projection');return s;}
+// A v0.71 kit life is brought through the later steps (step 72 adds nothing it lacks); every captured value stays.
+function imported(index=0){const old=saved(index),before=clone(old),s=engine.migrateSave(old);assert.deepEqual(old,before);assert.ok(engine.validateSave(s));assert.deepEqual(s,{...before,edition:{...before.edition,step:EDITION_STEP}},'import keeps every captured value, not just the mechanical projection');return s;}
 function pending(s){return s.timeline.storybook.pending.scene;}
 function presentationOnly(s){
   const v=clone(s);delete v.edition.began;

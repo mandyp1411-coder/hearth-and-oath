@@ -47,7 +47,7 @@ test('companion commitment/custody/work locks are canonical while existing hero 
 test('public canonical maze quote admits entrance/cleared rooms but blocks unresolved current enemy/trap/guardian', () => {
   const source=fresh();let s;
   for(let run=source.mazeBook.nextRun;run<source.mazeBook.nextRun+40;run++){
-    const next=structuredClone(source);next.mazeBook.nextRun=run;const entered=E.chooseAction(next,'adventure_descend');
+    const next=structuredClone(source);next.mazeBook.nextRun=run;const entered=E.chooseAction(next,'rpg_enter_modular_1'); // a regional descent is a maze for every life (v0.72.3)
     const kinds=new Set(Maze.mazeLayout(entered.maze).cells.map(c=>Maze.mazeRoomCell(entered.maze,c.id).kind));
     if(['enemy','trap','guardian'].every(kind=>kinds.has(kind))){s=entered;break;}
   }

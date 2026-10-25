@@ -99,7 +99,9 @@ test('a real maze entrance focuses the actual room heading without taking a step
   for (const room of settlementWalkPath(s, 'market')) s = E.chooseAction(s, 'atlas_room_' + room);
   assert.ok(E.getActions(s).some(a => a.id === 'realm_ration' && !a.disabledReason)); s = E.chooseAction(s, 'realm_ration');
   for (let n = 0; s.event && n < 8; n++) s = E.chooseEventOption(s, s.event.choices.find(c => !c.disabledReason).id);
-  s = E.chooseAction(s, 'adventure_descend'); assert.ok(s.maze); assert.equal(s.event, null); valid(s);
+  // One rulebook (v0.72.3): the board's descent is a delve; a contract's descent is the maze. Controlled setup: the contract is accepted here.
+  const c = s.adventuring.contracts.find(c => c.status === 'offered') || s.adventuring.contracts[0]; Object.assign(c, { status: 'active', acceptedDay: s.day, destinationId: s.locationId });
+  s = E.chooseAction(s, 'adventure_pursue_' + c.id); assert.ok(s.maze); assert.equal(s.event, null); valid(s);
   const first = view(s).steps[0], ui = await open(t, s), before = ui.current();
   await ui.click('footing-step', first.key); assert.equal(ui.document.activeElement, ui.root.querySelector('.maze-current h2')); assert.equal(ui.document.activeElement.isConnected, true); assert.deepEqual(ui.current(), before);
 });

@@ -11,7 +11,11 @@ import {societyCustomerChoiceReason} from '../../dist/js/society.js';
 
 export const clone=value=>structuredClone(value);
 export function valid(s,label='customer fixture'){assert.ok(E.validateSave(s),label+': '+s?.notice);return s;}
-function observed(name){const s=JSON.parse(gunzipSync(readFileSync(new URL('../fixtures/native-v0551-civilian-'+name+'.json.gz',import.meta.url))));valid(s,'fictional observed '+name+' QA export');return valid(E.migrateSave(s),'explicit current admission');}
+function observed(name){const s=JSON.parse(gunzipSync(readFileSync(new URL('../fixtures/native-v0551-civilian-'+name+'.json.gz',import.meta.url))));valid(s,'fictional observed '+name+' QA export');const read=E.migrateSave(s);
+ // One rulebook (v0.72.3): the archive takes a scholar only with a grammar school certificate, so this QA
+ // life carries one as controlled data, like its equipment. Every customer, commission and day stays real.
+ if(read&&!read.education.qualifications.some(q=>q.route==='academy'))read.education.qualifications.push({id:'academy-certificate',label:'Academy certificate',route:'academy',schoolId:'school-academy',grade:72,day:read.day,age:Math.min(17,read.age)});
+ return valid(read,'explicit current admission');}
 export const fresh=()=>observed('fresh');
 export const deferred=()=>observed('deferred');
 export function action(s,id){assert.ok(E.getActions(s).some(a=>a.id===id&&!a.disabledReason),'real offered action '+id);return valid(E.chooseAction(s,id),id);}

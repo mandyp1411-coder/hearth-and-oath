@@ -8,17 +8,23 @@ import { mazeMapIdentity } from '../dist/js/maze-map-memory.js';
 import { currentMazeMapSession, mazeMapView } from '../dist/js/maze-map-ui.js';
 import { syncCartography } from '../dist/js/cartography.js';
 import { mountApp } from './helpers/ui-surface.mjs';
+import {readIntoRulebook,contractDescent} from './helpers/one-rulebook.mjs';
+import {mazeDimensions} from '../dist/js/maze-dimensions.js';
 
 // Controlled visited positions test interface/validation contracts. They are not
 // earned route or difficulty evidence. Actual edits and walks use public APIs.
 const old=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v27-road-and-descent.json.gz',import.meta.url)))).descent;
 let base;
 function drain(s){for(let n=0;s.event&&n<30;n++)s=E.chooseEventOption(s,(s.event.choices.find(row=>['later','care','leave','keep','continue','pause','ask'].includes(row.id)&&!row.disabledReason)||s.event.choices.find(row=>!row.disabledReason)).id);assert.equal(s.event,null);return s;}
+// One rulebook (v0.72.3): the campaign dungeons and the board's descent are delves for every life, so a
+// new maze is a contract's descent, and an authored maze is one already begun (a genuine capture's).
+const begun=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v0590-long-life-before-battle.json.gz',import.meta.url))));
 function fresh(authored=false){
+ // Controlled visited position, like the rest of this file: the walker stands at the begun maze's entrance.
+ if(authored){const s=drain(readIntoRulebook(begun.state||begun));assert.equal(s.maze?.kind,'authored');s.maze.position=0;s.maze.previous=s.maze.visited[1];assert.ok(E.validateSave(s));return s;}
  if(!base){base=E.migrateSave(structuredClone(old));assert.ok(base);base=E.chooseEventOption(base,'withdraw');assert.ok(E.validateSave(base));}
  let s=structuredClone(base);s.adventuring.rations=20;
- if(authored){s.locationId='marsh';s.cartography.pending=null;s.cartography.offsite=false;s.cartography.interior=null;syncCartography(s);}
- s=drain(E.chooseAction(s,authored?'explore_enter_cistern':'adventure_descend'));assert.ok(s.maze);assert.ok(E.validateSave(s));return s;
+ s=drain(E.chooseAction(s,contractDescent(s)));assert.ok(s.maze);assert.ok(E.validateSave(s));return s;
 }
 function payload(s,roomId=0,extra={}){const {rules}=mazeMapRuntime(s);return {identity:mazeMapIdentity(s.maze,rules),roomId,mark:'revisit',note:'Return later',...extra};}
 function clean(s){const v=structuredClone(s);v.notice='';if(v.maze)delete v.maze.mapMemory;for(const m of v.mazeBook?.records||[])delete m.mapMemory;return v;}
@@ -28,7 +34,8 @@ function recordedPath(s){
  for(const at of queue){if(at.length===3){path=at;break;}for(const to of l.cells[at.at(-1)].doors)if(!seen.has(to)){seen.add(to);queue.push([...at,to]);}}
  assert.ok(path);s.maze.visited=[...path];s.maze.cleared=[...path];assert.ok(E.validateSave(s));return path;
 }
-function arrow(from,to){return {1:'ArrowRight','-1':'ArrowLeft',11:'ArrowDown','-11':'ArrowUp'}[to-from];}
+// A contract's maze is 5, 7 or 11 rooms wide (maze-dimensions.js).
+function arrow(from,to,size=11){return {1:'ArrowRight','-1':'ArrowLeft',[size]:'ArrowDown',[-size]:'ArrowUp'}[to-from];}
 async function submitReminder(ui,{mark='revisit',note='Return later'}={}){
  const form=ui.root.querySelector('#maze-map-reminder');assert.ok(form);ui.root.querySelector('#maze-map-mark').value=mark;
  ui.root.querySelector('#maze-map-note').value=note;await ui.fire('submit',form);
@@ -69,10 +76,10 @@ test('active and archived validators reject copied, unseen and malformed annotat
  const corrupt=structuredClone(archived);corrupt.mazeBook.records.at(-1).mapMemory.identity.runSeed='wrong';assert.equal(E.validateSave(corrupt),false);
 });
 
-test('authored archive/reentry and v2 inheritance preserve full note provenance',()=>{
+test('an authored archive and v2 inheritance preserve full note provenance',()=>{
  let s=fresh(true);s=roundtrip(E.updateMazeMapMemory(s,payload(s)));const memory=structuredClone(s.maze.mapMemory);
- s=roundtrip(E.chooseAction(s,'maze_exit'));s=roundtrip(drain(E.chooseAction(s,'explore_enter_cistern')));
- assert.deepEqual(s.maze.mapMemory,memory);
+ // Re-entering the place is a delve now (v0.72.3); the archived maze keeps its notes.
+ s=roundtrip(E.chooseAction(s,'maze_exit'));assert.equal(s.maze,null,s.notice);assert.deepEqual(s.mazeBook.records.at(-1).mapMemory,memory);
  const successor=structuredClone(s),priorActor=memory.entries[0].authorId;
  successor.maze=null;successor.dynasty={...successor.dynasty,generation:2,activePersonId:'map-test-successor',
   history:[...(successor.dynasty.history||[]),{personId:priorActor}]};
@@ -114,7 +121,7 @@ test('actual Inspect selection, arrows, double-click and Cancel never move or sp
  const s=fresh(),path=recordedPath(s),ui=await mountApp(t, {states:[s]});await ui.click('title-continue');await ui.click('maze-map-mode','inspect');
  assert.deepEqual(ui.current(),s);assert.equal(ui.document.activeElement.dataset.id,'inspect');
  assert.equal(ui.root.querySelectorAll('.maze-cell[data-op="activity"]').length,0);
- const selected=ui.root.querySelector('[data-op="maze-map-select"][data-id="0"]');selected.focus();await ui.key(arrow(0,path[1]));
+ const selected=ui.root.querySelector('[data-op="maze-map-select"][data-id="0"]');selected.focus();await ui.key(arrow(0,path[1],mazeDimensions(ui.current().maze).size));
  assert.equal(ui.document.activeElement.dataset.id,String(path[1]));assert.equal(ui.document.activeElement.dataset.op,'maze-map-select');assert.deepEqual(ui.current(),s);
  const same=ui.document.activeElement;await ui.fire('dblclick',same);await ui.key('Enter');assert.deepEqual(ui.current(),s);
  ui.root.querySelector('#maze-map-note').value='discard this';await ui.click('maze-map-cancel');
@@ -134,7 +141,7 @@ test('actual save/escape/focus, marked picker, route/clear and explicit Walk rem
  assert.equal(ui.root.querySelectorAll('.maze-cell.route-room').length,3);assert.match(ui.root.innerHTML,/2 walks through recorded rooms/);
  await ui.click('maze-map-route-clear');assert.equal(ui.root.querySelectorAll('.maze-cell.route-room').length,0);assert.deepEqual(ui.current(),saved);
  await ui.click('maze-map-mode','walk');const before=ui.current(),expected=E.chooseAction(before,'maze_step_'+path[1]);
- ui.root.querySelector('.maze-grid').focus();await ui.key(arrow(0,path[1]));assert.deepEqual(ui.current(),expected);
+ ui.root.querySelector('.maze-grid').focus();await ui.key(arrow(0,path[1],mazeDimensions(ui.current().maze).size));assert.deepEqual(ui.current(),expected);
  assert.deepEqual(ui.current().maze.mapMemory,saved.maze.mapMemory);assert.equal(ui.current().maze.steps,before.maze.steps+1);
 });
 

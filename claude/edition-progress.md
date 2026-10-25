@@ -28,13 +28,25 @@ files: 3,267 passed, 0 failed, 3 skipped; slow lane 36 files: 741 passed,
 0 failed, 1 skipped; browser 28 of 28
 ([record](../docs/measures/one-rulebook-v0721-verification.md)).
 
-v0.72.2, One rulebook in the engine, follows on branch
-`v0.72.2-one-rulebook-engine`: the edition checks leave the rules, and
-`migrateSave` reads any life into the one rulebook with stated defaults.
-Fast lane 252 files: 3,267 passed, 0 failed, 3 skipped; slow lane 36 files:
-741 passed, 0 failed, 1 skipped; browser 28 of 28; generated lives hash the
-same as main's ([record](../docs/measures/one-rulebook-v0722-verification.md)).
-Neither v0.72.1 nor v0.72.2 is deployed to the Sites host.
+v0.72.2, One rulebook in the engine, is merged in
+[PR #21](https://github.com/mandyp1411-coder/hearth-and-oath/pull/21) as
+`ad31f40819a763c3fb386ee3180d8a069a1295d0` from head
+`2cd59e5b0550136dd2cdaf9fdbefc7d508a83270`: the edition checks leave the
+rules, and `migrateSave` reads any life into the one rulebook with stated
+defaults. Fast lane 252 files: 3,267 passed, 0 failed, 3 skipped; slow lane 36
+files: 741 passed, 0 failed, 1 skipped; browser 28 of 28; generated lives hash
+the same as main's ([record](../docs/measures/one-rulebook-v0722-verification.md)).
+
+v0.72.3, Every life has the whole world, follows on branch
+`v0.72.3-no-station-gates`: the six station checks leave, and migration step
+72 begins schooling, the living world, the guild, the delve, battlecraft and
+the cloth on a life that predates them. The levy keeps its effective rule; the
+first lesson of a school year no longer refuses a child holding exactly the
+fee. Fast lane 252 files: 3,269 passed, 0 failed, 3 skipped; slow lane 36
+files: 741 passed, 0 failed, 1 skipped; browser 28 of 28; generated lives
+match v0.72.2's apart from their stamps
+([record](../docs/measures/one-rulebook-v0723-verification.md)).
+None of v0.72.1 to v0.72.3 is deployed to the Sites host.
 
 ## Earlier release
 

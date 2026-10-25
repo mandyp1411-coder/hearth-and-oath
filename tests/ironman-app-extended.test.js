@@ -16,8 +16,10 @@ import { settlementWalkPath } from '../dist/js/exploration-ui.js';
 import { syncCartography } from '../dist/js/cartography.js';
 import { mazeMapRuntime, mazeLayout } from '../dist/js/maze-v31.js';
 import { mazeMapIdentity } from '../dist/js/maze-map-memory.js';
+import { mazeDimensions } from '../dist/js/maze-dimensions.js';
 import { fakeSurface, mountApp } from './helpers/ui-surface.mjs';
 import { freshStory } from './helpers/story-life-fixtures.mjs';
+import { contractDescent } from './helpers/one-rulebook.mjs';
 
 // Additional bounded SOURCE handler checks. Fixtures are controlled fictional
 // projections, not earned routes, browser timing or release certification.
@@ -215,7 +217,7 @@ test('craft confirmation retains one real design command until acceptance and th
 });
 
 function maze(){
-  if(!mazeBase){const raw=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v27-road-and-descent.json.gz',import.meta.url)))).descent;let s=E.migrateSave(raw);s=E.chooseEventOption(s,'withdraw');s.adventuring.rations=20;s=E.chooseAction(s,'adventure_descend');
+  if(!mazeBase){const raw=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v27-road-and-descent.json.gz',import.meta.url)))).descent;let s=E.migrateSave(raw);s=E.chooseEventOption(s,'withdraw');s.adventuring.rations=20;s=E.chooseAction(s,contractDescent(s)); // a contract's descent is the maze (v0.72.3)
     for(let n=0;s.event&&n<30;n++){const c=s.event.choices.find(c=>['later','care','leave','keep','continue','pause','ask'].includes(c.id)&&!c.disabledReason)||s.event.choices.find(c=>!c.disabledReason);s=E.chooseEventOption(s,c.id);}assert.equal(s.event,null);assert.ok(s.maze);mazeBase=valid(s);}
   return ironman(clone(mazeBase));
 }
@@ -225,7 +227,7 @@ test('maze reminder and keyboard movement defer their actual focus effects until
   const payload={identity:mazeMapIdentity(source.maze,mazeMapRuntime(source).rules),roomId:0,mark:'revisit',note:'Return after accepted storage.'},saved=E.updateMazeMapMemory(source,payload);assert.notDeepEqual(saved,source);
   await heldCommand(ui,locks,source,()=>ui.fire('submit',form));await finishHeld(ui,locks,saved);assert.equal(ui.document.activeElement.id,'maze-map-note');
   await ui.click('maze-map-mode','walk');const to=mazeLayout(saved.maze).cells[saved.maze.position].doors.find(id=>enabled(ui,'activity','maze_step_'+id));assert.ok(to!==undefined);
-  const direction={1:'ArrowRight','-1':'ArrowLeft',11:'ArrowDown','-11':'ArrowUp'}[to-saved.maze.position],expected=E.chooseAction(saved,'maze_step_'+to),grid=ui.root.querySelector('.maze-grid');assert.ok(direction&&grid);grid.focus();
+  const size=mazeDimensions(saved.maze).size,direction={1:'ArrowRight','-1':'ArrowLeft',[size]:'ArrowDown',[-size]:'ArrowUp'}[to-saved.maze.position],expected=E.chooseAction(saved,'maze_step_'+to),grid=ui.root.querySelector('.maze-grid');assert.ok(direction&&grid);grid.focus();
   await heldCommand(ui,locks,saved,()=>ui.key(direction));await finishHeld(ui,locks,expected);assert.equal(ui.document.activeElement.classList.contains('maze-grid'),true);assert.equal(expected.maze.steps,saved.maze.steps+1);
 });
 

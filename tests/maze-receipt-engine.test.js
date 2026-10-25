@@ -7,6 +7,7 @@ import { mazeLayout } from '../dist/js/maze-v31.js';
 import { expeditionVisitTotals } from '../dist/js/maze-receipts.js';
 import { closeMazeVisit } from '../dist/js/maze-receipt-runtime.js';
 import { addCampingKit } from '../dist/js/travel-energy.js';
+import {contractDescent} from './helpers/one-rulebook.mjs';
 
 // Controlled room/resources and completed combat fixtures isolate accounting.
 // These cases are not earned routing, difficulty or combat fairness evidence.
@@ -19,7 +20,8 @@ function fresh(){
  if(!base){const old=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v27-road-and-descent.json.gz',import.meta.url)))).descent;base=valid(E.migrateSave(old));base=drain(E.chooseEventOption(base,'withdraw'));assert.equal(base.maze,null);assert.equal(base.adventuring.expedition,null);}
  const s=clone(base);s.hero.hp=s.hero.maxHp;s.hero.mp=s.hero.maxMp;s.hero.gold=500;s.hero.potions=3;s.adventuring.rations=5;return valid(s);
 }
-function enter(){return act(fresh(),'adventure_descend');}
+// One rulebook (v0.72.3): the board's descent is a delve; a contract's descent is the native maze.
+function enter(){const s=fresh();return act(s,contractDescent(s));}
 function cell(s,kind){const l=mazeLayout(s.maze),r=l.cells.find(r=>r.kind===kind);assert.ok(r,kind);s.maze.position=r.id;s.maze.previous=r.doors[0];s.maze.visited=[...new Set([...s.maze.visited,r.id,r.doors[0]])];return valid(s);}
 function completed(s,outcome){
  const b=clone(s.battle);for(const a of b.actors)if(outcome==='victory'?a.side==='enemy':outcome==='defeat'?a.side==='party':false)a.hp=0;
@@ -27,8 +29,8 @@ function completed(s,outcome){
 }
 function roundtrip(s){const restored=E.migrateSave(JSON.parse(JSON.stringify(s)));assert.ok(restored);assert.deepEqual(restored,s);return restored;}
 
-test('real radiant admission and entrance return issue one finite receipt including actual entry costs',()=>{
- const before=fresh(),s=act(before,'adventure_descend');assert.equal(s.day,before.day+1);assert.equal(s.maze.expeditionVisit.days.entry,1);assert.equal(s.maze.expeditionVisit.used.rations,1);
+test('real contract admission and entrance return issue one finite receipt including actual entry costs',()=>{
+ const before=fresh(),s=act(before,contractDescent(before));assert.equal(s.day,before.day+1);assert.equal(s.maze.expeditionVisit.days.entry,1);assert.equal(s.maze.expeditionVisit.used.rations,before.adventuring.rations-s.adventuring.rations);
  const returned=act(s,'maze_exit'),r=returned.mazeBook.expeditionReceipts.at(-1);assert.equal(returned.maze,null);assert.equal(r.reason,'stair');assert.equal(r.objective.complete,false);assert.equal(r.end.explored,1);assert.equal(r.end.day-r.start.day,1);assert.equal(expeditionVisitTotals(r).gains.gold,0);const note=returned.journal.find(j=>j.title==='An Expedition Account');assert.ok(note);assert.equal(note.narrativeEdition,30);assert.deepEqual(roundtrip(returned).journal.find(j=>j.id===note.id),note);
 });
 

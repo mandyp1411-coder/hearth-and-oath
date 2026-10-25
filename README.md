@@ -1,11 +1,39 @@
 # Hearth & Oath
 
+Version 0.72.3 is Every life has the whole world. The last edition checks,
+the ones that waited for a rolled station, are gone: schooling, the living
+world, the guild, the delve, battlecraft and the cloth now belong to every
+life the main game plays, and the older rules that stood in for them have
+left the code.
+
+- **Lives that predate a system begin it when read** (migration step 72).
+  A life past six reads, as every life did before letters were earned, and
+  the shrine keeper's place was never offered to it. No guild family is
+  decided after a birth. The world's courts, guilds and packs set their
+  goals from this season. No past descent, fight, vow or lesson is written.
+  A maze or a battle already begun is finished the way it was begun.
+- **What leaves.** The free school and the old scholarship route (tuition,
+  examinations and credentials are every life's), the calendar's own wars
+  (the courts of the living world decide when to march), and the maze route
+  for the five campaign dungeons and the board's descent (they are delves for
+  every life; the regional and contract descents are still mazes). The levy
+  stays as new lives already met it: it falls while a war is being fought.
+- **A life without a station** (born in v0.61, or a birth with none) plays
+  every system; the station's own effects (dues, the portion at eighteen,
+  the cradle's diet and roof) are simply absent for it, and its heirs are
+  born with none. Nothing is invented for it.
+- **A lesson that was refused.** A child holding exactly the year's school
+  fee saw the first lesson of a new school year offered, paid for it, and was
+  told it could not begin: the lesson asked the purse again after the fee was
+  taken. It no longer does.
+- **New births are unchanged.** Three generated lives aged a year match
+  v0.72.2's in everything but the migration step they carry.
+
+Verification is in [the v0.72.3 record](docs/measures/one-rulebook-v0723-verification.md).
+
 Version 0.72.2 is One rulebook in the engine. The rules no longer ask which
 rulebook a life lives by: every life the main game plays follows the same
-ones, and the old rules' branches have left the code. Six systems still wait
-for a rolled station before they begin (the living world, the guild, the
-cloth, the delve, battlecraft and schooling); v0.72.3 gives a life without
-one stated defaults instead.
+ones, and the old rules' branches have left the code.
 
 - **No more "which rulebook?" in the rules.** Mortality, a break at full
   Stress, the lender's interest, borrowing after the first adult year, the

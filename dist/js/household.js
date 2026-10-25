@@ -208,16 +208,17 @@ function admissionReason(s, route) {
   if (st.freedom === 'owned') return 'Your labour is spoken for; the bond does not allow for lessons.';
   if (st.id === 'bound' && route === 'academy') return 'The academy does not take the bound.';
   if (st.id === 'bound' && route !== 'apprenticeship' && !s.family?.literate) return 'The field does not wait, and no one at home reads to argue otherwise.';
-  if (schooling(s) && bondReason(s) && route !== 'apprenticeship') return bondReason(s);
+  if (bondReason(s) && route !== 'apprenticeship') return bondReason(s);
   return schoolingAdmissionReason(s, route);
 }
-function schoolReason(s) {
+/** `feeCharged`: the year's first lesson carries the tuition as its own cost, which the engine has
+ * already taken when the handler runs, so the purse is not asked again. */
+function schoolReason(s, { feeCharged = false } = {}) {
   const row = schoolRecord(s, s.education.route);
   if (!s.education.enrolled || !row) return 'Enroll in a school or apprenticeship first. Independent reading remains available.';
   if (yearAge(s) < row.minAge) return `This route opens at age ${row.minAge}.`;
   if (s.locationId !== row.locationId) return `Lessons take place at ${location(s, row.locationId)?.name || row.locationId}.`;
-  const k = schooling(s);
-  if (k && tuitionDue(s, s.education.route) > s.hero.gold) return `This year’s tuition is ${TUITION[s.education.route]} gold, and it is not paid.`;
+  if (!feeCharged && tuitionDue(s, s.education.route) > s.hero.gold) return `This year’s tuition is ${TUITION[s.education.route]} gold, and it is not paid.`;
   return null;
 }
 function transferExplanation(s,route) {
@@ -241,8 +242,8 @@ export function householdActions(s) {
   actions.push(action(s, 'family_dilemma', age<6?'A small moment at home':'A decision within your household', age<6?'Choose a familiar story, ask for comfort, or say you need a quiet moment. The adults remain responsible for your care.':'Face a specific household problem involving the people and circumstances you actually have. One dilemma each year; your choice becomes a participant’s memory.', 1, 0, caregiver(s)?.alive === false ? 'Your recorded caregivers have died; their names remain in your legacy.' : f.interactionUses.dilemma ? 'Your household has already faced its special decision this year.' : familyVisitReason(s,caregiver(s))));
   if (age < 6) return actions;
   for (const def of ROUTES) {
-    const row = schoolRecord(s, def.id), k = schooling(s), cost = k ? tuitionDue(s, def.id) : def.id === 'academy' && !e.scholarship ? Math.max(0,20-communitySupport(s,row.locationId).schoolFeeDiscount) : 0;
-    actions.push(action(s, `school_enroll_${def.id}`, `${e.enrolled ? 'Transfer to' : 'Enroll at'} ${row.name}`, k ? `${schoolDescription(s, def.id)} Enrolment takes a day${cost?` and the year’s ${cost} gold`:''}.${e.enrolled&&e.route!==def.id?' '+transferExplanation(s,def.id):''}` : `${def.description} Enrollment takes one day${cost?` and ${cost} gold`:''}. ${cost ? 'A free scholarship route is available.' : 'No enrollment fee.'} ${e.enrolled&&e.route!==def.id?transferExplanation(s,def.id):'Choose a route without choosing a combat calling.'}`, 1, cost, age < def.minAge ? `Opens at age ${def.minAge}.` : e.enrolled && e.route === def.id ? 'You are already enrolled here.' : admissionReason(s, def.id) || (s.locationId !== row.locationId ? `Enrollment takes place at ${location(s, row.locationId)?.name || row.locationId}.` : undefined)));
+    const row = schoolRecord(s, def.id), cost = tuitionDue(s, def.id);
+    actions.push(action(s, `school_enroll_${def.id}`, `${e.enrolled ? 'Transfer to' : 'Enroll at'} ${row.name}`, `${schoolDescription(s, def.id)} Enrolment takes a day${cost?` and the year’s ${cost} gold`:''}.${e.enrolled&&e.route!==def.id?' '+transferExplanation(s,def.id):''}`, 1, cost, age < def.minAge ? `Opens at age ${def.minAge}.` : e.enrolled && e.route === def.id ? 'You are already enrolled here.' : admissionReason(s, def.id) || (s.locationId !== row.locationId ? `Enrollment takes place at ${location(s, row.locationId)?.name || row.locationId}.` : undefined)));
   }
   const reason = schoolReason(s), row = schoolRecord(s, e.route);
   if (e.depthVersion === 1) {
@@ -252,8 +253,8 @@ export function householdActions(s) {
       actions.push(action(s, `school_project_${project.id}`, project.title, 'Complete a distinct supervised project with school-provided tools, then decide how the work serves people. Gain two course progress through actual practice and a remembered outcome. Once per project each school year.', project.days, 0, reason || (e.progress < 2 ? 'Attend two supervised sessions before undertaking this project.' : done ? 'You already completed this project this school year.' : undefined)));
     }
   }
-  const yearFee = e.enrolled && schooling(s) ? tuitionDue(s, e.route) : 0;
-  actions.push(action(s, 'school_attend', 'Attend a real lesson and practical session', yearFee ? `Add one attendance and one course progress, gain the route’s actual skills, and improve performance. Eight supervised sessions per year. The first lesson of the year pays the schoolmaster his ${yearFee} gold.` : 'Add one attendance and one course progress, gain the route’s actual skills, and improve performance. Eight supervised sessions per year; no tuition per lesson.', 4, yearFee, reason || (e.lessonsThisYear >= 8 ? 'You completed eight supervised sessions this year; return next year or read independently.' : schooling(s) && electiveOffer(s) ? 'Choose this year’s elective first.' : undefined)));
+  const yearFee = e.enrolled ? tuitionDue(s, e.route) : 0;
+  actions.push(action(s, 'school_attend', 'Attend a real lesson and practical session', yearFee ? `Add one attendance and one course progress, gain the route’s actual skills, and improve performance. Eight supervised sessions per year. The first lesson of the year pays the schoolmaster his ${yearFee} gold.` : 'Add one attendance and one course progress, gain the route’s actual skills, and improve performance. Eight supervised sessions per year; no tuition per lesson.', 4, yearFee, reason || (e.lessonsThisYear >= 8 ? 'You completed eight supervised sessions this year; return next year or read independently.' : electiveOffer(s) ? 'Choose this year’s elective first.' : undefined)));
   actions.push(action(s, 'school_exam', 'Present your term examination', `Four progress opens an attempt; six progress guarantees a pass through preparation. ${row?.qualification || 'A qualification'} records its route, grade, and teacher’s school. One completed exam per year; public exams are free.`, 2, 0, reason || (row && age < row.examAge ? `Examinations for this route open at ${row.examAge}.` : e.examinedYear === age ? 'You completed an examination this year.' : e.qualifications.some(q => q.route === e.route) ? 'You already hold this route’s qualification.' : e.progress < 4 ? `Attend ${4 - e.progress} more sessions to open an attempt.` : undefined)));
   actions.push(action(s, 'school_dilemma', 'A decision among teachers and classmates', 'Respond to a specific school situation. Teacher and classmate memories follow the actual participants; no automatic disclosure of forbidden research.', 1, 0, reason || (f.interactionUses.schoolDilemma ? 'This year’s school dilemma is already remembered.' : undefined)));
   const k = schooling(s), academy = schoolRecord(s, 'academy');
@@ -282,7 +283,7 @@ export function householdActions(s) {
     if (k.bond && !k.bond.broken && !k.bond.done) actions.push(action(s, 'school_break_bond', `Buy back your bond from ${k.bond.master}`, `Thirty gold on the bench and the paper torn. ${Math.max(1, Math.ceil((k.bond.until - s.day) / 365))} years of the ${BOND_YEARS} remain. Cheaper than walking out, which the guild never forgets.`, 1, 30));
     const offer = electiveOffer(s);
     if (offer && !reason) for (const el of offer) actions.push(action(s, `school_elective_${el.id}`, `Elective: ${el.label}`, `${el.line} Four lessons this year, then the master’s grade. Choose one.`, 0, 0));
-  } else if (age >= 12) actions.push(action(s, 'school_scholarship', 'Apply for a free service or study scholarship', 'An aptitude interview or a supervised service promise can remove academy enrollment fees. Every household has a route; no combat class is required.', 2, 0, e.scholarship ? 'A scholarship already funds your studies.' : undefined));
+  }
   if (s.obligations.some(o => o.id === 'school_service' && !o.resolved)) actions.push(action(s, 'school_service', 'Complete the promised reading-room service', 'Spend three days helping with supervised reading and supplies. Fulfill the scholarship promise, gain persuasion, and keep your funded place.', 3));
   return actions;
 }
@@ -363,15 +364,15 @@ export function applyHouseholdAction(s, id, ctx) {
   if (id.startsWith('school_enroll_')) {
     const route = id.slice(14), row = schoolRecord(s, route);
     if (!row || age < row.minAge || s.locationId !== row.locationId || e.enrolled && e.route === route) return false;
-    if (schooling(s) && bondReason(s)) return false;
+    if (bondReason(s)) return false;
     const transfer=activateCourse(s,route);
     payTuition(s, route, ctx, { charged: true });
     const teacher = educationTeacher(s); teacherMemory(s, `You enrolled at ${row.name} and began with a question of your own.`);
-    if (schooling(s) && route === 'academy') makeClassmates(s, ctx);
-    if (schooling(s) && route === 'apprenticeship') bindApprentice(s, teacher.name, ctx);
+    if (route === 'academy') makeClassmates(s, ctx);
+    if (route === 'apprenticeship') bindApprentice(s, teacher.name, ctx);
     history(s, 'education', 'A named place to learn', `${row.name} enrolled you with ${teacher.name}. ${transfer.returning?`Your ${e.attendance} recorded sessions, ${e.progress} course progress and ${e.performance}/100 performance resume.`: 'This route begins with zero attended sessions and zero course progress.'} ${transfer.from?`Earlier course preparation is kept; your ${e.lessonsThisYear}/8 annual lessons, ${e.preparationsThisYear}/2 revisions and examination limit are shared across routes.`:''} Your combat identity and independent reading remain your choices.`, ctx); return true;
   }
-  if (id === 'school_scholarship' && schooling(s)) {
+  if (id === 'school_scholarship') {
     if (blocked(s, id)) return false;
     const passed = scholarshipExam(s, ctx);
     s.notice = passed ? 'A place at the grammar school, without a fee. One of three.' : 'You were not one of the three. There is no second sitting.';
@@ -389,30 +390,30 @@ export function applyHouseholdAction(s, id, ctx) {
     s.notice = isLiterate(s) ? 'You can read.' : `Lesson ${schooling(s).lettersLessons} of ${LETTERS_LESSONS} with the archivist.`;
     return true;
   }
-  if (id.startsWith('school_sit_') && schooling(s)) {
+  if (id.startsWith('school_sit_')) {
     const inst = institutionById(id.slice(11)); if (!inst || !householdActions(s).some(a => a.id === id && !a.disabledReason)) return false;
     institutionEntrance(s, inst.id, ctx); return true;
   }
-  if (id.startsWith('school_place_') && schooling(s)) {
+  if (id.startsWith('school_place_')) {
     const inst = institutionById(id.slice(13)); if (!inst || !householdActions(s).some(a => a.id === id && !a.disabledReason)) return false;
     institutionScholarship(s, inst.id, ctx); return true;
   }
-  if (id.startsWith('school_read_') && schooling(s)) {
+  if (id.startsWith('school_read_')) {
     const inst = INSTITUTIONS.find(i => id.startsWith(`school_read_${i.id}_`)); if (!inst) return false;
     const subject = id.slice(13 + inst.id.length);
     if (blocked(s, id)) return false;
     return enrolInstitution(s, inst.id, subject, ctx);
   }
-  if (id === 'school_lecture' && schooling(s)) {
+  if (id === 'school_lecture') {
     if (blocked(s, id)) return false;
     payInstitutionYear(s, ctx);
     return institutionLesson(s, ctx);
   }
-  if (id === 'school_degree' && schooling(s)) {
+  if (id === 'school_degree') {
     if (blocked(s, id)) return false;
     institutionExam(s, ctx); return true;
   }
-  if (id === 'school_break_bond' && schooling(s)) {
+  if (id === 'school_break_bond') {
     if (blocked(s, id)) return false;
     return breakBond(s, ctx, 'paid');
   }
@@ -422,17 +423,13 @@ export function applyHouseholdAction(s, id, ctx) {
     s.notice = 'Chosen. Four lessons, then the master’s grade.';
     return true;
   }
-  if (id === 'school_scholarship') {
-    if (age < 12 || e.scholarship) return false;
-    e.pending = { sceneId: 'scholarship' };
-    ctx.setEvent('school_scholarship', 'A funded place at the academy', 'Education and opportunity', 'A visiting teacher offers two honest routes to funded study: demonstrate the questions you have already pursued, or promise supervised service in the reading room. Poverty and absent parents do not close either door.', [...(s.hero.skills.scholarship >= 2 ? [choice('study', 'Show your independent reading and prepared questions', 'Gain a free scholarship through demonstrated learning.')] : []), choice('service', 'Accept a supervised reading-room service promise', 'Gain a free scholarship and an explicit sixty-day obligation. Fulfill it through the school service action.'), choice('wait', 'Continue free community study for now', 'Leave the scholarship open without a promise or fee.')]); return true;
-  }
+  // A scholarship promise made before schooling (v0.64) is still kept: the service it captured stays open.
   if (id === 'school_service') {
     if (age < 12 || !s.obligations.some(o => o.id === 'school_service' && !o.resolved)) return false;
     ctx.finishObligation('school_service'); skill(s, 'persuasion'); e.performance = clamp(e.performance + 5);
     history(s, 'education', 'A scholarship promise fulfilled', 'You helped with supervised reading and supplies, kept your funding, and fulfilled the promised service.', ctx); return true;
   }
-  if (schoolReason(s)) return false;
+  if (schoolReason(s, { feeCharged: id === 'school_attend' })) return false;
   const row = schoolRecord(s, e.route);
   if (id === 'school_path') {
     if (e.depthVersion !== 1 || age < 12) return false;
@@ -451,9 +448,9 @@ export function applyHouseholdAction(s, id, ctx) {
     if (e.lessonsThisYear >= 8) return false;
     payTuition(s, e.route, ctx, { charged: true });
     ensureCourseBook(s);recordCourseAttendance(s);
-    e.lessonsThisYear++; e.attendanceThisYear++; e.attendance++; e.progress++; e.performance = clamp(e.performance + (schooling(s) ? lessonPerformance(s) : 4));
+    e.lessonsThisYear++; e.attendanceThisYear++; e.attendance++; e.progress++; e.performance = clamp(e.performance + lessonPerformance(s));
     onElectiveLesson(s, ctx);
-    if (schooling(s)) { if (e.route === 'apprenticeship') onBondLesson(s, ctx); if (e.route === 'academy' && e.lessonsThisYear === 3) queueRivalry(s); }
+    if (e.route === 'apprenticeship') onBondLesson(s, ctx); if (e.route === 'academy' && e.lessonsThisYear === 3) queueRivalry(s);
     skill(s, row.skills[0]); skill(s, row.skills[1]);
     s.flags.education = (s.flags.education || 0) + 1;
     teacherMemory(s, `At age ${age}, you took part in a real ${row.label.toLowerCase()} lesson.`);
@@ -503,6 +500,7 @@ export function applyHouseholdChoice(s, eventId, pick, ctx) {
     if (beneficiary?.alive !== false) memory(s, beneficiary?.id, `I remember your school project: ${project.title}, where you chose to ${project[pick].toLowerCase()}.`, pick === 'care' ? 6 : 3);
     history(s, 'education', project.title, outcome, ctx); return true;
   }
+  // A scholarship scene left open before schooling (v0.64) is answered as it was offered.
   if (eventId === 'school_scholarship') {
     if (e.pending?.sceneId !== 'scholarship' || age < 12 || e.scholarship || pick === 'study' && s.hero.skills.scholarship < 2) return false;
     e.pending = null;

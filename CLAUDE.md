@@ -49,8 +49,8 @@ v0.61) and a rolled station (`hero.station`, v0.62). Since v0.72.2 there is one
 rulebook: no rule asks whether a life has the ledger, and `migrateSave` gives a
 life from before it the stated defaults (`openLedger`: nothing owed; fortune
 from the day it is read). The station is still a birth's own record and is
-never invented; a parent without one passes none on (`heirStation`). Six
-systems still begin only on a life with a station (see One rulebook below).
+never invented; a parent without one passes none on (`heirStation`). Since
+v0.72.3 every system below belongs to every life (step 72; see One rulebook).
 `station.js` is what a birth decides; `fortune.js` is luck by season
 (money shocks from 18, hard winters before); `personality.js` carries the
 chosen nature and `hero.marks`, what life wrote on it. Choices that exist
@@ -58,22 +58,25 @@ only for some natures carry `nature: traitId` on the choice.
 
 `schooling.js` (v0.64) is letters, tuition, the examinations, electives
 and the credentials that gate the learned trades; `education.schooling`
-exists only on edition lives and `isLiterate` is true without it.
+is on every life (a life read with it past six is literate, letters
+`'before'`; `initializeSchooling(s, {born: true})` at a birth).
 `living-world.js` (v0.65) is the actors with goals, the seasonal tick,
 the events they make and the threads that route an event to someone the
-player knows; `state.living` exists only on edition lives. It drives the
+player knows; `state.living` is on every life. It drives the
 regional world (`regional-world-v33.js`: wars, fronts, deployments,
-settlements) rather than duplicating it — on a living world the courts
-start the wars (`startRegionalWar`) and the calendar's border tension and
-luck's war tax are off. New threads follow the pattern: a `pending`-like
-open thread, `flushLivingEvent` makes the scene, `applyLivingChoice`
+settlements) rather than duplicating it — the courts start the wars
+(`startRegionalWar`); the calendar's wars and border tension are gone
+(v0.72.3). Luck's levy falls while a war is active: its fortune entry once
+carried a dead `!s.living` guard beside the effective one, so it was never
+off on a living world, and v0.72.3 kept it as new lives met it. New threads
+follow the pattern: a `pending`-like open thread, `flushLivingEvent` makes the scene, `applyLivingChoice`
 answers it, `followUp` comes back later, `LIVING_EVENTS.ids()` registers
 the ids, `validateLiving` the shape.
 
 `guild.js` (v0.66) is the first path built with the whole anatomy (the
 Bible's table: ways in, daily life, its own people, its own stories, the
-world reacts, ways out, legacy); `state.guild` exists only on edition
-lives. It reads the living world (the three guild actors, their strikes
+world reacts, ways out, legacy); `state.guild` is on every life, and a
+guild family is decided only at a birth (`initializeGuild(s, {born})`). It reads the living world (the three guild actors, their strikes
 and monopolies) and adds the member's side: `guild.member` with rank,
 standing, dues, the road years, the assignment, the rival, the warden, the
 apprentice; `guild.past` for a struck or abandoned name; `guild.heir` for
@@ -93,19 +96,25 @@ the lair, the way), light and supplies instead of Focus-per-step,
 perception cues by who you are (`CUES`), noise that wakes the halls, a
 lair left alone that reaches the village through the living world
 (`raidFromBelow`), and spoils with an owner (`delve_spoils`). `state.delve`
-is the walk; `state.delves.places[id]` is what a place remembers. On an
-edition life every dungeon entry (`startDungeon`, `adventure_descend`,
-`explore_enter_*`) goes to the delve; the maze and the older room engine
-stay for legacy saves. Battle contexts must be strings and `kind: 'delve'`
+is the walk; `state.delves.places[id]` is what a place remembers. On every
+life the board's descent and the campaign dungeons (`startDungeon`,
+`adventure_descend`, `explore_enter_*`) go to the delve, except a dungeon
+already begun in the maze (`mazeBegun`, maze-rules.js) or walked in the
+older room engine (`flags.dungeonRecords`), which is finished there; the
+regional (`rpg_enter_*`) and contract (`adventure_pursue_*`) descents are
+mazes. Battle contexts must be strings and `kind: 'delve'`
 is in `validBattle`'s list; defeat below ground is death (`afterDelveBattle`)
-except on `gentle`. Tests that are about the maze on an edition life
-`delete s.delves`, the way they `delete s.mazeBook` to reach the older
-engine; `getActions` returns only `delve_*` actions while below. The
+except on `gentle`. Maze tests descend by contract (`contractDescent` in
+tests/helpers/one-rulebook.mjs) or a regional road, or stand in a genuine
+begun maze (the v0.59 capture's Covenant Core,
+`fixtures/maze-identity/v0722-begun-authored.json.gz`); tests of the older
+room engine `delete s.delves` (rebuild's `roomEngine`) until it leaves main.
+`getActions` returns only `delve_*` actions while below. The
 playtest Player (`scripts/playtest-story.mjs`) walks a delve with `delve()`
 the way it walks a maze, so the campaign playthroughs cover the authored
 delves end to end.
 
-`battlecraft.js` (v0.68) is the fight on an edition life: `state.battlecraft`
+`battlecraft.js` (v0.68) is the fight on every life: `state.battlecraft`
 (the arts learned, the injuries, the bestiary, the record, a pending
 scene) and `battle.fieldVersion = 68` on every battle `createBattle` makes
 for one. combat.js keeps the engine and calls the hooks (`assignRows`,
@@ -123,8 +132,7 @@ old battle page does `delete s.battlecraft` (grounded-enemies-v39 does).
 The playtest Player aims at what it can reach.
 
 `faith.js` (v0.69) is the church as a path, in guild.js's shape:
-`state.faith` (the member, the past, the heir, the threads) on edition lives
-only; `realm.faithId` stays the congregation and the cloth is what a few of
+`state.faith` (the member, the past, the heir, the threads) on every life; `realm.faithId` stays the congregation and the cloth is what a few of
 it take (`faith_novice` wants the congregation first). Ways in are the
 oblate scene, the shrine door, the Seminary's `orders` credential and the
 vow after a grief; the house's seat is the region's shrine city
@@ -171,17 +179,18 @@ Test fixtures that are not about birth should pin a station
 child may die of a winter fever, gets no pocket money and is not schooled,
 and a `household: 'poor'` birth is bound a third of the time. Growing loops
 need a guard and an answer for `hard_winter` (`'endure'`), and a journey
-policy needs `debt_reckoning: 'plead'`. A fixture that documents the rules
-a legacy save keeps (free school, the service scholarship) is born with
-`station: null`. On an edition life the village school wants 10 gold at
-enrolment and the shrine keeper may not have a place; a fee is always the
-action's displayed `cost`, taken once by the engine.
+policy needs `debt_reckoning: 'plead'`. The village school wants 10 gold
+at enrolment and the shrine keeper may not have a place; a fee is always the
+action's displayed `cost`, taken once by the engine. A learned trade wants
+its credential (the archive, a grammar school certificate): a controlled
+fixture that needs one carries it as data, as the society QA scholar does.
 
 Two engine facts that bit the schooling handlers: for every action prefix
 not in `performAction`'s `experienceHandlers` list (`school_`, `family_`,
 `career_` …) the engine spends `days` and `cost` before the handler runs,
 so the handler must not spend them again, and must not re-check the purse
-(`blocked()` in household.js ignores the "Requires N gold" reason); and
+(`blocked()` in household.js ignores the "Requires N gold" reason, and the
+lesson that carries a year's tuition asks `schoolReason(s, {feeCharged})`); and
 after a `school_`/`career_`/`health_` action the engine overwrites the last
 new journal line of that tag with a receipt ("… 2 days passed.") unless the
 line was written with `ctx.journalLiteral` (schooling.js's `note()`).
@@ -318,12 +327,15 @@ its own stored markers, a station or a debt ledger, say new rules (`rulesOf`),
 never on a claimed stamp, so v0.61 debt-only lives play on. The engine has one
 rulebook (v0.72.2): `migrateSave` reads any life it can into it, so the door is
 the store's decoder, not the engine; keep the app's decoder
-`storedLifeDecoder(migrateSave)`. Still to go: the six station-gated systems
-(`edition = s => !!s.hero.station` in living-world, guild, faith, delve,
-battlecraft and schooling) wait for v0.72.3; until then a life without a
-station keeps the maze, the older battle page and free school. New-rules lives
-begun before v0.67/v0.68 can hold an older maze or battle in progress, and the
-maze is still the regional and contract descents' engine on every life.
+`storedLifeDecoder(migrateSave)`. Since v0.72.3 no system waits for a
+station: migration step 72 begins schooling, the living world, the guild, the
+delve, battlecraft and the cloth on a life that predates them, with stated
+defaults and no invented past. A test that checks migration changes nothing
+else applies `statedDefaults` (tests/helpers/one-rulebook.mjs) to its expected
+life. Lives begun before v0.67/v0.68 can hold an older maze or battle in
+progress; each is finished the way it began. Still to go: the older room
+engine and the radiant maze (no new entry reaches them), the old pages, and
+the pre-edition migrations.
 
 An old-rules life meets its door and opens nothing. From v0.72.1 the app's
 store decoder is `storedLifeDecoder(migrateSave)`: it reads a

@@ -26,8 +26,9 @@ function drain(s){for(let i=0;s.event&&i<100;i++)s=E.chooseEventOption(s,(s.even
 const base=drain(await createLifeAtAge({seed:'regional-foundation-contracts',startAge:22,difficulty:'gentle'}));
 assert.ok(E.validateSave(base));
 function valid(s){assert.ok(E.validateSave(s),s.notice||'The complete save must validate');return s;}
-// The regional world's own border tensions start wars only where no living world's courts do (v0.65); this file tests the regional tick on its own.
-function fresh(){const s=structuredClone(base);delete s.living;s.realm.wars=[];Object.assign(s.realm.politics,{quests:[],holds:[],deployments:[],dispatches:[],pending:null});return s;}
+// The courts of the living world start the wars (v0.65; the regional border tension left in v0.72.3). This file
+// clears the realm's wars and starts its own through startRegionalWar, the way a court does, where it needs one.
+function fresh(){const s=structuredClone(base);s.realm.wars=[];Object.assign(s.realm.politics,{quests:[],holds:[],deployments:[],dispatches:[],pending:null});return s;}
 function at(s,id,room='gate'){s.locationId=id;s.cartography.route=null;s.cartography.pending=null;s.cartography.offsite=false;s.cartography.interior=null;syncCartography(s);for(const step of serviceWalkPath(s,room)||[])s=valid(E.chooseAction(s,'atlas_room_'+step));return s;}
 function war(s){const pair=s.realm.politics.borders.find(([a,b])=>s.realm.politics.regions[a].capitalId&&s.realm.politics.regions[b].capitalId);return startRegionalWar(s,...pair,s.day,'border');}
 const qfor=(s,kind)=>s.realm.politics.quests.find(q=>q.kind===kind&&q.status==='active');
@@ -63,7 +64,7 @@ test('wars arise only between neighboring polities with a concrete crossing and 
  const s=fresh(),w=war(s);assert.ok(w);assert.ok(s.world.locations.some(p=>p.id===w.frontSiteId));assert.match(w.grievance,/crossing/);assert.match(w.terms,/Civilian/);assert.equal(war(s),null);const pair=REGIONAL_CULTURES.flatMap(a=>REGIONAL_CULTURES.map(b=>[a.id,b.id])).find(([a,b])=>a!==b&&!s.realm.politics.borders.some(p=>p.includes(a)&&p.includes(b)));if(pair)assert.equal(startRegionalWar(s,...pair,s.day),null);assert.ok(validateRegionalWorld(s));
 });
 test('world politics advance once, survive reload and are independent of repeated render or action queries',()=>{
- const s=fresh(),from=s.day,to=from+365*8;const whole=structuredClone(s),parts=structuredClone(s);whole.day=to;onRegionalTime(whole,from,to);for(let day=from+91;day<to;day+=91){const before=parts.day;parts.day=day;onRegionalTime(parts,before,day);}const before=parts.day;parts.day=to;onRegionalTime(parts,before,to);assert.deepEqual(whole.realm.politics,parts.realm.politics);assert.deepEqual(whole.realm.wars,parts.realm.wars);const done=JSON.stringify(whole.realm);onRegionalTime(whole,from,to);regionalView(whole);regionalActions(whole);renderPaperMap(whole,{view:cartographyView(whole)});assert.equal(JSON.stringify(whole.realm),done);assert.ok(whole.realm.wars.length);assert.ok(validateRegionalWorld(whole));
+ const s=fresh();assert.ok(war(s),'a court marches');const from=s.day,to=from+365*8;const whole=structuredClone(s),parts=structuredClone(s);whole.day=to;onRegionalTime(whole,from,to);for(let day=from+91;day<to;day+=91){const before=parts.day;parts.day=day;onRegionalTime(parts,before,day);}const before=parts.day;parts.day=to;onRegionalTime(parts,before,to);assert.deepEqual(whole.realm.politics,parts.realm.politics);assert.deepEqual(whole.realm.wars,parts.realm.wars);const done=JSON.stringify(whole.realm);onRegionalTime(whole,from,to);regionalView(whole);regionalActions(whole);renderPaperMap(whole,{view:cartographyView(whole)});assert.equal(JSON.stringify(whole.realm),done);assert.ok(whole.realm.wars.length);assert.ok(validateRegionalWorld(whole));
 });
 test('protracted disputes do not expire at the old three-year deadline',()=>{
  const s=fresh(),w=war(s);w.entrenched=true;const from=s.day;s.day+=365*6;onRegionalTime(s,from,s.day);assert.equal(w.status,'active');assert.ok(w.exhaustion>0);assert.ok(['stalemate','campaigning'].includes(w.phase));assert.ok(w.endsDay>s.day);assert.ok(validateRegionalWorld(s));

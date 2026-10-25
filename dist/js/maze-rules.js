@@ -1,3 +1,8 @@
+/** A campaign dungeon this life already began in the maze (a life from before the delve, v0.67):
+ * it is resumed in the maze, the way it was begun, never restarted as a delve (v0.72.3). */
+export function mazeBegun(s,dungeonId) {
+ return Boolean(s.maze?.kind==='authored'&&s.maze.sourceId===dungeonId||s.mazeBook?.records?.some(r=>r.kind==='authored'&&r.sourceId===dungeonId));
+}
 /** Match the entry resolver without changing any recorded legacy expedition. */
 export function isMazeEntry(s,id) {
  return Boolean(s.mazeBook && (id==='adventure_descend' || id.startsWith('adventure_pursue_')

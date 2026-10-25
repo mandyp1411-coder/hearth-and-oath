@@ -7,6 +7,7 @@ import { mazeLayout } from '../dist/js/maze-v31.js';
 import { expeditionVisitTotals } from '../dist/js/maze-receipts.js';
 import { discardGear } from '../dist/js/gear.js';
 import { mountApp } from './helpers/ui-surface.mjs';
+import {contractDescent} from './helpers/one-rulebook.mjs';
 
 // Controlled rooms, real entry/cache/return handlers. This is semantic handler
 // coverage, not a browser/layout or earned maze route/difficulty test.
@@ -14,7 +15,7 @@ let base;
 function drain(s){for(let n=0;s.event&&n<40;n++){const c=s.event.choices.find(c=>['withdraw','continue','care','keep','later','pause','ask','leave'].includes(c.id)&&!c.disabledReason)||s.event.choices.find(c=>!c.disabledReason);s=E.chooseEventOption(s,c.id);}assert.equal(s.event,null);assert.ok(E.validateSave(s));return s;}
 function returnedGear(){
  if(!base){const old=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v27-road-and-descent.json.gz',import.meta.url)))).descent;base=E.migrateSave(old);assert.ok(base);base=drain(E.chooseEventOption(base,'withdraw'));}
- let s=structuredClone(base);s.hero.hp=s.hero.maxHp;s.hero.mp=s.hero.maxMp;s.adventuring.rations=5;s=drain(E.chooseAction(s,'adventure_descend'));
+ let s=structuredClone(base);s.hero.hp=s.hero.maxHp;s.hero.mp=s.hero.maxMp;s.adventuring.rations=5;s=drain(E.chooseAction(s,contractDescent(s))); // a contract's descent is the native maze (v0.72.3)
  const caches=mazeLayout(s.maze).cells.filter(c=>c.kind==='cache');let id;
  for(const c of caches){s.maze.position=c.id;s.maze.previous=c.doors[0];s.maze.visited=[...new Set([...s.maze.visited,c.id,c.doors[0]])];assert.ok(E.validateSave(s));s=drain(E.chooseAction(s,'maze_search'));id=expeditionVisitTotals(s.maze.expeditionVisit).gains.gear[0]?.id;if(id)break;}
  assert.ok(id,'fixed saved world yields an actual finite cache gear drop');s.maze.position=0;s.maze.previous=0;s=drain(E.chooseAction(s,'maze_exit'));return {s,id};

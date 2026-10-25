@@ -10,17 +10,20 @@ import {syncCartography} from '../dist/js/cartography.js';
 import {getBattleActions} from '../dist/js/combat.js';
 import {bossContactJournal} from '../dist/js/boss-stories-v27.js';
 import {ENCOUNTER_DESIGN_V27} from '../dist/js/encounter-design-v27.js';
-import {openLedger} from '../dist/js/budget.js';
-import {initializeFortune} from '../dist/js/fortune.js';
+import {readIntoRulebook,statedDefaults} from './helpers/one-rulebook.mjs';
 const copy=v=>structuredClone(v),raw=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/maze-identity/v050-successor.json.gz',import.meta.url)))),input=JSON.stringify(raw);
 const valid=s=>{assert.ok(E.validateSave(s),s.notice);return s;};
 const reload=s=>{valid(s);const next=E.migrateSave(copy(s));assert.deepEqual(next,s);return next;};
 function original(){return copy(raw.states.renewedHeir);}
 function repaired(){return valid(E.migrateSave(original()));}
 function room(s,id){const cell=s.maze.content.anchors.find(a=>a.slotId===id).cellId;s.maze.position=cell;s.maze.previous=mazeLayout(s.maze).cells[cell].doors[0];s.maze.visited=[...new Set([...s.maze.visited,cell])];return valid(s);}
-function authored(source='cistern',locationId='marsh'){let s=E.migrateSave(JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v27-road-and-descent.json.gz',import.meta.url)))).descent);s=E.chooseEventOption(s,'withdraw');s.locationId=locationId;s.cartography.pending=null;s.cartography.offsite=false;s.cartography.interior=null;syncCartography(s);for(const k of Object.keys(s.equipment.materials))s.equipment.materials[k]=20;return valid(E.chooseAction(s,'explore_enter_'+source));}
-// The engine reads an old capture into the one rulebook with its stated defaults (v0.72.2); nothing else may change.
-function withoutJournalChange(before,after){const value=copy(after),prior=copy(before);openLedger(prior);initializeFortune(prior);value.journal=copy(prior.journal);delete value.edition;delete prior.edition;assert.deepEqual(value,prior);}
+// One rulebook (v0.72.3): a campaign dungeon begins as a delve for every life, and an authored maze runs only
+// where one was already begun. These are genuine begun mazes, written by v0.72.2's own engine with the
+// controlled setup this file used before (scripts/fixtures/generate-begun-mazes.mjs), read into the rulebook.
+const begunMazes=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/maze-identity/v0722-begun-authored.json.gz',import.meta.url)))).states;
+function authored(source='cistern'){const s=readIntoRulebook(begunMazes[source]);assert.equal(s.maze?.kind,'authored');assert.equal(s.maze.sourceId,source);return valid(s);}
+// The engine reads an old capture into the one rulebook with its stated defaults (v0.72.2, v0.72.3); nothing else may change.
+function withoutJournalChange(before,after){const value=copy(after),prior=copy(before);statedDefaults(prior);value.journal=copy(prior.journal);delete value.edition;delete prior.edition;assert.deepEqual(value,prior);}
 function generic(s){return s.journal.findLast(r=>r.tag==='rpg'&&r.title==='Work in the Region');}
 
 test('new v2 signature contact retains its exact generated title/body through afterAction and reload',()=>{
@@ -28,7 +31,7 @@ test('new v2 signature contact retains its exact generated title/body through af
  assert.equal(after.day-before.day,2);assert.equal(row.text,note.text);assert.equal(row.day,after.day);assert.equal(row.generation,after.dynasty.generation);assert.equal(row.narrativeEdition,30);assert.equal(after.rpg.history.at(-1).text,row.text);
 });
 
-test('new authored admission and delegated witness rows persist literal current-source names and limits',()=>{
+test('a begun authored maze keeps its admission row, and delegated witness rows persist literal current-source names and limits',()=>{
  let s=authored();const entry=s.journal.at(-1);assert.equal(entry.title,'Below the Surface');assert.ok(entry.text.includes(s.maze.title));assert.equal(entry.narrativeEdition,30);reload(s);
  s=room(s,'witness');const witness=s.maze.content.definition.witness;
  for(const [id,title]of [['hear_witness','A person beside the objective'],['record_witness','An account kept with permission']]){const next=reload(E.chooseAction(s,'maze_authored_'+id)),row=next.journal.findLast(r=>r.title===title);assert.ok(row,title);assert.ok(row.text.includes(witness.name));assert.equal(row.narrativeEdition,30);assert.equal(row.day,next.day);s=next;}
@@ -57,7 +60,7 @@ test('staged A, unrelated calendar, B keep exact IDs/order/timestamps and only v
 test('one exact typed renewal/history repairs only the unique generic row and is input-pure and idempotent',()=>{
  const before=original(),prior=copy(before),after=E.migrateSave(before),old=generic(prior),row=after.journal.find(r=>r.id===old.id),history=prior.rpg.history.at(-1);
  assert.equal(row.title,history.title);assert.equal(row.text,history.text);assert.equal(row.day,old.day);assert.equal(row.age,old.age);assert.equal(row.generation,old.generation);assert.equal(row.id,old.id);withoutJournalChange(prior,after);assert.deepEqual(before,prior);
- const expected=copy(prior);openLedger(expected);initializeFortune(expected);stampEdition(expected);const matched=expected.journal.find(r=>r.id===old.id);matched.title=history.title;matched.text=history.text;assert.deepEqual(after,expected);assert.deepEqual(E.migrateSave(copy(after)),after);assert.equal(JSON.stringify(raw),input);
+ const expected=copy(prior);statedDefaults(expected);stampEdition(expected);const matched=expected.journal.find(r=>r.id===old.id);matched.title=history.title;matched.text=history.text;assert.deepEqual(after,expected);assert.deepEqual(E.migrateSave(copy(after)),after);assert.equal(JSON.stringify(raw),input);
 });
 
 for(const [name,change]of [
@@ -82,7 +85,7 @@ for(const [name,change]of [
 function fighter(s){s.hero.attributes.strength=40;s.hero.skills.weapons=20;s.hero.maxHp=s.hero.hp=1000;return valid(s);}
 function playedVictory(s){let turns=0;while(!s.battle.outcome&&turns++<40){const target=s.battle.actors.find(a=>a.side==='enemy'&&a.hp>0);assert.ok(getBattleActions(s.battle).some(a=>a.id==='attack'&&!a.disabledReason));const prior=JSON.stringify(s.battle);s=valid(E.chooseBattleAction(s,'attack',target.id));assert.notEqual(JSON.stringify(s.battle),prior,'actual legal Attack advances combat');}assert.equal(s.battle.outcome,'victory','bounded real-command victory');assert.ok(turns>0);const result=E.resolveBattle(s,copy(s.battle));assert.equal(result.battle,null,'real result resolver accepts the actual completed battle: '+result.notice);return reload(result);}
 test('actual v2 authored rescue result keeps its source-owned title/body after final combat settlement and reload',()=>{
- let s=room(authored('watchtower','tower'),'cells');s=valid(E.chooseAction(fighter(s),'maze_fight'));assert.ok(s.battle);s=playedVictory(s);
+ let s=room(authored('watchtower'),'cells');s=valid(E.chooseAction(fighter(s),'maze_fight'));assert.ok(s.battle);s=playedVictory(s);
  const row=s.journal.findLast(r=>r.title==='The cell doors opened');assert.ok(row);assert.equal(row.text,'Your victory freed the detained travelers. Their families can return to the road.');assert.equal(row.narrativeEdition,30);assert.equal(s.maze.contentFacts.prisonersFreed,true);assert.equal(row.day,s.day);
 });
 test('actual v2 signature combat result keeps its exact physical conclusion without inventing a peaceful outcome',()=>{

@@ -11,6 +11,8 @@ import { CLASS_CATALOG, classView } from '../dist/js/classes.js';
 import { campaignView } from '../dist/js/campaign.js';
 import { DUNGEONS } from '../dist/js/exploration.js';
 import { getContacts, getThread } from '../dist/js/conversations.js';
+import { reaches } from '../dist/js/enemy-targets.js';
+import { delveView } from '../dist/js/delve.js';
 
 const oldFixture = JSON.parse(readFileSync(new URL('./fixtures/legacy-v2.json', import.meta.url), 'utf8'));
 const oldLives = oldFixture.states;
@@ -63,7 +65,10 @@ function win(state) {
       target = hurt.id;
     } else {
       selected = options.find(action => action.id === 'skill' && action.targetSide === 'enemy') || options.find(action => action.id === 'attack');
-      target = completed.actors.filter(actor => actor.side === 'enemy' && actor.hp > 0).sort((a, b) => a.hp - b.hp)[0]?.id;
+      // A field battle (v0.68) is fought at reach: aim at the weakest foe the actor can actually reach.
+      const me = completed.actors[completed.turnOrder[completed.turnIndex]] || completed.actors.find(actor => actor.id === completed.currentActorId);
+      const living = completed.actors.filter(actor => actor.side === 'enemy' && actor.hp > 0), reachable = living.filter(actor => reaches(completed, me, actor));
+      target = (reachable.length ? reachable : living).sort((a, b) => a.hp - b.hp)[0]?.id;
     }
     assert.ok(selected, 'a living party member must have a usable action');
     completed = takeBattleAction(completed, selected.id, target);
@@ -85,7 +90,7 @@ function childhoodChoice(state, preference = []) {
 function growTo(state, target, preference = []) {
   // These retained linear-dungeon/quoted-road contracts use the explicit legacy
   // travel and dungeon profile. New energy and maze behavior has separate gates.
-  state=structuredClone(state);delete state.trail;delete state.mazeBook;delete state.maze;delete state.delves;
+  state=structuredClone(state);delete state.trail;delete state.mazeBook;delete state.maze;
   const moments = [];
   for (let step = 0; step < 150 && (state.age < target || state.event); step += 1) {
     saveable(state);
@@ -178,6 +183,10 @@ const dungeonPaths = {
   covenant_core: ['route_hall', 'fight', 'route_library', 'take', 'route_warden', 'fight', 'route_anchor', 'finish', 'leave'],
 };
 
+// The older room engine is reached now only by a dungeon already begun in it (v0.72.3); these tests
+// document it by standing in a life without the delve until the engine itself leaves main.
+function roomEngine(state) { state = structuredClone(state); delete state.delves; return state; }
+
 function completeDungeon(state, id) {
   assert.equal(state.dungeon?.id, id);
   const battles = [];
@@ -203,6 +212,43 @@ function completeDungeon(state, id) {
   return { state, battles };
 }
 
+// The campaign's dungeons are delves for every life (v0.72.3). This player walks one the way the
+// playtest Player does: take what a room gives, open every door but the lair's first, camp when hurt,
+// fight what comes, claim the objective, then go down while there are floors and climb out. Unlike the
+// Player, this one never leaves a lair alone: the campaign is walked through its actual bosses.
+// What a life meets between the campaign's steps: care for a wound first, give back what was
+// brought up, and let the field and the world take their course.
+function incidental(state) {
+  const open = ids => ids.find(id => state.event.choices.some(choice => choice.id === id && !choice.disabledReason));
+  const id = state.event.id.startsWith('health_') ? open(['care', 'rest', 'support', 'routine', 'continue'])
+    : state.event.id === 'delve_spoils' ? open(['return'])
+    : open(['continue', 'endure', 'plead', 'private', 'keep', 'leave']);
+  const pick = id || state.event.choices.find(choice => !choice.disabledReason)?.id;
+  assert.ok(pick, `${state.event.id} offers a way on`);
+  return pick;
+}
+
+function completeDelve(state) {
+  const id = state.delve.id, battles = [];
+  for (let step = 0; step < 240 && state.delve; step += 1) {
+    if (state.battle) { battles.push(state.battle.encounterId); ({ state } = win(state)); continue; }
+    if (state.event) { state = choose(state, incidental(state)); continue; }
+    const view = delveView(state), actions = engine.getActions(state).filter(action => !action.disabledReason), pick = ids => actions.find(action => ids.includes(action.id));
+    const hurt = state.hero.hp < state.hero.maxHp * 0.6 || state.companions.some(person => person.active && person.alive !== false && person.hp > 0 && person.hp < person.maxHp * 0.6);
+    let next = pick(['delve_take', 'delve_claim', 'delve_relic', 'delve_torch', 'delve_search']);
+    if (!next && hurt) next = pick(['delve_camp']);
+    const doors = actions.filter(action => action.id.startsWith('delve_go_')), unseen = doors.filter(action => action.label.startsWith('On to')), back = doors.filter(action => action.label.startsWith('Back'));
+    if (!next && view.objectiveDone) next = unseen.find(action => action.id.endsWith('lair')) || pick(['delve_descend', 'delve_out']) || ['delve_go_secret', 'delve_go_approach', 'delve_go_hub', 'delve_go_lair'].map(go => doors.find(action => action.id === go)).find(Boolean) || back[0];
+    if (!next) next = unseen.find(action => !action.id.endsWith('lair')) || unseen[0];
+    if (!next) next = back.find(action => action.id === 'delve_go_hub') || back[0];
+    assert.ok(next, `${id}: a delve step exists in ${view.room.id}`);
+    state = transition(state, value => engine.chooseAction(value, next.id)); saveable(state);
+  }
+  assert.equal(state.delve, null, 'the delve ends');
+  for (let n = 0; n < 10 && state.event; n += 1) state = choose(state, incidental(state));
+  return { state, battles };
+}
+
 const campaignPolicy = {
   patients: 'living', letter: 'order', return: 'quiet', inquiry: 'record', ferryman: 'protect',
   accounts: 'compare', patron: 'independent', gate: 'reinforce', refugees: 'camp',
@@ -214,7 +260,7 @@ function campaignUntil(state, stop = 'complete', policy = {}) {
   if(state.questLog?.main!=='active')state=act(state,'journal_main_accept');
   const battles = [];
   for (let step = 0; step < 30 && state.campaign.stage !== stop && state.campaign.stage !== 'complete'; step += 1) {
-    while (state.event?.id.startsWith('farm_')) state = choose(state, 'continue');
+    for (let n = 0; n < 10 && (state.event?.id.startsWith('farm_') || state.event?.id.startsWith('health_')); n += 1) state = choose(state, incidental(state));
     assert.equal(state.event, null);
     assert.equal(state.battle, null);
     assert.equal(state.dungeon, null);
@@ -225,7 +271,11 @@ function campaignUntil(state, stop = 'complete', policy = {}) {
     const needsRest = () => state.hero.hp < state.hero.maxHp || state.hero.mp < state.hero.maxMp || state.companions.some(person => person.active && (person.hp < person.maxHp || person.mp < person.maxMp));
     for (let rest = 0; rest < 6 && needsRest(); rest += 1) state = act(state, 'camp_rest');
     state = act(state, `quest_begin_${stage}`);
-    if (state.dungeon) {
+    if (state.delve) {
+      const expedition = completeDelve(state);
+      state = expedition.state;
+      battles.push(...expedition.battles);
+    } else if (state.dungeon) {
       const expedition = completeDungeon(state, state.dungeon.id);
       state = expedition.state;
       battles.push(...expedition.battles);
@@ -526,7 +576,7 @@ test('a destructive ending leaves visitable ruins, displaced people, and genuine
 });
 
 test('dungeon retreat preserves its unfinished room and caches and discoveries pay out once', () => {
-  let state = move(prepared('one-cache-one-discovery'), 'marsh');
+  let state = roomEngine(move(prepared('one-cache-one-discovery'), 'marsh'));
   state = act(state, 'explore_enter_cistern');
   state = choose(state, 'route_sluice');
   state = choose(state, 'fight');
@@ -578,7 +628,7 @@ test('dungeon retreat preserves its unfinished room and caches and discoveries p
 });
 
 test('a dungeon battle result cannot redirect its immutable context or pay rewards twice', () => {
-  let pending = move(prepared('battle-context-integrity'), 'marsh');
+  let pending = roomEngine(move(prepared('battle-context-integrity'), 'marsh'));
   pending = act(pending, 'explore_enter_cistern');
   pending = choose(pending, 'route_sluice');
   pending = choose(pending, 'fight');
@@ -611,7 +661,7 @@ test('a real dungeon remedy supports curing vampirism without erasing earned ide
   state = choose(state, 'accept');
   assert.equal(state.hero.maxMp, originalMaxMp + 6);
   state = act(state, 'night_travel');
-  state = move(state, 'forest');
+  state = roomEngine(move(state, 'forest'));
   state = act(state, 'explore_enter_root_caverns');
   const herbsBefore = state.flags.herbs || 0;
   const discovery = completeDungeon(state, 'root_caverns');
@@ -662,7 +712,7 @@ test('blood hunger interrupts a real road with a usable feeding choice and prese
   assert.notEqual(state.locationId, 'marsh', 'an interrupted partial leg cannot teleport to its destination');
   const journey = structuredClone(state.timeline.journey);
   saveable(state);
-  const restored = engine.migrateSave(JSON.parse(JSON.stringify(state)));delete restored.trail;delete restored.mazeBook;delete restored.maze;delete restored.delves;
+  const restored = engine.migrateSave(JSON.parse(JSON.stringify(state)));delete restored.trail;delete restored.mazeBook;delete restored.maze;
   assert.deepEqual(engine.chooseEventOption(restored, 'animal'), engine.chooseEventOption(state, 'animal'));
   const ownArrangement = choose(state, 'pause');
   assert.ok(engine.getActions(ownArrangement).some(action => action.id === 'feed_vampire' && !action.disabledReason), 'a paused hunger choice must still allow the promised day activity');

@@ -574,7 +574,7 @@ export function createSuccessor(original, childId, createBirthGame) {
   s.family = { setup: 'legacy', housing: s.life.home.tier === 'lodgings' ? 'shelter' : 'secure', support: 55, members, history: [], pending: null, lastAge: childAge, interactionUses: {} };
   s.education = { route: null, schoolId: null, enrolled: false, year: 0, attendance: record.development.education.attendance, progress: record.development.education.attendance, performance: 50, scholarship: false, qualifications: record.development.education.qualifications.map(q => ({ ...clone(q), route: q.route === 'public' ? 'community' : q.route, id: `${q.route === 'public' ? 'community' : q.route}-certificate`, schoolId: `school-${q.route === 'public' ? 'community' : q.route}` })), history: [], pending: null, lastAge: childAge, lessonsThisYear: 0, attendanceThisYear: 0, preparationsThisYear: 0, examinedYear: null };
   // An heir's letters come from the schooling it had as a child of the house.
-  initializeSchooling(s); if (s.education.schooling && tier1Certificate(s)) { s.education.schooling.literate = true; s.education.schooling.letters = 'school'; }
+  initializeSchooling(s, { born: true }); if (s.education.schooling && tier1Certificate(s)) { s.education.schooling.literate = true; s.education.schooling.letters = 'school'; }
   if(ownLife?.study)Object.assign(s.education,clone(ownLife.study));
   if(old.education?.teachers)s.education.teachers=clone(old.education.teachers);
   if (s.education.qualifications.some(q => q.route === 'academy')) s.flags.certified = true;

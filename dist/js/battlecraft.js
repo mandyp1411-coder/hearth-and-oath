@@ -12,7 +12,6 @@ import { studyLevel } from './schooling.js';
 import { CLASS_CATALOG } from './classes.js';
 
 export const FIELD_VERSION = 68;
-const edition = s => !!s?.hero?.station;
 const clamp = (n, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, n));
 const number = (v, d = 0) => Number.isFinite(v) ? v : d;
 const low = t => t.charAt(0).toLowerCase() + t.slice(1);
@@ -20,7 +19,7 @@ const alive = a => a.hp > 0;
 
 // ---------------------------------------------------------------- the state
 export function initializeBattlecraft(s) {
-  if (!edition(s) || s.battlecraft) return;
+  if (s.battlecraft) return;
   s.battlecraft = { version: 1, arts: [], injuries: [], bestiary: {}, record: { fights: 0, won: 0, lost: 0, fled: 0, settled: 0, kills: {} }, pending: null, lastDay: s.day };
 }
 export const hasBattlecraft = s => !!s?.battlecraft;

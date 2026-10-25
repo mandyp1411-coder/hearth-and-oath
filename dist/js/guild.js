@@ -12,7 +12,8 @@
 // Built on the living world: the three guilds are its actors, their contracts,
 // strikes and monopolies its events; this module reads those and adds the
 // member's side. Threads follow living-world.js: open → scene → choice →
-// follow-up → memory. New-edition lives only (`hero.station`).
+// follow-up → memory. Every life has it from v0.72.3 (a life that predates it
+// begins it when read, with no guild family decided after the fact).
 import { seededRoll, isSettlement, generatePersonName } from './world.js';
 import { companionOpinion } from './battlecraft.js';
 import { REGION_TEMPLATES } from './realm-content-v18.js';
@@ -21,7 +22,6 @@ import { addStationTie } from './station.js';
 import { seasonOf, activeEvents } from './living-world.js';
 import { professionWage } from './careers.js';
 
-const edition = s => !!s?.hero?.station;
 export const GUILD_CRAFTS = Object.freeze(['blacksmith', 'merchant', 'miner']);
 export const CRAFT_PROFESSION = Object.freeze({ blacksmith: 'Blacksmith', merchant: 'Merchant', miner: 'Miner' });
 const PROFESSION_CRAFT = Object.freeze({ Blacksmith: 'blacksmith', Merchant: 'merchant', Miner: 'miner' });
@@ -69,9 +69,11 @@ const syncCareerRank = s => { if (s.life?.career) s.life.career.rank = member(s)
 
 // ---------------------------------------------------------------------------
 // Birth: a trade family may be a guild family, and that is a way in.
-export function initializeGuild(s) {
-  if (!edition(s) || s.guild) return;
-  const trade = s.hero.station.id === 'trade' && seededRoll(s.seed, 'guild:family', 100) < 55;
+/** `born`: a guild family is something a birth decides. A life that predates the
+ * guild (read with it from v0.72.3) is not given a family table after the fact. */
+export function initializeGuild(s, { born = false } = {}) {
+  if (s.guild) return;
+  const trade = born && s.hero.station?.id === 'trade' && seededRoll(s.seed, 'guild:family', 100) < 55;
   const family = trade ? GUILD_CRAFTS[seededRoll(s.seed, 'guild:family:craft', GUILD_CRAFTS.length)] : null;
   s.guild = { version: 1, family, member: null, past: [], heir: null, threads: [], history: [], counters: { threads: 0 }, lastSeason: seasonOf(s.day) };
   if (family) { const parent = (s.life?.people || []).find(p => p.familyRole === 'parent'); if (parent) parent.occupation = family === 'merchant' ? 'merchant of the guild' : family; }
