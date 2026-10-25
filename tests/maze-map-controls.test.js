@@ -89,11 +89,7 @@ test('an authored archive and v2 inheritance preserve full note provenance',()=>
  inheritStoryMazes(legacySuccessor,legacy);assert.deepEqual(legacySuccessor.mazeBook,oldBook,'all-v1 inheritance remains unchanged');
 });
 
-test('legacy six-floor saves remain legacy and cannot acquire map reminders',()=>{
- const legacy=E.migrateSave(structuredClone(old));assert.ok(legacy.adventuring.expedition);assert.equal(legacy.maze,null);
- const next=E.updateMazeMapMemory(legacy,{identity:{},roomId:0,mark:'cache',note:'No conversion'});
- assert.deepEqual(clean(next),clean(legacy));assert.ok(E.validateSave(next));assert.equal(next.maze,null);
-});
+// The older expedition engines and their pages left in v0.72.4 (tests/older-walks-v0724.test.js); their tests went with them.
 
 test('pure view/session keep inherited recorded knowledge and reset controls on actor/run change',()=>{
  const original=fresh(true),s=E.updateMazeMapMemory(original,payload(original)),before=structuredClone(s);

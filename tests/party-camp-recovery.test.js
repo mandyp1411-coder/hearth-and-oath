@@ -221,12 +221,7 @@ test('the actual maze UI exposes named gains and non-revival without revealing u
   assert.deepEqual(ui.current(), before);
 });
 
-test('authentic older six-floor saves retain their captured expedition and gain no new camp fields on migration', () => {
-  const original = JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v27-road-and-descent.json.gz', import.meta.url)))).descent;
-  const s = E.migrateSave(original); assert.ok(s); assert.ok(s.adventuring.expedition); assert.equal(s.maze, null);
-  assert.deepEqual(s.adventuring.expedition, original.adventuring.expedition); assert.equal(Object.hasOwn(s.adventuring.expedition, 'campRecovery'), false);
-  roundtrip(s);
-});
+// The older expedition engines and their pages left in v0.72.4 (tests/older-walks-v0724.test.js); their tests went with them.
 
 test('a controlled long peaceful crawl keeps the 121-room route, finite objectives and reserves while camps cost days', t => {
   let s = delve('rpg_enter_modular_1'); addCampingKit(s, 'expedition'); s.hero.hp = 10; s.hero.mp = 0;

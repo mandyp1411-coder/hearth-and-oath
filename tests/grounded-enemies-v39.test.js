@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { contractDescent } from './helpers/one-rulebook.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
@@ -181,7 +182,8 @@ test('all five expanded families appear through offered maze fights and survive 
   const witnessed=new Set();
   for(let run=1;run<=12&&witnessed.size<5;run++){
     let entered=await fresh();entered.mazeBook.nextRun=run;
-    const offer=E.getActions(entered).find(a=>a.id==='adventure_descend'&&!a.disabledReason);assert.ok(offer);
+    // A contract's descent is the maze that still begins (v0.72.3); the board's descent is a delve.
+    const pursue=contractDescent(entered),offer=E.getActions(entered).find(a=>a.id===pursue&&!a.disabledReason);assert.ok(offer);
     entered=drain(E.chooseAction(entered,offer.id));assert.ok(entered.maze);
     for(const room of mazeLayout(entered.maze).cells.filter(room=>room.kind==='enemy'&&families.includes(room.enemy)&&!witnessed.has(room.enemy))){
       const expected=proceduralEnemies(entered,room.enemy,entered.maze.tier,entered.maze.seed+':enemy:'+room.id);
@@ -275,23 +277,4 @@ test('loaded combat UI formats enemy cards, turn chips and previews while party 
   assert.deepEqual(ui.current().battle,before);
 });
 
-test('explicit named targets preserve spelling in new battles and older contract UI without a marker',async t=>{
-  const s=await fresh();s.locationId='home';syncCartography(s);refreshAdventureBoard(s);
-  const contract=s.adventuring.contracts[0];assert.ok(contract);
-  Object.assign(contract,{flavorId:'bounty-returning-knight',type:'bounty',targetType:'undead',targetName:'Rook of dusk',status:'active',acceptedDay:s.day});
-  delete contract.target;
-  s.locationId=contract.destinationId;syncCartography(s);
-  const context={kind:'adventure',mode:'contract',token:contract.id,locationId:s.locationId};
-  s.battle={...createBattle(s,'free_undead',context,{openingTurns:false}),context,instanceId:'grounded-named-target-ui'};
-  s.battle.currentActorId='hero';const target=s.battle.actors.find(actor=>actor.id==='enemy-1');
-  assert.equal(target.name,contract.targetName);assert.equal(target.namedTarget,true);
-  assert.equal(previewBattleAction(s.battle,'attack',target.id).targetName,contract.targetName);
-  assert.ok(E.validateSave(s));
-  delete target.namedTarget; // An older saved contract predates display metadata.
-  assert.equal(battleNamedTargetId(s,s.battle),target.id);assert.ok(E.validateSave(s));
-  const before=structuredClone(s.battle),ui=await mountApp(t,{states:[s]});await ui.click('title-continue');
-  assert.equal(ui.root.querySelector('.actor-card.enemy .actor-heading strong').textContent,contract.targetName);
-  assert.match(ui.root.querySelector('[data-action-preview="attack"]').textContent,/Rook of dusk:/);
-  assert.ok(ui.root.querySelectorAll('.turn-chip').some(node=>node.textContent===contract.targetName));
-  assert.deepEqual(ui.current().battle,before);
-});
+// The older single-battle contract left in v0.72.4; a contract's named target is met at its maze's guardian.

@@ -106,12 +106,13 @@ test('resource panel safely escapes names, marks missing reserves unavailable, a
  assert.ok(!markup.includes('<script>unsafe</script>'));assert.ok(markup.includes('&lt;script&gt;'));assert.deepEqual(s,before);
 });
 
-test('modern entry selection preserves authored records, regional saved descents and legacy dispatch',()=>{
- const s={mazeBook:{},flags:{dungeonRecords:{cistern:{complete:false}}},rpg:{expeditions:[{id:'old',locationId:'here'}]},locationId:'here'};
- assert.equal(isMazeEntry(s,'adventure_descend'),true);assert.equal(isMazeEntry(s,'adventure_pursue_contract'),true);
+test('a maze begins by contract or a regional road, or resumes an authored maze already begun; nothing else is a maze entry',()=>{
+ // v0.72.4: the board's descent is a delve, and an older record (a room-engine walk, a v0.27 descent) opens no maze.
+ const s={mazeBook:{records:[{kind:'authored',sourceId:'watchtower'}]},flags:{dungeonRecords:{cistern:{complete:false}}},rpg:{expeditions:[{id:'old',locationId:'here'}]},locationId:'here',maze:null};
+ assert.equal(isMazeEntry(s,'adventure_descend'),false);assert.equal(isMazeEntry(s,'adventure_pursue_contract'),true);
  assert.equal(isMazeEntry(s,'explore_enter_cistern'),false);assert.equal(isMazeEntry(s,'explore_enter_watchtower'),true);
- assert.equal(isMazeEntry(s,'rpg_enter_old'),false);assert.equal(isMazeEntry({...s,locationId:'elsewhere'},'rpg_enter_old'),true);
- assert.equal(isMazeEntry({...s,mazeBook:undefined},'adventure_descend'),false);assert.equal(isMazeEntry(s,'maze_fight'),false);
+ assert.equal(isMazeEntry(s,'rpg_enter_old'),true);assert.equal(isMazeEntry({...s,locationId:'elsewhere'},'rpg_enter_old'),true);
+ assert.equal(isMazeEntry({...s,mazeBook:undefined},'adventure_pursue_contract'),false);assert.equal(isMazeEntry(s,'maze_fight'),false);
 });
 
 let base=await createLifeAtAge({seed:'maze-resource-rules',startAge:18,difficulty:'gentle'});
@@ -173,12 +174,4 @@ test('the actual UI updates the visible movement quote after one arrow-key move 
  roundtrip(ui.current());
 });
 
-test('authentic older six-floor saves keep their mode, captured state, ration rules and free withdrawal',()=>{
- const old=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v27-road-and-descent.json.gz',import.meta.url)))).descent;
- let s=E.migrateSave(structuredClone(old));assert.ok(s);assert.equal(s.maze,null);assert.deepEqual(s.adventuring.expedition,old.adventuring.expedition);
- assert.equal(mazeMovementForecast(s),null);assert.equal(mazeExpeditionView(s),null);
- const before=structuredClone(s),page=adventurePage(s,E.getActions(s),{section:'delves'});
- assert.match(page,new RegExp('Floor '+old.adventuring.expedition.floor));assert.doesNotMatch(page,/121 rooms|maze-expedition|Next walk:/);
- assert.deepEqual(s,before);const day=s.day,rations=s.adventuring.rations;s=roundtrip(E.chooseEventOption(s,'withdraw'));
- assert.equal(s.adventuring.expedition,null);assert.equal(s.maze,null);assert.equal(s.day,day);assert.equal(s.adventuring.rations,rations);
-});
+// The older expedition engines and their pages left in v0.72.4 (tests/older-walks-v0724.test.js); their tests went with them.

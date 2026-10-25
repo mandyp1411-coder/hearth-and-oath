@@ -92,35 +92,7 @@ test('unknown/mismatched effective room fails closed; entrance and quiet current
   for (const kind of ['entrance', 'empty', 'camp', 'cache', 'inscription', 'objective']) assert.equal(quoteFieldPotion(s, 'mira', { mazeRoom: { id: 0, kind } }).disabledReason, null);
 });
 
-test('legacy dungeon exception must match a real quiet or resolved room, while hero pause behavior is unchanged', () => {
-  const s = sample(); s.event = { id: 'dungeon_cistern_entry', choices: [{ id: 'route_sluice' }] }; s.dungeon = { id: 'cistern', roomId: 'entry', pendingRoom: null, cleared: [] };
-  const options = { legacyDungeonRooms: [{ id: 'entry', kind: 'safe' }, { id: 'sluice', kind: 'fight' }] };
-  assert.equal(quoteFieldPotion(s, 'mira', options).disabledReason, null);
-  s.dungeon.roomId = 'sluice'; s.event.id = 'dungeon_cistern_sluice'; const before = structuredClone(s);
-  assert.match(applyFieldPotion(s, 'mira', options).disabledReason, /danger/); assert.deepEqual(s, before);
-  assert.equal(quoteFieldPotion(s).disabledReason, null, 'existing hero can drink at this dungeon pause');
-  s.dungeon.cleared.push('sluice'); assert.equal(quoteFieldPotion(s, 'mira', options).disabledReason, null);
-  s.event.id = 'dungeon_other_entry'; assert.ok(quoteFieldPotion(s, 'mira', options).disabledReason);
-  delete s.dungeon; assert.ok(quoteFieldPotion(s, 'mira', options).disabledReason);
-});
-
-test('adventure pause must match its captured kind and unresolved trap/fight stays blocked', () => {
-  const s = sample(); s.event = { id: 'adventure_room', choices: [{ id: 'withdraw' }] };
-  assert.ok(quoteFieldPotion(s, 'mira').disabledReason);
-  s.adventuring = { expedition: { floor: 1, room: 2, pendingKind: 'stairs', cleared: [], pendingBattle: false } };
-  assert.equal(quoteFieldPotion(s, 'mira').disabledReason, null);
-  for (const kind of ['trap', 'battle']) { s.adventuring.expedition.pendingKind = kind; assert.match(quoteFieldPotion(s, 'mira').disabledReason, /danger/); }
-  s.adventuring.expedition.cleared.push('1:2'); assert.equal(quoteFieldPotion(s, 'mira').disabledReason, null);
-  s.adventuring.expedition.pendingBattle = true; assert.ok(quoteFieldPotion(s, 'mira').disabledReason);
-  assert.equal(quoteFieldPotion(s).disabledReason, null);
-});
-
-test('regional legacy current hazard/guardian must be resolved, and a pending battle cannot be bypassed', () => {
-  const s = sample(); s.rpg.expedition = { roomId: 'gate', pendingRoom: null, rooms: [{ id: 'gate', type: 'guardian', resolved: false }] };
-  const before = structuredClone(s); assert.match(applyFieldPotion(s, 'mira').disabledReason, /danger/); assert.deepEqual(s, before);
-  s.rpg.expedition.rooms[0].resolved = true; assert.equal(quoteFieldPotion(s, 'mira').disabledReason, null);
-  s.rpg.expedition.pendingRoom = 'gate'; assert.ok(companionFieldRoomReason(s));
-});
+// The older expedition engines and their pages left in v0.72.4 (tests/older-walks-v0724.test.js); their tests went with them.
 
 test('named native buttons show exact effect/cost, preserve hero op, escape names and explain invalid treatment', () => {
   const s = sample(); s.companions[0].name = '<Mira & "Oath">'; s.companions[0].hp = 57;
