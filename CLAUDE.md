@@ -99,16 +99,23 @@ lair left alone that reaches the village through the living world
 is the walk; `state.delves.places[id]` is what a place remembers. On every
 life the board's descent and the campaign dungeons (`startDungeon`,
 `adventure_descend`, `explore_enter_*`) go to the delve, except a dungeon
-already begun in the maze (`mazeBegun`, maze-rules.js) or walked in the
-older room engine (`flags.dungeonRecords`), which is finished there; the
-regional (`rpg_enter_*`) and contract (`adventure_pursue_*`) descents are
-mazes. Battle contexts must be strings and `kind: 'delve'`
+already begun in the maze (`mazeBegun`, maze-rules.js), which is finished
+there; the regional (`rpg_enter_*`) and contract (`adventure_pursue_*`)
+descents are mazes. The older expedition engines left in v0.72.4 (step 73):
+the room engine, the descent's rooms and radiant maze start, the v0.27
+regional rooms and the single-battle contract. A life read in the middle of
+one ends that walk where it stands (`closeOlderWalks`, engine.js, before
+validation); `dungeon`, `adventuring.expedition` and `rpg.expedition` stay in
+the save's shape and are always null, and their records
+(`flags.dungeonRecords`, `rpg.expeditions`, `adventuring.history`, radiant
+maze receipts) stay as history. Battle contexts must be strings and `kind: 'delve'`
 is in `validBattle`'s list; defeat below ground is death (`afterDelveBattle`)
 except on `gentle`. Maze tests descend by contract (`contractDescent` in
 tests/helpers/one-rulebook.mjs) or a regional road, or stand in a genuine
 begun maze (the v0.59 capture's Covenant Core,
-`fixtures/maze-identity/v0722-begun-authored.json.gz`); tests of the older
-room engine `delete s.delves` (rebuild's `roomEngine`) until it leaves main.
+`fixtures/maze-identity/v0722-begun-authored.json.gz`). A test that reads a
+capture saved mid-walk checks the close with `assertOlderWalkClosed`
+(tests/helpers/one-rulebook.mjs).
 `getActions` returns only `delve_*` actions while below. The
 playtest Player (`scripts/playtest-story.mjs`) walks a delve with `delve()`
 the way it walks a maze, so the campaign playthroughs cover the authored
@@ -332,10 +339,12 @@ station: migration step 72 begins schooling, the living world, the guild, the
 delve, battlecraft and the cloth on a life that predates them, with stated
 defaults and no invented past. A test that checks migration changes nothing
 else applies `statedDefaults` (tests/helpers/one-rulebook.mjs) to its expected
-life. Lives begun before v0.67/v0.68 can hold an older maze or battle in
-progress; each is finished the way it began. Still to go: the older room
-engine and the radiant maze (no new entry reaches them), the old pages, and
-the pre-edition migrations.
+life. Lives begun before v0.67/v0.68 can hold a maze or a battle in
+progress; each is finished the way it began. A walk in the older expedition
+engines, which left with their pages in v0.72.4, ends where it stands when
+read. Still to go: the old academy's `study`/`take_exam` (still offered and
+still feeding wages through `flags.certified`, a design decision rather than
+dead code) and the pre-edition migrations.
 
 An old-rules life meets its door and opens nothing. From v0.72.1 the app's
 store decoder is `storedLifeDecoder(migrateSave)`: it reads a

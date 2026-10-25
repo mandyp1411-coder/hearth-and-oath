@@ -14,7 +14,7 @@ offline files behave the same from disk.
     python3 scripts/browser-archive-check.py [--main dist] [--archive out-legacy]
         [--main-offline artifacts/hearth-and-oath.html]
         [--archive-offline artifacts/old-rules-archive/hearth-and-oath-old-rules.html]
-        [--snapshot docs/measures/archive-verification-v0723.md]
+        [--snapshot docs/measures/archive-verification-v0724.md]
 
 The main game is served from `dist/` (what `npm start` serves) and the
 archive from `out-legacy/` (what `scripts/build-archive.mjs` packages), on two

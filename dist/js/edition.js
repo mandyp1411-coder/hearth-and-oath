@@ -15,10 +15,10 @@
 // (subsystems are added to an older edition life as it plays on), so they
 // carry `began: null` and read "begun before v0.70". Never guess a date.
 
-export const GAME_VERSION = '0.72.3';
+export const GAME_VERSION = '0.72.4';
 /** The migration step this build brings a new-rules life to. Each later
  * release that changes what a new-rules save holds adds a step here. */
-export const EDITION_STEP = 72;
+export const EDITION_STEP = 73;
 export const OLD = 'old', NEW = 'new';
 
 const plain = v => Boolean(v) && typeof v === 'object' && !Array.isArray(v);
@@ -61,6 +61,13 @@ const STEPS = [
   // actors begin their goals this season; no past descent, fight or vow is
   // written. A maze or a battle already begun is finished as it was begun.
   { step: 72, apply() {} },
+  // 73: the older walks end. The room engine, the descent's rooms and the
+  // regional rooms of v0.27 left with the single-battle contract; a life read
+  // in the middle of one ends that walk where it stands (engine.js
+  // closeOlderWalks, on every read): its rooms stay recorded, its scene and
+  // fight end with it, nothing is paid back and nothing found is invented.
+  // `dungeon`, `adventuring.expedition` and `rpg.expedition` are always null.
+  { step: 73, apply() {} },
 ];
 
 /** Stamp a save with its rules. Idempotent; never overwrites `began`. */

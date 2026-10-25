@@ -1,5 +1,31 @@
 # Hearth & Oath
 
+Version 0.72.4 is The older walks end. The expedition engines that no life in
+the main game can enter any more have left the code: the room engine the
+campaign dungeons used before the delve, the board's descent through rooms
+and the radiant maze it began, the regional rooms of v0.27, and the contract
+fought as a single battle. Their pages and four of their modules go with them.
+
+- **A life saved in the middle of one of them ends that walk where it
+  stands** when it is read. Only a life begun under the old rules can have
+  been saved there. The rooms walked stay recorded: the dungeon's record,
+  the descent's row in the adventuring history, the regional descent among
+  the maps. A room's scene or fight ends with the walk. Nothing is paid back
+  and nothing found is invented.
+- **What stays.** A maze or a battle already begun is still finished the way
+  it was begun, and the radiant mazes already walked stay in the records and
+  receipts. The board's descent and the campaign doors open delves; the
+  regional roads and the contracts open mazes.
+- **Below ground, wherever you are.** The dungeon's music plays in a maze or
+  a delve. Town contacts and letters wait until you come up, a scene's way
+  back holds while you are below, and the first day's guide points to a
+  delve under way, as they all did for the older walks.
+- **New births are unchanged.** Three generated lives aged a year match
+  v0.72.3's in everything but the version they were begun in and the
+  migration step they carry (73, which states the close above).
+
+Verification is in [the v0.72.4 record](docs/measures/one-rulebook-v0724-verification.md).
+
 Version 0.72.3 is Every life has the whole world. The last edition checks,
 the ones that waited for a rolled station, are gone: schooling, the living
 world, the guild, the delve, battlecraft and the cloth now belong to every
