@@ -12,6 +12,7 @@ import {fileURLToPath} from 'node:url';
 import {createContext,Script} from 'node:vm';
 import {setImmediate as turn} from 'node:timers/promises';
 import {fakeSurface, installOfflineDocument} from '../tests/helpers/ui-surface.mjs';
+import {statedDefaults} from '../tests/helpers/one-rulebook.mjs';
 import {validateOfflineIdentity,validateUnchangedOfflineIdentity} from './lib/release-identity.mjs';
 import * as E from '../dist/js/engine.js';
 import {getBattleActions} from '../dist/js/combat.js';
@@ -24,7 +25,7 @@ const original=args.length?JSON.parse(inputBytes):JSON.parse(gunzipSync(inputByt
 const expected=E.migrateSave(original);assert.ok(E.validateSave(expected));assert.deepEqual(original,originalCopy);assert.deepEqual(E.migrateSave(copy(expected)),expected);
 const changed=expected.journal.filter(row=>JSON.stringify(row)!==JSON.stringify(original.journal.find(r=>r.id===row.id)));assert.equal(changed.length,1,'one uniquely proven old contact row, not a blanket migration');
 const restored=changed[0],before=original.journal.find(r=>r.id===restored.id),history=original.rpg.history.filter(r=>r.day===restored.day&&r.title===restored.title&&r.text===restored.text);assert.equal(history.length,1);assert.equal(before.title,'Work in the Region');assert.equal(restored.generation,original.dynasty.generation);
-const independent=stampEdition(copy(original)),target=independent.journal.find(r=>r.id===restored.id);target.title=history[0].title;target.text=history[0].text;assert.deepEqual(expected,independent,'exactly two narrative fields and the current edition stamp; resources/proofs/permissions/other memories unchanged');
+const independent=stampEdition(statedDefaults(copy(original))),target=independent.journal.find(r=>r.id===restored.id);target.title=history[0].title;target.text=history[0].text;assert.deepEqual(expected,independent,'exactly two narrative fields and the current edition stamp; resources/proofs/permissions/other memories unchanged');
 const proof=[original.maze,...original.mazeBook.records].filter(Boolean).flatMap(m=>(m.contentOutcomes||[]).map(row=>({m,row}))).filter(({m,row})=>m.version===2&&m.content?.family==='signature'&&['lead_contact','renew_contact'].includes(row.actionId)&&row.day===restored.day&&row.actorId===original.dynasty.activePersonId&&row.actorGeneration===restored.generation);assert.ok(proof.length);for(const {m,row}of proof){assert.equal(history[0].locationId,m.locationId);assert.deepEqual(row.participantIds,original.rpg.bosses.find(b=>b.id===row.bossId).people.map(p=>p.id));}
 const identity=await validateOfflineIdentity(fileURLToPath(root)),version=identity.version;const [major,minor,patch]=version.split('.').map(Number);assert.ok(major===0&&(minor>50||minor===50&&patch>=1));
 let bytes=read('artifacts/hearth-and-oath.html');assert.equal(hash(bytes),identity.sha256);const manifest=JSON.parse(read('dist/offline/manifest.json'));let offset=0;for(const part of manifest.parts){const b=read('dist/offline/'+part.file);assert.ok(b.equals(bytes.subarray(offset,offset+b.length)));offset+=b.length;}assert.equal(offset,bytes.length);
@@ -32,10 +33,13 @@ let html=installOfflineDocument(bytes.toString('utf8'));bytes=null;const tag='<s
 // Controlled high stats bound real public Attack commands, not earned routing,
 // naturally developed characters or battle-balance evidence. No terminal packet
 // or enemy health/outcome is forged after the actual encounter capture.
-const combatFixture='tests/fixtures/v27-road-and-descent.json.gz',combatFixtureHash=hash(read(combatFixture));
+// From v0.72.3 a campaign dungeon begins as a delve; an authored maze runs only where one was begun. The rescue
+// stands in a genuine begun watchtower maze written by v0.72.2's own engine from the same v0.27 capture and setup
+// (scripts/fixtures/generate-begun-mazes.mjs, which also gave it twenty of each material).
+const combatFixture='tests/fixtures/maze-identity/v0722-begun-authored.json.gz',combatFixtureHash=hash(read(combatFixture));
 function at(s,slot){const cell=s.maze.content.anchors.find(a=>a.slotId===slot).cellId;s.maze.position=cell;s.maze.previous=mazeLayout(s.maze).cells[cell].doors[0];s.maze.visited=[...new Set([...s.maze.visited,cell])];assert.ok(E.validateSave(s));return s;}
 function pending(s){s.hero.attributes.strength=40;s.hero.skills.weapons=20;s.hero.maxHp=s.hero.hp=1000;assert.ok(E.validateSave(s));s=E.chooseAction(s,'maze_fight');assert.ok(s.battle);assert.ok(E.validateSave(s));assert.deepEqual(E.migrateSave(copy(s)),s);return s;}
-let rescue=E.migrateSave(JSON.parse(gunzipSync(read(combatFixture))).descent);rescue=E.chooseEventOption(rescue,'withdraw');rescue.locationId='tower';rescue.cartography.pending=null;rescue.cartography.offsite=false;rescue.cartography.interior=null;syncCartography(rescue);rescue=pending(at(E.chooseAction(rescue,'explore_enter_watchtower'),'cells'));
+let rescue=E.migrateSave(JSON.parse(gunzipSync(read(combatFixture))).states.watchtower);assert.equal(rescue.maze?.sourceId,'watchtower');rescue=pending(at(rescue,'cells'));
 let guardian=E.migrateSave(JSON.parse(gunzipSync(read(fixture))).states.renewedHeir);guardian=pending(at(guardian,guardian.maze.content.requiredGuardians[0].slotId));
 const states=[original,rescue,guardian],wanted=[expected,copy(rescue),copy(guardian)],ui=fakeSurface(),KEY='hearth-and-oath:slots:v1',MIRROR='hearth-and-oath:life:v1';
 const initial={version:1,activeSlot:0,backups:{},slots:states.map((state,id)=>({id,state,updatedAt:'2026-10-17T00:00:00.000Z',revision:'literal-v501-'+id}))};ui.storage.setItem(KEY,JSON.stringify(initial));ui.storage.setItem(MIRROR,JSON.stringify(original));

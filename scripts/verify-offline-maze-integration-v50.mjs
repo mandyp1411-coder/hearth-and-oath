@@ -15,6 +15,7 @@ import { fileURLToPath } from 'node:url';
 import { createContext, Script } from 'node:vm';
 import { setImmediate as nextTurn } from 'node:timers/promises';
 import {fakeSurface, installOfflineDocument} from '../tests/helpers/ui-surface.mjs';
+import { statedDefaults } from '../tests/helpers/one-rulebook.mjs';
 import { validateOfflineIdentity, validateUnchangedOfflineIdentity } from './lib/release-identity.mjs';
 import * as E from '../dist/js/engine.js';
 
@@ -60,11 +61,11 @@ import { syncCartography } from '../dist/js/cartography.js';
 
 const valid=s=>{assert.ok(E.validateSave(s),s?.notice);return s;};
 function settled(s){for(let n=0;s.event&&n<30;n++){const choice=s.event.choices.find(c=>['withdraw','continue','care','keep','later','pause','ask','leave'].includes(c.id)&&!c.disabledReason)||s.event.choices.find(c=>!c.disabledReason);assert.ok(choice);s=E.chooseEventOption(s,choice.id);}assert.equal(s.event,null);return valid(s);}
-const fixturePaths=['tests/fixtures/maze-identity/v050-successor.json.gz','tests/fixtures/maze-identity/v2-successor.json.gz','tests/fixtures/v27-road-and-descent.json.gz'];
+const fixturePaths=['tests/fixtures/maze-identity/v050-successor.json.gz','tests/fixtures/maze-identity/v2-successor.json.gz','tests/fixtures/v27-road-and-descent.json.gz','tests/fixtures/maze-identity/v0722-begun-authored.json.gz'];
 const fixtureHashes=Object.fromEntries(fixturePaths.map(path=>[path,hash(read(path))]));
 const rawCapture=JSON.parse(gunzipSync(read(fixturePaths[0]))),old=JSON.parse(gunzipSync(read(fixturePaths[2]))).descent;
 const capture={...rawCapture,states:{}};
-for(const [name,s]of Object.entries(rawCapture.states)){valid(s);const current=valid(E.migrateSave(copy(s))),other=copy(current),prior=stampEdition(copy(s));other.journal=copy(s.journal);for(const [id,messages] of Object.entries(prior.conversations.threads))prior.conversations.threads[id]=messages.filter(m=>!Number.isInteger(m.age)||m.age>=3);assert.deepEqual(other,prior,'current-v2 recovery preserves every non-Journal field except the current edition stamp and invalid pre-speech correspondence');for(const row of current.journal){const original=s.journal.find(r=>r.id===row.id);assert.ok(original);const unchanged={...row,title:original.title,text:original.text};assert.deepEqual(unchanged,original,'recovery changes only proven title/body, never ID/day/age/generation/metadata');}assert.deepEqual(E.migrateSave(copy(current)),current);capture.states[name]=current;}
+for(const [name,s]of Object.entries(rawCapture.states)){valid(s);const current=valid(E.migrateSave(copy(s))),other=copy(current),prior=stampEdition(statedDefaults(copy(s)));other.journal=copy(s.journal);for(const [id,messages] of Object.entries(prior.conversations.threads))prior.conversations.threads[id]=messages.filter(m=>!Number.isInteger(m.age)||m.age>=3);assert.deepEqual(other,prior,'current-v2 recovery preserves every non-Journal field except the current edition stamp and invalid pre-speech correspondence');for(const row of current.journal){const original=s.journal.find(r=>r.id===row.id);assert.ok(original);const unchanged={...row,title:original.title,text:original.text};assert.deepEqual(unchanged,original,'recovery changes only proven title/body, never ID/day/age/generation/metadata');}assert.deepEqual(E.migrateSave(copy(current)),current);capture.states[name]=current;}
 const ancestor=capture.states.unresolvedParent.dynasty.activePersonId,parentName=capture.states.unresolvedParent.hero.name;
 // Controlled companion eligibility and an unobserved optional-ledger shape
 // isolate treatment/accounting. The genealogy/content/map authorship are the
@@ -74,10 +75,11 @@ heir.companions.find(p=>p.id==='mira').hp=1;heir.rpg.companionStages.mira.status
 assert.equal(heir.maze.mapMemory.entries[0].authorId,ancestor);assert.notEqual(heir.dynasty.activePersonId,ancestor);
 assert.equal(heir.maze.mapMemory.entries[0].authorName,parentName);assert.equal(heir.maze.mapMemory.entries[0].authorGeneration,1);
 assert.deepEqual(heir.rpg.bosses[0].people[0].memories,[]);assert.equal(heir.rpg.bosses[0].people[0].bond,35);
-let legacy=settled(E.chooseEventOption(valid(E.migrateSave(copy(old))),'withdraw'));
+// The v0.27 descent is read with its walk closed (v0.72.4); its maze is a contract's, accepted here as controlled setup.
+let legacy=settled(valid(E.migrateSave(copy(old))));
 legacy.hero.hp=legacy.hero.maxHp;legacy.hero.mp=legacy.hero.maxMp;legacy.hero.gold=500;legacy.hero.potions=4;legacy.adventuring.rations=8;valid(legacy);
-const outside=copy(legacy);
-legacy=settled(E.chooseAction(legacy,'adventure_descend'));assert.equal(legacy.maze.version,1);
+
+const contract=legacy.adventuring.contracts.find(c=>c.status==='offered')||legacy.adventuring.contracts[0];Object.assign(contract,{status:'active',acceptedDay:legacy.day,destinationId:legacy.locationId});legacy=settled(E.chooseAction(valid(legacy),'adventure_pursue_'+contract.id));assert.equal(legacy.maze.version,1);
 // A controlled known, cleared path to a real finite cache permits bounded
 // handler coverage without pretending this is earned routing/balance play.
 function pathTo(m,to){const l=mazeLayout(m),queue=[[0]],seen=new Set([0]);for(const path of queue){if(path.at(-1)===to)return path;for(const id of l.cells[path.at(-1)].doors)if(!seen.has(id)){seen.add(id);queue.push([...path,id]);}}return null;}
@@ -88,9 +90,14 @@ for(const cell of mazeLayout(legacy.maze).cells.filter(c=>c.kind==='cache')){
  if(expeditionVisitTotals(after.maze.expeditionVisit).gains.gear.length){route=path;cacheSource=s;break;}
 }
 assert.ok(cacheSource&&route.length>=2,'captured world has a real finite cache gear settlement');
-const authored=copy(outside);authored.locationId='marsh';authored.cartography.pending=null;authored.cartography.offsite=false;authored.cartography.interior=null;syncCartography(authored);for(const k of Object.keys(authored.equipment.materials))authored.equipment.materials[k]=20;
-for(const p of authored.companions){p.recruited=p.id==='mira';p.active=p.recruited;}authored.companions.find(p=>p.id==='mira').hp=1;authored.rpg.companionStages.mira.status='available';
-let authoredSource=settled(E.chooseAction(authored,'explore_enter_cistern'));assert.equal(authoredSource.maze.version,2);assert.equal(authoredSource.maze.content.family,'authored');
+// From v0.72.3 a campaign dungeon begins as a delve; an authored maze runs only where one was begun. This is a
+// genuine begun one, written by v0.72.2's own engine (scripts/fixtures/generate-begun-mazes.mjs), given this
+// checker's controlled resources and party.
+let authoredSource=valid(E.migrateSave(copy(JSON.parse(gunzipSync(read(fixturePaths[3]))).states.cistern)));
+Object.assign(authoredSource.hero,{hp:authoredSource.hero.maxHp,mp:authoredSource.hero.maxMp,gold:500,potions:4});authoredSource.adventuring.rations=8;
+for(const k of Object.keys(authoredSource.equipment.materials))authoredSource.equipment.materials[k]=20;
+for(const p of authoredSource.companions){p.recruited=p.id==='mira';p.active=p.recruited;}authoredSource.companions.find(p=>p.id==='mira').hp=1;authoredSource.rpg.companionStages.mira.status='available';
+authoredSource=settled(authoredSource);assert.equal(authoredSource.maze.version,2);assert.equal(authoredSource.maze.content.family,'authored');
 const witness=authoredSource.maze.content.anchors.find(a=>a.slotId==='witness');assert.ok(witness);authoredSource.maze.position=witness.cellId;authoredSource.maze.previous=mazeLayout(authoredSource.maze).cells[witness.cellId].doors[0];authoredSource.maze.visited=[...new Set([...authoredSource.maze.visited,witness.cellId])];valid(authoredSource);
 const expected=[heir,cacheSource,authoredSource].map(valid);
 for(const s of expected)assert.deepEqual(E.migrateSave(copy(s)),s,'complete fixtures are canonical before mounting');

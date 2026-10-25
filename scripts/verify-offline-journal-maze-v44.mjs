@@ -36,7 +36,10 @@ assert.equal(journal.stories.arcs[0].chapter, 1);
 journal.stories.arcs[0].nextAge = journal.age; assert.ok(E.validateSave(journal));
 let maze = structuredClone(base); maze.adventuring.rations = 2;
 for (const p of maze.companions) { p.recruited = p.id === 'mira'; p.active = p.id === 'mira'; }
-maze = E.chooseAction(maze, 'adventure_descend'); assert.ok(maze.maze);
+// From v0.72.3 the board's descent is a delve and the radiant maze it began left in v0.72.4; a
+// contract's descent is the maze. Controlled setup: an offered contract is accepted here.
+const contract = maze.adventuring.contracts.find(c => c.status === 'offered') || maze.adventuring.contracts[0]; Object.assign(contract, { status: 'active', acceptedDay: maze.day, destinationId: maze.locationId });
+maze = E.chooseAction(maze, 'adventure_pursue_' + contract.id); assert.ok(maze.maze);
 addCampingKit(maze, 'bedroll'); maze.hero.hp = 10; maze.hero.mp = 0;
 const ally = maze.companions.find(p => p.id === 'mira'); ally.hp = 10; ally.mp = 0;
 assert.ok(E.validateSave(maze));
