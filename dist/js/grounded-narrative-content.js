@@ -299,7 +299,6 @@ function childhoodEvent(s,e) {
     // both editionScene and setEvent; the saved incident keeps its own words.
     // Other birthdays retain their existing prose and quotation rules.
     const opening=s.farm&&s.age===16&&e.id==='birth_year_16'
-      &&(s.hero?.station||s.householdBudget?.debt!==undefined)
       &&pending.age===s.age&&pending.day===s.day
       &&captured.title===e.title&&captured.body===e.body
       &&choices.length===3&&captured.choices?.length===3&&new Set(choices.map(c=>c.id)).size===3

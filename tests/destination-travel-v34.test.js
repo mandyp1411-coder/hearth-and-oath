@@ -11,16 +11,14 @@ import {chartProject} from '../dist/js/regional-geography-v33.js';
 import {paperMapLabels,paperMapPosition,paperMapLayout} from '../dist/js/paper-map.js';
 import {addCampingKit} from '../dist/js/travel-energy.js';
 import {mountApp,fakeSurface} from './helpers/ui-surface.mjs';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
 const fixture=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url))));
-const fresh=key=>structuredClone(fixture.states[key||'base']);
+// The old capture, read into the one rulebook as the main game's engine reads any life (v0.72.2).
+const fresh=key=>E.migrateSave(structuredClone(fixture.states[key||'base']));
 const valid=s=>{assert.ok(E.validateSave(s),s.notice);return s;};
 function drain(s){for(let n=0;s.event&&n<100;n++){const c=s.event.choices.find(c=>['avoid','continue','keep','care','pause','leave','later','friends','private'].includes(c.id)&&!c.disabledReason)||s.event.choices.find(c=>!c.disabledReason);s=valid(E.chooseEventOption(s,c.id));}return s;}
 const known=s=>Object.keys(s.cartography.sites).filter(id=>s.cartography.offsite||id!==s.locationId);
 const nearest=s=>known(s).filter(id=>!E.exploreTravelPreview(s,id).disabledReason).sort((a,b)=>E.exploreTravelPreview(s,a).days-E.exploreTravelPreview(s,b).days)[0];
-async function open(t,s=fresh(),width=1440){const ui=await mountApp(t, {rulebooks:'both', states:[s],width});await ui.click('title-continue');await ui.click('tab','map');return ui;}
+async function open(t,s=fresh(),width=1440){const ui=await mountApp(t, {states:[s],width});await ui.click('title-continue');await ui.click('tab','map');return ui;}
 async function pick(ui,id){const select=ui.root.querySelector('#journey-destination');select.value=id;await ui.fire('change',select);}
 function arrive(s,id){for(let n=0;n<240&&(s.timeline.journey||s.cartography.route||s.cartography.pending||s.locationId!==id);n++){s=drain(s);if(s.battle)throw Error('Unexpected battle in peaceful fixture');const before=s.day;if(s.hero.mp<s.hero.maxMp*.4&&E.getActions(s).some(a=>a.id==='trail_camp'&&!a.disabledReason))s=valid(E.chooseAction(s,'trail_camp'));else s=valid(E.continueExploreJourney(s));if(s.day===before&&!s.event&&!s.timeline.journey&&!s.cartography.route&&!s.cartography.pending)break;}return drain(s);}
 

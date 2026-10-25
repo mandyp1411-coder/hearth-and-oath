@@ -10,7 +10,7 @@ import {GROUNDED_PORTRAIT_FAMILIES_V39} from '../dist/js/grounded-portraits-v39.
 import {portraitLayers} from '../dist/js/avatar.js';
 import {HERITAGES,heritageAllowsPortrait} from '../dist/js/heritages.js';
 import {culturalName,namingLore,regionalNamingLore} from '../dist/js/names.js';
-import {traitPointBudget,traitPoints,traitAttributeBonuses,applyPersonalityBuild,personalityImpactText,personalityView, personalityImpact} from '../dist/js/personality.js';
+import {traitPointBudget,traitPoints,applyPersonalityBuild,personalityImpactText,personalityView, personalityImpact} from '../dist/js/personality.js';
 import {renderPersonalityPanel} from '../dist/js/personality-ui.js';
 import {defaultCreatorDraft,captureCreatorDraft,randomizeCreatorDraft,toggleCreatorTrait,rollCreatorName,renderCharacterCreator} from '../dist/js/creator.js';
 import {createLifeAtAge} from '../dist/js/new-life.js';
@@ -77,10 +77,12 @@ test('new NPCs keep their observed complexion, hair family, coat and species thr
 // On a new-edition life a nature is a trade-off; the attribute points a trait
 // once bought belong to older saves. These two tests play an older life.
 // The controlled legacy fixture also has no prospective v0.71 family field.
-const olderLife=async()=>{const s=structuredClone(await adultLife());delete s.householdBudget.debt;delete s.householdBudget.borrowedGold;delete s.householdBudget.debtInterestPaid;delete s.householdBudget.lastInterestYear;delete s.householdBudget.graceUsed;delete s.hero.station;delete s.farm;delete s.edition;stampEdition(s);assert.ok(validateSave(s));return s;};
-test('trait attribute gains are real, are applied once, and survive an export and reload',async()=>{
+// One rulebook (v0.72.2): there is no older life for a trait to treat differently.
+const olderLife=adultLife;
+test('a trait is chosen once, carries no attribute bonus, and survives an export and reload',async()=>{
   let s=await olderLife(),base=structuredClone(s.hero.attributes);s=choosePersonalityTrait(s,'brave');s=choosePersonalityTrait(s,'curious');
-  const bonus=traitAttributeBonuses(['brave','curious']);for(const [key,v] of Object.entries(base))assert.equal(s.hero.attributes[key],v+(bonus[key]||0));
+  // One rulebook (v0.72.2): a nature is a trade-off, not a point of Strength.
+  assert.deepEqual(s.hero.attributes,base);
   const duplicate=choosePersonalityTrait(s,'brave');assert.deepEqual(duplicate.hero.attributes,s.hero.attributes);assert.equal(duplicate.hero.personality.traits.length,2);
   const opposing=choosePersonalityTrait(s,'cautious');assert.deepEqual(opposing.hero,s.hero);
   assert.equal(applyPersonalityBuild(s,['brave','curious']),true);assert.deepEqual(s.hero.attributes,duplicate.hero.attributes);
@@ -127,12 +129,10 @@ test('a remembered grievance makes forgiveness and vengeance playable, with a la
   assert.equal(chooseEventOption(chosen,'forgive').hero.personality.history.length,chosen.hero.personality.history.length);
 });
 
-test('a trait strength bonus changes actual battle damage and invalid targets cannot change composure',async()=>{
+test('a trait adds no battle strength, and invalid targets cannot change composure',async()=>{
   const plain=await olderLife(),brave=choosePersonalityTrait(choosePersonalityTrait(plain,'brave'),'vengeful');
   const a=savedEncounter(plain),b=savedEncounter(brave);
-  const target=a.battle.actors.find(p=>p.side==='enemy').id;
-  const afterA=chooseBattleAction(a,'attack',target),afterB=chooseBattleAction(b,'attack',target);
-  assert.notDeepEqual(afterB.battle.log,afterA.battle.log);assert.ok(afterB.battle.actors.find(p=>p.id===target).hp<=afterA.battle.actors.find(p=>p.id===target).hp);assert.equal(b.battle.actors.find(p=>p.id==='hero').attributes.strength,a.battle.actors.find(p=>p.id==='hero').attributes.strength+2);
+  assert.equal(b.battle.actors.find(p=>p.id==='hero').attributes.strength,a.battle.actors.find(p=>p.id==='hero').attributes.strength);
   const failed=chooseBattleAction(b,'inspect','missing-enemy');assert.deepEqual(failed.hero.personality,b.hero.personality);assert.equal(failed.life.stress,b.life.stress);
 });
 

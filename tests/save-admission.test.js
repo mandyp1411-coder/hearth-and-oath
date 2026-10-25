@@ -13,7 +13,11 @@ import {ironmanRecordKey, ironmanEndedKey} from '../dist/js/ironman-storage.js';
 const KEY = 'hearth-and-oath:slots:v1', RUN = '00112233-4455-4677-8899-aabbccddeeff';
 const release = v => JSON.parse(gunzipSync(readFileSync(new URL(`./fixtures/saves/v${v}.json.gz`, import.meta.url)))).states;
 const oldRaw = release('0600'), newRaw = release('0690');
-const old = migrateSave(oldRaw.eighteen), newer = migrateSave(newRaw.eighteen);
+// v0.72.2: the engine reads any life into the one rulebook, so these store-level
+// tests decode with a reader that keeps an old life as its own stored rules: the
+// subject is the store's split between retained reads and admitted writes.
+const readBoth = value => rulesOf(value) === OLD ? (validateSave(value) ? structuredClone(value) : null) : migrateSave(value);
+const old = readBoth(oldRaw.eighteen), newer = migrateSave(newRaw.eighteen);
 assert.ok(validateSave(old) && validateSave(newer));
 assert.equal(rulesOf(old), OLD); assert.equal(rulesOf(newer), NEW);
 const clone = value => structuredClone(value);
@@ -40,14 +44,14 @@ function ironman(storage, acceptPosition) {
   // browser scheduling. Both actual decode and mortality validators still run.
   let sequence = 0;
   const coordinate = createSaveCoordinator({async request(name, {mode}, consume) {return consume({name, mode});}});
-  return createSaveStore(storage, migrateSave, {coordinate, acceptPosition,
+  return createSaveStore(storage, readBoth, {coordinate, acceptPosition,
     crypto: {randomUUID: () => `aaaaaaaa-bbbb-4ccc-8ddd-${(++sequence).toString(16).padStart(12, '0')}`}});
 }
 function optedIn() {
   // Explicit modern opt-in on a genuine old-rule life, not a claim that the
   // historical release wrote Ironman metadata. All past deeds stay untouched.
   const state = clone(old); state.ironman = createIronmanMetadata(state, {randomUUID: () => RUN});
-  assert.ok(validateSave(state)); assert.deepEqual(migrateSave(state), state); return state;
+  assert.ok(validateSave(state)); assert.deepEqual(readBoth(state), state); return state;
 }
 async function claim(store, state) {
   const review = await store.inspectIronman(state, {intent: 'create', slot: 2});
@@ -64,21 +68,21 @@ async function head(store, intent = 'export') {
 test('a stricter incoming-write policy cannot hide old durable slots, backups or a mirror-only life', () => {
   let calls = 0;
   const storage = disk(), initial = bytes(storage);
-  const store = createSaveStore(storage, migrateSave, {acceptPosition: state => {calls++; return newOnly(state);}});
+  const store = createSaveStore(storage, readBoth, {acceptPosition: state => {calls++; return newOnly(state);}});
   for (let iteration = 0; iteration < 2; iteration++) {
     assert.deepEqual(store.read(0), old); assert.deepEqual(store.read(1), newer);
-    assert.deepEqual(store.backup(1), migrateSave(oldRaw.birth));
+    assert.deepEqual(store.backup(1), readBoth(oldRaw.birth));
     assert.equal(store.empty(), 2); assert.equal(store.health(0).hasDurableState, true);
     assert.ok(store.reviewToken(0)); assert.ok(store.deletionToken(0)); assert.equal(store.reload(), true);
   }
   assert.equal(calls, 0); assert.equal(storage.writes, 0); assert.deepEqual(bytes(storage), initial);
   storage.values.delete(KEY); storage.values.set(LEGACY_SAVE_KEY, JSON.stringify(oldRaw.eighteen));
-  const mirror = createSaveStore(storage, migrateSave, {acceptPosition: () => {throw Error('not a read policy');}});
+  const mirror = createSaveStore(storage, readBoth, {acceptPosition: () => {throw Error('not a read policy');}});
   assert.deepEqual(mirror.read(0), old); assert.equal(mirror.empty(), 1); assert.equal(storage.writes, 0);
 });
 
 test('refused ordinary writes and replacements leave occupancy, tokens, selection and unsaved state exact', () => {
-  const storage = disk(), store = createSaveStore(storage, migrateSave, {acceptPosition: newOnly});
+  const storage = disk(), store = createSaveStore(storage, readBoth, {acceptPosition: newOnly});
   const initial = bytes(storage), before = view(store), input = clone(old);
   for (const slot of [0, 1, 2]) {
     assert.equal(store.write(slot, input), false);
@@ -87,13 +91,13 @@ test('refused ordinary writes and replacements leave occupancy, tokens, selectio
   }
   assert.deepEqual(input, old); assert.equal(storage.writes, 0);
   assert.equal(store.write(2, newer), true);
-  assert.deepEqual(store.read(0), old); assert.deepEqual(store.backup(1), migrateSave(oldRaw.birth));
+  assert.deepEqual(store.read(0), old); assert.deepEqual(store.backup(1), readBoth(oldRaw.birth));
   assert.equal(store.replace(0, newer, {reviewed: true, token: store.reviewToken(0)}), true);
   assert.deepEqual(store.backup(0), old, 'an explicit admitted replacement keeps the complete previous old life');
 });
 
 test('genuine zero-debt v0.61 lives pass new-rule admission without inventing a station or field', () => {
-  const debtOnly = release('0610'), storage = disk(), store = createSaveStore(storage, migrateSave, {acceptPosition: newOnly});
+  const debtOnly = release('0610'), storage = disk(), store = createSaveStore(storage, readBoth, {acceptPosition: newOnly});
   for (const [name, raw] of Object.entries(debtOnly)) {
     assert.equal(raw.hero.station, undefined); assert.equal(raw.householdBudget.debt, 0);
     const original = clone(raw), expected = migrateSave(raw);
@@ -105,7 +109,7 @@ test('genuine zero-debt v0.61 lives pass new-rule admission without inventing a 
 
 test('admission cannot grant validity to a malformed save and refusal preserves earlier unsaved work', () => {
   const storage = disk(); let allowed = true, calls = 0;
-  const store = createSaveStore(storage, migrateSave, {acceptPosition: () => {calls++; return allowed;}});
+  const store = createSaveStore(storage, readBoth, {acceptPosition: () => {calls++; return allowed;}});
   const initial = bytes(storage), original = view(store);
   assert.equal(store.write(2, {version: 1}), false); assert.equal(store.replace(2, {version: 1}), false);
   assert.equal(calls, 0); assert.deepEqual(view(store), original); assert.deepEqual(bytes(storage), initial);
@@ -120,7 +124,7 @@ test('admission cannot grant validity to a malformed save and refusal preserves 
 
 test('predicate mutation, exceptions and nonboolean results cannot alter or admit an ordinary candidate', async () => {
   for (const result of [() => false, () => undefined, () => 1, () => 'yes', () => ({}), () => Promise.resolve(true), () => Promise.reject(Error('async refusal'))]) {
-    const storage = disk(), store = createSaveStore(storage, migrateSave, {acceptPosition: state => {state.hero.gold = 999999; return result();}});
+    const storage = disk(), store = createSaveStore(storage, readBoth, {acceptPosition: state => {state.hero.gold = 999999; return result();}});
     const initial = bytes(storage), before = view(store), input = clone(newer);
     assert.equal(store.write(2, input), false);
     assert.equal(store.replace(0, input, {reviewed: true, token: store.reviewToken(0)}), false);
@@ -128,16 +132,16 @@ test('predicate mutation, exceptions and nonboolean results cannot alter or admi
     await setImmediate();
   }
   const storage = disk(), initial = bytes(storage);
-  const store = createSaveStore(storage, migrateSave, {acceptPosition: state => {state.hero.name = 'Changed'; throw Error('refuse');}});
+  const store = createSaveStore(storage, readBoth, {acceptPosition: state => {state.hero.name = 'Changed'; throw Error('refuse');}});
   assert.equal(store.write(2, newer), false); assert.deepEqual(bytes(storage), initial); assert.deepEqual(store.read(1), newer);
-  const accepting = createSaveStore(storage, migrateSave, {acceptPosition: state => {state.hero.name = 'Changed'; return true;}});
+  const accepting = createSaveStore(storage, readBoth, {acceptPosition: state => {state.hero.name = 'Changed'; return true;}});
   assert.equal(accepting.write(2, newer), true); assert.deepEqual(accepting.read(2), newer, 'admission cannot rewrite an accepted candidate');
-  for (const value of [null, false, 'new', {}]) assert.throws(() => createSaveStore(storage, migrateSave, {acceptPosition: value}), /acceptPosition must be a function/);
+  for (const value of [null, false, 'new', {}]) assert.throws(() => createSaveStore(storage, readBoth, {acceptPosition: value}), /acceptPosition must be a function/);
 });
 
 test('a refused ordinary candidate cannot bless a stale replacement review', () => {
-  const storage = disk(), local = createSaveStore(storage, migrateSave, {acceptPosition: newOnly});
-  const other = createSaveStore(storage, migrateSave), token = local.reviewToken(0);
+  const storage = disk(), local = createSaveStore(storage, readBoth, {acceptPosition: newOnly});
+  const other = createSaveStore(storage, readBoth), token = local.reviewToken(0);
   assert.equal(other.replace(0, newer, {reviewed: true, token: other.reviewToken(0)}), true);
   const durable = bytes(storage);
   assert.equal(local.replace(0, old, {reviewed: true, token}), false);
@@ -190,7 +194,7 @@ test('a refused Ironman life can still be reviewed, archived, reattached and exp
   assert.deepEqual((await head(store)).state, state);
   const removed = await store.deleteIronman(RUN, {reviewed: true, token: (await head(store)).token}); assert.equal(removed.status, 'deleted');
   const record = JSON.parse(storage.getItem(ironmanRecordKey(RUN))); assert.equal(record.state, null); assert.deepEqual(record.casualties, state.ironman.casualties);
-  assert.deepEqual(store.read(0), old); assert.deepEqual(store.read(1), newer); assert.deepEqual(store.backup(1), migrateSave(oldRaw.birth));
+  assert.deepEqual(store.read(0), old); assert.deepEqual(store.read(1), newer); assert.deepEqual(store.backup(1), readBoth(oldRaw.birth));
 });
 
 test('an incoming-write refusal cannot block a verified Ironman terminal marker and full-position cleanup', async () => {

@@ -10,6 +10,8 @@ import {syncCartography} from '../dist/js/cartography.js';
 import {getBattleActions} from '../dist/js/combat.js';
 import {bossContactJournal} from '../dist/js/boss-stories-v27.js';
 import {ENCOUNTER_DESIGN_V27} from '../dist/js/encounter-design-v27.js';
+import {openLedger} from '../dist/js/budget.js';
+import {initializeFortune} from '../dist/js/fortune.js';
 const copy=v=>structuredClone(v),raw=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/maze-identity/v050-successor.json.gz',import.meta.url)))),input=JSON.stringify(raw);
 const valid=s=>{assert.ok(E.validateSave(s),s.notice);return s;};
 const reload=s=>{valid(s);const next=E.migrateSave(copy(s));assert.deepEqual(next,s);return next;};
@@ -17,7 +19,8 @@ function original(){return copy(raw.states.renewedHeir);}
 function repaired(){return valid(E.migrateSave(original()));}
 function room(s,id){const cell=s.maze.content.anchors.find(a=>a.slotId===id).cellId;s.maze.position=cell;s.maze.previous=mazeLayout(s.maze).cells[cell].doors[0];s.maze.visited=[...new Set([...s.maze.visited,cell])];return valid(s);}
 function authored(source='cistern',locationId='marsh'){let s=E.migrateSave(JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v27-road-and-descent.json.gz',import.meta.url)))).descent);s=E.chooseEventOption(s,'withdraw');s.locationId=locationId;s.cartography.pending=null;s.cartography.offsite=false;s.cartography.interior=null;syncCartography(s);for(const k of Object.keys(s.equipment.materials))s.equipment.materials[k]=20;return valid(E.chooseAction(s,'explore_enter_'+source));}
-function withoutJournalChange(before,after){const value=copy(after),prior=copy(before);value.journal=copy(prior.journal);delete value.edition;delete prior.edition;assert.deepEqual(value,prior);}
+// The engine reads an old capture into the one rulebook with its stated defaults (v0.72.2); nothing else may change.
+function withoutJournalChange(before,after){const value=copy(after),prior=copy(before);openLedger(prior);initializeFortune(prior);value.journal=copy(prior.journal);delete value.edition;delete prior.edition;assert.deepEqual(value,prior);}
 function generic(s){return s.journal.findLast(r=>r.tag==='rpg'&&r.title==='Work in the Region');}
 
 test('new v2 signature contact retains its exact generated title/body through afterAction and reload',()=>{
@@ -54,7 +57,7 @@ test('staged A, unrelated calendar, B keep exact IDs/order/timestamps and only v
 test('one exact typed renewal/history repairs only the unique generic row and is input-pure and idempotent',()=>{
  const before=original(),prior=copy(before),after=E.migrateSave(before),old=generic(prior),row=after.journal.find(r=>r.id===old.id),history=prior.rpg.history.at(-1);
  assert.equal(row.title,history.title);assert.equal(row.text,history.text);assert.equal(row.day,old.day);assert.equal(row.age,old.age);assert.equal(row.generation,old.generation);assert.equal(row.id,old.id);withoutJournalChange(prior,after);assert.deepEqual(before,prior);
- const expected=stampEdition(copy(prior));const matched=expected.journal.find(r=>r.id===old.id);matched.title=history.title;matched.text=history.text;assert.deepEqual(after,expected);assert.deepEqual(E.migrateSave(copy(after)),after);assert.equal(JSON.stringify(raw),input);
+ const expected=copy(prior);openLedger(expected);initializeFortune(expected);stampEdition(expected);const matched=expected.journal.find(r=>r.id===old.id);matched.title=history.title;matched.text=history.text;assert.deepEqual(after,expected);assert.deepEqual(E.migrateSave(copy(after)),after);assert.equal(JSON.stringify(raw),input);
 });
 
 for(const [name,change]of [

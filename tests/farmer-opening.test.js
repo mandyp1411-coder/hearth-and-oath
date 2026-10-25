@@ -75,8 +75,7 @@ test('a mismatched birthday never borrows descriptions from a different captured
     differentEvent:s=>s.event.id='birth_year_17',
     oldContent:s=>s.timeline.contentVersion=6,
     notBirth:s=>s.timeline.mode='legacy',
-    noFarm:s=>delete s.farm,
-    oldRules:s=>{delete s.hero.station;delete s.householdBudget.debt;}
+    noFarm:s=>delete s.farm
   };
   // These controlled copies isolate authentication failures; they are not
   // played lives or fabricated save histories and are never passed as such.

@@ -7,9 +7,6 @@ import {settlementServices} from '../dist/js/world-services.js';
 import {renderServiceMeeting} from '../dist/js/world-services-ui.js';
 import {syncCartography} from '../dist/js/cartography.js';
 import {mountApp} from './helpers/ui-surface.mjs';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
 
 const captured=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url)))).states.base;
 const escape=value=>String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -59,7 +56,7 @@ for(const [age,enrolled,schoolShortcut] of [[18,false,false],[18,true,true],[17,
 });
 
 test('empty archive navigation and repeated return spend no time or resources and never enroll',async t=>{
- const ui=await mountApp(t, {rulebooks:'both', states:[fixture()]});await ui.click('title-continue');
+ const ui=await mountApp(t, {states:[fixture()]});await ui.click('title-continue');
  for(let i=0;i<2;i++){
   await ui.click('place-open');const r=archivist(ui.current());await ui.click('service-open',r.id);
   assert.ok(ui.root.querySelector('.archive-empty-meeting'));const before=ui.current();

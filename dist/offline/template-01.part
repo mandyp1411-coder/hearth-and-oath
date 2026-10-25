@@ -112227,9 +112227,7 @@ function traitPoints(ids=[]){return ids.reduce((sum,id)=>sum+(personalityTrait(i
 function normalizePersonalityTraits(value,age=0){
   const result=[];for(const id of Array.isArray(value)?value:[]){const t=personalityTrait(id);if(!t||result.includes(id)||result.includes(t.opposite)||traitPoints(result)+t.cost>traitPointBudget(age))continue;result.push(id);}return result;
 }
-function traitAttributeBonuses(ids=[]){const out={};for(const id of ids)for(const [key,n] of Object.entries(personalityTrait(id)?.attributes||{}))out[key]=(out[key]||0)+n;return out;}
-const natureEdition=state=>state?.householdBudget?.debt!==undefined;
-function personalityView(state){const traits=state?.hero?.personality?.traits||[],budget=traitPointBudget(state?.age),acquired=(state?.hero?.marks||[]).map(m=>({...personalityTrait(m.id),day:m.day,source:m.source})).filter(t=>t.id);return {traits:traits.map(personalityTrait).filter(Boolean),ids:[...traits],acquired,budget,spent:traitPoints(traits),remaining:budget-traitPoints(traits),bonuses:natureEdition(state)?{}:traitAttributeBonuses(traits),history:state?.hero?.personality?.history||[],stress:state?.life?.stress||0};}
+function personalityView(state){const traits=state?.hero?.personality?.traits||[],budget=traitPointBudget(state?.age),acquired=(state?.hero?.marks||[]).map(m=>({...personalityTrait(m.id),day:m.day,source:m.source})).filter(t=>t.id);return {traits:traits.map(personalityTrait).filter(Boolean),ids:[...traits],acquired,budget,spent:traitPoints(traits),remaining:budget-traitPoints(traits),bonuses:{},history:state?.hero?.personality?.history||[],stress:state?.life?.stress||0};}
 function initializePersonality(state){if(!state.hero.personality)state.hero.personality={version:1,traits:[],applied:[],cooldowns:{},history:[]};}
 const reflectionPause={id:'pause',label:'Leave this exchange for later',description:'Leave without spending time or changing the relationship. Meet any urgent need, then return to the grievance.'};
 function initializePersonalityDecision(state){
@@ -112249,16 +112247,9 @@ function personalitySelectionReason(state,id){
  * twice. On a new-edition life there are none: a nature is a trade-off, chosen
  * for who you want to be, not for a point of Strength. */
 function applyPersonalityBuild(state,ids,{creation=false}={}){
-  initializePersonality(state);const p=state.hero.personality,chosen=normalizePersonalityTraits(ids,state.age),edition=natureEdition(state);
+  initializePersonality(state);const p=state.hero.personality,chosen=normalizePersonalityTraits(ids,state.age);
   if(p.traits.some(id=>!chosen.includes(id)))return false;
-  for(const id of chosen)if(!p.applied.includes(id)){
-    for(const [key,amount] of Object.entries(edition?{}:personalityTrait(id).attributes)){
-      state.hero.attributes[key]+=amount;
-      if(key==='vitality'){state.hero.maxHp+=amount*3;state.hero.hp=Math.min(state.hero.maxHp,state.hero.hp+amount*3);}
-      if(key==='intellect'){state.hero.maxMp+=amount*3;state.hero.mp=Math.min(state.hero.maxMp,state.hero.mp+amount*3);}
-    }
-    p.applied.push(id);
-  }
+  for(const id of chosen)if(!p.applied.includes(id))p.applied.push(id);
   p.traits=chosen;return true;
 }
 function actionTags(id){
@@ -112349,10 +112340,10 @@ function applyPersonalityImpact(state,context){
   const amount=Math.max(-4,Math.min(12,entries.reduce((n,i)=>n+i.delta,0))),old=state.life.stress;
   state.life.stress=Math.max(0,Math.min(100,old+amount));
   for(const i of entries)p.cooldowns[`${i.id}:${i.tag}`]=state.day;
-  if(natureEdition(state))recordStrain(state,entries,context);
+  recordStrain(state,entries,context);
   // Where people can see it, acting on your nature moves how they hold you:
   // what their people respect draws them closer, what it scorns pushes them off.
-  if(natureEdition(state))for(const i of entries.filter(i=>i.delta<0))for(const person of state.life.people){
+  for(const i of entries.filter(i=>i.delta<0))for(const person of state.life.people){
     if(person.alive===false||person.locationId!==state.locationId||!person.appearance?.ancestry)continue;
     const regard=cultureRegard(person.appearance.ancestry,i.id);if(regard)person.bond=Math.max(0,Math.min(100,(person.bond||0)+regard));
   }
@@ -112428,7 +112419,7 @@ function applyPersonalityChoice(state,eventId,id,ctx){
 }
 function personalityEventIds(){return {nature_slight:['forgive','retaliate','account','wait','pause']};}
 
-return {ACQUIRED_TRAITS,CULTURE_ESTEEM,INTENT_TAGS,PERSONALITY_TRAITS,applyPersonalityAction,applyPersonalityBuild,applyPersonalityChoice,applyPersonalityImpact,cultureRegard,hasNature,initializePersonality,initializePersonalityDecision,natureChoice,natureEdition,natureIds,normalizePersonalityTraits,personalityActions,personalityEventIds,personalityImpact,personalityImpactText,personalitySelectionReason,personalityTags,personalityTrait,personalityView,shiftNature,traitAttributeBonuses,traitPointBudget,traitPoints,validatePersonality};
+return {ACQUIRED_TRAITS,CULTURE_ESTEEM,INTENT_TAGS,PERSONALITY_TRAITS,applyPersonalityAction,applyPersonalityBuild,applyPersonalityChoice,applyPersonalityImpact,cultureRegard,hasNature,initializePersonality,initializePersonalityDecision,natureChoice,natureIds,normalizePersonalityTraits,personalityActions,personalityEventIds,personalityImpact,personalityImpactText,personalitySelectionReason,personalityTags,personalityTrait,personalityView,shiftNature,traitPointBudget,traitPoints,validatePersonality};
 })();
 const __fortune = (() => {
 // Fortune: the things that go wrong (and, less often, right) with a
@@ -112573,7 +112564,7 @@ function onFortuneTime(s, { oldDay, newDay = s.day } = {}, ctx = {}) {
       // only on new-edition lives; older saves simply pay what they can.
       const paid = Math.min(gold, Math.max(0, s.hero.gold)), short = gold - paid;
       s.hero.gold -= paid;
-      if (short && s.householdBudget && s.householdBudget.debt !== undefined) s.householdBudget.debt += short;
+      if (short && s.householdBudget) s.householdBudget.debt += short;
     }
     if (event.incomeFactor) { f.incomeFactor = event.incomeFactor; f.factorUntil = season * SEASON + SEASON; }
     if (event.stress && s.life) s.life.stress = Math.min(100, (s.life.stress || 0) + event.stress);
@@ -112773,7 +112764,7 @@ function comeOfAge(s, ctx = {}) {
     s.hero.gold += portion;
     ctx.journal?.('Your portion', `You are eighteen. The house hands you ${portion} gold and the name that comes with it, and expects both to be spent well.`, 'household');
   }
-  if (st.debt && b && b.debt !== undefined) {
+  if (st.debt && b) {
     b.debt += st.debt;
     const bond = st.freedom === 'owned' ? 2 * 365 : 0;
     if (bond) b.bondedUntil = Math.max(b.bondedUntil || 0, s.day + bond);
@@ -113479,11 +113470,13 @@ const annualWorkRatio=s=>RATIOS[s.life?.focus]??1;
 
 // The debt ledger marks a new-edition life. A save migrated from an older
 // version gets a budget without it and keeps the rules it was played under.
-function initializeHouseholdBudget(s,{reset=false,edition=false}={}) {
+const LEDGER=()=>({debt:0,borrowedGold:0,debtInterestPaid:0,lastInterestYear:null,graceUsed:false});
+function initializeHouseholdBudget(s,{reset=false}={}) {
   if(s.householdBudget&&!reset)return;
-  s.householdBudget={startedDay:s.day,lastDay:s.day,accruedUnits:0,billedGold:0,paidGold:0,supportedGold:0,lastJournalYear:null,focusDays:Object.fromEntries(HOUSEHOLD_FOCI.map(f=>[f.id,0])),history:[],
-    ...(edition?{debt:0,borrowedGold:0,debtInterestPaid:0,lastInterestYear:null,graceUsed:false}:{})};
+  s.householdBudget={startedDay:s.day,lastDay:s.day,accruedUnits:0,billedGold:0,paidGold:0,supportedGold:0,lastJournalYear:null,focusDays:Object.fromEntries(HOUSEHOLD_FOCI.map(f=>[f.id,0])),history:[],...LEDGER()};
 }
+/** The ledger a budget from before v0.61 is read with: nothing owed, nothing borrowed. */
+function openLedger(s){const b=s.householdBudget;if(b&&b.debt===undefined)Object.assign(b,LEDGER());}
 function householdAnnualCost(s,day=s.day) {
   if(!s.life)return 0;
   const lifestyle=HOUSEHOLD_LIFESTYLES.find(l=>l.id===s.life.lifestyle)||HOUSEHOLD_LIFESTYLES[0];
@@ -113530,14 +113523,13 @@ function settleHouseholdBudget(s,ctx={},forceJournal=false) {
   if(!due)return 0;
   const paid=Math.min(Math.max(0,s.hero.gold),due),short=due-paid;
   s.hero.gold-=paid;b.billedGold+=due;b.paidGold+=paid;
-  // Legacy saves without a ledger keep their recorded support; new lives borrow.
-  const legacy=b.debt===undefined;
   const year=Math.floor((s.day-(s.timeline?.birthDay||0))/365);
   let support=0,borrowed=0;
   if(short){
     const firstAdultYear=s.age<19;
-    if(legacy||(firstAdultYear&&!b.graceUsed)){support=short;b.supportedGold+=short;if(!legacy)b.graceUsed=true;}
-    else{borrowed=short;b.debt=(b.debt||0)+short;b.borrowedGold=(b.borrowedGold||0)+short;}
+    // The first adult year's shortfall is carried by the neighbours once; after that the house borrows.
+    if(firstAdultYear&&!b.graceUsed){support=short;b.supportedGold+=short;b.graceUsed=true;}
+    else{borrowed=short;b.debt+=short;b.borrowedGold+=short;}
   }
   if(support||borrowed)s.life.lifestyle='frugal';
   const entry={day:s.day,due,paid,support,focus:s.life.focus,lifestyle:s.life.lifestyle,...(borrowed?{borrowed}:{})};
@@ -113557,7 +113549,7 @@ function settleHouseholdBudget(s,ctx={},forceJournal=false) {
 /** Charge a year's interest once per lived year and report the debt's weight. */
 function chargeDebtInterest(s,ctx={}) {
   const b=s.householdBudget;
-  if(!b||b.debt===undefined||s.phase==='retired')return;
+  if(!b||s.phase==='retired')return;
   const year=Math.floor((s.day-(s.timeline?.birthDay||0))/365);
   if(b.lastInterestYear===year)return;
   b.lastInterestYear=year;
@@ -113679,7 +113671,7 @@ function householdBudgetActions(s) {
   if(!ready(s))return [];
   const b=s.householdBudget,owed=b.debt||0;
   // Owed money is paid from what you carry; nothing else pays it down.
-  const repay=b.debt===undefined?[]:[{id:'budget_repay',label:owed?`Pay down what you owe (${Math.min(owed,s.hero.gold)} of ${owed} gold)`:'Pay down what you owe',description:'Hand the lender what you can from what you carry. Interest stops on what is paid.',days:0,cost:0,group:'Household',disabledReason:!owed?'You owe nothing.':s.hero.gold<=0?'You have nothing to pay with.':undefined}];
+  const repay=[{id:'budget_repay',label:owed?`Pay down what you owe (${Math.min(owed,s.hero.gold)} of ${owed} gold)`:'Pay down what you owe',description:'Hand the lender what you can from what you carry. Interest stops on what is paid.',days:0,cost:0,group:'Household',disabledReason:!owed?'You owe nothing.':s.hero.gold<=0?'You have nothing to pay with.':undefined}];
   return [...repay,...HOUSEHOLD_FOCI.map(f=>({id:`budget_focus_${f.id}`,label:f.label,description:`${f.description} Ordinary Age up income uses ${Math.round(RATIOS[f.id]*100)}% of the normal working schedule. Dedicated work commitments keep their agreed wages.`,disabledReason:s.life.focus===f.id?'This is your current priority.':undefined})),...HOUSEHOLD_LIFESTYLES.map(l=>({id:`budget_lifestyle_${l.id}`,label:l.label,description:`${l.description} Base provisions: ${l.annual} gold per actual adult year; property, dependent children and scheduled lessons add their visible costs.`,disabledReason:s.life.lifestyle===l.id?'This is your current living standard.':undefined}))].map(a=>({...a,days:0,cost:0,group:'Household priorities'}));
 }
 function applyHouseholdBudgetAction(s,id,ctx={}) {
@@ -113707,7 +113699,7 @@ function validateHouseholdBudget(b,s) {
   return b.history.every(e=>e&&integer(e.day)&&e.day<=s.day&&integer(e.due)&&integer(e.paid)&&integer(e.support)&&e.due===e.paid+e.support+(e.borrowed||0)&&(e.borrowed===undefined||integer(e.borrowed))&&HOUSEHOLD_FOCI.some(f=>f.id===e.focus)&&HOUSEHOLD_LIFESTYLES.some(l=>l.id===e.lifestyle));
 }
 
-return {DEBT_FRUGAL_MULTIPLE,DEBT_INTEREST,DEBT_RECKONING_EVENT,DEBT_RECKONING_MULTIPLE,HOUSEHOLD_FOCI,HOUSEHOLD_LIFESTYLES,accrueHouseholdBudget,annualWorkRatio,applyAnnualFocus,applyDebtReckoningChoice,applyHouseholdBudgetAction,chargeDebtInterest,debtReckoning,debtWeight,householdAnnualCost,householdBudgetActions,householdBudgetView,householdCostPreview,initializeHouseholdBudget,repayDebt,settleHouseholdBudget,validateHouseholdBudget};
+return {DEBT_FRUGAL_MULTIPLE,DEBT_INTEREST,DEBT_RECKONING_EVENT,DEBT_RECKONING_MULTIPLE,HOUSEHOLD_FOCI,HOUSEHOLD_LIFESTYLES,accrueHouseholdBudget,annualWorkRatio,applyAnnualFocus,applyDebtReckoningChoice,applyHouseholdBudgetAction,chargeDebtInterest,debtReckoning,debtWeight,householdAnnualCost,householdBudgetActions,householdBudgetView,householdCostPreview,initializeHouseholdBudget,openLedger,repayDebt,settleHouseholdBudget,validateHouseholdBudget};
 })();
 const __home_ownership = (() => {
 const { householdCostPreview } = __budget;
@@ -114706,7 +114698,7 @@ function careerActions(s) {
   if(c.batch)return [action(s,'career_batch_continue',`Continue ${c.batch.title.toLowerCase()}`,`${c.batch.remainingDays} real work days remain. Only completed days earn wages; the same job, wage agreement, and progress resume.`,0,0,!open(place(s,c.batch.locationId))?'This workplace is unavailable; cancel the commitment.':s.locationId!==c.batch.locationId?'Return to the workplace before continuing.':null,{durationDays:c.batch.remainingDays}),action(s,'career_batch_cancel','Release the remaining work commitment','Keep wages already earned; no future days or income are granted. Reserved masterwork materials remain consumed.',0)];
   if(!settlement(s))return [];
   const actions=PROFESSION_CATALOG.filter(job=>job.name!==p.name).map(job=>action(s,`career_choose_${job.id}`,job.name==='Unemployed'?'Return to flexible local labor':`Learn the work of ${withArticle(job.name.toLowerCase())}`,`${job.description} A named local mentor offers an accessible introduction. Your combat identity stays independent; previous career records are retained.`,1,0,civilianEntryReason(s,{profession:job.name})));
-  actions.push(action(s,'career_work',`Work as ${p.name==='Unemployed'?'a local laborer':withArticle(p.name.toLowerCase())}`,`Three days of safe local work earn ${professionWage(s)} gold and 3 professional experience. At fourteen actual work days, ${modern(s)&&p.skill?`${p.skill} improves by 1; `:''}smiths gain crafting practice, miners gain ore, and growers gather one remedy bundle. The same actual-day learning applies to saved commitments and shop work. No battle or class is required.`,3,0,s.householdBudget?.debt!==undefined&&s.hero.mp<=0?'You are spent. Rest before you work.':null));
+  actions.push(action(s,'career_work',`Work as ${p.name==='Unemployed'?'a local laborer':withArticle(p.name.toLowerCase())}`,`Three days of safe local work earn ${professionWage(s)} gold and 3 professional experience. At fourteen actual work days, ${modern(s)&&p.skill?`${p.skill} improves by 1; `:''}smiths gain crafting practice, miners gain ore, and growers gather one remedy bundle. The same actual-day learning applies to saved commitments and shop work. No battle or class is required.`,3,0,s.hero.mp<=0?'You are spent. Rest before you work.':null));
   actions.push(action(s,'career_practice','Practice a difficult part of your profession','Gain 6 professional experience and one relevant skill through supervised practice. Smiths also gain 1 crafting. Once every 14 days.',3,4,p.name==='Unemployed'?'Choose a profession first.':r.lastPracticeDay!==null && s.day-r.lastPracticeDay<14?`Another lesson opens in ${14-(s.day-r.lastPracticeDay)} days.`:null));
   for(const duration of [30,365]) {
     const budget=s.householdBudget?` At your present living standard, these days accrue about ${householdCostPreview(s,duration).additionalCost} gold in household costs; changes in your household can change that rate.`:'';
@@ -114799,7 +114791,7 @@ function applyCareerAction(s,id,ctx={}) {
   if(id==='career_work') {
     // Worn down, you work worse: above 70 Stress a shift pays less, and the
     // customers notice. Only new-edition lives carry this.
-    const worn=s.householdBudget?.debt!==undefined&&(s.life?.stress||0)>70;
+    const worn=(s.life?.stress||0)>70;
     const bonded=(s.householdBudget?.bondedUntil||0)>s.day,wage=bonded?0:Math.floor(professionWage(s)*fortuneIncomeFactor(s)*(worn?0.7:1));s.hero.gold+=wage;recordCareerWork(s,{days:3,source:'shift',gold:wage},ctx);if(!modern(s))skill(s,p.skill);
     if(s.life){s.life.career.experience+=2;s.life.stress=clamp(s.life.stress+(bonded?4:2));}
     record(s,ctx,bonded?'Work for the creditor':'Ordinary useful work',bonded?`Three days of ${p.name.toLowerCase()} work, and every coin of it to the creditor. ${Math.max(0,s.householdBudget.bondedUntil-s.day)} days of the bond remain.`:`Three days of ${p.name.toLowerCase()} work earned ${wage} gold in ${place(s).name}.${worn?' Your hands shook and it showed in the pay.':''}`);return true;
@@ -117536,4 +117528,14 @@ function openFirstMissionOffer(s, d, ctx) {
 function firstMissionOfferReason(s, id) {
   const p = s.rpg?.pending;
   if (!p?.firstOffer || id === 'leave') return null;
- 
+  const method = id.slice(7), def = definitions[p.id];
+  if (!id.startsWith('accept_') || !def || !FIRST_MISSION_METHODS[p.id].includes(method)) return 'That method is not part of this proposal.';
+  return offerReason(s, { id: p.id }, method);
+}
+function acceptFirstMission(s, d, method, ctx, { makeContact, note }) {
+  const faction = s.rpg.factions.find(f => f.id === d.id);
+  if (!faction || faction.rank !== 0 || faction.firstMission || !FIRST_MISSION_METHODS[d.id]?.includes(method) || offerReason(s, d, method)) return false;
+  const def = definitions[d.id], rows = settlementServices(s), cast = {};
+  const fieldLocationId = d.id === 'rootward_circle' && method === 'access' ? fieldDestination(s, s.locationId) : null;
+  for (const [key, [role, roomId]] of Object.entries(def.roles)) {
+    const p = makeContact(`first-${d.id}-${key}-${s.dynas

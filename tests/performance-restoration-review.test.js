@@ -5,9 +5,6 @@ import {gunzipSync} from 'node:zlib';
 import * as E from '../dist/js/engine.js';
 import {serviceWalkPath,serviceAccessReason,settlementServices} from '../dist/js/world-services.js';
 import {mountApp} from './helpers/ui-surface.mjs';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
 const base=E.migrateSave(JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url)))).states.base);
 function fresh(){return structuredClone(base);}
 function interest(s=fresh(),id='music'){s=E.chooseAction(s,'pastime_interest');return E.chooseEventOption(s,id);}
@@ -46,7 +43,7 @@ test('unavailable or dead personal contacts are never named as an actual perform
  s=E.chooseAction(s,'pastime_performance');assert.equal(s.pastimes.pending.actorIds.length,0);for(const name of names)assert.ok(!s.event.body.includes(name));assert.match(s.event.body,/listener|traveler/);
 });
 test('innkeeper performance wording includes artwork and keeps personal Talk separate',async t=>{
- const s=interest(fresh(),'sketching'),ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');await ui.click('tab','activities');await ui.click('activities-pane','fun');
+ const s=interest(fresh(),'sketching'),ui=await mountApp(t, {states:[s]});await ui.click('title-continue');await ui.click('tab','activities');await ui.click('activities-pane','fun');
  const host=settlementServices(ui.current()).find(r=>r.kind==='inn');await ui.click('activity-visit',host.id);
  assert.match(ui.root.innerHTML,/music, story or artwork/);assert.ok(ui.root.querySelector('[data-op="activity"][data-id="pastime_performance"]'));assert.ok(ui.root.querySelector('[data-op="spatial-contact"][data-id="'+host.personId+'"]'));
 });

@@ -5,12 +5,9 @@ import { migrateSave, validateSave, equipGear, gearOrganizerCommand } from '../d
 import { gearOrganizer, projectedEquipment } from '../dist/js/gear.js';
 import { gearPreset } from '../dist/js/gear-organizer.js';
 import { mountApp } from './helpers/ui-surface.mjs';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
 const old=JSON.parse(readFileSync(new URL('./fixtures/legacy-v5.json',import.meta.url),'utf8')).states.adult18;
 function fresh(){let s=migrateSave(old);assert.ok(s);s.equipment.owned.push('iron_sword','travel_cloak');s=equipGear(s,'iron_sword');s=equipGear(s,'travel_cloak');assert.ok(validateSave(s));return s;}
-async function inventory(t,state=fresh(),options={}){const ui=await mountApp(t, {rulebooks:'both', states:[state],...options});await ui.click('title-continue');await ui.click('tab','inventory');return ui;}
+async function inventory(t,state=fresh(),options={}){const ui=await mountApp(t, {states:[state],...options});await ui.click('title-continue');await ui.click('tab','inventory');return ui;}
 async function form(ui,id,label){const node=ui.root.querySelector('#'+id);assert.ok(node);node.querySelector('[name="label"]').value=label;await ui.fire('submit',node);}
 
 test('opening Inventory and its empty Loadouts disclosure never initializes metadata',async t=>{

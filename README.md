@@ -1,5 +1,32 @@
 # Hearth & Oath
 
+Version 0.72.2 is One rulebook in the engine. The rules no longer ask which
+rulebook a life lives by: every life the main game plays follows the same
+ones, and the old rules' branches have left the code. Six systems still wait
+for a rolled station before they begin (the living world, the guild, the
+cloth, the delve, battlecraft and schooling); v0.72.3 gives a life without
+one stated defaults instead.
+
+- **No more "which rulebook?" in the rules.** Mortality, a break at full
+  Stress, the lender's interest, borrowing after the first adult year, the
+  tired worker's refusal, the passive wage, the nature that carries no
+  attribute bonus, and the voice the game speaks in no longer ask whether a
+  life is new; they simply apply. The free support an old save once got in
+  place of debt is gone with them.
+- **The engine reads any life into the one rulebook.** `migrateSave` gives a
+  life from before the debt ledger the stated defaults: nothing owed, nothing
+  borrowed, and luck by season from the day it is read. It invents no
+  station and no date. The main game still never lets an old-rules life in:
+  its store keeps one exactly as written (v0.72.1), so the defaults are what
+  the engine itself does, not anything a player's old save meets.
+- **Heirs.** Every heir starts with a ledger; an heir's station follows its
+  parent's, and a parent without one passes none on.
+- **Tests.** The pre-v0.72 harness route is gone; every UI test mounts the
+  game as players get it. Save defaults for real new-rules lives are
+  unchanged: migration step 71.
+
+Verification is in [the v0.72.2 record](docs/measures/one-rulebook-v0722-verification.md).
+
 Version 0.72.1 is The old lives are kept as written. The main game no longer
 reads an old-rules life at all: it tells one by its own stored markers and
 keeps it exactly as it was written, so none of the old rules' code runs on it

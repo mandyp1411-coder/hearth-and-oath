@@ -48,7 +48,7 @@ function consequence(s, effect) {
 
 /** A pure presentation of a captured age-sixteen farmer birthday. */
 export function farmerOpeningEvent(s, ev) {
-  if (!s?.farm || !(s.hero?.station || s.householdBudget?.debt !== undefined) || s.age !== 16 || s.timeline?.mode !== 'birth' || s.timeline.contentVersion !== 7 || ev?.id !== 'birth_year_16') return ev;
+  if (!s?.farm || s.age !== 16 || s.timeline?.mode !== 'birth' || s.timeline.contentVersion !== 7 || ev?.id !== 'birth_year_16') return ev;
   const pending = s.timeline.storybook?.pending, scene = pending?.scene;
   if (!Number.isSafeInteger(s.day) || s.day < 0 || pending?.age !== s.age || pending?.day !== s.day || !plain(scene) || typeof scene.title !== 'string' || !scene.title.trim() || typeof scene.body !== 'string' || !scene.body.trim() || scene.title !== ev.title || scene.body !== ev.body || !Array.isArray(scene.choices) || !Array.isArray(ev.choices) || scene.choices.length !== 3 || ev.choices.length !== 3) return ev;
   if (new Set(ev.choices.map(c => c?.id)).size !== 3 || ev.choices.some((c, i) => !plain(c) || !plain(scene.choices[i]) || c.id !== PICKS[i] || scene.choices[i].id !== c.id || typeof c.label !== 'string' || !c.label.trim() || c.label !== scene.choices[i].label || quoted(c) || quoted(scene.choices[i]))) return ev;

@@ -120,7 +120,9 @@ function finishYear(state) {
     for (const key of ['health', 'stress', 'happiness']) assert.ok(state.life[key] >= 0 && state.life[key] <= 100);
     if (state.event) {
       const id = state.event.id;
-      const optionId = id === 'lycan_fullmoon' ? (state.event.choices.some(item => item.id === 'safe') ? 'safe' : 'isolate') : yearChoices[id];
+      // One rulebook (v0.72.2): an untreated severe fever can kill, so the year's policy seeks what care it can.
+      const open = c => state.event.choices.some(item => item.id === c && !item.disabledReason);
+      const optionId = id === 'lycan_fullmoon' ? (state.event.choices.some(item => item.id === 'safe') ? 'safe' : 'isolate') : id === 'health_concern' ? ['care', 'rest', 'continue'].find(open) : yearChoices[id];
       assert.ok(optionId, `year policy needs a deliberate choice for ${id}`);
       events.push({ id, body: state.event.body, choice: optionId });
       state = choose(state, optionId);
@@ -381,10 +383,12 @@ test('consecutive priorities develop different skills while earning career and h
   const promotedPreview = yearPreview(state, { focus: 'livelihood', lifestyle: 'frugal' });
   assert.ok(promotedPreview.income > previewBefore.income, 'recognized civilian work must improve future earnings');
   state = activity(state, 'life_goal_settle');
-  const gold = state.hero.gold;
+  const gold = state.hero.gold, luck = state.fortune.history.length;
   const purchase = engine.getActions(state).find(item => item.id === 'life_home_cottage');
   state = activity(state, purchase.id);
-  assert.equal(state.hero.gold, gold - purchase.cost);
+  // One rulebook (v0.72.2): a season's luck can land on the same day; the cottage itself costs its price once.
+  const shocks = state.fortune.history.slice(luck).reduce((n, row) => n + row.gold, 0);
+  assert.equal(state.hero.gold, gold - purchase.cost - shocks);
   assert.equal(state.life.home.tier, 'cottage');
   assert.equal(state.life.goals.find(goal => goal.id === 'settle').completed, true);
   assert.equal(state.life.achievements.filter(item => item.id === 'goal-settle').length, 1);

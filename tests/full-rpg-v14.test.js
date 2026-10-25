@@ -17,7 +17,8 @@ function checkpoint(){
 function settle(s){
   for(let n=0;n<200;n++){
     assert.ok(engine.validateSave(s),s.notice);
-    if(s.event){s=engine.chooseEventOption(s,s.event.choices.find(c=>c.id==='care'||c.id==='support'||c.id==='continue')?.id||s.event.choices[0].id);continue;}
+    // One rulebook (v0.72.2): an untreated severe fever can kill, so the policy takes the best open care first.
+    if(s.event){const open=s.event.choices.filter(c=>!c.disabledReason);s=engine.chooseEventOption(s,['care','rest','support','continue'].map(id=>open.find(c=>c.id===id)).find(Boolean)?.id||open[0]?.id||s.event.choices[0].id);continue;}
     if(s.conversations.pending){const p=s.conversations.pending;s=engine.replyMessage(s,p.personId,p.replies[0].id);continue;}
     if(s.timeline.yearTarget!==null&&!engine.getLifeCommitment(s)){s=engine.continueAgeUp(s);continue;}
     return s;

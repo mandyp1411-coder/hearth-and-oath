@@ -1,44 +1,25 @@
-// Which rulebook the main game lets into play.
+// Which lives the main game lets into play, and how it reads a stored one.
 //
-// The new rules only, from v0.72. A life is new rules when it carries a
+// One rulebook (v0.72). A stored life is told by its own stored markers, a
 // rolled station or a debt ledger (edition.js `rulesOf`, the markers the
-// rules themselves check; never a claimed stamp alone), which includes the
-// v0.61 lives that have a ledger and no station. A life written under the old
-// rules is kept in its slot, exported whole and sent to the Old Rules archive
-// (archive-link.js); it never opens here. The archive is the v0.69 game at its
-// own address with its own storage, and it admits only old-rules lives.
+// rules were written against; never a claimed stamp alone). A life written
+// under the old rules is never read here: the store keeps it exactly as it was
+// written (saves.js `kept`), and it leaves whole for the Old Rules archive
+// (archive-link.js), the v0.69 game at its own address with its own storage.
+//
+// Keep the store's decoder this one. The engine's `migrateSave` reads any
+// life it can into the one rulebook (a life from before the ledger is read
+// with the stated defaults); it is this door, not the engine, that sends an
+// old life to the archive.
 import { rulesOf, NEW } from './edition.js';
 
-export const BOTH = 'both';
-export const NEW_ONLY = 'new';
-export const MAIN_ADMITS = NEW_ONLY;
-
-/** The test harness's route to the pre-v0.72 policy, for UI tests whose
- * scenarios still play on old-rules saves while the code they cover remains
- * in main (v0.72.1 onward rebases them or moves them to the archive). Only the
- * module itself imported as `…/app.js?rulebooks=both` qualifies
- * (tests/helpers/ui-surface.mjs). A page cannot reach it: the game's script
- * tag imports app.js without a query, and the offline file's inlined module
- * carries the page's own URL, which is not app.js. */
-export function harnessRulebooks(moduleUrl) {
-  try {
-    const url = new URL(moduleUrl);
-    return /\/js\/app\.js$/.test(url.pathname) && url.searchParams.get('rulebooks') === BOTH ? BOTH : MAIN_ADMITS;
-  } catch { return MAIN_ADMITS; }
-}
-
-/** How the save store reads a stored life. Under the new rules only, an old
- * life is told by its own stored markers and never decoded: the store keeps it
- * exactly as it was written (saves.js `kept`), so nothing of the old rules'
- * code runs on it here and it leaves for the archive byte for byte. `BOTH`
- * decodes every life, as before v0.72. */
-export function storedLifeDecoder(admits = MAIN_ADMITS, decode = value => value) {
-  return admits === NEW_ONLY ? value => rulesOf(value) === NEW ? decode(value) : null : decode;
+/** The store's decoder: a stored life is decoded only when it lives by the new rules. */
+export function storedLifeDecoder(decode) {
+  return value => rulesOf(value) === NEW ? decode(value) : null;
 }
 
 /** The entry policy for life-entry.js, the save store and the Ironman session:
- * under the new rules only, a life must carry a station or a debt ledger;
- * `BOTH` (the policy before v0.72) admits every decoded life. */
-export function admissionPolicy(admits = MAIN_ADMITS) {
-  return admits === NEW_ONLY ? state => rulesOf(state) === NEW : undefined;
+ * a life enters play only when it carries a station or a debt ledger. */
+export function admissionPolicy() {
+  return state => rulesOf(state) === NEW;
 }

@@ -28,7 +28,9 @@ function captureDownloads(t,ui){
 }
 
 test('an actual old-rules save has the published archive route on its slot and import review, without changing its life',async t=>{
-  const old=ready(oldRaw,OLD),newer=ready(newRaw,NEW),ui=await mountApp(t,{states:[newer,old]});
+  // The old life is stored as a v0.60 player's browser holds it; the main game never reads it into play.
+  const old=structuredClone(oldRaw);assert.equal(rulesOf(old),OLD);
+  const newer=ready(newRaw,NEW),ui=await mountApp(t,{states:[newer,old]});
   const durable=ui.storage.getItem(KEY),current=ui.current(),oldBefore=structuredClone(old),rawBefore=structuredClone(oldRaw);
   await ui.click('title-load');
   const row=ui.root.querySelector('[data-op="slot-load"][data-id="1"]').closest('.save-slot-row');
@@ -47,7 +49,7 @@ test('an actual old-rules save has the published archive route on its slot and i
   assert.ok(review.querySelector('[data-rules="old"]'));archiveAnchor(review);
   assert.equal(ui.storage.getItem(KEY),durable,'reviewing the route cannot replace a slot');assert.deepEqual(ui.current(),current);
   await ui.click('close-modal');
-  assert.equal(ui.storage.getItem(KEY),durable);assert.deepEqual(ui.lives(),[newer,oldBefore,null]);assert.deepEqual(ui.current(),current);
+  assert.equal(ui.storage.getItem(KEY),durable);assert.ok(JSON.stringify(ui.lives())===JSON.stringify([newer,oldBefore,null]));assert.deepEqual(ui.current(),current);
   assert.deepEqual(old,oldBefore);assert.deepEqual(oldRaw,rawBefore);
 });
 

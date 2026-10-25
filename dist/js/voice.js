@@ -11,7 +11,6 @@ import { farmerOpeningEvent } from './farmer-opening.js';
 // as `detail` and shown to those who ask for it. Nothing here changes what
 // an action or a choice does.
 
-const edition = s => !!s?.hero?.station || s?.householdBudget?.debt !== undefined;
 const nameOf = (s, id) => s.life?.people.find(p => p.id === id)?.name || s.companions?.find(p => p.id === id)?.name || s.society?.people?.find(p => p.id === id)?.name || null;
 const after = (label, prefix) => label.startsWith(prefix) ? label.slice(prefix.length) : null;
 
@@ -146,7 +145,7 @@ const PATTERNS = [
 
 /** The voiced action: a short situation to read, the engine's figures kept as detail. */
 export function voiceAction(s, a) {
-  if (!a || !edition(s)) return a;
+  if (!a || !s) return a;
   const exact = EXACT[a.id];
   let line = exact ? exact : null;
   if (!line) for (const [re, fn] of PATTERNS) { const m = a.id.match(re); if (m) { line = fn(s, a, m); break; } }
@@ -154,7 +153,7 @@ export function voiceAction(s, a) {
   const [label, description] = line;
   return { ...a, label: label || a.label, description, detail: a.description };
 }
-export function voiceActions(s, actions) { return edition(s) ? actions.map(a => voiceAction(s, a)) : actions; }
+export function voiceActions(s, actions) { return s ? actions.map(a => voiceAction(s, a)) : actions; }
 
 // Events: the same treatment for the moments every life meets. The choice ids
 // and effects are the engine's; only the words change.
@@ -205,7 +204,7 @@ function voiceSchool(s, ev) {
   return { ...ev, title, category: 'At school', body: body || ev.body, choices: ev.choices.map(c => choices[c.id] ? { ...c, label: choices[c.id][0], description: choices[c.id][1], detail: c.description } : c) };
 }
 export function voiceEvent(s, ev) {
-  if (!ev || !edition(s)) return ev;
+  if (!ev || !s) return ev;
   if (ev.id === 'birth_year_16') return farmerOpeningEvent(s, ev);
   if (ev.id === 'health_concern') return voiceHealth(s, ev);
   if (ev.id === 'annual_deadline_review') return voiceDeadline(s, ev);
@@ -255,7 +254,7 @@ export function validateEpitaph(v) { return v === undefined || (typeof v === 'st
 // situations, chosen from what the engine already offers. The full menu
 // stays beneath; this is the page you read first.
 export function whatMatters(s, actions) {
-  if (!edition(s) || !Array.isArray(actions) || s.event || s.battle) return [];
+  if (!s || !Array.isArray(actions) || s.event || s.battle) return [];
   const open = id => actions.find(a => (typeof id === 'string' ? a.id === id : id.test(a.id)) && !a.disabledReason);
   let services = null; const roomFor = kind => { services ||= (() => { try { return settlementServices(s); } catch { return []; } })(); const row = services.find(r => r.kind === kind); return row ? open('atlas_room_' + row.roomId) : null; };
   const rows = [], take = (a, why) => { if (a && !rows.some(r => r.id === a.id) && rows.length < 5) rows.push({ ...a, why }); };

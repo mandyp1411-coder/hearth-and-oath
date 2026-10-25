@@ -130,7 +130,7 @@ export function comeOfAge(s, ctx = {}) {
     s.hero.gold += portion;
     ctx.journal?.('Your portion', `You are eighteen. The house hands you ${portion} gold and the name that comes with it, and expects both to be spent well.`, 'household');
   }
-  if (st.debt && b && b.debt !== undefined) {
+  if (st.debt && b) {
     b.debt += st.debt;
     const bond = st.freedom === 'owned' ? 2 * 365 : 0;
     if (bond) b.bondedUntil = Math.max(b.bondedUntil || 0, s.day + bond);

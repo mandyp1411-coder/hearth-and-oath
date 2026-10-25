@@ -320,7 +320,7 @@ export function inheritGuild(old, s) {
   if (s.guild.family) { const parent = (s.life?.people || []).find(p => p.familyRole === 'parent'); if (parent && !m) parent.occupation = s.guild.family === 'merchant' ? 'merchant of the guild' : s.guild.family; }
   if (m) {
     s.guild.heir = { craft: m.craft, from: old.hero.name, rank: m.rank, warden: m.rank === 'warden' || m.rank === 'guildmaster' ? null : m.warden?.name || null };
-    if (m.dues.arrears > 0 && s.householdBudget && s.householdBudget.debt !== undefined) s.householdBudget.debt += m.dues.arrears * DUES[m.rank];
+    if (m.dues.arrears > 0 && s.householdBudget) s.householdBudget.debt += m.dues.arrears * DUES[m.rank];
     if (m.rival && m.rival.contests.some(c => !c.won) && s.hero.station?.ties) addTie(s, { kind: 'hates', name: m.rival.name, note: `${old.hero.name}’s rival at the guild’s bench, who has not forgotten the fair` });
   }
   for (const p of old.guild.past.filter(p => p.left === 'expelled')) if (s.hero.station?.ties) addTie(s, { kind: 'hates', name: GUILD_NAME[p.craft], note: `struck ${old.hero.name}’s name from its rolls` });

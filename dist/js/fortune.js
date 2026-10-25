@@ -141,7 +141,7 @@ export function onFortuneTime(s, { oldDay, newDay = s.day } = {}, ctx = {}) {
       // only on new-edition lives; older saves simply pay what they can.
       const paid = Math.min(gold, Math.max(0, s.hero.gold)), short = gold - paid;
       s.hero.gold -= paid;
-      if (short && s.householdBudget && s.householdBudget.debt !== undefined) s.householdBudget.debt += short;
+      if (short && s.householdBudget) s.householdBudget.debt += short;
     }
     if (event.incomeFactor) { f.incomeFactor = event.incomeFactor; f.factorUntil = season * SEASON + SEASON; }
     if (event.stress && s.life) s.life.stress = Math.min(100, (s.life.stress || 0) + event.stress);

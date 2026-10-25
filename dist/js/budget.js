@@ -30,11 +30,13 @@ export const annualWorkRatio=s=>RATIOS[s.life?.focus]??1;
 
 // The debt ledger marks a new-edition life. A save migrated from an older
 // version gets a budget without it and keeps the rules it was played under.
-export function initializeHouseholdBudget(s,{reset=false,edition=false}={}) {
+const LEDGER=()=>({debt:0,borrowedGold:0,debtInterestPaid:0,lastInterestYear:null,graceUsed:false});
+export function initializeHouseholdBudget(s,{reset=false}={}) {
   if(s.householdBudget&&!reset)return;
-  s.householdBudget={startedDay:s.day,lastDay:s.day,accruedUnits:0,billedGold:0,paidGold:0,supportedGold:0,lastJournalYear:null,focusDays:Object.fromEntries(HOUSEHOLD_FOCI.map(f=>[f.id,0])),history:[],
-    ...(edition?{debt:0,borrowedGold:0,debtInterestPaid:0,lastInterestYear:null,graceUsed:false}:{})};
+  s.householdBudget={startedDay:s.day,lastDay:s.day,accruedUnits:0,billedGold:0,paidGold:0,supportedGold:0,lastJournalYear:null,focusDays:Object.fromEntries(HOUSEHOLD_FOCI.map(f=>[f.id,0])),history:[],...LEDGER()};
 }
+/** The ledger a budget from before v0.61 is read with: nothing owed, nothing borrowed. */
+export function openLedger(s){const b=s.householdBudget;if(b&&b.debt===undefined)Object.assign(b,LEDGER());}
 export function householdAnnualCost(s,day=s.day) {
   if(!s.life)return 0;
   const lifestyle=HOUSEHOLD_LIFESTYLES.find(l=>l.id===s.life.lifestyle)||HOUSEHOLD_LIFESTYLES[0];
@@ -81,14 +83,13 @@ export function settleHouseholdBudget(s,ctx={},forceJournal=false) {
   if(!due)return 0;
   const paid=Math.min(Math.max(0,s.hero.gold),due),short=due-paid;
   s.hero.gold-=paid;b.billedGold+=due;b.paidGold+=paid;
-  // Legacy saves without a ledger keep their recorded support; new lives borrow.
-  const legacy=b.debt===undefined;
   const year=Math.floor((s.day-(s.timeline?.birthDay||0))/365);
   let support=0,borrowed=0;
   if(short){
     const firstAdultYear=s.age<19;
-    if(legacy||(firstAdultYear&&!b.graceUsed)){support=short;b.supportedGold+=short;if(!legacy)b.graceUsed=true;}
-    else{borrowed=short;b.debt=(b.debt||0)+short;b.borrowedGold=(b.borrowedGold||0)+short;}
+    // The first adult year's shortfall is carried by the neighbours once; after that the house borrows.
+    if(firstAdultYear&&!b.graceUsed){support=short;b.supportedGold+=short;b.graceUsed=true;}
+    else{borrowed=short;b.debt+=short;b.borrowedGold+=short;}
   }
   if(support||borrowed)s.life.lifestyle='frugal';
   const entry={day:s.day,due,paid,support,focus:s.life.focus,lifestyle:s.life.lifestyle,...(borrowed?{borrowed}:{})};
@@ -108,7 +109,7 @@ export function settleHouseholdBudget(s,ctx={},forceJournal=false) {
 /** Charge a year's interest once per lived year and report the debt's weight. */
 export function chargeDebtInterest(s,ctx={}) {
   const b=s.householdBudget;
-  if(!b||b.debt===undefined||s.phase==='retired')return;
+  if(!b||s.phase==='retired')return;
   const year=Math.floor((s.day-(s.timeline?.birthDay||0))/365);
   if(b.lastInterestYear===year)return;
   b.lastInterestYear=year;
@@ -230,7 +231,7 @@ export function householdBudgetActions(s) {
   if(!ready(s))return [];
   const b=s.householdBudget,owed=b.debt||0;
   // Owed money is paid from what you carry; nothing else pays it down.
-  const repay=b.debt===undefined?[]:[{id:'budget_repay',label:owed?`Pay down what you owe (${Math.min(owed,s.hero.gold)} of ${owed} gold)`:'Pay down what you owe',description:'Hand the lender what you can from what you carry. Interest stops on what is paid.',days:0,cost:0,group:'Household',disabledReason:!owed?'You owe nothing.':s.hero.gold<=0?'You have nothing to pay with.':undefined}];
+  const repay=[{id:'budget_repay',label:owed?`Pay down what you owe (${Math.min(owed,s.hero.gold)} of ${owed} gold)`:'Pay down what you owe',description:'Hand the lender what you can from what you carry. Interest stops on what is paid.',days:0,cost:0,group:'Household',disabledReason:!owed?'You owe nothing.':s.hero.gold<=0?'You have nothing to pay with.':undefined}];
   return [...repay,...HOUSEHOLD_FOCI.map(f=>({id:`budget_focus_${f.id}`,label:f.label,description:`${f.description} Ordinary Age up income uses ${Math.round(RATIOS[f.id]*100)}% of the normal working schedule. Dedicated work commitments keep their agreed wages.`,disabledReason:s.life.focus===f.id?'This is your current priority.':undefined})),...HOUSEHOLD_LIFESTYLES.map(l=>({id:`budget_lifestyle_${l.id}`,label:l.label,description:`${l.description} Base provisions: ${l.annual} gold per actual adult year; property, dependent children and scheduled lessons add their visible costs.`,disabledReason:s.life.lifestyle===l.id?'This is your current living standard.':undefined}))].map(a=>({...a,days:0,cost:0,group:'Household priorities'}));
 }
 export function applyHouseholdBudgetAction(s,id,ctx={}) {

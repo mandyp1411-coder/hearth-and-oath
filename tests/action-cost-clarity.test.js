@@ -15,9 +15,6 @@ import { settlementServices } from '../dist/js/world-services.js';
 import { settlementWalkPath } from '../dist/js/exploration-ui.js';
 import { syncCartography } from '../dist/js/cartography.js';
 import { mountApp } from './helpers/ui-surface.mjs';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
 
 // Synthetic lives and genuine prior-version fixture copies only. The handler
 // surface does not measure browser layout, CSS visibility or screen readers.
@@ -27,7 +24,7 @@ const e=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;',
 const uiHelpers={e};
 function fresh(kind=null){let s=structuredClone(base);s.hero.gold=1000;for(const k of Object.keys(s.equipment.materials))s.equipment.materials[k]=30;if(kind){const r=settlementServices(s).find(r=>r.kind===kind);assert.ok(r,kind);for(const id of settlementWalkPath(s,r.roomId))s=E.chooseAction(s,'atlas_room_'+id);}return s;}
 function validate(s){assert.ok(E.validateSave(s),s.notice);assert.deepEqual(E.migrateSave(JSON.parse(JSON.stringify(s))),s);return s;}
-async function open(t,s){const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');return ui;}
+async function open(t,s){const ui=await mountApp(t, {states:[s]});await ui.click('title-continue');return ui;}
 async function openCraft(t,s=fresh('smith')){const ui=await open(t,s);await ui.click('place-open');await ui.click('service-open',settlementServices(s).find(r=>r.kind==='smith').id);await ui.click('craft-browse');await ui.click('craft-item','workshop_craft_padded_gambeson');return ui;}
 function settle(s){for(let i=0;s.event&&i<12;i++){const c=s.event.choices.find(c=>c.id==='continue'&&!c.disabledReason)||s.event.choices.find(c=>!c.disabledReason);assert.ok(c);s=E.chooseEventOption(s,c.id);}assert.equal(s.event,null);return s;}
 

@@ -23,8 +23,7 @@ function householdWords(s, choice) {
   if (short && feeOf(choice) <= s.hero.gold) {
     const nineteenth = s.timeline?.mode === 'birth' ? (s.timeline.birthDay || 0) + 19 * 365 : Infinity;
     const carriedOnce = s.age < 19 && !s.householdBudget.graceUsed && s.day + days < nineteenth;
-    risk = s.householdBudget.debt === undefined ? 'Without other coin, the house will need help.'
-      : carriedOnce ? 'Without other coin, the neighbours carry the house this once.'
+    risk = carriedOnce ? 'Without other coin, the neighbours carry the house this once.'
         : `Without other coin, the house will owe about ${short} gold.`;
   }
   return { text, risk };

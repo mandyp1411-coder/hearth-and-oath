@@ -503,7 +503,7 @@ export function createSuccessor(original, childId, createBirthGame) {
   const parentRecord = old.lineage.people.find(p => p.id === old.dynasty.activePersonId);
   const ownLife=adultChildInheritance(old,old.lineage.people.find(p=>p.id===record.id));
   const childAge = Math.max(0, Math.floor((old.day - child.bornDay) / YEAR));
-  const start = createBirthGame({ name: child.name, pronouns:record.pronouns || child.pronouns, seed: old.seed, origin: old.hero.origin, station: old.householdBudget?.debt === undefined ? null : heirStation(old, `${old.seed}:heir:${generation}`, (record.appearance || old.hero.appearance)?.ancestry), household: inheritance.homeTier === 'estate' ? 'noble' : inheritance.homeTier === 'lodgings' ? 'poor' : 'tradesfolk', familySetup: 'single_parent', appearance: record.appearance || old.hero.appearance, difficulty: old.difficulty, belief: old.hero.belief, temperament: TRAITS.reduce((best, t) => record.development.traits[t] > record.development.traits[best] ? t : best, 'care') === 'curiosity' ? 'curious' : record.development.traits.courage > record.development.traits.care ? 'ambitious' : 'compassionate', preferences: record.preferences || child.preferences || old.hero.preferences });
+  const start = createBirthGame({ name: child.name, pronouns:record.pronouns || child.pronouns, seed: old.seed, origin: old.hero.origin, station: heirStation(old, `${old.seed}:heir:${generation}`, (record.appearance || old.hero.appearance)?.ancestry), household: inheritance.homeTier === 'estate' ? 'noble' : inheritance.homeTier === 'lodgings' ? 'poor' : 'tradesfolk', familySetup: 'single_parent', appearance: record.appearance || old.hero.appearance, difficulty: old.difficulty, belief: old.hero.belief, temperament: TRAITS.reduce((best, t) => record.development.traits[t] > record.development.traits[best] ? t : best, 'care') === 'curiosity' ? 'curious' : record.development.traits.courage > record.development.traits.care ? 'ambitious' : 'compassionate', preferences: record.preferences || child.preferences || old.hero.preferences });
   if (!start) return null;
   const s = clone(start);
   if (isIronman(old)) s.ironman = clone(old.ironman);
@@ -592,8 +592,7 @@ export function createSuccessor(original, childId, createBirthGame) {
   }
   s.notice = `${child.name}'s life continues in the same world. No inherited oath, transformation, criminal evidence, or combat class follows them.`;
   initializeHealth(s, { reset: true }); initializeTravel(s, { reset: true });
-  // An heir of a new-edition life stays in the new edition, debt ledger and all.
-  initializeHouseholdBudget(s, { reset: true, edition: old.householdBudget?.debt !== undefined });
+  initializeHouseholdBudget(s, { reset: true });
   if (s.fortune) s.fortune = { version: 1, lastSeason: Math.floor(s.day / 92), incomeFactor: 1, factorUntil: 0, history: [] };
   // The changed world is the same world: the courts, guilds and packs keep their goals and their news; the parent's own stories stay in the parent's book.
   if (old.living && s.living) s.living = { ...clone(old.living), threads: [], bonds: {}, lastSeason: Math.floor(s.day / 92) };

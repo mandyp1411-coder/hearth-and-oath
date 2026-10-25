@@ -10,9 +10,6 @@ import {settlementWalkPath} from '../dist/js/exploration-ui.js';
 import {buildingBenefits,applyWorkshopAction,workshopActions} from '../dist/js/workshop.js';
 import {householdCostPreview} from '../dist/js/budget.js';
 import {mountApp} from './helpers/ui-surface.mjs';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
 const fixture=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url))));
 const valid=s=>{assert.ok(E.validateSave(s),s.notice);return s;};
 function walk(s,to){for(const room of settlementWalkPath(s,to))s=E.chooseAction(s,'atlas_room_'+room);return valid(s);}
@@ -70,7 +67,7 @@ test('damaged historic cottages remain repairable without replacing a higher hom
  assert.equal(workshopActions(s).find(a=>a.id==='workshop_repair_cottage').disabledReason,undefined);
  const home=structuredClone(s.life.home);s.hero.gold-=6;applyWorkshopAction(s,'workshop_repair_cottage',{spendDays:n=>{s.day+=n;return n;},journal(){}});assert.deepEqual(s.life.home,home);assert.equal(s.workshop.structures[0].condition,'sound');
 });
-async function homes(t,s){const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');await ui.click('tab','map');await ui.click('place-open');return ui;}
+async function homes(t,s){const ui=await mountApp(t, {states:[s]});await ui.click('title-continue');await ui.click('tab','map');await ui.click('place-open');return ui;}
 test('Homes leads with current dwelling/rest; adoption is only in family management',async t=>{
  const ui=await homes(t,base('cottage'));const home=ui.root.querySelector('.home-overview');assert.ok(home);assert.ok(home.querySelector('[data-id="home_rest"]'));assert.equal(home.querySelector('[data-disclosure="home-household"]'),null);assert.match(home.textContent,/Your household:/);
  assert.ok(!ui.root.innerHTML.includes('data-id="lineage_adoption_'));assert.ok(!ui.root.innerHTML.includes('data-id="life_home_cottage"'));

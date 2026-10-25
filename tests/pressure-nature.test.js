@@ -26,7 +26,7 @@ function adult(seed, traits = []) {
 }
 const journal = () => { const rows = []; return { rows, ctx: { journal: (title, text, tag) => rows.push({ title, text, tag }), setEvent: () => {}, standing: () => {}, killPerson: () => false } }; };
 
-test('a nature is a trade-off on a new life: no attribute points come with it', () => {
+test('a nature is a trade-off: no attribute points come with it', () => {
   const s = engine.createBirthGame({ seed: 'no-bonus' });
   s.age = 18;
   const before = { ...s.hero.attributes }, hp = s.hero.maxHp;
@@ -39,11 +39,11 @@ test('a nature is a trade-off on a new life: no attribute points come with it', 
   const picker = renderTraitPicker(['brave'], 18, { creation: false, state: s });
   assert.match(picker, /A trade-off, not a bonus/);
   assert.doesNotMatch(picker, /\+1 Strength/);
-  // An older life keeps what its traits bought.
-  const old = engine.createBirthGame({ seed: 'old-bonus', station: null });
-  old.age = 18; delete old.householdBudget.debt;
-  applyPersonalityBuild(old, ['brave'], { creation: true });
-  assert.equal(old.hero.attributes.strength, before.strength + 1);
+  // One rulebook (v0.72.2): a life without a station is no different.
+  const plain = engine.createBirthGame({ seed: 'old-bonus', station: null });
+  plain.age = 18; const strength = plain.hero.attributes.strength;
+  applyPersonalityBuild(plain, ['brave'], { creation: true });
+  assert.equal(plain.hero.attributes.strength, strength);
 });
 
 test('life writes a nature: a mark reads like a trait, counts against choices, and can undo a chosen opposite', () => {

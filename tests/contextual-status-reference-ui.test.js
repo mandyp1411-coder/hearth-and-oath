@@ -6,9 +6,6 @@ import * as E from '../dist/js/engine.js';
 import { healthView } from '../dist/js/health.js';
 import { settlementServices } from '../dist/js/world-services.js';
 import { mountApp } from './helpers/ui-surface.mjs';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
 
 // Prepared for the serialized engine lane. Handler/semantic coverage only:
 // native disclosure keyboard behavior, reading-scale geometry and screen-reader
@@ -16,7 +13,7 @@ import { mountApp } from './helpers/ui-surface.mjs';
 const recorded=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url))));
 const earlier=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v27-road-and-descent.json.gz',import.meta.url))));
 function fresh(raw=recorded.states.base){const s=E.migrateSave(structuredClone(raw));assert.ok(s&&E.validateSave(s));return s;}
-async function open(t,s=fresh()){const ui=await mountApp(t, {rulebooks:'both', states:[s],width:390,height:844});await ui.click('title-continue');return ui;}
+async function open(t,s=fresh()){const ui=await mountApp(t, {states:[s],width:390,height:844});await ui.click('title-continue');return ui;}
 async function recovery(ui){await ui.click('tab','activities');await ui.click('activities-pane','recovery');return ui.root.querySelector('[data-status-reference="recovery"]');}
 async function inspect(ui,node){assert.ok(node);const before=ui.current(),slots=ui.lives(),status=ui.viewStatus.textContent,summary=node.querySelector('summary');assert.ok(summary);assert.equal(node.open===true,false);await ui.fire('click',summary,{pointerType:'touch'});for(const key of ['Enter',' ']){const event=await ui.key(key,{target:summary});assert.equal(event.defaultPrevented,false,'native summary activation is not intercepted');}assert.deepEqual(ui.current(),before);assert.deepEqual(ui.lives(),slots);assert.equal(ui.viewStatus.textContent,status,'reading produces no outcome announcement');}
 

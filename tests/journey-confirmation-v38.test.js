@@ -4,15 +4,13 @@ import {readFileSync} from 'node:fs';
 import {gunzipSync} from 'node:zlib';
 import * as E from '../dist/js/engine.js';
 import {mountApp} from './helpers/ui-surface.mjs';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
+import {readIntoRulebook} from './helpers/one-rulebook.mjs';
 
 const fixture=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url))));
-const fresh=()=>structuredClone(fixture.states.base);
+const fresh=()=>readIntoRulebook(fixture.states.base);
 const nearest=s=>Object.keys(s.cartography.sites).filter(id=>id!==s.locationId&&!E.exploreTravelPreview(s,id).disabledReason).sort((a,b)=>E.exploreTravelPreview(s,a).days-E.exploreTravelPreview(s,b).days)[0];
 const pin=(ui,id)=>ui.root.querySelector(`button[data-op="destination-select"][data-id="${id}"]`);
-async function open(t,s=fresh()){const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');await ui.click('tab','map');return ui;}
+async function open(t,s=fresh()){const ui=await mountApp(t, {states:[s]});await ui.click('title-continue');await ui.click('tab','map');return ui;}
 
 test('hover identifies only known places and leaves selection, route, all slots and life untouched',async t=>{
  const ui=await open(t),before=ui.current(),slots=ui.lives(),id=nearest(before),target=pin(ui,id),name=before.world.locations.find(p=>p.id===id).name;

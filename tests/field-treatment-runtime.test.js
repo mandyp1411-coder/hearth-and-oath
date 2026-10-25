@@ -6,9 +6,6 @@ import * as E from '../dist/js/engine.js';
 import { createBattle, previewBattleAction, takeBattleAction } from '../dist/js/combat.js';
 import * as Maze from '../dist/js/maze-v31.js';
 import { mountApp } from './helpers/ui-surface.mjs';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
 
 // Controlled saved-life and handler checks, not earned-party balance or visual QA.
 const fixture = JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz', import.meta.url))));
@@ -20,7 +17,7 @@ function fresh() {
   assert.ok(E.validateSave(s)); return s;
 }
 function unchanged(next, before) { const restored = structuredClone(next); restored.notice = before.notice; assert.deepEqual(restored, before); }
-async function open(t, s = fresh()) { const ui = await mountApp(t, {rulebooks:'both',  states: [s] }); await ui.click('title-continue'); return ui; }
+async function open(t, s = fresh()) { const ui = await mountApp(t, { states: [s] }); await ui.click('title-continue'); return ui; }
 
 test('public quote and execution agree exactly, remain pure, and round-trip without new save fields', () => {
   const s = fresh(), before = structuredClone(s), q = E.fieldPotionQuote(s, 'mira'); assert.deepEqual(s, before);

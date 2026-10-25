@@ -12,16 +12,13 @@ import { getContacts } from '../dist/js/conversations.js';
 import { receiveNotification, notificationsFor } from '../dist/js/notifications-v40.js';
 import { createSaveStore } from '../dist/js/saves.js';
 import { mountApp } from './helpers/ui-surface.mjs';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
 const base=E.migrateSave(JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url)))).states.base);
 const fresh=()=>structuredClone(base);
 const KEY='hearth-and-oath:slots:v1',LIFE='hearth-and-oath:life:v1';
 const e=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const helpers={e,paragraphs:text=>'<p>'+e(text)+'</p>',date:n=>'Day '+n,button:(label,op,id='',cls='',disabled=false)=>`<button data-op="${e(op)}" data-id="${e(id)}" ${disabled?'disabled':''}>${label}</button>`};
 const control=(ui,op)=>ui.root.querySelector(`[data-op="${op}"]`);
-async function notes(t,s=fresh(),options={}){const ui=await mountApp(t, {rulebooks:'both', states:[s],...options});await ui.click('title-continue');await ui.click('tab','journal');await ui.click('workspace-section','journal:notes');return ui;}
+async function notes(t,s=fresh(),options={}){const ui=await mountApp(t, {states:[s],...options});await ui.click('title-continue');await ui.click('tab','journal');await ui.click('workspace-section','journal:notes');return ui;}
 async function type(ui,text){const field=ui.root.querySelector('#note-text');assert.ok(field);field.value=text;await ui.fire('input',field);return field;}
 function careState(){const s=fresh();s.event=null;s.battle=null;s.flags.herbs=4;s.hero.hp=s.hero.maxHp;s.life.health=100;s.life.stress=0;return s;}
 
@@ -42,7 +39,7 @@ test('UI 028 authoritative care preview is pure and matches time/materials for h
 });
 
 test('UI 028 opening and cancelling preparation spends nothing; confirming once shows actual care receipt',async t=>{
- const s=careState(),ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');await ui.click('tab','inventory');await ui.click('inventory-item','supply:herbs');const before=ui.current();
+ const s=careState(),ui=await mountApp(t, {states:[s]});await ui.click('title-continue');await ui.click('tab','inventory');await ui.click('inventory-item','supply:herbs');const before=ui.current();
  await ui.click('use-consumable','herbs');assert.deepEqual(ui.current(),before);assert.ok(ui.root.querySelector('.herbal-care-dialog'));assert.match(ui.root.innerHTML,/2 Days · No Fee · 1 Medicinal Herb/);assert.match(ui.root.innerHTML,/Recipient:/);assert.match(ui.root.innerHTML,/preventive supportive care/);
  await ui.key('Escape');assert.deepEqual(ui.current(),before);assert.equal(ui.document.activeElement.dataset.op,'use-consumable');
  await ui.click('use-consumable','herbs');const commit=control(ui,'herbal-care-confirm');const held=await ui.key('Enter',{target:commit,repeat:true});assert.equal(held.defaultPrevented,true);assert.deepEqual(ui.current(),before);
@@ -100,11 +97,11 @@ test('UI 027 pronoun labels agree in creation, Character and attributes without 
   assert.equal(pronounDisplayLabel(value),label);const draft={...defaultCreatorDraft('labels'),identityChoice:value,pronouns:value};const before=structuredClone(draft),html=renderCharacterCreator(draft);assert.match(html,new RegExp('value="'+value+'" selected>'+label));assert.deepEqual(draft,before);
  }
  assert.equal(pronounDisplayLabel('Xe/xEm'),'Xe/xEm');assert.equal(pronounDisplayLabel('future_internal_enum'),'Pronouns Unrecorded');
- const s=fresh();s.hero.pronouns='they/them';const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');await ui.click('tab','character');assert.match(ui.root.innerHTML,/They\/Them/);assert.equal(ui.current().hero.pronouns,'they/them');await ui.click('customize');assert.match(ui.root.innerHTML,/They\/Them/);
+ const s=fresh();s.hero.pronouns='they/them';const ui=await mountApp(t, {states:[s]});await ui.click('title-continue');await ui.click('tab','character');assert.match(ui.root.innerHTML,/They\/Them/);assert.equal(ui.current().hero.pronouns,'they/them');await ui.click('customize');assert.match(ui.root.innerHTML,/They\/Them/);
 });
 
 test('UI 006 title Settings and Load place connected heading focus; Escape returns to the Settings opener',async t=>{
- const ui=await mountApp(t, {rulebooks:'both', states:[fresh()]});await ui.click('title-settings');assert.equal(ui.document.activeElement.tagName,'H1');assert.match(ui.document.activeElement.textContent,/Sound.*display/);assert.equal(ui.document.activeElement.isConnected,true);await ui.key('Escape');assert.equal(ui.document.activeElement.dataset.op,'title-settings');await ui.click('title-load');assert.equal(ui.document.activeElement.id,'slot-heading');assert.equal(ui.document.activeElement.isConnected,true);
+ const ui=await mountApp(t, {states:[fresh()]});await ui.click('title-settings');assert.equal(ui.document.activeElement.tagName,'H1');assert.match(ui.document.activeElement.textContent,/Sound.*display/);assert.equal(ui.document.activeElement.isConnected,true);await ui.key('Escape');assert.equal(ui.document.activeElement.dataset.op,'title-settings');await ui.click('title-load');assert.equal(ui.document.activeElement.id,'slot-heading');assert.equal(ui.document.activeElement.isConnected,true);
 });
 
 
@@ -115,13 +112,13 @@ test('UI 029 editing a retained failed draft retries the same note with the corr
 });
 
 test('UI 028 a conflicting saved position invalidates an open review and its detached confirm button',async t=>{
- const s=careState(),ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');await ui.click('tab','inventory');await ui.click('inventory-item','supply:herbs');await ui.click('use-consumable','herbs');const stale=control(ui,'herbal-care-confirm');
+ const s=careState(),ui=await mountApp(t, {states:[s]});await ui.click('title-continue');await ui.click('tab','inventory');await ui.click('inventory-item','supply:herbs');await ui.click('use-consumable','herbs');const stale=control(ui,'herbal-care-confirm');
  const remote=E.keepPlayerNote(s,'Written in another tab.');assert.equal(createSaveStore(ui.storage,E.migrateSave).write(0,remote),true);await ui.windowEvent('storage',{key:KEY});await settle();assert.equal(ui.root.querySelector('.herbal-care-dialog'),null);await ui.fire('click',stale);assert.equal(ui.lives()[0].flags.herbs,s.flags.herbs);assert.equal(ui.lives()[0].day,s.day);assert.match(ui.root.innerHTML,/changed in another tab|conflict|saved-life conflict/i);
 });
 
 test('UI 006 an adult letter hands focus to Explore without spending travel time',async t=>{
  const s=fresh(),person=getContacts(s).find(p=>p.locationId&&s.cartography.sites[p.locationId])||getContacts(s)[0];assert.ok(person);
- receiveNotification(s,{kind:'letter',sourceId:'ui-audit-route',title:'A recorded place',body:'A letter already delivered to this adult.',personId:person.id});const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');await ui.click('notifications');const id=notificationsFor(s).find(n=>n.sourceId==='ui-audit-route')?.id||notificationsFor(s)[0].id;await ui.click('notice-open',id);const before=ui.current();await ui.click('notice-person',person.id);assert.equal(ui.root.querySelector('.inbox-letter'),null);assert.ok(ui.document.activeElement.isConnected);assert.ok(ui.document.activeElement.closest('#main-content'));assert.notEqual(ui.document.activeElement,ui.document.body);assert.equal(ui.current().day,before.day);assert.equal(ui.current().hero.gold,before.hero.gold);
+ receiveNotification(s,{kind:'letter',sourceId:'ui-audit-route',title:'A recorded place',body:'A letter already delivered to this adult.',personId:person.id});const ui=await mountApp(t, {states:[s]});await ui.click('title-continue');await ui.click('notifications');const id=notificationsFor(s).find(n=>n.sourceId==='ui-audit-route')?.id||notificationsFor(s)[0].id;await ui.click('notice-open',id);const before=ui.current();await ui.click('notice-person',person.id);assert.equal(ui.root.querySelector('.inbox-letter'),null);assert.ok(ui.document.activeElement.isConnected);assert.ok(ui.document.activeElement.closest('#main-content'));assert.notEqual(ui.document.activeElement,ui.document.body);assert.equal(ui.current().day,before.day);assert.equal(ui.current().hero.gold,before.hero.gold);
 });
 
 test('UI 010 active search reports matched and unfiltered counts and Clear Search restores recorded discoveries',async t=>{

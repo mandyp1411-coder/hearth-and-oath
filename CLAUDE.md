@@ -44,11 +44,14 @@ in IndexedDB through the synchronous facade in `save-storage.js`
 
 ## The new edition (v0.60+)
 
-A life made by `createBirthGame` is a new-edition life: `householdBudget.debt`
-is defined (v0.61) and `hero.station` is set (v0.62). Migrated saves have
-neither and keep their old rules; heirs inherit the edition. Rules that
-belong to the edition check one of those two markers rather than a version
-number. `station.js` is what a birth decides; `fortune.js` is luck by season
+A life made by `createBirthGame` carries a debt ledger (`householdBudget.debt`,
+v0.61) and a rolled station (`hero.station`, v0.62). Since v0.72.2 there is one
+rulebook: no rule asks whether a life has the ledger, and `migrateSave` gives a
+life from before it the stated defaults (`openLedger`: nothing owed; fortune
+from the day it is read). The station is still a birth's own record and is
+never invented; a parent without one passes none on (`heirStation`). Six
+systems still begin only on a life with a station (see One rulebook below).
+`station.js` is what a birth decides; `fortune.js` is luck by season
 (money shocks from 18, hard winters before); `personality.js` carries the
 chosen nature and `hero.marks`, what life wrote on it. Choices that exist
 only for some natures carry `nature: traitId` on the choice.
@@ -310,16 +313,20 @@ restrictive-policy UI review. No cutover or publication is included.
 ## One rulebook (v0.72)
 
 The main game plays the new rules only. `rulebook.js` is the one place the
-entry policy comes from (`MAIN_ADMITS = 'new'`): a life enters play when it
-carries a station or a debt ledger (`rulesOf`), never on a claimed stamp, so
-v0.61 debt-only lives play on. The old rules' engine code is still in main;
-v0.72.1 onward removes it subsystem by subsystem. Until then remember that a
-v0.61 life has no station and still takes station-gated legacy paths, and
-that new-rules lives begun before v0.67/v0.68 can hold an older maze or
-battle in progress: neither is old-rules classification.
+entry policy and the store's decoder come from: a stored life enters play when
+its own stored markers, a station or a debt ledger, say new rules (`rulesOf`),
+never on a claimed stamp, so v0.61 debt-only lives play on. The engine has one
+rulebook (v0.72.2): `migrateSave` reads any life it can into it, so the door is
+the store's decoder, not the engine; keep the app's decoder
+`storedLifeDecoder(migrateSave)`. Still to go: the six station-gated systems
+(`edition = s => !!s.hero.station` in living-world, guild, faith, delve,
+battlecraft and schooling) wait for v0.72.3; until then a life without a
+station keeps the maze, the older battle page and free school. New-rules lives
+begun before v0.67/v0.68 can hold an older maze or battle in progress, and the
+maze is still the regional and contract descents' engine on every life.
 
 An old-rules life meets its door and opens nothing. From v0.72.1 the app's
-store decoder is `storedLifeDecoder(rulebooks, migrateSave)`: it reads a
+store decoder is `storedLifeDecoder(migrateSave)`: it reads a
 stored life only when its own raw markers say new rules, so an old life is
 never decoded or migrated here. The store keeps a stored life it cannot
 decode (`slot.kept`, `backups[id].kept`, `store.kept(id)`, and a mirror-only
@@ -343,16 +350,16 @@ with no attachment) or deletes it; a released kept run is listed by
 `listRecoverableIronman` with `kept: true`. Export a kept run through
 `exportKeptIronman`, never by downloading `store.kept(id)` directly.
 
-UI tests whose scenarios still play on old-rules saves mount the app with the
-pre-v0.72 policy: `mountApp(t, {rulebooks: 'both'})`, which imports the module
-as `app.js?rulebooks=both` (`harnessRulebooks`; no page can reach it, and the
-offline builder gives the bundled app a fixed address); under it the store
-decodes both rulebooks as before. Each
-such file says so in its first lines; that list is the old-rules UI coverage
-v0.72.1+ rebases onto new-rules lives or moves to the archive. Tests about
-the live game use the default. Whole-life comparisons in tests should compare
-JSON text: a failing `deepEqual` on two whole lives renders a diff that can
-exhaust the machine's memory.
+Tests mount the game as players get it. A feature test that plays an old
+capture reads it into the one rulebook first (`readIntoRulebook` in
+`tests/helpers/one-rulebook.mjs`, or `migrateSave`); a test of the archive's
+door stores the old life as it was written (the raw fixture), because the main
+game never reads one into play. Store and session tests that need a decoded
+old position use a reader that keeps an old life as its own stored rules
+(`readBoth` in save-admission and ironman-entry-admission). No module may read
+`import.meta` (the offline builder refuses it). Whole-life comparisons in tests
+should compare JSON text: a failing `deepEqual` on two whole lives renders a
+diff that can exhaust the machine's memory.
 
 ## Direction
 

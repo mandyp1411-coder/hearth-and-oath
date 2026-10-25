@@ -3,10 +3,12 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import * as engine from '../dist/js/engine.js';
 import {isSettlement} from '../dist/js/world.js';
+import {readIntoRulebook} from './helpers/one-rulebook.mjs';
 
 test('the genuine healer parent can attend care one day before a birthday without breaking their save',()=>{
   const original=JSON.parse(readFileSync(new URL('./fixtures/family-care-boundary.json',import.meta.url),'utf8'));
-  const state=original.state||original;
+  // The capture read into the one rulebook (v0.72.2), as the main game's engine reads any life.
+  const state=readIntoRulebook(original.state||original);
   assert.equal(state.day,12774);assert.equal(state.timeline.yearTarget,12775);assert.equal(state.event.id,'health_concern');assert.ok(engine.validateSave(state));
   const before=structuredClone(state),next=engine.chooseEventOption(state,'care');
   assert.deepEqual(state,before);assert.equal(next.day,12775,'the actual attended care day reaches the birthday without overrunning it');

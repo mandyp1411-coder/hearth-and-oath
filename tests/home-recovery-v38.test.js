@@ -9,17 +9,15 @@ import {addCampingKit} from '../dist/js/travel-energy.js';
 import {householdCostPreview} from '../dist/js/budget.js';
 import {ownedHomeHere,homeRestReason,applyHomeRest} from '../dist/js/home-recovery-v38.js';
 import {mountApp} from './helpers/ui-surface.mjs';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
 
 const fixture=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url))));
 const valid=s=>{assert.ok(E.validateSave(s),s.notice);return s;};
 function walk(s,to){const path=settlementWalkPath(s,to);assert.ok(path);for(const room of path)s=valid(E.chooseAction(s,'atlas_room_'+room));return s;}
-let bought=structuredClone(fixture.states.base);bought.hero.gold=1000;bought.locationId='city';bought.cartography.interior=null;syncCartography(bought);bought=walk(bought,'homes');bought=valid(E.chooseAction(bought,'life_home_cottage'));assert.equal(bought.life.home.source,'purchase');assert.equal(bought.life.home.locationId,'city');
+// The old capture, read into the one rulebook as the main game's engine reads any life (v0.72.2).
+let bought=E.migrateSave(structuredClone(fixture.states.base));bought.hero.gold=1000;bought.locationId='city';bought.cartography.interior=null;syncCartography(bought);bought=walk(bought,'homes');bought=valid(E.chooseAction(bought,'life_home_cottage'));assert.equal(bought.life.home.source,'purchase');assert.equal(bought.life.home.locationId,'city');
 const fresh=()=>{const s=structuredClone(bought);s.hero.mp=1;s.life.stress=20;s.trail.daysWithoutRest=6;s.trail.daysTravelled=Math.max(6,s.trail.daysTravelled);addCampingKit(s,'tent');return valid(s);};
 const stable=s=>({...s,notice:''});
-async function recovery(t,s=fresh()){const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');await ui.click('tab','activities');await ui.click('activities-pane','recovery');return ui;}
+async function recovery(t,s=fresh()){const ui=await mountApp(t, {states:[s]});await ui.click('title-continue');await ui.click('tab','activities');await ui.click('activities-pane','recovery');return ui;}
 
 test('Recovery walks from another city area to the purchased home and rests for one real day',async t=>{
  const s=walk(fresh(),'tavern'),ui=await recovery(t,s),before=ui.current(),go=ui.root.querySelector('[data-op="activity-home"]');assert.ok(go&&!go.disabled);assert.equal(go.querySelector('.interaction-copy strong').textContent,'Go Home and Rest');assert.match(go.textContent,/1 Day · No Fee/);
@@ -29,7 +27,7 @@ test('rest is also available at the actual Homes area and repeated rests spend a
  const ui=await recovery(t);await ui.click('tab','map');await ui.click('place-open');assert.ok(ui.root.querySelector('[data-op="activity"][data-id="home_rest"]'));const before=ui.current();await ui.click('activity','home_rest');const one=valid(ui.current());assert.equal(one.day,before.day+1);assert.equal(one.hero.mp,one.hero.maxMp);await ui.click('activity','home_rest');const two=valid(ui.current());assert.equal(two.day,one.day+1);assert.equal(two.hero.mp,two.hero.maxMp);assert.deepEqual(two.trail.kits,one.trail.kits);
 });
 test('lodgings, a home in a different city and open country offer no home shortcut or free remote rest',async t=>{
- for(const kind of ['lodgings','remote','offsite']){const s=kind==='offsite'?structuredClone(fixture.states.offsite):fresh();if(kind==='offsite')s.life.home={tier:'cottage',source:'purchase',locationId:s.locationId};if(kind==='lodgings')s.life.home.tier='lodgings';if(kind==='remote')s.life.home.locationId='home';assert.equal(ownedHomeHere(s),false,kind);valid(s);assert.deepEqual(stable(E.chooseAction(s,'home_rest')),stable(s));const ui=await recovery(t,s);assert.equal(ui.root.querySelector('[data-op="activity-home"]'),null);assert.equal(ui.root.querySelector('[data-op="activity"][data-id="home_rest"]'),null);}
+ for(const kind of ['lodgings','remote','offsite']){const s=kind==='offsite'?E.migrateSave(structuredClone(fixture.states.offsite)):fresh();if(kind==='offsite')s.life.home={tier:'cottage',source:'purchase',locationId:s.locationId};if(kind==='lodgings')s.life.home.tier='lodgings';if(kind==='remote')s.life.home.locationId='home';assert.equal(ownedHomeHere(s),false,kind);valid(s);assert.deepEqual(stable(E.chooseAction(s,'home_rest')),stable(s));const ui=await recovery(t,s);assert.equal(ui.root.querySelector('[data-op="activity-home"]'),null);assert.equal(ui.root.querySelector('[data-op="activity"][data-id="home_rest"]'),null);}
 });
 test('ownership supports cottage, townhouse and estate, but destroyed or evacuated homes cannot supply rest',()=>{
  for(const tier of ['cottage','townhouse','estate']){const s=fresh();s.life.home.tier=tier;assert.equal(ownedHomeHere(s),true);assert.equal(homeRestReason(s),null);}

@@ -5,7 +5,7 @@ import {gunzipSync} from 'node:zlib';
 import {setImmediate as nextTurn} from 'node:timers/promises';
 import {createSaveStore, LEGACY_SAVE_KEY} from '../dist/js/saves.js';
 import {migrateSave, validateSave} from '../dist/js/engine.js';
-import {storedLifeDecoder, NEW_ONLY} from '../dist/js/rulebook.js';
+import {storedLifeDecoder} from '../dist/js/rulebook.js';
 import {mountApp} from './helpers/ui-surface.mjs';
 
 // A stored life this build cannot decode is kept exactly as written: never an
@@ -21,7 +21,7 @@ const flush = async () => { for (let i = 0; i < 8; i++) await nextTurn(); };
 /** A life a later build wrote: the v0.69 engine's own save with a revision this build does not know. */
 function fromLaterBuild(state) { const s = structuredClone(state); s.revision = 6; return s; }
 const laterLife = fromLaterBuild(newer.eighteen);
-const afterCutover = storedLifeDecoder(NEW_ONLY, migrateSave); // the main game's decoder
+const afterCutover = storedLifeDecoder(migrateSave); // the main game's decoder
 const text = value => JSON.stringify(value);
 function memory(raw, mirror) {
   const values = new Map([[KEY, text(raw)], [LEGACY_SAVE_KEY, text(mirror)]]);

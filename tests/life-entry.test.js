@@ -7,6 +7,7 @@ import {createLifeEntry, LIFE_ENTRY_REFUSED, LIFE_ENTRY_CANCELLED} from '../dist
 import {migrateSave, validateSave} from '../dist/js/engine.js';
 import {rulesOf, NEW} from '../dist/js/edition.js';
 import {mountApp} from './helpers/ui-surface.mjs';
+import {storedLifeDecoder} from '../dist/js/rulebook.js';
 
 const KEY = 'hearth-and-oath:slots:v1';
 const release = v => JSON.parse(gunzipSync(readFileSync(new URL(`./fixtures/saves/v${v}.json.gz`, import.meta.url)))).states;
@@ -40,11 +41,13 @@ function locks() {
 }
 
 test('entry refusal leaves genuine old slots and backups readable without queueing a replacement', () => {
-  const storage = disk(), store = createSaveStore(storage, migrateSave), initial = bytes(storage), before = view(store);
+  // The main game's decoder keeps the old lives as stored; entry refuses them and queues nothing.
+  const storage = disk(), store = createSaveStore(storage, storedLifeDecoder(migrateSave)), initial = bytes(storage), before = view(store);
   let queued = 0;
   const entry = createLifeEntry({store, coordinate: operation => {queued++; return operation();}, acceptPosition: newOnly});
-  assert.equal(entry.canEnter(store.read(0)), false); assert.deepEqual(store.read(0), migrateSave(old.eighteen));
-  assert.equal(entry.replaceReviewed({state: store.backup(1), slot: 1, token: store.reviewToken(1), isCurrent: () => true}), LIFE_ENTRY_REFUSED);
+  assert.equal(store.read(0), null); assert.equal(entry.canEnter(store.kept(0)), false);
+  assert.ok(JSON.stringify(store.kept(0)) === JSON.stringify(old.eighteen), 'the old slot is kept whole');
+  assert.equal(entry.replaceReviewed({state: store.keptBackup(1), slot: 1, token: store.reviewToken(1), isCurrent: () => true}), LIFE_ENTRY_REFUSED);
   assert.equal(queued, 0); assert.deepEqual(view(store), before); assert.deepEqual(bytes(storage), initial); assert.equal(storage.writes, 0);
 });
 

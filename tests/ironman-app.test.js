@@ -9,9 +9,6 @@ import { createSaveStore, createSaveCoordinator, LEGACY_SAVE_KEY } from '../dist
 import { getGearItem } from '../dist/js/gear.js';
 import { fakeSurface, mountApp } from './helpers/ui-surface.mjs';
 import { freshStory } from './helpers/story-life-fixtures.mjs';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
 
 // Source handler/store integration with bounded controlled fictional saves.
 // No production observer, fabricated accepted outcome, browser/layout claim,
@@ -82,7 +79,7 @@ async function prepared(source = ironman(), { another = false } = {}) {
 }
 async function mountRun(t, source = ironman(), options = {}) {
   const seed = await prepared(source,options);
-  const ui = await mountApp(t, {rulebooks:'both', storageEntries:seed.storageEntries,locks:seed.manager});
+  const ui = await mountApp(t, {storageEntries:seed.storageEntries,locks:seed.manager});
   await flush();
   await ui.click('title-continue'); await flush();
   assert.ok(ui.root.querySelector('.game-frame'),'actual Continue opens a playable life');
@@ -250,7 +247,7 @@ test('an ended different run is fanned out while the current Ironman life and pr
 });
 
 test('unavailable exclusive locks block Ironman admission while an actual Standard life retains synchronous choices',async t=>{
-  const seed=await prepared(),ui=await mountApp(t, {rulebooks:'both', storageEntries:seed.storageEntries});await flush();
+  const seed=await prepared(),ui=await mountApp(t, {storageEntries:seed.storageEntries});await flush();
   const before=copy(record(ui));await ui.click('title-continue');await flush();
   assert.equal(phase(ui),'blocked');assert.deepEqual(record(ui),before);assert.equal(ui.root.querySelector('.game-frame'),null);
   const standardReturn=enabled(ui,'ironman-standard-return');assert.ok(standardReturn,'definitive admission refusal offers explicit Standard return');
@@ -275,7 +272,7 @@ test('a matching marker clears an actual protected rehearsal and its origin with
 });
 
 test('first-save quota retains one fixed new run with no playable fallback, then explicit retry commits that original life',async t=>{
-  const manager=locks(),ui=await mountApp(t, {rulebooks:'both', locks:manager});await flush();
+  const manager=locks(),ui=await mountApp(t, {locks:manager});await flush();
   await ui.click('title-new');await ui.click('slot-new','0');
   ui.set('startAge','0');ui.set('name','Fictional First Reserve');ui.set('lifeMode','ironman');
   const set=ui.storage.setItem.bind(ui.storage),attempts=[];let fail=true;
@@ -299,7 +296,7 @@ test('first-save quota retains one fixed new run with no playable fallback, then
 });
 
 test('malformed present Ironman metadata is rejected by actual file input without stripping it into a Standard import',async t=>{
-  const original=birth(),ui=await mountApp(t, {rulebooks:'both', states:[original]});await ui.click('title-load');
+  const original=birth(),ui=await mountApp(t, {states:[original]});await ui.click('title-load');
   const before=[...ui.values],bad=copy(original);bad.ironman={version:1,runId:'malformed',startedDay:0,casualties:[]};
   assert.equal(E.migrateSave(bad),null,'malformed metadata is truly rejected by the engine');
   await ui.import(JSON.stringify(bad));await flush();
@@ -309,7 +306,7 @@ test('malformed present Ironman metadata is rejected by actual file input withou
 
 test('an invalid raw nonempty target cannot become an Ironman attachment merely because its display migrates to empty',async t=>{
   const neighbor=birth(),envelope={version:1,activeSlot:2,slots:[{id:0,state:{unrecognized:'raw occupied object'},updatedAt:null},{id:1,state:null,updatedAt:null},{id:2,state:neighbor,updatedAt:'2026-10-18T00:00:00.000Z'}],backups:{}};
-  const ui=await mountApp(t, {rulebooks:'both', storageEntries:[[SLOT_KEY,JSON.stringify(envelope)],[LEGACY_SAVE_KEY,JSON.stringify(neighbor)]],locks:locks()});await flush();
+  const ui=await mountApp(t, {storageEntries:[[SLOT_KEY,JSON.stringify(envelope)],[LEGACY_SAVE_KEY,JSON.stringify(neighbor)]],locks:locks()});await flush();
   await ui.click('title-load');const before=shared(ui);await ui.import(JSON.stringify(ironman()));await flush();
   assert.ok(ui.root.querySelector('.modal'),'positive control: valid incoming Ironman reaches real import review');
   const option=ui.root.querySelector('[name="import-slot"][value="0"]');assert.ok(option,'actual target row is present');
@@ -393,7 +390,7 @@ test('an old known-run import identifies and resumes the latest authoritative po
 });
 
 test('a late Standard claim after Ironman import review preserves the claimant and refuses the stale empty-target token',async t=>{
-  const neighbor=birth(),manager=locks(),ui=await mountApp(t, {rulebooks:'both', states:[null,null,neighbor],activeSlot:2,locks:manager});await flush();
+  const neighbor=birth(),manager=locks(),ui=await mountApp(t, {states:[null,null,neighbor],activeSlot:2,locks:manager});await flush();
   await ui.click('title-load');await ui.import(JSON.stringify(ironman()));await flush();
   const target=ui.root.querySelector('[name="import-slot"][value="1"]');assert.ok(target);await ui.fire('change',target);await flush();
   assert.ok(enabled(ui,'confirm-import'),'positive control: a real empty target was reviewed');
