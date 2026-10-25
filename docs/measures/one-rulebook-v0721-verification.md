@@ -10,10 +10,16 @@ path. The farmer playtest gate still holds for every new kind of life.
 
 | Check | Source | Result |
 | --- | --- | --- |
-| Fast lane, serial, 252 files | `SOURCE` | FAST |
-| Slow lane, serial, 36 files | `SOURCE` | SLOW |
+| Fast lane, serial, 252 files | `6b29e6d` | 3,267 passed, 0 failed, 3 skipped |
+| Slow lane, serial, 36 files | `6b29e6d` | 741 passed, 0 failed, 1 skipped |
 | Release build and archive build | `6b29e6d` | Both pass |
 | Browser, two origins plus both offline files | `6b29e6d` (main), the pinned archive | 28 of 28 ([record](archive-verification-v0721.md)) |
+| Offline recipe, download, release-gate, voice-lint and boot tests against the rebuilt recipe | the release tip | 62 passed, 0 failed |
+
+Altogether 4,008 passing tests, none failing, four skips: the reference-art
+tests (`curses-v25` one, `presets-v18` two, `rpg-v18` one), which skip when the
+paintings folder is absent. Later commits on the branch change only this
+record, the status page and the ledger, and the rebuilt offline recipe.
 
 ## What the new and changed checks hold
 
