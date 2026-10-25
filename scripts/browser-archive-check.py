@@ -1,12 +1,18 @@
-"""The archive, checked in a real browser: a life written under the old rules
-leaves the main game, opens in the Old Rules archive, plays on there, and
-comes back; a new-rules life is turned away at the archive's door; the two
-games never share a browser database; and both open from their offline files.
+"""The archive and the one-rulebook main game, checked in a real browser.
+
+From v0.72 the main game plays the new rules only. This walks what that
+means for a player: an old-rules file meets the archive's door in main and
+plays on in the Old Rules archive; what the archive exports still meets the
+door in main; a new-rules life plays in main and is turned away by the
+archive; a life begun in the archive is new rules and main keeps its date;
+the two games never share a browser database; a returning player whose old
+life is already in a slot sees it kept, never opened, and sends it to the
+archive whole; and both offline files behave the same from disk.
 
     python3 scripts/browser-archive-check.py [--main dist] [--archive out-legacy]
         [--main-offline artifacts/hearth-and-oath.html]
         [--archive-offline artifacts/old-rules-archive/hearth-and-oath-old-rules.html]
-        [--snapshot docs/measures/archive-verification-v070.md]
+        [--snapshot docs/measures/archive-verification-v072.md]
 
 The main game is served from `dist/` (what `npm start` serves) and the
 archive from `out-legacy/` (what `scripts/build-archive.mjs` packages), on two
@@ -15,6 +21,7 @@ records pass or fail with what was seen; the script exits 1 if any step
 failed. Screenshots go to artifacts/archive-check/.
 """
 import argparse
+import gzip
 import json
 import socket
 import subprocess
@@ -150,14 +157,27 @@ def main():
     legacy = json.loads((project / 'tests/fixtures/legacy-v5.json').read_text())['states']['adult18']
     old_file = out / 'fixture-old-rules.json'
     old_file.write_text(json.dumps(legacy))
-    import gzip
     new69 = json.loads(gzip.decompress((project / 'tests/fixtures/saves/v0690.json.gz').read_bytes()))['states']['eighteen']
     new_file = out / 'fixture-new-rules-v069.json'
     new_file.write_text(json.dumps(new69))
 
+    # A returning player's browser from before v0.72: an old-rules life in
+    # slot 0 beside a new-rules one, as the game's one-time localStorage
+    # migration source. The app copies it into IndexedDB on first load.
+    older = json.loads(gzip.decompress((project / 'tests/fixtures/saves/v0600.json.gz').read_bytes()))['states']
+    kept_life = older['eighteen']
+    returning = {'version': 1, 'activeSlot': 0, 'backups': {},
+                 'slots': [{'id': 0, 'state': kept_life, 'updatedAt': '2026-10-20T00:00:00.000Z', 'revision': 'returning-0'},
+                           {'id': 1, 'state': new69, 'updatedAt': '2026-10-21T00:00:00.000Z', 'revision': 'returning-1'},
+                           {'id': 2, 'state': None, 'updatedAt': None, 'revision': 'returning-2'}]}
+    seed_script = ("if (!localStorage.getItem('hearth-and-oath:seeded')) {"
+                   f"localStorage.setItem('hearth-and-oath:slots:v1', {json.dumps(json.dumps(returning))});"
+                   f"localStorage.setItem('hearth-and-oath:life:v1', {json.dumps(json.dumps(kept_life))});"
+                   "localStorage.setItem('hearth-and-oath:seeded', '1'); }")
+
     main_proc, main_url = serve(project / args.main)
     archive_proc, archive_url = serve(project / args.archive)
-    errors = {'main': [], 'archive': []}
+    errors = {'main': [], 'archive': [], 'returning': []}
     try:
         with sync_playwright() as p:
             launch = {'headless': True, 'args': ['--no-sandbox']}
@@ -177,128 +197,114 @@ def main():
             text = archive.locator('.title-screen').inner_text()
             record('archive opens at its own origin and names itself', 'old rules' in text.lower(), archive_url)
 
-            # 2. An old-rules save in the main game: label, note, export for the archive.
+            # 2. An old-rules file in the main game meets the archive's door.
             op(main, 'import')
-            import_file(main, old_file)
-            review = main.locator('.modal').inner_text() if main.locator('.modal').count() else ''
-            record('import review in the main game labels the old-rules life', 'Old rules' in review and 'archive' in review.lower(), review.strip().replace('\n', ' ')[:160])
-            confirm_import(main)
-            to_slots(main)
-            rules = slot_rules(main)
-            record('the slot says Old rules', any(r == 'old' for r, _ in rules), str(rules))
-            note = main.locator('[data-archive-note]')
-            record('the slot carries the way to the archive, in the game’s voice', note.count() >= 1 and 'Export for the archive' in note.first.inner_text(), note.first.inner_text().replace('\n', ' ')[:160] if note.count() else 'no note')
-            main.screenshot(path=str(out / 'main-slot-old-rules.png'), full_page=True)
-            exported_old = export_slot(main, 0)
-            data = json.loads(exported_old.read_text())
-            record('the export is named for its rules and carries the stamp', exported_old.name.endswith('-old-rules.json') and data.get('edition', {}).get('rules') == 'old', f'{exported_old.name} edition={data.get("edition")}')
+            import_file(main, old_file, review=False)
+            door = main.locator('[data-archive-door]')
+            link = main.locator('.modal [data-archive-link]')
+            record('main: an old-rules file meets the archive’s door, with no slot offered', door.count() == 1 and main.locator('[data-op="confirm-import"]').count() == 0, door.first.inner_text() if door.count() else 'no door')
+            record('main: the door links to the public archive', link.count() == 1 and (link.first.get_attribute('href') or '').startswith('https://'), link.first.get_attribute('href') if link.count() else 'no link')
+            main.screenshot(path=str(out / 'main-door.png'), full_page=True)
+            op(main, 'close-modal')
 
-            # 3. The archive takes it, labels it, plays a season, exports it back.
+            # 3. The archive takes the old file, plays a season, exports it.
             op(archive, 'import')
-            import_file(archive, exported_old)
+            import_file(archive, old_file)
             review = archive.locator('.modal').inner_text() if archive.locator('.modal').count() else ''
-            record('the archive’s import review labels the life Old rules', 'Old rules' in review, review.strip().replace('\n', ' ')[:120])
+            record('archive: the import review labels the life Old rules', 'Old rules' in review, review.strip().replace('\n', ' ')[:120])
             confirm_import(archive)
-            record('the archive loads the life', archive.locator('.app-shell.has-life').count() == 1)
             moved = one_season(archive)
-            record('the life plays on in the archive', moved and not errors['archive'], f'errors={errors["archive"][:2]}')
-            archive.screenshot(path=str(out / 'archive-life.png'), full_page=True)
+            record('archive: the old life plays on', archive.locator('.app-shell.has-life').count() == 1 and moved and not errors['archive'], f'errors={errors["archive"][:2]}')
             to_slots(archive)
-            rules = slot_rules(archive)
-            record('the archive’s slot says Old rules', any(r == 'old' for r, _ in rules), str(rules))
             exported_back = export_slot(archive, 0)
-            record('the archive’s export is named for the archive', exported_back.name.endswith('-old-rules-archive.json'), exported_back.name)
+            record('archive: its export is named for the archive', exported_back.name.endswith('-old-rules-archive.json'), exported_back.name)
 
-            # 4. Back in the main game it still opens (nothing is removed in v0.70).
-            to_slots(main)
+            # 4. That export, brought back to main, meets the door again: main plays one rulebook.
+            to_slots(main) if not main.locator('.title-screen').count() else None
             op(main, 'import')
-            import_file(main, exported_back)
-            confirm_import(main)
-            record('a life played in the archive opens in the main game again', main.locator('.app-shell.has-life').count() == 1 and not errors['main'], f'errors={errors["main"][:2]}')
+            import_file(main, exported_back, review=False)
+            record('main: a life played in the archive meets the door, not a slot', main.locator('[data-archive-door]').count() == 1 and main.locator('[data-op="confirm-import"]').count() == 0)
+            op(main, 'close-modal')
 
-            # 5. A new-rules life: labelled in the main game, turned away by the archive.
-            to_slots(main)
+            # 5. A new-rules life: reviewed and played in main; turned away by the archive.
             op(main, 'import')
             import_file(main, new_file)
             review = main.locator('.modal').inner_text() if main.locator('.modal').count() else ''
-            record('a v0.69 new-rules save is labelled "New rules, begun before v0.70"', 'New rules, begun before v0.70' in review, review.strip().replace('\n', ' ')[:120])
+            record('main: a v0.69 new-rules save is labelled "New rules, begun before v0.70"', 'New rules, begun before v0.70' in review, review.strip().replace('\n', ' ')[:120])
             confirm_import(main)
+            moved = one_season(main)
+            record('main: the new-rules life plays', main.locator('.app-shell.has-life').count() == 1 and moved and not errors['main'], f'errors={errors["main"][:2]}')
             to_slots(main)
             exported_new = export_slot(main, [r for r, _ in slot_rules(main)].index('new'))
-            record('the new-rules export is named for its rules', exported_new.name.endswith('-new-rules.json'), exported_new.name)
+            record('main: the new-rules export is named for its rules', exported_new.name.endswith('-new-rules.json'), exported_new.name)
             to_slots(archive)
             op(archive, 'import')
             import_file(archive, exported_new, review=False)
             toast = archive.locator('#toast').inner_text() if archive.locator('#toast').count() else ''
-            record('the archive turns the new-rules life away in a line', 'new rules' in toast.lower() and 'main game' in toast.lower() and not archive.locator('[data-op="confirm-import"]').count(), toast)
+            record('archive: turns the new-rules life away in a line', 'new rules' in toast.lower() and 'main game' in toast.lower() and not archive.locator('[data-op="confirm-import"]').count(), toast)
 
-            # 6. A life begun in the archive opens in the main game, labelled for the release that made it.
+            # 6. A life begun in the archive is new rules: main takes it and keeps its date.
             op(archive, 'title-menu')
             archive.locator('.title-screen').wait_for()
             op(archive, 'title-new')
             archive.locator('.save-slots-screen').wait_for(timeout=15000)
             archive.locator('.save-slot-row:not(.occupied-slot-row) [data-op="slot-new"]:visible').first.click()
             archive.locator('#character-form').wait_for(timeout=15000)
-            # the first submit opens the review step, the second begins the life
             archive.locator('#character-form').evaluate('f => f.requestSubmit()')
             archive.wait_for_timeout(600)
             archive.locator('#character-form').evaluate('f => f.requestSubmit()')
             archive.locator('.app-shell.has-life').wait_for(timeout=180000)
-            record('a life begins in the archive', True)
             to_slots(archive)
             labels = slot_rules(archive)
-            record('a life begun in the archive is labelled New rules, begun in v0.69', any(t == 'New rules, begun in v0.69' for _, t in labels), str(labels))
+            record('archive: a life begun there is labelled New rules, begun in v0.69', any(text == 'New rules, begun in v0.69' for _, text in labels), str(labels))
             new_from_archive = export_slot(archive, [r for r, _ in labels].index('new'))
             to_slots(main)
             op(main, 'import')
             import_file(main, new_from_archive)
             review = main.locator('.modal').inner_text() if main.locator('.modal').count() else ''
-            record('the main game takes a life begun in the archive and keeps its date', 'New rules, begun in v0.69' in review, review.strip().replace('\n', ' ')[:120])
+            record('main: takes a life begun in the archive and keeps its date', 'New rules, begun in v0.69' in review, review.strip().replace('\n', ' ')[:120])
             if main.locator('[data-op="confirm-import"]:visible').count():
                 confirm_import(main)
 
             # 7. Storage never shared.
             s_main, s_arch = storage_names(main), storage_names(archive)
-            record('the main game keeps its saves in hearth-and-oath', 'hearth-and-oath' in s_main['dbs'] and all(k.startswith('hearth-and-oath:') for k in s_main['keys']), json.dumps(s_main)[:200])
+            record('main keeps its saves in hearth-and-oath', 'hearth-and-oath' in s_main['dbs'] and all(k.startswith('hearth-and-oath:') for k in s_main['keys']), json.dumps(s_main)[:200])
             record('the archive keeps its saves in hearth-and-oath-legacy and nowhere else', s_arch['dbs'] == ['hearth-and-oath-legacy'] and all(k.startswith('hearth-and-oath-legacy:') for k in s_arch['keys']), json.dumps(s_arch)[:200])
 
-            # 8. The cutover rehearsed (rulebook.js): a page on the main origin that
-            #    refuses the old rules shares the saves above. The old slot is kept,
-            #    not opened; it exports exactly what it held; the archive takes it;
-            #    an old file meets the archive's door. The live game is unchanged.
-            rehearsed = ctx.new_page()
-            rehearsed_errors = []
-            rehearsed.on('pageerror', lambda e: rehearsed_errors.append(str(e)))
-            rehearsed.add_init_script('globalThis.__hearthRehearseCutover = true;')
-            title(rehearsed, main_url)
-            saved_lives = rehearsed.locator('[data-op="title-load"]').inner_text()
-            record('rehearsed cutover: the title counts the lives kept for the archive', 'kept for the archive' in saved_lives, saved_lives.replace('\n', ' ')[:120])
-            op(rehearsed, 'title-load')
-            rehearsed.locator('.save-slots-screen').wait_for(timeout=15000)
-            kept_slot = rehearsed.locator('.save-slot[data-id="0"]')
-            record('rehearsed cutover: the old slot is kept, not opened', kept_slot.is_disabled() and kept_slot.get_attribute('data-refused-life') is not None and 'kept for the archive' in kept_slot.inner_text().lower(), kept_slot.inner_text().replace('\n', ' ')[:120])
-            rehearsed.screenshot(path=str(out / 'rehearsed-kept-slot.png'), full_page=True)
-            with rehearsed.expect_download(timeout=20000) as download:
-                rehearsed.locator('[data-archive-note] [data-op="export-session"][data-id="0"]').first.click()
-            kept_export = out / ('rehearsed-' + download.value.suggested_filename)
+            # 8. A returning player: an old life already in a slot is kept, never opened, and sent on whole.
+            back = browser.new_context(viewport={'width': 1280, 'height': 900}, accept_downloads=True)
+            back.add_init_script(seed_script)
+            returning_page = back.new_page()
+            returning_page.on('pageerror', lambda e: errors['returning'].append(str(e)))
+            title(returning_page, main_url)
+            saved_lives = returning_page.locator('[data-op="title-load"]').inner_text()
+            record('returning: the title continues the new-rules life and counts the kept one', returning_page.locator('[data-op="title-continue"][data-id="1"]').count() == 1 and returning_page.locator('[data-op="title-continue"][data-id="0"]').count() == 0 and 'kept for the archive' in saved_lives, saved_lives.replace('\n', ' ')[:120])
+            op(returning_page, 'title-load')
+            returning_page.locator('.save-slots-screen').wait_for(timeout=15000)
+            kept_slot = returning_page.locator('.save-slot[data-id="0"]')
+            record('returning: the old slot is kept, not opened', kept_slot.is_disabled() and kept_slot.get_attribute('data-refused-life') is not None and 'kept for the archive' in kept_slot.inner_text().lower(), kept_slot.inner_text().replace('\n', ' ')[:120])
+            returning_page.screenshot(path=str(out / 'returning-kept-slot.png'), full_page=True)
+            with returning_page.expect_download(timeout=20000) as download:
+                returning_page.locator('[data-archive-note] [data-op="export-session"][data-id="0"]').first.click()
+            kept_export = out / ('returning-' + download.value.suggested_filename)
             download.value.save_as(str(kept_export))
-            same_life = json.loads(kept_export.read_text()) == json.loads(exported_old.read_text())
-            record('rehearsed cutover: the kept slot exports exactly what it held', kept_export.name.endswith('-old-rules.json') and same_life, kept_export.name)
+            exported = json.loads(kept_export.read_text())
+            whole = exported.get('hero', {}).get('name') == kept_life['hero']['name'] and exported.get('day') == kept_life['day'] and exported.get('seed') == kept_life['seed'] and len(exported.get('journal', [])) == len(kept_life.get('journal', []))
+            record('returning: the kept life exports whole, named for its rules', kept_export.name.endswith('-old-rules.json') and whole, kept_export.name)
             to_slots(archive)
             op(archive, 'import')
             import_file(archive, kept_export)
             archive_review = archive.locator('.modal').inner_text() if archive.locator('.modal').count() else ''
             confirm_import(archive)
-            record('rehearsed cutover: the archive takes the kept life and opens it', 'Old rules' in archive_review and archive.locator('.app-shell.has-life').count() == 1, archive_review.strip().replace('\n', ' ')[:100])
-            op(rehearsed, 'import')
-            import_file(rehearsed, old_file, review=False)
-            door = rehearsed.locator('[data-archive-door]')
-            record('rehearsed cutover: an old file meets the archive’s door, with no slot offered', door.count() == 1 and rehearsed.locator('[data-op="confirm-import"]').count() == 0, door.first.inner_text() if door.count() else 'no door')
-            record('rehearsed cutover: no page errors', not rehearsed_errors, str(rehearsed_errors[:2]))
-            rehearsed.close()
+            record('archive: takes the returning player’s kept life and opens it', 'Old rules' in archive_review and archive.locator('.app-shell.has-life').count() == 1, archive_review.strip().replace('\n', ' ')[:100])
+            record('returning: no page errors', not errors['returning'], str(errors['returning'][:2]))
+            back.close()
 
-            # 9. The offline files open and take the same imports.
-            for name, path, label_expected in (('main offline file', project / args.main_offline, 'Old rules'), ('archive offline file', project / args.archive_offline, 'Old rules')):
+            # 9. The offline files: main shows the door to an old life and takes a new one; the archive takes the old.
+            for name, path, incoming, expect_door in (('main offline file', project / args.main_offline, old_file, True),
+                                                      ('main offline file', project / args.main_offline, new_file, False),
+                                                      ('archive offline file', project / args.archive_offline, old_file, False)):
+                kind = 'an old-rules' if incoming == old_file else 'a new-rules'
                 if not path.exists():
                     record(f'{name} opens from disk', False, f'{path} is not built')
                     continue
@@ -308,16 +314,16 @@ def main():
                 try:
                     page.goto(path.as_uri(), wait_until='commit', timeout=300000)
                     page.locator('.title-screen').wait_for(timeout=300000)
-                    record(f'{name} opens from disk', True, f'{path.stat().st_size // 1048576} MB')
                     op(page, 'import')
-                    import_file(page, exported_old)
-                    review = page.locator('.modal').inner_text() if page.locator('.modal').count() else ''
-                    record(f'{name} labels an imported old-rules life', label_expected in review, review.strip().replace('\n', ' ')[:120])
-                    if page.locator('[data-op="confirm-import"]:visible').count():
+                    if expect_door:
+                        import_file(page, incoming, review=False)
+                        record(f'{name}: {kind} file meets the door', page.locator('[data-archive-door]').count() == 1 and page.locator('[data-op="confirm-import"]').count() == 0 and not errs, f'errors={errs[:2]}')
+                    else:
+                        import_file(page, incoming)
                         confirm_import(page)
-                        record(f'{name} loads the imported life', page.locator('.app-shell.has-life').count() == 1 and not errs, f'errors={errs[:2]}')
+                        record(f'{name}: {kind} file is reviewed and loads', page.locator('.app-shell.has-life').count() == 1 and not errs, f'{path.stat().st_size // 1048576} MB; errors={errs[:2]}')
                 except Exception as e:  # noqa: BLE001
-                    record(f'{name} opens from disk', False, f'{type(e).__name__}: {str(e)[:120]}')
+                    record(f'{name}: {kind} file', False, f'{type(e).__name__}: {str(e)[:120]}')
                 page.close()
             browser.close()
     finally:
@@ -331,7 +337,7 @@ def main():
     md = [f'# The archive, checked in a browser (main {version} at {head})', '', f'{len(results) - len(failed)} of {len(results)} steps passed. Headless Chromium, the main game served from `{args.main}/` and the archive from `{args.archive}/` on two ports (two origins, as published); the offline files opened from disk.', '', '| Step | Result | Seen |', '|---|---|---|']
     for r in results:
         md.append(f"| {r['step']} | {'pass' if r['ok'] else 'FAIL'} | {r['seen'].replace('|', '/')} |")
-    md += ['', 'Page errors: ' + (json.dumps(errors) if errors['main'] or errors['archive'] else 'none.'), '']
+    md += ['', 'Page errors: ' + (json.dumps(errors) if any(errors.values()) else 'none.'), '']
     (out / 'report.md').write_text('\n'.join(md))
     if args.snapshot:
         Path(project / args.snapshot).parent.mkdir(parents=True, exist_ok=True)

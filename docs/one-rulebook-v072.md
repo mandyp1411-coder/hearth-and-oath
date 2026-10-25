@@ -1,10 +1,12 @@
-# v0.72: One Rulebook — preparation
+# v0.72: One Rulebook
 
-The owner has authorized beginning this release. The published game remains
-v0.71.2. This branch first protects saved lives and maps the cutover. The
-first runtime change separates durable decoding from incoming-write
-admission; the current game still admits both rulebooks. No compatibility
-is removed and v0.72 is not claimed shipped.
+**v0.72.0 takes the cutover.** The main game plays the new rules only
+(`rulebook.js`, `MAIN_ADMITS = 'new'`). The owner took it on 25 October 2026
+before the farmer playtest, which still gates every new kind of life; the
+archive has its verified public home (v0.71.2). Old-rules lives meet their
+door (below) and play on in the archive. The old rules' engine code is still
+in main; v0.72.1 onward removes it, starting with a kept path for old
+Ironman records. The sections below are the preparation that led here.
 
 ## Gates before the cutover
 

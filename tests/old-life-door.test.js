@@ -6,16 +6,14 @@ import {setImmediate as nextTurn} from 'node:timers/promises';
 import {createSaveStore, createSaveCoordinator, LEGACY_SAVE_KEY} from '../dist/js/saves.js';
 import {migrateSave, validateSave} from '../dist/js/engine.js';
 import {rulesOf, OLD, NEW, OLD_RULES_DOOR} from '../dist/js/edition.js';
-import {admissionPolicy, admittedRulebooks, MAIN_ADMITS, BOTH, NEW_ONLY} from '../dist/js/rulebook.js';
+import {admissionPolicy, harnessRulebooks, MAIN_ADMITS, BOTH, NEW_ONLY} from '../dist/js/rulebook.js';
 import {ARCHIVE_URL} from '../dist/js/archive-link.js';
 import {createIronmanMetadata} from '../dist/js/ironman.js';
 import {ironmanRecordKey} from '../dist/js/ironman-storage.js';
 import {fakeSurface, mountApp} from './helpers/ui-surface.mjs';
 
-// The door an old-rules life meets once the main game refuses it (Volume II,
-// v0.72, step 3 of docs/one-rulebook-v072.md). The cutover is not taken:
-// rulebook.js still admits both rulebooks, and the first test holds that.
-// The rest mount the actual app with the cutover rehearsed and play genuine
+// The door an old-rules life meets now that the main game plays the new rules
+// only (Volume II, v0.72). Each test mounts the actual app and plays genuine
 // saves written by the v0.60 and v0.69 engines.
 const KEY = 'hearth-and-oath:slots:v1', RUN = '0a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d';
 const release = v => JSON.parse(gunzipSync(readFileSync(new URL(`./fixtures/saves/v${v}.json.gz`, import.meta.url)))).states;
@@ -44,39 +42,37 @@ function sameLife(actual, expected, label) {
 }
 const playing = ui => ui.root.querySelector('.game-frame') !== null;
 
-test('the rulebook still admits both; only a rehearsal refuses, and nothing widens it', () => {
-  assert.equal(MAIN_ADMITS, BOTH, 'the cutover is not taken in this branch');
-  assert.equal(admissionPolicy(), undefined, 'the live game admits every decoded life');
-  assert.equal(admittedRulebooks({}), BOTH);
-  assert.equal(admittedRulebooks({__hearthRehearseCutover: true}), NEW_ONLY);
-  for (const value of ['true', 1, {}, 'both', 'old']) assert.equal(admittedRulebooks({__hearthRehearseCutover: value}), BOTH, `only literal true rehearses (${JSON.stringify(value)})`);
-  const hostile = {get __hearthRehearseCutover() { throw Error('hostile'); }};
-  assert.equal(admittedRulebooks(hostile), BOTH);
-  const refuse = admissionPolicy(NEW_ONLY);
+test('the main game admits the new rules only, by the markers the rules check', () => {
+  assert.equal(MAIN_ADMITS, NEW_ONLY);
+  assert.equal(admissionPolicy(BOTH), undefined, 'the old policy admitted every decoded life');
+  const refuse = admissionPolicy();
   for (const [name, raw] of Object.entries(older)) assert.equal(refuse(migrateSave(raw)), false, `v0.60 ${name} is old rules`);
   for (const [name, raw] of Object.entries(newer)) assert.equal(refuse(migrateSave(raw)), true, `v0.69 ${name} is new rules`);
   const v61 = release('0610').eighteen; assert.equal(v61.hero.station, undefined); assert.equal(refuse(migrateSave(v61)), true, 'a zero-debt ledger alone is the new rules');
   const claimed = migrateSave(older.eighteen); claimed.edition = {rules: NEW, began: null, step: claimed.edition.step};
   assert.equal(refuse(claimed), false, 'a claimed stamp alone admits nothing');
+
+  // Only the test harness reaches the pre-v0.72 policy: the module itself, imported with the query.
+  assert.equal(harnessRulebooks('file:///repo/dist/js/app.js?handler-surface=1&rulebooks=both'), BOTH);
+  for (const url of ['file:///repo/dist/js/app.js?handler-surface=1', 'https://game.example/js/app.js', 'https://game.example/hearth-and-oath.html?rulebooks=both',
+    'https://game.example/index.html?rulebooks=both', 'https://game.example/js/engine.js?rulebooks=both', 'file:///repo/dist/js/app.js?rulebooks=new', 'nonsense'])
+    assert.equal(harnessRulebooks(url), NEW_ONLY, url);
 });
 
-test('while both rulebooks play, an old slot returns and plays as it did', async t => {
+test('an old slot that was active is no longer continued, and its life is not opened', async t => {
   const ui = await mountApp(t, {storageEntries: entries([migrateSave(older.eighteen), migrateSave(newer.eighteen)], 0)});
-  assert.ok(ui.root.querySelector('[data-op="title-continue"][data-id="0"]'), 'the old life is the one to continue');
-  assert.equal(ui.root.querySelector('[data-refused-life]'), null);
+  assert.equal(ui.root.querySelector('[data-op="title-continue"][data-id="0"]'), null, 'the old life is not offered to continue');
+  assert.ok(ui.root.querySelector('[data-op="title-continue"][data-id="1"]'), 'the new-rules life is');
   await ui.click('title-load');
   const old = row(ui, 0);
-  assert.equal(old.querySelector('[data-op="slot-load"]').disabled, false);
-  assert.match(old.querySelector('[data-archive-note]').textContent, /plays on here for now/);
-  assert.equal(old.querySelector('[data-archive-note][data-refused-life]'), null, 'nothing is refused');
-  await ui.click('slot-load', 0); await flush();
-  assert.ok(playing(ui), 'the old life opens and plays here');
-  assert.equal(rulesOf(ui.current()), OLD);
+  assert.equal(old.querySelector('[data-op="slot-load"]').disabled, true);
+  assert.ok(old.querySelector('[data-archive-note][data-refused-life]'));
+  assert.doesNotMatch(old.textContent, /plays on here/);
 });
 
-test('rehearsed cutover: the title continues the newest admitted life and counts the kept ones', async t => {
+test('the title continues the newest admitted life and counts the kept ones', async t => {
   const states = [migrateSave(older.eighteen), migrateSave(newer.eighteen), migrateSave(older.later)];
-  const ui = await mountApp(t, {rehearseCutover: true, storageEntries: entries(states, 0)}), before = durable(ui);
+  const ui = await mountApp(t, {storageEntries: entries(states, 0)}), before = durable(ui);
   assert.equal(ui.root.querySelector('[data-op="title-continue"][data-id="0"]'), null, 'the active old life is not offered to continue');
   assert.ok(ui.root.querySelector('[data-op="title-continue"][data-id="1"]'), 'the admitted life is');
   assert.match(ui.root.querySelector('[data-op="title-load"]').textContent, /3 of 3 slots occupied · 2 kept for the archive/);
@@ -88,9 +84,9 @@ test('rehearsed cutover: the title continues the newest admitted life and counts
   for (const id of [0, 2]) sameLife(after[id].state, states[id], `kept slot ${id} is untouched`);
 });
 
-test('rehearsed cutover: with only old lives, the title shows the kept life, its export and the way to the archive', async t => {
+test('with only old lives, the title shows the kept life, its export and the way to the archive', async t => {
   const states = [migrateSave(older.eighteen), null, migrateSave(older.later)];
-  const ui = await mountApp(t, {rehearseCutover: true, storageEntries: entries(states, 2)}), files = downloads(t, ui), before = durable(ui);
+  const ui = await mountApp(t, {storageEntries: entries(states, 2)}), files = downloads(t, ui), before = durable(ui);
   const card = ui.root.querySelector('.title-life-kept');
   assert.ok(card, 'the kept card is shown');
   assert.equal(ui.root.querySelector('[data-op="title-continue"]'), null, 'nothing offers to continue');
@@ -106,9 +102,9 @@ test('rehearsed cutover: with only old lives, the title shows the kept life, its
   assert.equal(playing(ui), false, 'nothing was opened');
 });
 
-test('rehearsed cutover: an old slot is kept, not loaded; its export and delete review remain', async t => {
+test('an old slot is kept, not loaded; its export and delete review remain', async t => {
   const states = [migrateSave(older.eighteen), migrateSave(newer.eighteen), null];
-  const ui = await mountApp(t, {rehearseCutover: true, storageEntries: entries(states, 1)}), files = downloads(t, ui), before = durable(ui);
+  const ui = await mountApp(t, {storageEntries: entries(states, 1)}), files = downloads(t, ui), before = durable(ui);
   await ui.click('title-load');
   const old = row(ui, 0), fresh = row(ui, 1), empty = row(ui, 2);
   const load = old.querySelector('[data-op="slot-load"]');
@@ -130,8 +126,8 @@ test('rehearsed cutover: an old slot is kept, not loaded; its export and delete 
   assert.ok(durable(ui).every((text, i) => text === before[i]), 'the durable saves are unchanged');
 });
 
-test('rehearsed cutover: an old file meets the archive’s door; a new one is reviewed as before', async t => {
-  const ui = await mountApp(t, {rehearseCutover: true, storageEntries: entries([migrateSave(newer.eighteen)], 0)}), before = durable(ui);
+test('an old file meets the archive’s door; a new one is reviewed as before', async t => {
+  const ui = await mountApp(t, {storageEntries: entries([migrateSave(newer.eighteen)], 0)}), before = durable(ui);
   await ui.click('title-load');
   await ui.import(JSON.stringify(older.eighteen)); await flush();
   const door = ui.root.querySelector('[data-archive-door]');
@@ -152,10 +148,10 @@ function locks() {
   let serial = Promise.resolve();
   return {request(name, options, callback) { const result = serial.then(() => callback({name, mode: 'exclusive'})); serial = result.catch(() => {}); return result; }};
 }
-async function keptIronman() {
-  const surface = fakeSurface(), manager = locks(), state = migrateSave(older.eighteen);
+async function keptIronman(source = older.eighteen) {
+  const surface = fakeSurface(), manager = locks(), state = migrateSave(source);
   state.ironman = createIronmanMetadata(state, {randomUUID: () => RUN});
-  assert.ok(validateSave(state)); assert.equal(rulesOf(state), OLD);
+  assert.ok(validateSave(state));
   surface.storage.setItem(KEY, JSON.stringify(envelope([null, null, migrateSave(newer.eighteen)], 2)));
   let entropy = 0;
   const store = createSaveStore(surface.storage, migrateSave, {coordinate: createSaveCoordinator(manager), crypto: {randomUUID: () => `11112222-3333-4444-8555-${(++entropy).toString(16).padStart(12, '0')}`}});
@@ -164,9 +160,9 @@ async function keptIronman() {
   return {storageEntries: [...surface.values], manager, state};
 }
 
-test('rehearsed cutover: a kept Ironman run is exported from its head without being opened', async t => {
+test('a kept Ironman run is exported from its head without being opened', async t => {
   const seed = await keptIronman();
-  const ui = await mountApp(t, {rehearseCutover: true, storageEntries: seed.storageEntries, locks: seed.manager}); await flush();
+  const ui = await mountApp(t, {storageEntries: seed.storageEntries, locks: seed.manager}); await flush();
   const files = downloads(t, ui), head = ui.storage.getItem(ironmanRecordKey(RUN)), before = durable(ui);
   assert.equal(ui.root.querySelector('[data-op="title-continue"][data-id="0"]'), null, 'the run is not offered to continue');
   await ui.click('title-load');
@@ -184,11 +180,11 @@ test('rehearsed cutover: a kept Ironman run is exported from its head without be
   assert.ok(durable(ui).every((text, i) => text === before[i]), 'the durable saves are unchanged');
 });
 
-test('without the rehearsal, a kept-looking Ironman run still asks to be resumed before export', async t => {
-  const seed = await keptIronman();
+test('an admitted Ironman run still asks to be resumed before export', async t => {
+  const seed = await keptIronman(newer.eighteen);
   const ui = await mountApp(t, {storageEntries: seed.storageEntries, locks: seed.manager}); await flush();
   await ui.click('title-load');
   const slot = row(ui, 0);
   assert.equal(slot.querySelector('.save-slot').disabled, false);
-  assert.ok([...slot.querySelectorAll('.slot-row-actions [data-op="slot-load"]')].some(control => /Resume to export/.test(control.textContent)), 'today’s export path is unchanged');
+  assert.ok([...slot.querySelectorAll('.slot-row-actions [data-op="slot-load"]')].some(control => /Resume to export/.test(control.textContent)), 'the export path for a run that plays here is unchanged');
 });

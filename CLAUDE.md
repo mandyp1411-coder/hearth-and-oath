@@ -307,23 +307,36 @@ Current app handlers retain the unset policy; configured policies are tested
 at actual coordinator/store/session boundaries, not claimed as a complete
 restrictive-policy UI review. No cutover or publication is included.
 
-`rulebook.js` is now the one place the entry policy comes from: `MAIN_ADMITS`
-is `both`, so `admissionPolicy()` is `undefined` and every life plays. A page
-that sets `globalThis.__hearthRehearseCutover = true` before load rehearses the
-cutover (old rules refused, by markers only); the switch can only refuse.
-Tests mount the app that way with `mountApp(t, {rehearseCutover: true})`.
-Under refusal the app shows the old life's door and opens nothing: the title
-continues the newest admitted life or shows the kept one, the slot is Kept
-for the archive, an old file meets `OLD_RULES_DOOR`, and a kept Ironman run
-exports its head through the store's `export` inspection without adoption.
-The store keeps a stored life it cannot decode (`slot.kept`,
-`backups[id].kept`, `store.kept(id)`): written back byte for byte, never
-empty, never overwritten by a live write, replaced or deleted only by review.
-In app code, ask `occupantOf(id)` rather than `saveStore.read(id)` when the
-question is whether a slot is free. Whole-life comparisons in tests should
-compare JSON text: a failing `deepEqual` on two whole lives renders a diff
-that can exhaust the machine's memory. Old Ironman records still need their
-own kept path before the decoder may refuse old rules.
+## One rulebook (v0.72)
+
+The main game plays the new rules only. `rulebook.js` is the one place the
+entry policy comes from (`MAIN_ADMITS = 'new'`): a life enters play when it
+carries a station or a debt ledger (`rulesOf`), never on a claimed stamp, so
+v0.61 debt-only lives play on. The old rules' engine code is still in main;
+v0.72.1 onward removes it subsystem by subsystem. Until then remember that a
+v0.61 life has no station and still takes station-gated legacy paths, and
+that new-rules lives begun before v0.67/v0.68 can hold an older maze or
+battle in progress: neither is old-rules classification.
+
+An old-rules life meets its door and opens nothing: the title continues the
+newest admitted life or shows the kept one, its slot is Kept for the archive,
+an old file meets `OLD_RULES_DOOR`, and a kept Ironman run exports its head
+through the store's `export` inspection without adoption. The store keeps a
+stored life it cannot decode (`slot.kept`, `backups[id].kept`,
+`store.kept(id)`): written back byte for byte, never empty, never
+overwritten by a live write, replaced or deleted only by review. In app code
+ask `occupantOf(id)` rather than `saveStore.read(id)` when the question is
+whether a slot is free. Old Ironman records still need their own kept path
+before the decoder may refuse old rules (the first step of v0.72.1).
+
+UI tests whose scenarios still play on old-rules saves mount the app with the
+pre-v0.72 policy: `mountApp(t, {rulebooks: 'both'})`, which imports the module
+as `app.js?rulebooks=both` (`harnessRulebooks`; no page can reach it). Each
+such file says so in its first lines; that list is the old-rules UI coverage
+v0.72.1+ rebases onto new-rules lives or moves to the archive. Tests about
+the live game use the default. Whole-life comparisons in tests should compare
+JSON text: a failing `deepEqual` on two whole lives renders a diff that can
+exhaust the machine's memory.
 
 ## Direction
 
