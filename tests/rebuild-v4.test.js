@@ -233,14 +233,14 @@ test('parented, orphan, and homeless lives retain actual caregivers and free lea
   }
 });
 
-test('a homeless pupil earns free qualifications, keeps named school memories, and chooses a calling', () => {
-  // The rules a legacy save keeps: free school, a scholarship by service, letters for everyone. A new life pays tuition and
-  // sits examinations instead (tests/education-v64.test.js), so this fixture is born without a station.
+test('a homeless pupil whose fees are found earns her certificate, keeps named school memories, and chooses a calling', () => {
+  // The village schoolmaster wants ten gold a year from every life (v0.72.3); this homeless pupil's fees are found for her
+  // as controlled data, the year she enrols and the year she sits the examination. Born without a station.
   let state = engine.createBirthGame({ name: 'Lark', seed: 'a-school-with-room', familySetup: 'homeless', household: 'poor', station: null });
   state = choose(state, 'care');
   assert.equal(state.family.housing,'shelter','the caregiver arranged shelter during infancy');
   state = grow(state, 6);
-  state = chargedActivity(state, 'school_enroll_community');
+  state.hero.gold += 10; state = chargedActivity(state, 'school_enroll_community');
   const school = householdView(state).education;
   const initialScholarship = state.hero.skills.scholarship;
   for (let lesson = 0; lesson < 6; lesson += 1) state = chargedActivity(state, 'school_attend');
@@ -255,29 +255,15 @@ test('a homeless pupil earns free qualifications, keeps named school memories, a
   assert.ok(state.life.people.find(person => person.id === 'fellow').memories.some(memory => /helped me study/i.test(memory)));
   assert.ok(state.conversations.relationships[school.teacher.id].memories.some(memory => /lessons|teacher.s table/i.test(memory)));
   state = grow(state, 10);
+  state.hero.gold += 10; state = chargedActivity(state, 'school_attend');
   state = chargedActivity(state, 'school_exam');
   state = choose(state, 'present');
   assert.ok(state.flags.literacyCertificate);
   assert.equal(state.education.qualifications[0].route, 'community');
   assert.equal(state.education.qualifications[0].schoolId, state.education.schoolId);
   assert.ok(state.conversations.relationships[school.teacher.id].memories.some(memory => /earned.*certificate/i.test(memory)));
-  state = grow(state, 12);
-  state = chargedActivity(state, 'school_scholarship');
-  state = choose(state, 'service');
-  assert.ok(state.education.scholarship);
-  const obligation = state.obligations.find(item => item.id === 'school_service');
-  assert.equal(obligation.dueDay - state.day, 60);
-  state = chargedActivity(state, 'school_service');
-  assert.equal(state.obligations.find(item => item.id === 'school_service').resolved, true);
-  state = chargedActivity(state, 'school_enroll_academy');
-  for (let lesson = 0; lesson < 6; lesson += 1) state = chargedActivity(state, 'school_attend');
   assert.equal(state.hero.path, 'unformed');
-  state = grow(state, 14);
-  state = move(state, 'city');
-  state = chargedActivity(state, 'school_exam');
-  state = choose(state, 'present');
-  assert.equal(state.flags.certified, true);
-  assert.deepEqual(state.education.qualifications.map(item => item.route), ['community', 'academy']);
+  assert.deepEqual(state.education.qualifications.map(item => item.route), ['community']);
   state = grow(state, 18);
   state = earnCalling(state, 'healer');
   assert.equal(state.hero.specialization, 'healer');
@@ -388,10 +374,12 @@ test('a full moon pauses a committed building after one day and save/load resume
 });
 
 test('a school promise interrupts a project without duplicate fees or phantom completion', () => {
-  // The service promise belongs to the legacy scholarship; a new life sits an examination instead, so this life is born without a station.
+  // The reading-room promise was the scholarship of lives before schooling (v0.61–v0.63); a life read with one keeps it.
+  // The scholarship is an examination for every life now (v0.72.3), so this promise is captured as controlled data.
   let state = shelterSupplies(homelessAdult('a-roof-and-a-kept-promise', null));
-  state = chargedActivity(state, 'school_scholarship');
-  state = choose(state, 'service');
+  state.education.scholarship = true; state.flags.scholarship = true;
+  state.obligations.push({ id: 'school_service', title: 'Complete the scholarship’s supervised service', dueDay: state.day + 60, description: 'Help in the reading room through the school service action.', resolved: false });
+  saveable(state);
   const dueDay = state.obligations.find(item => item.id === 'school_service').dueDay;
   for (let week = 0; week < 8; week += 1) state = chargedActivity(state, 'life_rest');
   assert.equal(state.day, dueDay - 4);

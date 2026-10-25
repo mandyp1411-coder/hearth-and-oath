@@ -93,10 +93,7 @@ export function onRegionalTime(s,oldDay,newDay,ctx={}){
  const p=politics(s);if(!p||s.phase==='retired')return;
  for(let q=p.lastQuarter+1;q<=quarter(newDay);q++){
   const day=q*91;electThrough(s,day);
-  for(const pair of p.borders){if(s.realm.wars.filter(w=>w.status==='active').length>=3)break;const [a,b]=pair,old=s.realm.wars.filter(w=>[w.a,w.b].includes(a)&&[w.a,w.b].includes(b)).at(-1);if(old&&(old.status==='active'||day-old.endsDay<365*3))continue;
-   if(s.living||seededRoll(s.seed,`border-tension:${a}:${b}:${q}`,100)>=5)continue; // on a living world the courts decide when to march
-   const ar=s.realm.regions.find(r=>r.id===a),br=s.realm.regions.find(r=>r.id===b),cause=ar.occupation||br.occupation?'occupation':Math.max(ar.succession,br.succession)>0&&seededRoll(s.seed,'succession-cause:'+q,3)===0?'succession':seededRoll(s.seed,'resource-cause:'+a+q,2)?'resource':seededRoll(s.seed,'pilgrim-cause:'+a+q,3)===0?'faith':'border';startRegionalWar(s,a,b,day,cause);
-  }
+  // The courts of the living world decide when to march (living-world.js `startRegionalWar`).
   for(const w of s.realm.wars.filter(w=>w.politicalVersion===33&&w.status==='active'&&w.lastQuarter<q)){
    if(!isSettlement(s.world,w.frontSiteId)){const previous=w.frontSiteId,next=frontSite(s,w.a,w.b);if(next&&next!==previous){w.frontSiteId=next;w.refugeFromId=previous;dispatch(s,day,'Border Households Relocate',`Survivors from ${place(s,previous).name} now give their accounts at ${place(s,next).name}. The disputed claim remains; accepted mediation can continue there.`,{warId:w.id,locationId:next});}}
    const age=q-quarter(w.startDay);w.balance=Math.max(-100,Math.min(100,w.balance+seededRoll(s.seed,w.id+':front:'+q,7)-3));w.exhaustion=Math.min(w.entrenched?75:100,w.exhaustion+seededRoll(s.seed,w.id+':wear:'+q,3));w.lastQuarter=q;w.phase=age<3?'mobilizing':Math.abs(w.balance)<10&&age>12?'stalemate':'campaigning';

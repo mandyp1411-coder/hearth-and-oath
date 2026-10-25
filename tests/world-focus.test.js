@@ -9,6 +9,7 @@ import { rememberAnnualScene } from '../dist/js/annual-world-memory.js';
 import { birthEvent, applyBirthChoice, validateTimeline } from '../dist/js/birth.js';
 import { onRealmTime, validateRealm } from '../dist/js/realm.js';
 import { onRpgTime } from '../dist/js/rpg-depth-v27.js';
+import { startRegionalWar } from '../dist/js/regional-world-v33.js';
 import { storyActions, validateStories } from '../dist/js/life-stories.js';
 import { localLawWindow } from '../dist/js/local-law-window.js';
 import { onEvidence, onSanctuaryTime, flushSanctuaryEvent, validateSanctuaries } from '../dist/js/sanctuaries.js';
@@ -110,8 +111,13 @@ test('annual memory from a known different settlement does not impersonate this 
  const s=fresh(),source={title:'The festival work nobody planned',body:'New local work.',choices:[]};s.timeline.yearHistory.push({id:'remote-memory',age:20,day:20*365,title:source.title,summary:'A completed remote repair.',choice:'care',locationId:s.locationId==='city'?'home':'city'});assert.deepEqual(rememberAnnualScene(s,source),source);
 });
 
-test('one saved war grievance appears in its announcement, later account and realm view without a second cause roll',()=>{
- const s=fresh(),old=s.day;delete s.realm.politics;delete s.living;s.realm.wars=s.realm.wars.filter(w=>w.politicalVersion!==33);/* Controlled pre-politics cadence; modern political wars and the living world's courts are outside this module fixture. */s.day=24*365;s.age=24;onRealmTime(s,old,s.day,context(s));const war=s.realm.wars.find(w=>w.id==='war-24');assert.ok(war);const announcement=s.realm.history.find(h=>h.text.includes('enter open conflict')&&h.text.includes(war.grievance));assert.ok(announcement);onRpgTime(s,{oldDay:old,newDay:s.day},context(s));assert.equal(s.rpg.warAccounts.find(a=>a.warId===war.id).cause,war.grievance);assert.ok(validateRealm(s.realm,s));
+test('one saved war grievance appears in its dispatch, later account and realm view without a second cause roll',()=>{
+ // The courts start the wars (v0.65; the calendar's own cadence left in v0.72.3): a court marches through startRegionalWar.
+ const s=fresh();s.realm.wars=[];const pair=s.realm.politics.borders.find(([a,b])=>s.realm.politics.regions[a].capitalId&&s.realm.politics.regions[b].capitalId);
+ const war=startRegionalWar(s,...pair,s.day,'resource');assert.ok(war);assert.ok(war.grievance);
+ const announcement=s.realm.politics.dispatches.find(d=>d.warId===war.id);assert.ok(announcement?.text.includes(war.grievance));
+ const old=s.day;s.day+=1;onRpgTime(s,{oldDay:old,newDay:s.day},context(s));assert.equal(s.rpg.warAccounts.find(a=>a.warId===war.id).cause,war.grievance);
+ assert.equal(s.realm.wars.find(w=>w.id===war.id).grievance,war.grievance,'no second cause roll');assert.ok(validateRealm(s.realm,s));
 });
 test('old war causes and their already-written announcements are not retroactively rewritten',()=>{
  const s=fresh(),before=structuredClone(s.realm),loaded=E.migrateSave(JSON.parse(JSON.stringify(s)));assert.deepEqual(loaded.realm,before);

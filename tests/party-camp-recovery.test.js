@@ -8,6 +8,7 @@ import { addCampingKit, campRecoveryView, mazeCampDescription, restAtCamp } from
 import { applyMazeAction, mazeActions, mazeLayout } from '../dist/js/maze-v31.js';
 import { householdCostPreview } from '../dist/js/budget.js';
 import { mountApp } from './helpers/ui-surface.mjs';
+import {contractDescent} from './helpers/one-rulebook.mjs';
 
 // Controlled fixtures isolate camp accounting. They are not earned-life balance
 // evidence or claims about expedition win rates.
@@ -159,13 +160,14 @@ function drain(s) {
   for (let n = 0; s.event && n < 100; n++) s = E.chooseEventOption(s, (s.event.choices.find(c => ['continue', 'keep', 'care', 'pause', 'leave', 'later', 'friends'].includes(c.id) && !c.disabledReason) || s.event.choices.find(c => !c.disabledReason)).id);
   return s;
 }
-base = drain(base); delete base.delves; // the maze camp, not the delve
+base = drain(base);
 function roundtrip(s) { assert.ok(E.validateSave(s), s.notice); assert.deepEqual(E.migrateSave(JSON.parse(JSON.stringify(s))), s); return s; }
-function delve() {
+function delve(entry) {
   const s = structuredClone(base); s.hero.gold = 2000; s.hero.skills.stealth = 100; s.hero.skills.persuasion = 100; s.hero.skills.survival = 100; s.adventuring.rations = 2;
   for (const p of s.companions) { p.recruited = p.id === 'mira'; p.active = p.id === 'mira'; }
   const p = s.companions.find(p => p.id === 'mira'); p.hp = 10; p.mp = 0;
-  return roundtrip(E.chooseAction(s, 'adventure_descend'));
+  // A contract's descent is the native maze (v0.72.3); a regional road is the 121-room one.
+  return roundtrip(E.chooseAction(s, entry || contractDescent(s)));
 }
 
 test('public maze camp applies its quote once, bills ordinary upkeep, and round-trips without new run fields', () => {
@@ -227,7 +229,7 @@ test('authentic older six-floor saves retain their captured expedition and gain 
 });
 
 test('a controlled long peaceful crawl keeps the 121-room route, finite objectives and reserves while camps cost days', t => {
-  let s = delve(); addCampingKit(s, 'expedition'); s.hero.hp = 10; s.hero.mp = 0;
+  let s = delve('rpg_enter_modular_1'); addCampingKit(s, 'expedition'); s.hero.hp = 10; s.hero.mp = 0;
   const m = s.maze, layout = structuredClone(mazeLayout(m)), queue = [[m.position]], seen = new Set([m.position]);
   let route;
   for (let n = 0; n < queue.length; n++) {

@@ -222,6 +222,55 @@ lives as written. Real new-rules saves change in nothing they hold: step 71.
 Still to go: the six station-gated systems (v0.72.3), the older room engine
 and old pages once no life can reach them, and the pre-edition migrations.
 
+## v0.72.3: every life has the whole world
+
+The six station checks are deleted (`edition = s => !!s.hero.station` in
+schooling, living-world, guild, delve, battlecraft and faith). Migration step
+72 gives a life that predates any of them its stated defaults on reading:
+`initializeSchooling` without `born` makes a life past six literate with
+letters `'before'` and no shrine place; `initializeGuild` without `born`
+decides no guild family; the living world, the delves, battlecraft and the
+cloth begin empty from the season they are read. A birth passes `born: true`
+(`createBirthGame`, lineage's successor).
+
+What leaves with the checks: the free school and the service scholarship (the
+schooling handlers no longer ask whether a life has schooling), the realm's
+four-year calendar wars and the regional world's border tension (both were
+already off on a living world), and the maze route for the board's descent
+and the five campaign dungeons. `startDungeon` resumes a dungeon walked in the
+older room engine there (`dungeonRecords`), one begun in the maze there
+(`mazeBegun` in maze-rules.js), and sends every other entry to the delve;
+`isDelveEntry` refuses an `explore_enter_*` whose authored maze was begun.
+The regional (`rpg_enter_*`) and contract (`adventure_pursue_*`) descents stay
+mazes.
+
+One check was not what the notes said. The fortune table's levy carried two
+`onlyIf` keys, and the second (an active war) won, so the levy fell on living
+worlds whenever the courts were at war. It stays as new lives met it; only
+the dead key goes. Three generated lives aged a year are identical to
+v0.72.2's apart from the step they carry.
+
+The free scholarship's listing and its dead action handler leave household.js;
+a scholarship scene left open, or a reading-room promise made, before schooling
+(v0.61 to v0.63) is still answered and kept. One bug found on the way: the first
+lesson of a school year carries the year's tuition as its cost, which the engine
+takes before the handler runs, and the handler then asked the purse again, so a
+child holding exactly the fee was refused after paying. `schoolReason` now takes
+`feeCharged` for that lesson (regression in education-v64).
+
+Tests follow: maze tests descend by contract (`contractDescent`) or a regional
+road, authored-maze tests stand in genuine begun mazes (the v0.59 capture's
+Covenant Core, and `tests/fixtures/maze-identity/v0722-begun-authored.json.gz`
+written by v0.72.2's own engine through `scripts/fixtures/generate-begun-mazes.mjs`),
+the rebuild campaign walks its delves through their lairs, tests that check
+migration changes nothing else apply `statedDefaults`, long-life policies let
+the new systems' scenes take their course (`continue`), fixtures that relied on
+free school find their fees as controlled data, and the regional-world and war
+tests start their wars through a court (`startRegionalWar`).
+
+Still to go: the older room engine and the radiant maze, which no new entry
+reaches now, and the old pages; the pre-edition migrations.
+
 ## Order of the eventual cutover
 
 1. Preserve occupied old slots, backups and their complete exports before

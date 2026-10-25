@@ -15,10 +15,10 @@
 // (subsystems are added to an older edition life as it plays on), so they
 // carry `began: null` and read "begun before v0.70". Never guess a date.
 
-export const GAME_VERSION = '0.72.2';
+export const GAME_VERSION = '0.72.3';
 /** The migration step this build brings a new-rules life to. Each later
  * release that changes what a new-rules save holds adds a step here. */
-export const EDITION_STEP = 71;
+export const EDITION_STEP = 72;
 export const OLD = 'old', NEW = 'new';
 
 const plain = v => Boolean(v) && typeof v === 'object' && !Array.isArray(v);
@@ -53,6 +53,14 @@ const STEPS = [
   // 71: farmer lives begin prospectively. Earlier saves receive no field,
   // people, ambition, or past harvests; their existing rules stay intact.
   { step: 71, apply() {} },
+  // 72: every life has the whole world. A life that predates schooling, the
+  // living world, the guild, the delve, battlecraft or the cloth begins each
+  // when read (engine.js enableRoleplayUpdates): past six it reads, as every
+  // life did before letters were earned, and the shrine keeper's place was
+  // never offered; no guild family is decided after its birth; the world's
+  // actors begin their goals this season; no past descent, fight or vow is
+  // written. A maze or a battle already begun is finished as it was begun.
+  { step: 72, apply() {} },
 ];
 
 /** Stamp a save with its rules. Idempotent; never overwrites `began`. */

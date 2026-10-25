@@ -33,16 +33,20 @@ function readyWar(s) {
 }
 const mock = () => { const rows = []; return { rows, ctx: { journal: (t, x) => rows.push({ title: t, text: x }), journalLiteral: (t, x) => rows.push({ title: t, text: x }), standing: () => {}, setEvent: () => {}, killPerson: () => true, addEvidence: () => {} } }; };
 
-test('a new life is born into a living world of actors with goals; an older save has none; both validate', () => {
+test('every life is born into a living world of actors with goals; a save from before it begins one when read', () => {
   const s = born('lw-born');
   assert.ok(s.living); assert.equal(s.living.version, 1);
   assert.ok(s.living.actors.length >= 9 && s.living.actors.length <= 14);
   assert.ok(s.living.actors.every(a => a.goal && a.goal.progress === 0 && a.goal.pace >= 1));
   assert.ok(s.living.actors.some(a => a.kind === 'court') && s.living.actors.some(a => a.kind === 'guild') && s.living.actors.some(a => a.kind === 'beasts'));
   assert.equal(engine.validateSave(s), true);
-  const old = engine.createBirthGame({ seed: 'lw-old', station: null });
-  assert.equal(old.living, undefined); assert.equal(validateLiving(old.living, old), true); assert.equal(engine.validateSave(old), true);
-  initializeLivingWorld(old); assert.equal(old.living, undefined, 'the living world belongs to the new edition');
+  // One rulebook (v0.72.3): a birth without a station has the living world too.
+  const plain = engine.createBirthGame({ seed: 'lw-old', station: null });
+  assert.ok(plain.living); assert.equal(engine.validateSave(plain), true);
+  // A save from before the living world is valid without one and begins it this season when read (step 72).
+  const before = structuredClone(s); delete before.living; assert.equal(validateLiving(before.living, before), true); assert.equal(engine.validateSave(before), true);
+  const read = engine.migrateSave(JSON.parse(JSON.stringify(before)));
+  assert.ok(read.living); assert.equal(read.living.lastSeason, Math.floor(read.day / 92)); assert.equal(read.living.events.length, 0, 'no past events are written');
 });
 
 test('the world is deterministic for a seed, and the seasonal tick advances every actor whether or not the player is looking', () => {

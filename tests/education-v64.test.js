@@ -7,6 +7,9 @@ import { isLiterate, schoolingView, canPayTuition, credentialReason, ELECTIVES, 
 import { civilianEntryReason } from '../dist/js/career-entry.js';
 import { applyPersonalityBuild } from '../dist/js/personality.js';
 import { whatMatters } from '../dist/js/voice.js';
+import { readFileSync } from 'node:fs';
+import { atService } from './helpers/service-visit.mjs';
+import { gunzipSync } from 'node:zlib';
 
 const answer = s => {
   const offered = s.event.choices.filter(c => !c.disabledReason);
@@ -29,14 +32,19 @@ function grow(s, to) {
 }
 const journal = () => { const rows = []; return { rows, ctx: { journal: (title, text, tag) => rows.push({ title, text, tag }), spendDays: n => n } }; };
 
-test('letters are earned: a new life cannot read until someone teaches it, and older saves always could', () => {
+test('letters are earned: a life cannot read until someone teaches it, and a life read in past six keeps its letters', () => {
   const s = born('letters-common', 'common');
   assert.equal(isLiterate(s), false);
   assert.equal(schoolingView(s).literate, false);
   assert.equal(engine.validateSave(s), true);
-  const old = engine.createBirthGame({ seed: 'letters-old', station: null });
-  assert.equal(isLiterate(old), true, 'no schooling record means the old rules');
-  assert.equal(old.education.schooling, undefined);
+  // One rulebook (v0.72.3): a birth without a station earns its letters the same way.
+  const plain = engine.createBirthGame({ seed: 'letters-old', station: null });
+  assert.equal(isLiterate(plain), false); assert.ok(plain.education.schooling);
+  // A life that predates schooling begins it when read (step 72): past six it reads, as it always did.
+  const older = JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/saves/v0620.json.gz', import.meta.url)))).states.eighteen;
+  assert.equal(older.education.schooling, undefined, 'a genuine v0.62 life predates schooling');
+  const read = engine.migrateSave(older);
+  assert.equal(isLiterate(read), true); assert.equal(read.education.schooling.letters, 'before'); assert.equal(read.education.schooling.shrinePlace, false);
 });
 
 test('a high house has a tutor; a literate trade house teaches at its own table; the shrine keeper chooses one pupil', () => {
@@ -64,6 +72,24 @@ test('tuition: the village school wants ten gold a year, a wealthy house pays fo
   if (open && !open.disabledReason) assert.equal(open.cost, 10);
   const rich = grow(born('tuition-trade', 'trade'), 7);
   if (rich.phase !== 'retired') { rich.hero.gold = 0; assert.equal(canPayTuition(rich, 'community'), true, 'the house pays'); }
+});
+
+test('a child holding exactly the year’s fee attends the lesson that opens a new school year, and pays it once', () => {
+  // Found in v0.72.3: the engine takes the fee as the lesson's cost, and the lesson used to ask the purse again.
+  let s = grow(born('attend-probe', 'common'), 6);
+  if (s.phase === 'retired') return;
+  s.hero.gold = 30; s = atService(s, 'school_enroll_community'); s = engine.chooseAction(s, 'school_enroll_community');
+  assert.equal(s.education.enrolled, true); assert.equal(s.education.route, 'community');
+  s = grow(s, 7);
+  if (s.phase === 'retired') return;
+  s = atService(s, 'school_attend'); s.hero.gold = 10;
+  const lesson = engine.getActions(s).find(a => a.id === 'school_attend');
+  assert.equal(lesson.cost, 10); assert.equal(lesson.disabledReason, undefined);
+  const attended = engine.chooseAction(s, 'school_attend');
+  assert.equal(attended.education.attendance, s.education.attendance + 1);
+  assert.equal(attended.hero.gold, 0, 'the year’s fee is taken once');
+  assert.equal(attended.education.schooling.tuitionPaid.community, 7);
+  assert.equal(engine.validateSave(attended), true);
 });
 
 test('the scholarship examination has a handful of places and one sitting; the entrance examination comes once a year', () => {
@@ -116,7 +142,7 @@ test('the grammar years offer one elective a year, four lessons each, then the m
   assert.ok(!electiveOffer(s).some(e => e.id === offer[0].id));
 });
 
-test('credentials gate the learned trades on new lives, not on old ones', () => {
+test('credentials gate the learned trades on every life', () => {
   const s = born('credentials', 'common'); s.age = 18; s.day = 18 * 365; s.phase = 'adult';
   assert.match(credentialReason(s, 'healer'), /letters/);
   assert.match(credentialReason(s, 'scholar'), /cannot read/);
@@ -131,8 +157,8 @@ test('credentials gate the learned trades on new lives, not on old ones', () => 
   assert.equal(credentialReason(s, 'healer'), null, 'anatomy opens the healers’ door');
   s.education.qualifications.push({ id: 'academy-certificate', label: 'Academy certificate', route: 'academy', schoolId: 'school-academy', grade: 60, day: s.day, age: 17 });
   assert.equal(credentialReason(s, 'scholar'), null);
-  const old = engine.createBirthGame({ seed: 'credentials-old', station: null }); old.age = 18;
-  assert.equal(credentialReason(old, 'healer'), null);
+  const plain = engine.createBirthGame({ seed: 'credentials-old', station: null }); plain.age = 18;
+  assert.match(credentialReason(plain, 'healer'), /letters/, 'one rulebook (v0.72.3): a life without a station is asked the same');
   // The trade's own wealth stands in for letters at the counting house.
   const trade = born('credentials-trade', 'trade'); trade.age = 18;
   assert.equal(credentialReason(trade, 'merchant'), null);

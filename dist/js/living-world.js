@@ -13,7 +13,7 @@
 // right; and places that change, written into the world's changes where the
 // place view reads them.
 //
-// New-edition lives only (`hero.station`). The realm's own yearly tick keeps
+// Every life has it (v0.72.3; a life that predates it begins it when read). The realm's own yearly tick keeps
 // its rulers, merchants and prosperity; this module writes into it (a war the
 // courts began, security and prosperity where an event sits) and reads it.
 import { seededRoll, isSettlement, generatePersonName } from './world.js';
@@ -22,7 +22,6 @@ import { hasNature, shiftNature } from './personality.js';
 import { startRegionalWar } from './regional-world-v33.js';
 import { addStationTie } from './station.js';
 
-const edition = s => !!s?.hero?.station;
 export const SEASON_DAYS = 92;
 export const seasonOf = day => Math.floor(day / SEASON_DAYS);
 const WINTER = 3;
@@ -69,7 +68,7 @@ function newGoal(s, actor, season) {
   return { kind: 'descend', target: null, progress: 0, pace: 1 + roll(2) }; // the wolves: slow, until a hard winter (+10 a winter season)
 }
 export function initializeLivingWorld(s) {
-  if (!edition(s) || !s.realm || s.living) return;
+  if (!s.realm || s.living) return;
   const season = seasonOf(s.day), actors = [];
   for (const region of s.realm.regions) actors.push({ id: `court:${region.id}`, kind: 'court', regionId: region.id, name: `the ${region.regime} of ${regionName(region.id)}`, goal: null });
   const guildRegions = s.realm.regions.filter(r => sitesIn(s, r.id).some(id => ['city', 'citadel', 'tower'].includes(s.world.locations.find(p => p.id === id)?.type)));

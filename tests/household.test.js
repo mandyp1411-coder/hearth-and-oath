@@ -2,12 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generateWorld } from '../dist/js/world.js';
 import { initializeLife } from '../dist/js/life.js';
+import { initializeSchooling } from '../dist/js/schooling.js';
 import { initializeHousehold, householdActions, applyHouseholdAction, applyHouseholdChoice, householdEventIds, householdView, householdContext, educationTeacher, onHouseholdAge, validateHousehold, validateEducation } from '../dist/js/household.js';
 
 function fixture(seed = 'a-family', setup = 'two_parents', age = 0, options = {}) {
   const s = { seed, age, day: age * 365, phase: age < 16 ? 'childhood' : 'adult', timeline: { mode: 'birth' }, locationId: 'home', world: generateWorld(seed, { expanded: true }), hero: { name: 'Rowan', origin: 'village', household: options.wealth || 'poor', path: 'unformed', specialization: null, profession: 'Unemployed', gold: 40, appearance: { ancestry: 'elf', hair: 'copper', skin: 'warm', hairStyle: 'long' }, skills: { scholarship: 0, arcana: 0, persuasion: 0, survival: 0, devotion: 0, defense: 0 } }, flags: {}, obligations: [], conversations: { threads: {}, relationships: {}, seen: [], pending: null }, companions: [], event: null, battle: null, dungeon: null };
   initializeLife(s);
   if (!options.skip) initializeHousehold(s, { config: { familySetup: setup } });
+  // Every life has schooling (v0.72.3): this child is read with it, so past six it reads.
+  if (!options.skip) initializeSchooling(s);
   return s;
 }
 function context(s) {
@@ -85,16 +88,19 @@ test('an orphan’s caregiver is a real guardian and contextual dilemmas never r
   assert.ok(householdContext(s).familySummary.includes('deceased'));
 });
 
-test('a free community-school journey records enrollment, attendance, skills, dilemma and a qualification', () => {
+test('a community-school journey pays its year once and records enrollment, attendance, skills, dilemma and a qualification', () => {
   const s = fixture('free-school', 'homeless', 6), ctx = context(s);
-  perform(s, 'family_shelter', ctx); perform(s, 'school_enroll_community', ctx);
+  // The village school wants its year at enrolment (v0.64, every life's from v0.72.3): this child has it.
+  s.hero.gold = 10;
+  perform(s, 'family_shelter', ctx); perform(s, 'school_enroll_community', ctx); assert.equal(s.hero.gold, 0);
   for (let i = 0; i < 6; i++) perform(s, 'school_attend', ctx);
   assert.equal(s.education.attendance, 6); assert.equal(s.education.progress, 6);
   assert.equal(s.hero.skills.scholarship, 6); assert.equal(s.hero.skills.persuasion, 6);
   perform(s, 'school_dilemma', ctx); pick(s, 'ask', ctx);
   const teacher = educationTeacher(s);
   assert.ok(s.conversations.relationships[teacher.id].memories.length);
-  ageTo(s, 10, ctx); perform(s, 'school_exam', ctx); pick(s, 'present', ctx);
+  ageTo(s, 10, ctx); s.hero.gold = 10; perform(s, 'school_attend', ctx); assert.equal(s.hero.gold, 0, 'a new year’s first lesson pays the schoolmaster');
+  perform(s, 'school_exam', ctx); pick(s, 'present', ctx);
   assert.equal(s.education.qualifications.length, 1); assert.equal(s.education.qualifications[0].route, 'community');
   assert.equal(s.flags.literacyCertificate, true); assert.equal(s.flags.certified, undefined);
   assert.equal(s.hero.gold, 0); assert.equal(s.hero.path, 'unformed');
@@ -127,34 +133,37 @@ test('an unavailable exam revision leaves the pending scene and preparation unto
   assert.deepEqual(s, original);
 });
 
-test('a free supervised-service scholarship opens actual academy studies and has a fulfillable promise', () => {
+test('a scholarship promise captured before schooling stays fulfillable, and the scholarship is now an examination', () => {
   const s = fixture('academy-poverty', 'orphan', 12), ctx = context(s);
   s.hero.gold = 0;
   assert.match(householdActions(s).find(a => a.id === 'school_enroll_academy').disabledReason, /gold/);
-  perform(s, 'school_scholarship', ctx); pick(s, 'service', ctx);
-  assert.equal(s.education.scholarship, true); assert.ok(s.obligations.some(o => o.id === 'school_service' && !o.resolved));
+  const exam = householdActions(s).find(a => a.id === 'school_scholarship');
+  assert.equal(exam.label, 'Sit the scholarship examination'); assert.equal(exam.cost, 0);
+  // A v0.61–v0.63 life could have promised the reading-room service for its funded place; that promise is kept.
+  s.education.scholarship = true; s.flags.scholarship = true;
+  ctx.addObligation('school_service', 'Complete the scholarship’s supervised service', 60, 'Help in the reading room through the school service action.');
   perform(s, 'school_service', ctx);
   assert.ok(s.obligations.find(o => o.id === 'school_service').resolved);
-  perform(s, 'school_enroll_academy', ctx);
-  for (let i = 0; i < 6; i++) perform(s, 'school_attend', ctx);
-  ageTo(s, 14, ctx); s.locationId = 'city';
-  perform(s, 'school_exam', ctx); pick(s, 'present', ctx);
-  assert.equal(s.education.qualifications[0].route, 'academy'); assert.equal(s.flags.certified, true); assert.equal(s.hero.gold, 0);
+  assert.ok(!householdActions(s).some(a => a.id === 'school_service'), 'a kept promise is not offered twice');
 });
 
 test('normal tuition is paid once and transfers cannot reset annual lesson or revision limits', () => {
-  const s = fixture('paid-academy', 'two_parents', 14), ctx = context(s); s.locationId = 'city';
-  perform(s, 'school_enroll_academy', ctx); assert.equal(s.hero.gold, 20);
+  const s = fixture('paid-academy', 'two_parents', 14), ctx = context(s); s.locationId = 'city'; s.hero.gold = 50;
+  perform(s, 'school_enroll_academy', ctx); assert.equal(s.hero.gold, 10, 'the grammar school takes its forty once');
+  perform(s, householdActions(s).find(a => a.id.startsWith('school_elective_')).id, ctx); // the grammar school wants a year's elective chosen
   for (let i = 0; i < 8; i++) perform(s, 'school_attend', ctx);
-  s.locationId = 'home'; perform(s, 'school_enroll_community', ctx);
+  assert.equal(s.hero.gold, 10, 'lessons in a paid year cost nothing more');
+  s.locationId = 'home'; perform(s, 'school_enroll_community', ctx); assert.equal(s.hero.gold, 0);
   assert.equal(s.education.lessonsThisYear, 8);
   assert.ok(householdActions(s).find(a => a.id === 'school_attend').disabledReason);
   ageTo(s, 15, ctx);
   assert.equal(s.education.lessonsThisYear, 0);
+  assert.match(householdActions(s).find(a => a.id === 'school_attend').disabledReason, /tuition is 10 gold/);
+  s.hero.gold = 10; // the new year's fee found, its eight lessons open
   assert.ok(!householdActions(s).find(a => a.id === 'school_attend').disabledReason);
 });
 
-test('age and location requirements are real mechanics with free independent learning kept open', () => {
+test('age and location requirements are real mechanics, and a child who cannot read is told how letters are found', () => {
   const s = fixture('age-gates', 'two_parents', 5), ctx = context(s);
   assert.equal(applyHouseholdAction(s, 'school_enroll_community', ctx), false);
   ageTo(s, 6, ctx);
@@ -162,7 +171,7 @@ test('age and location requirements are real mechanics with free independent lea
   assert.equal(applyHouseholdAction(s, 'school_enroll_academy', ctx), false);
   assert.equal(applyHouseholdAction(s, 'school_attend', ctx), false);
   assert.equal(s.hero.skills.scholarship, 0);
-  assert.ok(householdContext(s).schoolSummary.includes('independent reading'));
+  assert.match(householdContext(s).schoolSummary, /cannot read/);
 });
 
 test('family support and visits are bounded per year while birthday hooks never replace a scene', () => {
@@ -207,7 +216,8 @@ test('named view data matches actual descriptors, people and schools rather than
   const view = householdView(s), contextView = householdContext(s);
   assert.equal(view.family.members.find(m => m.personId === 'kin').age, s.life.people.find(p => p.id === 'kin').age);
   assert.equal(view.family.members.filter(m => !m.personId).every(m => m.age === null && m.bond === null), true);
-  assert.ok(view.education.routes.find(r => r.id === 'academy').disabledReason.includes('gold'));
+  assert.equal(view.education.routes.find(r => r.id === 'academy').disabledReason, householdActions(s).find(a => a.id === 'school_enroll_academy').disabledReason);
+  assert.match(view.education.routes.find(r => r.id === 'academy').disabledReason, /40 gold/);
   assert.equal(contextView.caregiverName, s.life.people.find(p => p.id === 'kin').name);
   assert.notEqual(householdView(fixture('other-view', 'homeless', 12)).education.routes[0].name, view.education.routes[0].name);
 });
@@ -230,12 +240,13 @@ test('pending family and school scenes roundtrip only with matching resolvable s
   for (const change of [s => s.family.pending = null, s => s.event = null, s => s.event.id = 'school_dilemma', s => s.family.interactionUses.dilemma = 1]) {
     const s = structuredClone(family); change(s); assert.equal(validateHousehold(s.family, s), false);
   }
-  for (const id of ['school_scholarship', 'school_dilemma', 'school_exam']) {
-    const original = fixture(`pending-${id}`, 'orphan', 12), ctx = context(original);
-    if (id !== 'school_scholarship') { perform(original, 'school_enroll_community', ctx); for (let i = 0; i < 4; i++) perform(original, 'school_attend', ctx); }
+  // The scholarship is an examination for every life (v0.64, v0.72.3), not a scene.
+  for (const id of ['school_dilemma', 'school_exam']) {
+    const original = fixture(`pending-${id}`, 'orphan', 12), ctx = context(original); original.hero.gold = 10;
+    perform(original, 'school_enroll_community', ctx); for (let i = 0; i < 4; i++) perform(original, 'school_attend', ctx);
     perform(original, id, ctx);
     assert.equal(validateEducation(original.education, original), true);
-    for (const change of [s => s.education.pending = null, s => s.event = null, s => s.event.id = 'family_dilemma', s => s.education.pending.sceneId = id === 'school_scholarship' ? 'copy' : 'scholarship']) {
+    for (const change of [s => s.education.pending = null, s => s.event = null, s => s.event.id = 'family_dilemma', s => s.education.pending.sceneId = 'scholarship']) {
       const s = structuredClone(original); change(s); assert.equal(validateEducation(s.education, s), false);
     }
   }

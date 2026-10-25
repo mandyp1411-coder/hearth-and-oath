@@ -447,7 +447,10 @@ test('metadata-absent Standard acceptance keeps ordinary downed/retreat semantic
   s = command(s, 'attack', 'enemy-1'); assert.equal(actor(s, 'mira').hp, 0);
   assert.equal(actual(s, 'mira').alive !== false, true); assert.equal(actual(s, 'mira').recruited, true); assert.equal(exact(s, 'mira').alive, true);
   s = command(s, 'retreat'); s = valid(E.resolveBattle(s, s.battle));
-  assert.equal(actual(s, 'mira').alive !== false, true); assert.equal(Object.hasOwn(s, 'ironman'), false); roundtrip(s, 'unchanged metadata-free Standard behavior');
+  // One rulebook (v0.72.3): every life fights on the field, where a companion left lying in an abandoned
+  // fight may die (battlecraft) through the family book; Standard still keeps no Ironman ledger.
+  assert.equal(actual(s, 'mira').alive === false, exact(s, 'mira').alive === false, 'the roster and the family book agree');
+  assert.equal(Object.hasOwn(s, 'ironman'), false); roundtrip(s, 'metadata-free Standard behavior');
 });
 
 test('a genuinely offered maze entry accepts an opening hero death before any playable continuation', () => {

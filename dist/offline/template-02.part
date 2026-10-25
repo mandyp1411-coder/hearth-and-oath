@@ -1,33 +1,4 @@
-ty?.generation || 1}-${s.day}`, d.regionId, role, s.locationId);
-    if (d.id === 'rootward_circle' && method === 'access' && key === 'tenant') p.locationId = fieldLocationId;
-    p.roomId = d.id === 'rootward_circle' && method === 'access' && key === 'tenant' ? null : roomId === 'work' ? workRoom(s, s.locationId) : roomId;
-    if (roomId === 'work') p.firstMissionWorkplace = 'smith';
-    cast[key] = captureMissionActor(p, { roomId: p.roomId === workRoom(s, s.locationId) && roomId === 'work' ? 'work' : p.roomId });
-  }
-  for (const kind of ['faction', ...def.services]) {
-    const row = rows.find(r => r.kind === kind && (kind !== 'faction' || r.subjectId === d.id));
-    cast[kind] = captureMissionActor(row.person, { source: 'service', sourceId: row.id, serviceKind: row.kind, subjectId: row.subjectId || null, roomId: row.roomId });
-  }
-  const targetId = `first-${d.id}-${s.dynasty?.generation || 1}-${s.day}`;
-  const m = makeFirstMission({ factionId: d.id, day: s.day, locationId: s.locationId, cast, targetId, fieldLocationId, values: def.values });
-  m.method = method;
-  if (d.id === 'quiet_table') m.values.recipientWilling = seededRoll(s.seed, targetId + ':recipient-choice', 5) !== 0;
-  faction.firstMission = m;
-  if (m.fieldLocationId) markSiteKnowledge(s, m.fieldLocationId, 'Rumored', 'Directions for your accepted gathering-path agreement');
-  missionNote(s, ctx, m, note, def.title, `You accepted ${def.methods[method][0].toLowerCase()}. The named people, case and method are saved. No day, material, fee or reward has changed yet.`);
-  return true;
-}
-
-const step = (id, label, actor, days, kind, text, extra = {}) => ({ id, label, actor, days, kind, text, ...extra });
-function steps(s, m) {
-  const v = m.values;
-  switch (m.definitionId) {
-    case 'lantern_compact': return m.method === 'allocation' ? [
-      step('blanket_totals', 'Compare the anonymous bedding totals', 'archivist', 1, 'record', `${v.guests} guests, ${v.covers} covers in use and ${v.spare} spare covers are recorded. No guest names are copied.`),
-      step('allocate_covers', 'Assign the two recorded spare covers with the steward', 'steward', 1, 'receipt', 'The two identified covers move within this finite refuge allocation. Nobody sells a guest list.'),
-      step('report', 'Return the anonymous allocation to the Compact', 'faction', 0, 'receipt', 'Record the completed allocation and receive the agreed 20 Gold.', { finish: true }),
-    ] : [
-      step('mend_covers', 'Mend two replacement covers', 'smith', 2, 'material', 'Consume 2 real Cloth once and keep two craft days. No guest identities are needed.', { materials: { cloth: 2 } }),
+loth once and keep two craft days. No guest identities are needed.', { materials: { cloth: 2 } }),
       step('deliver_covers', 'Deliver the mended covers to the shelter steward', 'steward', 1, 'receipt', 'The two covers you made reach the finite refuge allocation; no second material charge.'),
       step('report', 'Return the completed bedding account to the Compact', 'faction', 0, 'receipt', 'Record the replacements and receive the agreed 20 Gold.', { finish: true }),
     ];
@@ -12749,6 +12720,11 @@ function validateStories(v,s){
 return {LIFE_STORIES,applyStoryAction,applyStoryChoice,initializeLifeStories,storyActions,storyChoiceReason,storyEventIds,storyInvitations,storyView,validateStories};
 })();
 const __maze_rules = (() => {
+/** A campaign dungeon this life already began in the maze (a life from before the delve, v0.67):
+ * it is resumed in the maze, the way it was begun, never restarted as a delve (v0.72.3). */
+function mazeBegun(s,dungeonId) {
+ return Boolean(s.maze?.kind==='authored'&&s.maze.sourceId===dungeonId||s.mazeBook?.records?.some(r=>r.kind==='authored'&&r.sourceId===dungeonId));
+}
 /** Match the entry resolver without changing any recorded legacy expedition. */
 function isMazeEntry(s,id) {
  return Boolean(s.mazeBook && (id==='adventure_descend' || id.startsWith('adventure_pursue_')
@@ -12777,7 +12753,7 @@ function mazeMovementDescription(v) {
  return `${v.focusSpent} Focus (${v.focusAfter} after walking) · ${v.days?'1 attended day; ordinary living costs apply':'no calendar day on this step'}.`;
 }
 
-return {MAZE_ENTRY_RULES,isMazeEntry,mazeMovementDescription,mazeMovementForecast};
+return {MAZE_ENTRY_RULES,isMazeEntry,mazeBegun,mazeMovementDescription,mazeMovementForecast};
 })();
 const __enemy_targets = (() => {
 // The current action only. This module reads captured battle actors; it never
@@ -15592,7 +15568,6 @@ const { ENEMY_SPECIES, ENEMY_DESCRIPTIONS } = __enemies;
 const { studyLevel } = __schooling;
 const { CLASS_CATALOG } = __classes;
 const FIELD_VERSION = 68;
-const edition = s => !!s?.hero?.station;
 const clamp = (n, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, n));
 const number = (v, d = 0) => Number.isFinite(v) ? v : d;
 const low = t => t.charAt(0).toLowerCase() + t.slice(1);
@@ -15600,7 +15575,7 @@ const alive = a => a.hp > 0;
 
 // ---------------------------------------------------------------- the state
 function initializeBattlecraft(s) {
-  if (!edition(s) || s.battlecraft) return;
+  if (s.battlecraft) return;
   s.battlecraft = { version: 1, arts: [], injuries: [], bestiary: {}, record: { fights: 0, won: 0, lost: 0, fled: 0, settled: 0, kills: {} }, pending: null, lastDay: s.day };
 }
 const hasBattlecraft = s => !!s?.battlecraft;
@@ -18255,7 +18230,7 @@ const __living_world = (() => {
 // right; and places that change, written into the world's changes where the
 // place view reads them.
 //
-// New-edition lives only (`hero.station`). The realm's own yearly tick keeps
+// Every life has it (v0.72.3; a life that predates it begins it when read). The realm's own yearly tick keeps
 // its rulers, merchants and prosperity; this module writes into it (a war the
 // courts began, security and prosperity where an event sits) and reads it.
 const { seededRoll, isSettlement, generatePersonName } = __world;
@@ -18263,7 +18238,6 @@ const { REGION_TEMPLATES } = __realm_content_v18;
 const { hasNature, shiftNature } = __personality;
 const { startRegionalWar } = __regional_world_v33;
 const { addStationTie } = __station;
-const edition = s => !!s?.hero?.station;
 const SEASON_DAYS = 92;
 const seasonOf = day => Math.floor(day / SEASON_DAYS);
 const WINTER = 3;
@@ -18310,7 +18284,7 @@ function newGoal(s, actor, season) {
   return { kind: 'descend', target: null, progress: 0, pace: 1 + roll(2) }; // the wolves: slow, until a hard winter (+10 a winter season)
 }
 function initializeLivingWorld(s) {
-  if (!edition(s) || !s.realm || s.living) return;
+  if (!s.realm || s.living) return;
   const season = seasonOf(s.day), actors = [];
   for (const region of s.realm.regions) actors.push({ id: `court:${region.id}`, kind: 'court', regionId: region.id, name: `the ${region.regime} of ${regionName(region.id)}`, goal: null });
   const guildRegions = s.realm.regions.filter(r => sitesIn(s, r.id).some(id => ['city', 'citadel', 'tower'].includes(s.world.locations.find(p => p.id === id)?.type)));
@@ -18780,7 +18754,8 @@ const __guild = (() => {
 // Built on the living world: the three guilds are its actors, their contracts,
 // strikes and monopolies its events; this module reads those and adds the
 // member's side. Threads follow living-world.js: open → scene → choice →
-// follow-up → memory. New-edition lives only (`hero.station`).
+// follow-up → memory. Every life has it from v0.72.3 (a life that predates it
+// begins it when read, with no guild family decided after the fact).
 const { seededRoll, isSettlement, generatePersonName } = __world;
 const { companionOpinion } = __battlecraft;
 const { REGION_TEMPLATES } = __realm_content_v18;
@@ -18788,7 +18763,6 @@ const { hasNature, shiftNature, natureChoice } = __personality;
 const { addStationTie } = __station;
 const { seasonOf, activeEvents } = __living_world;
 const { professionWage } = __careers;
-const edition = s => !!s?.hero?.station;
 const GUILD_CRAFTS = Object.freeze(['blacksmith', 'merchant', 'miner']);
 const CRAFT_PROFESSION = Object.freeze({ blacksmith: 'Blacksmith', merchant: 'Merchant', miner: 'Miner' });
 const PROFESSION_CRAFT = Object.freeze({ Blacksmith: 'blacksmith', Merchant: 'merchant', Miner: 'miner' });
@@ -18836,9 +18810,11 @@ const syncCareerRank = s => { if (s.life?.career) s.life.career.rank = member(s)
 
 // ---------------------------------------------------------------------------
 // Birth: a trade family may be a guild family, and that is a way in.
-function initializeGuild(s) {
-  if (!edition(s) || s.guild) return;
-  const trade = s.hero.station.id === 'trade' && seededRoll(s.seed, 'guild:family', 100) < 55;
+/** `born`: a guild family is something a birth decides. A life that predates the
+ * guild (read with it from v0.72.3) is not given a family table after the fact. */
+function initializeGuild(s, { born = false } = {}) {
+  if (s.guild) return;
+  const trade = born && s.hero.station?.id === 'trade' && seededRoll(s.seed, 'guild:family', 100) < 55;
   const family = trade ? GUILD_CRAFTS[seededRoll(s.seed, 'guild:family:craft', GUILD_CRAFTS.length)] : null;
   s.guild = { version: 1, family, member: null, past: [], heir: null, threads: [], history: [], counters: { threads: 0 }, lastSeason: seasonOf(s.day) };
   if (family) { const parent = (s.life?.people || []).find(p => p.familyRole === 'parent'); if (parent) parent.occupation = family === 'merchant' ? 'merchant of the guild' : family; }
@@ -19147,8 +19123,8 @@ const __faith = (() => {
 // (the prior, the rival novice, the penitent, the doubter, the preacher), its
 // own stories, a world that reacts (the court's purge at the house door, the
 // tithe in a hungry village), ways out (the priory, lapsing, the defrocking,
-// the door held against the court), and a legacy. `state.faith` exists only
-// on edition lives; `realm.faithId` stays the congregation, and the cloth is
+// the door held against the court), and a legacy. `state.faith` is on every
+// life from v0.72.3; `realm.faithId` stays the congregation, and the cloth is
 // what a few of the congregation take.
 const { seededRoll, isSettlement, generatePersonName } = __world;
 const { FAITHS, REGION_TEMPLATES } = __realm_content_v18;
@@ -19156,7 +19132,6 @@ const { hasNature, shiftNature, natureChoice } = __personality;
 const { addStationTie } = __station;
 const { seasonOf, activeEvents } = __living_world;
 const { hasCredential } = __schooling;
-const edition = s => !!s?.hero?.station;
 const RANKS = Object.freeze(['oblate', 'novice', 'brother', 'keeper', 'prior']);
 const TITHE = 5, STIPEND = 10, OFFICE_DAYS = 3, NOVICE_SEASONS = 4, VOWS_STANDING = 40, KEEPER_STANDING = 70, KEEPER_YEARS = 5, ARREARS_DOOR = 3, ARREARS_OUT = 4, NOVICE_MISSED = 2, PENANCE_DAYS = 30, CALLED_DEVOTION = 3;
 const LIMITS = Object.freeze({ threads: 10, history: 24 });
@@ -19198,7 +19173,7 @@ const priorWord = m => m.prior.wing === 'strict' ? 'the strict wing' : 'the open
 
 // ---------------------------------------------------------------------------
 function initializeFaith(s) {
-  if (!edition(s) || s.faith) return;
+  if (s.faith) return;
   s.faith = { version: 1, member: null, past: [], heir: null, threads: [], history: [], counters: { threads: 0 }, lastSeason: seasonOf(s.day), vow: null, oblateAsked: false, evidenceSeen: s.legal?.evidence || 0 };
 }
 /** The house's seat: the shrine at the capital of the region the faith is dominant in, or the nearest shrine. */
@@ -26165,7 +26140,8 @@ const __delve = (() => {
 // halls; the lair left alone reaches the village; and what you carry out has an
 // owner above. The five authored campaign dungeons are rebuilt on it first.
 //
-// New-edition lives only (`hero.station`): legacy saves keep their mazes.
+// Every life's dungeons from v0.72.3 (a life that predates the delve begins it when read);
+// a maze already begun is finished in the maze, and the regional and contract descents are mazes.
 // `state.delve` is the walk in progress; `state.delves.places[id]` is what the
 // place remembers between visits (seen, cleared, the lair, the threat).
 const { seededRoll, isSettlement, generatePersonName, withArticle } = __world;
@@ -26174,7 +26150,7 @@ const { isLiterate, studyLevel, useStudy } = __schooling;
 const { hasNature } = __personality;
 const { addStationTie } = __station;
 const { seasonOf, raidFromBelow } = __living_world;
-const edition = s => !!s?.hero?.station;
+const { mazeBegun } = __maze_rules;
 const TORCH_HOURS = 4, PACK_COST = 6, DAY_HOURS = 12, AWAKE = 60, STIRRING = 90;
 const LIMITS = Object.freeze({ places: 40, log: 30, finds: 12 });
 const NOISE = Object.freeze({ step: 1, search: 3, fight: 12, oil: 15, hazard: 5, retreat: 6, camp: -15 });
@@ -26318,11 +26294,11 @@ function premiseFor(s, id, questId) {
 
 // ---------------------------------------------------------------------------
 // Going in.
-function initializeDelves(s) { if (edition(s) && !s.delves) s.delves = { version: 1, places: {}, descents: 0 }; }
+function initializeDelves(s) { if (!s.delves) s.delves = { version: 1, places: {}, descents: 0 }; }
 const placeRecord = (s, id) => { s.delves.places[id] ||= { id, visits: 0, seen: [], cleared: [], lairCleared: false, objectiveDone: false, floorsCleared: 0, awake: false, threat: 0, lastDay: s.day, relicTaken: false, secretFound: false }; return s.delves.places[id]; };
-function isDelveEntry(s, id) { return edition(s) && !!s.delves && (id === 'adventure_descend' || id.startsWith('explore_enter_') && Object.hasOwn(AUTHORED, id.slice(14))); }
+function isDelveEntry(s, id) { return !!s.delves && (id === 'adventure_descend' || id.startsWith('explore_enter_') && Object.hasOwn(AUTHORED, id.slice(14)) && !mazeBegun(s, id.slice(14))); }
 function delveEntryReason(s, id) {
-  if (!edition(s) || !s.delves || s.phase === 'retired' || s.age < 16) return 'Not for you, not yet.';
+  if (!s.delves || s.phase === 'retired' || s.age < 16) return 'Not for you, not yet.';
   if (s.delve) return 'You are already below.';
   if (s.hero.hp < Math.ceil(s.hero.maxHp * 0.3)) return 'You would not come back. Rest first.';
   if (id === 'adventure_descend' && (s.adventuring?.rations || 0) < 1) return 'Nobody goes down without bread. Buy a ration.';
@@ -26330,7 +26306,7 @@ function delveEntryReason(s, id) {
 }
 /** The door: what you carry decides how long you can stay. A pack of torches, rope, oil and chalk for six gold, if you have it. */
 function enterDelve(s, id, questId = null, ctx = {}) {
-  if (!edition(s) || !s.delves || s.delve || s.event || s.battle || s.phase === 'retired' || s.age < 16) return false;
+  if (!s.delves || s.delve || s.event || s.battle || s.phase === 'retired' || s.age < 16) return false;
   let did = id.startsWith('explore_enter_') ? id.slice(14) : id;
   if (id === 'adventure_descend') { if ((s.adventuring?.rations || 0) < 1) return false; s.adventuring.rations--; s.delves.descents++; const theme = ['ossuary', 'roots', 'tower', 'abyss'][seededRoll(s.seed, `delve:theme:${s.delves.descents}`, 4)]; did = `descent-${theme}-${s.delves.descents}`; }
   const premise = premiseFor(s, did, questId); if (!premise) return false;
@@ -29374,10 +29350,10 @@ const __edition = (() => {
 // (subsystems are added to an older edition life as it plays on), so they
 // carry `began: null` and read "begun before v0.70". Never guess a date.
 
-const GAME_VERSION = '0.72.2';
+const GAME_VERSION = '0.72.3';
 /** The migration step this build brings a new-rules life to. Each later
  * release that changes what a new-rules save holds adds a step here. */
-const EDITION_STEP = 71;
+const EDITION_STEP = 72;
 const OLD = 'old', NEW = 'new';
 
 const plain = v => Boolean(v) && typeof v === 'object' && !Array.isArray(v);
@@ -29412,6 +29388,14 @@ const STEPS = [
   // 71: farmer lives begin prospectively. Earlier saves receive no field,
   // people, ambition, or past harvests; their existing rules stay intact.
   { step: 71, apply() {} },
+  // 72: every life has the whole world. A life that predates schooling, the
+  // living world, the guild, the delve, battlecraft or the cloth begins each
+  // when read (engine.js enableRoleplayUpdates): past six it reads, as every
+  // life did before letters were earned, and the shrine keeper's place was
+  // never offered; no guild family is decided after its birth; the world's
+  // actors begin their goals this season; no past descent, fight or vow is
+  // written. A maze or a battle already begun is finished as it was begun.
+  { step: 72, apply() {} },
 ];
 
 /** Stamp a save with its rules. Idempotent; never overwrites `began`. */
@@ -30020,7 +30004,7 @@ function createSuccessor(original, childId, createBirthGame) {
   s.family = { setup: 'legacy', housing: s.life.home.tier === 'lodgings' ? 'shelter' : 'secure', support: 55, members, history: [], pending: null, lastAge: childAge, interactionUses: {} };
   s.education = { route: null, schoolId: null, enrolled: false, year: 0, attendance: record.development.education.attendance, progress: record.development.education.attendance, performance: 50, scholarship: false, qualifications: record.development.education.qualifications.map(q => ({ ...clone(q), route: q.route === 'public' ? 'community' : q.route, id: `${q.route === 'public' ? 'community' : q.route}-certificate`, schoolId: `school-${q.route === 'public' ? 'community' : q.route}` })), history: [], pending: null, lastAge: childAge, lessonsThisYear: 0, attendanceThisYear: 0, preparationsThisYear: 0, examinedYear: null };
   // An heir's letters come from the schooling it had as a child of the house.
-  initializeSchooling(s); if (s.education.schooling && tier1Certificate(s)) { s.education.schooling.literate = true; s.education.schooling.letters = 'school'; }
+  initializeSchooling(s, { born: true }); if (s.education.schooling && tier1Certificate(s)) { s.education.schooling.literate = true; s.education.schooling.letters = 'school'; }
   if(ownLife?.study)Object.assign(s.education,clone(ownLife.study));
   if(old.education?.teachers)s.education.teachers=clone(old.education.teachers);
   if (s.education.qualifications.some(q => q.route === 'academy')) s.flags.certified = true;
@@ -32513,7 +32497,7 @@ const { legacyCallingOffers, captureLegacyMentorTrial, legacyMentorTrialChoice, 
 const { initializeNpcContinuity, observeNpcContinuity, reconcileNpcContinuity, validateNpcContinuity, townNpc, synchronizeMentorContinuity } = __npc_continuity;
 const { recordFirstMissionArrival } = __faction_first_missions;
 const { ensureMazeVisit, recordMazeDays, recordMazeUse, recordMazeFee, beginMazeSettlement, endMazeVictory } = __maze_receipt_runtime;
-const { isMazeEntry } = __maze_rules;
+const { isMazeEntry, mazeBegun } = __maze_rules;
 const { validFirstDayGuide } = __first_day_guide;
 const { flavoredCompletion } = __story_flavor;
 const { repertoireActions, applyRepertoireAction, applyRepertoireChoice, repertoireEventIds } = __repertoire_gameplay;
@@ -33187,13 +33171,13 @@ function createBirthGame(config = {}) {
   initializeCampaign(state); initializeExploration(state,{fresh:true});
   initializeHousehold(state, { config: resolvedConfig }); initializeFamilyOrigins(state); initializeWorkshop(state);
   if (state.family && station) { state.family.support = stationById(station.id).support; state.family.literate = station.literate; }
-  initializeSchooling(state);
+  initializeSchooling(state,{born:true});
   initializePreferences(state, { values: config.preferences }); initializeLore(state);
   initializeCareers(state); initializeHealth(state); initializeTravel(state); initializeTravelEnergy(state); initializeMaze(state); initializeSocialLife(state); initializeLineage(state,{startingAge:config.startAge});
   initializeHouseholdBudget(state);initializeFortune(state,{attempt:Number.isInteger(config.attempt)&&config.attempt>0&&config.attempt<=12?config.attempt:0});
   initializeFamilyDepth(state);initializeSociety(state);initializeCommunity(state);initializeFellowship(state);initializeSanctuaries(state);
   initializeSocial(state);initializePastimes(state);initializeLifeStories(state);
-  initializeRealm(state,{fresh:true});initializeLivingWorld(state);initializeGuild(state);initializeDelves(state);initializeBattlecraft(state);initializeFaith(state);initializeJustice(state);initializeAdventuring(state);initializeCartography(state);initializeRegionalWorld(state);initializeRpg(state,{fresh:true},engineContext(state));
+  initializeRealm(state,{fresh:true});initializeLivingWorld(state);initializeGuild(state,{born:true});initializeDelves(state);initializeBattlecraft(state);initializeFaith(state);initializeJustice(state);initializeAdventuring(state);initializeCartography(state);initializeRegionalWorld(state);initializeRpg(state,{fresh:true},engineContext(state));
   initializeQuestJournal(state);initializeUpbringing(state);settlePublicRoster(state,{migration:true});
   addJournal(state, 'A life begins at birth', `${state.hero.name} was born in ${location(state).name}${station ? ` to ${station.rank}` : ''}. The morning brought ${worldCalendarContext(state.world,state.day,state.seed).weather}.`, 'origin',{literal:true,meta:{narrativeEdition:30,capturedReceipt:true}});
   birthEvent(state, engineContext(state), true);
@@ -33410,7 +33394,9 @@ function engineContext(state, { annual = false, resolvingNeed=null } = {}) {
     endLife: cause=>endLife(state,cause),
     offerCurse: type=>type==='vampire'?vampireEvent(state):lycanOffer(state),
     startBattle: (id, context) => beginBattle(state, id, context),
-    startDungeon: (id, questId) => state.delves&&!state.flags.dungeonRecords?.[id]?enterDelve(state,id,questId,engineContext(state,{annual:true})):state.mazeBook&&!state.flags.dungeonRecords?.[id]?enterMaze(state,id,questId,engineContext(state,{annual:true})):enterDungeon(state,id,questId,engineContext(state)),
+    // Every life has the delve (v0.72.3). A dungeon already begun in the maze is resumed there, and one
+    // already walked in the older room engine keeps its record there: each is finished the way it began.
+    startDungeon: (id, questId) => state.flags.dungeonRecords?.[id]?enterDungeon(state,id,questId,engineContext(state)):mazeBegun(state,id)?enterMaze(state,id,questId,engineContext(state,{annual:true})):enterDelve(state,id,questId,engineContext(state,{annual:true})),
     touchCampaign: () => { if (state.campaign && !waiting(state)) onCampaignAge(state, engineContext(state)); },
     onBirthday: () => {
       if (state.family && state.education) onHouseholdAge(state, engineContext(state));
@@ -34529,6 +34515,10 @@ function enableRoleplayUpdates(state) {
   initializeFamilyOrigins(state);initializeFamilyDepth(state);initializeSociety(state,{migration:true});initializeCommunity(state,{migration:true});initializeFellowship(state,{migration:true});initializeSanctuaries(state,{migration:true});
   initializeSocial(state,{migration:true});initializePastimes(state,{migration:true});initializeLifeStories(state);
   initializeCurse(state);initializeRealm(state);initializeJustice(state);initializeAdventuring(state);initializeCartography(state,{migration:true});initializeRegionalWorld(state);initializeRpg(state,{migration:true});
+  // Every life has the whole world (v0.72.3, step 72). A life that predates schooling, the living
+  // world, the guild, the delve, battlecraft or the cloth begins each when read, with the stated
+  // defaults (past six it reads; no guild family is decided after the fact); its past is not rewritten.
+  initializeSchooling(state);initializeLivingWorld(state);initializeGuild(state);initializeDelves(state);initializeBattlecraft(state);initializeFaith(state);
   if(state.timeline?.mode==='birth' && (state.timeline.contentVersion||4)<7) {
     if(state.event?.id.startsWith('birth_'))state.timeline.nextContentVersion=7;
     else state.timeline.contentVersion=7;
@@ -41586,7 +41576,7 @@ function navigationLabel(id,label){return id==='journal'&&game?.farm&&farmView(g
 function groupedNavigation(){return navigationGroups.map(([name,rows])=>`<details class="navigation-group" open><summary>${e(name)}</summary>${rows.map(([id,label])=>`<button type="button" class="nav-item ${tab===id?'active':''}" data-op="tab" data-id="${id}" ${tab===id?'aria-current="page"':''}>${uiIcon(id)}<span>${e(navigationLabel(id,label))}</span></button>`).join('')}</details>`).join('');}
 function sidebar() {
  const main=navigationGroups[0][1].map(([id,label])=>[id,navigationLabel(id,label)]);
- return `<aside class="sidebar game-rail"><button class="brand" type="button" data-op="menu" aria-label="Open game menu"><span class="brand-title">Hearth &amp; Oath</span><small>VOLUME I</small></button><nav aria-label="Main views">${main.map(([id,label])=>`<button type="button" class="nav-item ${tab===id?'active':''}" data-op="tab" data-id="${id}" aria-label="${label}" title="${label}" ${tab===id?'aria-current="page"':''}>${uiIcon(id)}<span>${label}</span></button>`).join('')}</nav><div class="rail-footer">${button('Character','tab','character','ghost small')}${button('Party','tab','party','ghost small')}${button('Main Menu','title-menu','','ghost small')}${button('Settings','game-settings','','ghost small')}<small>v0.72.2</small></div></aside>`;
+ return `<aside class="sidebar game-rail"><button class="brand" type="button" data-op="menu" aria-label="Open game menu"><span class="brand-title">Hearth &amp; Oath</span><small>VOLUME I</small></button><nav aria-label="Main views">${main.map(([id,label])=>`<button type="button" class="nav-item ${tab===id?'active':''}" data-op="tab" data-id="${id}" aria-label="${label}" title="${label}" ${tab===id?'aria-current="page"':''}>${uiIcon(id)}<span>${label}</span></button>`).join('')}</nav><div class="rail-footer">${button('Character','tab','character','ghost small')}${button('Party','tab','party','ghost small')}${button('Main Menu','title-menu','','ghost small')}${button('Settings','game-settings','','ghost small')}<small>v0.72.3</small></div></aside>`;
 }
 function ageControlState() {
   let reason='';
@@ -41656,7 +41646,7 @@ function titleScreen() {
   const primary=state?`<article class="title-life" data-return-life-card data-slot-live="${live}" aria-label="Your current life"><button type="button" class="title-menu-item title-continue-card" data-op="title-continue" data-id="${recent.id}"><span class="title-life-portrait" aria-hidden="true">${renderAvatar(state.hero,{size:'small',age:state.age??18})}</span><span class="title-life-copy"><span class="title-action-label">Continue</span><strong>${e(state.hero.name)}</strong><small>Age ${state.age??18} · ${isIronman(state)?'Ironman · ':''}Slot ${recent.id+1}</small>${rulesMarkup(state,{compact:true})}<span class="title-life-place">${e(place)}</span>${card.context?`<span class="title-life-context">${e(card.context)}</span>`:''}</span><span class="menu-arrow" aria-hidden="true">→</span></button><p class="title-source-note" data-slot-source ${card.sourceNote?'':'hidden'}>${e(card.sourceNote)}</p>${saveHealthMarkup(recent.id,{live})}</article>`:menuItem('Begin a new life','title-new',{detail:'Choose an origin, a face and your first year.',className:'title-begin'});
   const keptCard=keptRecent?keptLifeCard(keptRecent.kept,keptRecent.id,{undecoded:true}):'';
   const keptNote=kept.length?` · ${kept.length} kept for the archive`:'';
-  return `<main class="title-screen" aria-labelledby="title-heading">${titleArtwork()}<header class="title-topline"><span>A DARK FANTASY LIFE</span>${button(fullscreenLabel(),'fullscreen','','ghost small')}</header><div class="title-content"><h1 id="title-heading" class="title-wordmark"><span>Hearth</span> <span><em>&amp;</em> Oath</span></h1><p class="title-tagline">The world is old.<br>${state?'Your story continues.':'Your story is unwritten.'}</p><nav class="title-menu" aria-label="Title menu">${keptCard}${primary}<div class="title-life-actions">${state?menuItem('New life','title-new'):''}${menuItem('Saved lives','title-load',{disabled:!occupied.length,detail:occupied.length?`${occupied.length} of 3 slots occupied${keptNote}`:'No lives saved in this browser'})}</div><div class="title-secondary">${menuItem('Settings','title-settings')}${menuItem('How to play','help')}${menuItem('Tactics rehearsal','practice-open',{id:'protect_ally',detail:'Practice with a fictional party'})}${menuItem('Import a saved life','import',{detail:'Open an exported save file'})}</div></nav>${!state?saveHealthMarkup(activeSlot):''}</div><footer class="title-footer"><div class="title-settings"><button type="button" class="button ghost small" data-op="music-toggle" aria-pressed="${getAudioSettings().musicEnabled}">♫ Music ${getAudioSettings().musicEnabled?'on':'off'}</button><span>Ambient score · adjustable in Settings</span></div><p class="title-save-note">Saves stay in this browser. Export a file to keep a separate copy.</p><div class="title-bottomline"><span>VOLUME I · THE BOOK OF A LIFE</span><span>v0.72.2</span></div></footer></main>`;
+  return `<main class="title-screen" aria-labelledby="title-heading">${titleArtwork()}<header class="title-topline"><span>A DARK FANTASY LIFE</span>${button(fullscreenLabel(),'fullscreen','','ghost small')}</header><div class="title-content"><h1 id="title-heading" class="title-wordmark"><span>Hearth</span> <span><em>&amp;</em> Oath</span></h1><p class="title-tagline">The world is old.<br>${state?'Your story continues.':'Your story is unwritten.'}</p><nav class="title-menu" aria-label="Title menu">${keptCard}${primary}<div class="title-life-actions">${state?menuItem('New life','title-new'):''}${menuItem('Saved lives','title-load',{disabled:!occupied.length,detail:occupied.length?`${occupied.length} of 3 slots occupied${keptNote}`:'No lives saved in this browser'})}</div><div class="title-secondary">${menuItem('Settings','title-settings')}${menuItem('How to play','help')}${menuItem('Tactics rehearsal','practice-open',{id:'protect_ally',detail:'Practice with a fictional party'})}${menuItem('Import a saved life','import',{detail:'Open an exported save file'})}</div></nav>${!state?saveHealthMarkup(activeSlot):''}</div><footer class="title-footer"><div class="title-settings"><button type="button" class="button ghost small" data-op="music-toggle" aria-pressed="${getAudioSettings().musicEnabled}">♫ Music ${getAudioSettings().musicEnabled?'on':'off'}</button><span>Ambient score · adjustable in Settings</span></div><p class="title-save-note">Saves stay in this browser. Export a file to keep a separate copy.</p><div class="title-bottomline"><span>VOLUME I · THE BOOK OF A LIFE</span><span>v0.72.3</span></div></footer></main>`;
 }
 /** The rules a life lives by, on its slot and its review: the label, and for an old-rules life the way to the archive. */
 function rulesMarkup(state,{slot=null,compact=false,undecoded=false,labelled=true}={}){

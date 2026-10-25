@@ -75,7 +75,11 @@ for (const definitionId of ['third_mark', 'early_bell']) test(`${definitionId}: 
 });
 
 test('a Scholar also finishes at home and keeps existing paid work separate', () => {
-  let s = fresh(); const work = settlementServices(s).find(row => row.kind === 'work'); s = walk(s, work.roomId); s = act(s, 'career_choose_scholar'); s = walk(s, 'homes');
+  let s = fresh(); const work = settlementServices(s).find(row => row.kind === 'work'); s = walk(s, work.roomId);
+  // One rulebook (v0.72.3): the archive takes a scholar only with a grammar school certificate; this
+  // controlled life carries one, as the society fixtures' QA scholar does.
+  s.education.qualifications.push({ id: 'academy-certificate', label: 'Academy certificate', route: 'academy', schoolId: 'school-academy', grade: 72, day: s.day, age: Math.min(17, s.age) });
+  s = act(s, 'career_choose_scholar'); s = walk(s, 'homes');
   const before = structuredClone(s), home = s.locationId; s = finished(s);
   assert.equal(s.hero.profession, 'Scholar'); assert.equal(s.locationId, home); assert.equal(s.cartography.interior.roomId, 'homes');
   assert.deepEqual(s.careers.records.Scholar, before.careers.records.Scholar); assert.ok(s.hero.gold <= before.hero.gold);

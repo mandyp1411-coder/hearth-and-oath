@@ -36,7 +36,8 @@ export function roomFixture(kind = 'scout') {
   // Short descents need not contain every room type; no room is invented.
   const source=copy(valid(s)),roomKind=['scout','protector'].includes(kind)?'trap':kind==='scholar'?'inscription':'camp';let found=false;
   for(let run=source.mazeBook.nextRun;run<source.mazeBook.nextRun+40;run++){
-    s=copy(source);s.mazeBook.nextRun=run;s=action(valid(s),'adventure_descend');
+    // A regional descent is a maze for every life; the board's descent is a delve (v0.72.3).
+    s=copy(source);s.mazeBook.nextRun=run;s=action(valid(s),'rpg_enter_modular_1');
     if(mazeLayout(s.maze).cells.some(c=>{const room=mazeRoomCell(s.maze,c.id);return room.kind===roomKind&&!room.contentSlot&&!s.maze.cleared.includes(c.id);})){found=true;break;}
   }
   assert.ok(found,'a bounded set of native runs contains '+roomKind);s=atGeneric(s,roomKind);

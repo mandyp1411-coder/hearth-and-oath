@@ -12,7 +12,7 @@ import { legacyCallingOffers, captureLegacyMentorTrial, legacyMentorTrialChoice,
 import { initializeNpcContinuity, observeNpcContinuity, reconcileNpcContinuity, validateNpcContinuity, townNpc, synchronizeMentorContinuity } from './npc-continuity.js';
 import { recordFirstMissionArrival } from './faction-first-missions.js';
 import { ensureMazeVisit, recordMazeDays, recordMazeUse, recordMazeFee, beginMazeSettlement, endMazeVictory } from './maze-receipt-runtime.js';
-import { isMazeEntry } from './maze-rules.js';
+import { isMazeEntry, mazeBegun } from './maze-rules.js';
 import { validFirstDayGuide } from './first-day-guide.js';
 import { flavoredCompletion } from './story-flavor.js';
 import { repertoireActions, applyRepertoireAction, applyRepertoireChoice, repertoireEventIds } from './repertoire-gameplay.js';
@@ -689,13 +689,13 @@ export function createBirthGame(config = {}) {
   initializeCampaign(state); initializeExploration(state,{fresh:true});
   initializeHousehold(state, { config: resolvedConfig }); initializeFamilyOrigins(state); initializeWorkshop(state);
   if (state.family && station) { state.family.support = stationById(station.id).support; state.family.literate = station.literate; }
-  initializeSchooling(state);
+  initializeSchooling(state,{born:true});
   initializePreferences(state, { values: config.preferences }); initializeLore(state);
   initializeCareers(state); initializeHealth(state); initializeTravel(state); initializeTravelEnergy(state); initializeMaze(state); initializeSocialLife(state); initializeLineage(state,{startingAge:config.startAge});
   initializeHouseholdBudget(state);initializeFortune(state,{attempt:Number.isInteger(config.attempt)&&config.attempt>0&&config.attempt<=12?config.attempt:0});
   initializeFamilyDepth(state);initializeSociety(state);initializeCommunity(state);initializeFellowship(state);initializeSanctuaries(state);
   initializeSocial(state);initializePastimes(state);initializeLifeStories(state);
-  initializeRealm(state,{fresh:true});initializeLivingWorld(state);initializeGuild(state);initializeDelves(state);initializeBattlecraft(state);initializeFaith(state);initializeJustice(state);initializeAdventuring(state);initializeCartography(state);initializeRegionalWorld(state);initializeRpg(state,{fresh:true},engineContext(state));
+  initializeRealm(state,{fresh:true});initializeLivingWorld(state);initializeGuild(state,{born:true});initializeDelves(state);initializeBattlecraft(state);initializeFaith(state);initializeJustice(state);initializeAdventuring(state);initializeCartography(state);initializeRegionalWorld(state);initializeRpg(state,{fresh:true},engineContext(state));
   initializeQuestJournal(state);initializeUpbringing(state);settlePublicRoster(state,{migration:true});
   addJournal(state, 'A life begins at birth', `${state.hero.name} was born in ${location(state).name}${station ? ` to ${station.rank}` : ''}. The morning brought ${worldCalendarContext(state.world,state.day,state.seed).weather}.`, 'origin',{literal:true,meta:{narrativeEdition:30,capturedReceipt:true}});
   birthEvent(state, engineContext(state), true);
@@ -912,7 +912,9 @@ function engineContext(state, { annual = false, resolvingNeed=null } = {}) {
     endLife: cause=>endLife(state,cause),
     offerCurse: type=>type==='vampire'?vampireEvent(state):lycanOffer(state),
     startBattle: (id, context) => beginBattle(state, id, context),
-    startDungeon: (id, questId) => state.delves&&!state.flags.dungeonRecords?.[id]?enterDelve(state,id,questId,engineContext(state,{annual:true})):state.mazeBook&&!state.flags.dungeonRecords?.[id]?enterMaze(state,id,questId,engineContext(state,{annual:true})):enterDungeon(state,id,questId,engineContext(state)),
+    // Every life has the delve (v0.72.3). A dungeon already begun in the maze is resumed there, and one
+    // already walked in the older room engine keeps its record there: each is finished the way it began.
+    startDungeon: (id, questId) => state.flags.dungeonRecords?.[id]?enterDungeon(state,id,questId,engineContext(state)):mazeBegun(state,id)?enterMaze(state,id,questId,engineContext(state,{annual:true})):enterDelve(state,id,questId,engineContext(state,{annual:true})),
     touchCampaign: () => { if (state.campaign && !waiting(state)) onCampaignAge(state, engineContext(state)); },
     onBirthday: () => {
       if (state.family && state.education) onHouseholdAge(state, engineContext(state));
@@ -2031,6 +2033,10 @@ function enableRoleplayUpdates(state) {
   initializeFamilyOrigins(state);initializeFamilyDepth(state);initializeSociety(state,{migration:true});initializeCommunity(state,{migration:true});initializeFellowship(state,{migration:true});initializeSanctuaries(state,{migration:true});
   initializeSocial(state,{migration:true});initializePastimes(state,{migration:true});initializeLifeStories(state);
   initializeCurse(state);initializeRealm(state);initializeJustice(state);initializeAdventuring(state);initializeCartography(state,{migration:true});initializeRegionalWorld(state);initializeRpg(state,{migration:true});
+  // Every life has the whole world (v0.72.3, step 72). A life that predates schooling, the living
+  // world, the guild, the delve, battlecraft or the cloth begins each when read, with the stated
+  // defaults (past six it reads; no guild family is decided after the fact); its past is not rewritten.
+  initializeSchooling(state);initializeLivingWorld(state);initializeGuild(state);initializeDelves(state);initializeBattlecraft(state);initializeFaith(state);
   if(state.timeline?.mode==='birth' && (state.timeline.contentVersion||4)<7) {
     if(state.event?.id.startsWith('birth_'))state.timeline.nextContentVersion=7;
     else state.timeline.contentVersion=7;

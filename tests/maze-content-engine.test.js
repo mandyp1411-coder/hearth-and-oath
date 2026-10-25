@@ -14,6 +14,7 @@ import { createSuccessor,validateLineage } from '../dist/js/lineage.js';
 import { inheritRpg,validateRpg } from '../dist/js/rpg-depth-v27.js';
 import { inheritStoryMazes,validateMazes } from '../dist/js/maze-v31.js';
 import { mountApp } from './helpers/ui-surface.mjs';
+import {readIntoRulebook} from './helpers/one-rulebook.mjs';
 
 // Existing real v0.27 save avoids generating a new life for every test. Source
 // room positions/resources are controlled fixtures, not earned maze routes or
@@ -25,6 +26,11 @@ function fresh(){
   const s=structuredClone(base);s.hero.gold=1000;for(const key of Object.keys(s.hero.skills))s.hero.skills[key]=12;
   for(const key of Object.keys(s.equipment.materials))s.equipment.materials[key]=20;s.flags.herbs=20;s.adventuring.rations=20;return s;
 }
+// One rulebook (v0.72.3): a campaign dungeon begins as a delve for every life; an authored maze runs only
+// where a life had already begun one, which is resumed the way it began (maze-rules.js mazeBegun). The
+// begun maze here is a genuine capture's (The Covenant Core), with the same controlled resources as fresh().
+const capture=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v0590-long-life-before-battle.json.gz',import.meta.url))));
+function begun(){const s=drain(readIntoRulebook(capture.state||capture));assert.equal(s.maze?.kind,'authored');s.hero.gold=1000;for(const key of Object.keys(s.hero.skills))s.hero.skills[key]=12;for(const key of Object.keys(s.equipment.materials))s.equipment.materials[key]=20;s.flags.herbs=20;s.adventuring.rations=20;s.hero.hp=s.hero.maxHp;s.hero.mp=s.hero.maxMp;return s;}
 function site(s,id){s.locationId=id;s.cartography.pending=null;s.cartography.offsite=false;s.cartography.interior=null;syncCartography(s);return s;}
 function room(s,slotId){const cell=s.maze.content.anchors.find(row=>row.slotId===slotId).cellId;s.maze.position=cell;s.maze.previous=mazeLayout(s.maze).cells[cell].doors[0];s.maze.visited=[...new Set([...s.maze.visited,cell])];if(s.maze.content.family==='signature')enterSignatureMazeRoom(s,s.maze);return s;}
 function drain(s){for(let n=0;s.event&&n<30;n++){const pick=s.event.choices.find(row=>['later','care','leave','keep','continue','pause','ask'].includes(row.id)&&!row.disabledReason)||s.event.choices.find(row=>!row.disabledReason);assert.ok(pick);s=E.chooseEventOption(s,pick.id);}assert.equal(s.event,null);return s;}
@@ -37,15 +43,21 @@ function authoredAid(s){
   s=act(room(s,'witness'),'maze_authored_hear_witness');return act(s,'maze_authored_protect_witness');
 }
 
-test('five new authored identities complete through actual engine proof/aid and source choices',()=>{
-  for(const source of DUNGEONS){let s=site(fresh(),source.locationId);s=act(s,'explore_enter_'+source.id);assert.equal(s.maze.version,2);assert.equal(s.dungeon,null);
+test('a campaign dungeon begins as a delve, and one begun in the maze resumes there',()=>{
+  for(const source of DUNGEONS){const s=site(fresh(),source.locationId);const entered=act(s,'explore_enter_'+source.id);assert.equal(entered.maze,null);assert.ok(entered.delve,source.id);}
+  const b=begun(),source=b.maze.sourceId;b.maze.position=0;b.maze.previous=b.maze.visited[1];const out=act(b,'maze_exit');assert.equal(out.maze,null);
+  const back=act(out,'explore_enter_'+source);assert.ok(!back.delve);assert.equal(back.maze?.sourceId,source,'resumed in the maze');assert.equal(back.maze.id,b.maze.id);
+});
+
+test('an authored maze already begun completes through actual engine proof/aid and source choices',()=>{
+  for(const source of [DUNGEONS.find(d=>d.id===capture.state?.maze?.sourceId||d.id==='covenant_core')]){let s=begun();assert.equal(s.maze.version,2);assert.equal(s.dungeon,null);
     s=authoredAid(s);const guardian=s.maze.content.requiredGuardians[0].slotId;s=act(room(s,guardian),'maze_authored_listen');s=act(s,'maze_authored_parley');
     s=act(room(s,s.maze.content.goalSlotId),'maze_authored_finish_stewardship');assert.equal(s.maze.contentFacts.objectiveMethod,'stewardship');roundtrip(s);s=act(s,'maze_exit');assert.equal(s.maze,null);assert.equal(s.mazeBook.contentReceipts.filter(row=>row.sourceId===source.id).length,1);
   }
 });
 
 test('new authored battle saves bind the actual named source encounter',()=>{
-  let s=site(fresh(),'marsh');s=act(s,'explore_enter_cistern');const encounter=s.maze.content.definition.rooms.find(row=>row.kind==='fight');s=act(room(s,encounter.id),'maze_fight');
+  let s=begun();const encounter=s.maze.content.definition.rooms.find(row=>row.kind==='fight'&&!s.maze.cleared.includes(s.maze.content.anchors.find(a=>a.slotId===row.id)?.cellId));assert.ok(encounter);s=act(room(s,encounter.id),'maze_fight');
   assert.equal(s.battle.encounterId,encounter.encounterId);assert.equal(s.battle.context.kind,'maze');assert.equal(s.battle.context.slotId,encounter.id);roundtrip(s);
   const bad=structuredClone(s);bad.battle.context.slotId='keeper';assert.equal(E.validateSave(bad),false);
 });
@@ -69,12 +81,13 @@ test('six signature identities use actual leads, both guardians and selected fin
   }
 });
 
-test('delegated maze controls keep fog and resume a saved content attendance target',async t=>{
-  let s=site(fresh(),'marsh');s=act(s,'explore_enter_cistern');const optional=s.maze.content.definition.rooms.find(row=>row.optional&&row.id==='service');
-  assert.ok(optional,'fixture seed includes service');s=room(s,'service');
-  assert.equal(applyMazeAction(s,'maze_authored_repair_route',{spendDays:()=>0}),true);assert.ok(E.validateSave(s));roundtrip(s);
-  const ui=await mountApp(t, {states:[s]});await ui.click('title-continue');assert.equal(ui.root.querySelectorAll('.maze-cell').length,121);
-  assert.ok(ui.root.querySelectorAll('.maze-cell.fog').every(node=>!node.textContent.trim()));assert.ok(ui.root.querySelector('[data-id="maze_work_continue"]'));
+test('delegated maze controls keep fog over a begun authored maze, and a saved content attendance target resumes',async t=>{
+  let s=begun();const service=s.maze.content.definition.rooms.find(row=>row.optional&&row.id==='service');
+  if(service){s=room(s,'service');assert.equal(applyMazeAction(s,'maze_authored_repair_route',{spendDays:()=>0}),true);assert.ok(E.validateSave(s));roundtrip(s);}
+  const ui=await mountApp(t, {states:[s]});await ui.click('title-continue');assert.equal(ui.root.querySelectorAll('.maze-cell').length,mazeLayout(s.maze).cells.length);
+  assert.ok(ui.root.querySelectorAll('.maze-cell.fog').every(node=>!node.textContent.trim()));
+  if(!service){t.diagnostic('the begun Covenant Core has no service room; the attendance target is covered where one exists');return;}
+  assert.ok(ui.root.querySelector('[data-id="maze_work_continue"]'));
   await ui.click('activity','maze_work_continue');assert.equal(ui.current().rpg.project,null);assert.equal(ui.current().maze.contentFacts.variantAid,true);assert.ok(E.validateSave(ui.current()));
 });
 

@@ -146,6 +146,7 @@ function settle(state) {
     let pick;
     if (/^(birth_|fate_)/.test(id)) pick = state.event.choices.some(c => c.id === 'care') ? 'care' : 'curiosity';
     else if(id==='society_staff')pick=state.event.choices.some(c=>c.id==='boundary')?'boundary':'prepare';
+    else if(/^(living|guild|faith|delve|battlecraft)_/.test(id))pick='continue'; // every life has the whole world (v0.72.3): this family keeps to its own work
     else pick = ({ career_year: 'care', life_birthday: 'people', plague_letter: 'later', deadline_review: 'pause', health_concern: state.health?.pending?.kind === 'physical' ? 'rest' : 'support', health_break: 'pray', debt_reckoning: 'plead', hard_winter: 'share', lineage_bereavement: 'share', society_customer:'decline',society_neighbor:'welcome',society_launch:'independent' })[id];
     // This parent prioritizes the already agreed work and their children's
     // schooling: tell customers an honest limit, welcome new neighbors and
@@ -237,15 +238,16 @@ function partnerAndChildren(state) {
 }
 
 function smithLife() {
-  // A free village school for a penniless child is the rule a legacy save keeps (on a new life the schoolmaster wants
-  // ten gold and the shrine keeper has one place, tests/education-v64.test.js); this fixture is born without a station.
+  // The village schoolmaster wants ten gold a year from every life (v0.72.3); this penniless child's fees are found
+  // for him, as controlled data, the year he enrols and the year he sits the examination. Born without a station.
   let state = engine.createBirthGame({ name: 'Vesper Hearthkeeper', seed: 'two-lives-at-the-forge', birthplace: 'village', household: 'poor', familySetup: 'homeless', appearance: { ancestry: 'dwarf' }, station: null });
   state = choose(state, 'care');
   assert.equal(state.family.housing,'shelter');
   state = grow(state, 6);
-  state = act(state, 'school_enroll_community');
+  state.hero.gold += 10; state = act(state, 'school_enroll_community');
   for (let lesson = 0; lesson < 6; lesson += 1) state = act(state, 'school_attend');
   state = grow(state, 10);
+  state.hero.gold += 10; state = act(state, 'school_attend');
   state = act(state, 'school_exam');
   state = choose(state, 'present');
   assert.ok(state.education.qualifications.some(q => q.route === 'community'), 'a penniless child earns literacy through actual lessons and an examination');

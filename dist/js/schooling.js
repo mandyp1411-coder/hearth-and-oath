@@ -2,8 +2,8 @@
 // who gets letters and how, what a school costs and whom it admits, the
 // scholarship examination with its handful of places, the electives of the
 // grammar years, and the credentials that gate the learned trades. It layers
-// over the course machinery in household.js and education-progress.js, and
-// applies to new-edition lives only.
+// over the course machinery in household.js and education-progress.js. Every
+// life has it from v0.72.3; one that predates it keeps the letters it had.
 //
 // Second slice (v0.64.1): the institutions of the capitals above the grammar
 // school, studies that fade without use, classmates who stay in a life, and
@@ -79,16 +79,19 @@ export const BOND_YEARS = 3;
 
 export const SCHOOLING_EVENTS = { ids: () => ({ schooling_rival: ['contest', 'yield', 'cheat'], schooling_temper: ['endure', 'answer', 'run'] }) };
 
-const edition = s => !!s?.hero?.station;
 const means = s => s.hero.station?.id;
 const wealthy = s => ['trade', 'gentry', 'noble', 'royal'].includes(means(s));
 const high = s => ['gentry', 'noble', 'royal'].includes(means(s));
 // A line in the book. Written literal, so the engine's action receipt ("Sit the examination. 2 days passed.") does not overwrite it.
 const note = (ctx, title, text, tag = 'education') => (ctx?.journalLiteral || ctx?.journal)?.(title, text, tag);
 
-export function initializeSchooling(s) {
-  if (!edition(s) || !s.education) return;
-  if (!s.education.schooling) s.education.schooling = { version: 1, literate: false, letters: null, shrinePlace: null, tuitionPaid: {}, electives: [], scholarship: null, entrance: {}, lettersLessons: 0, studies: {}, classmates: [], institution: null, bond: null, pending: null, credentials: [] };
+/** `born`: letters are earned from birth. A life that predates schooling (read with it from
+ * v0.72.3) keeps what it had: past six it reads, as every life did before letters were earned,
+ * and the shrine keeper's place was never offered. */
+export function initializeSchooling(s, { born = false } = {}) {
+  if (!s.education || s.education.schooling) return;
+  const k = s.education.schooling = { version: 1, literate: false, letters: null, shrinePlace: null, tuitionPaid: {}, electives: [], scholarship: null, entrance: {}, lettersLessons: 0, studies: {}, classmates: [], institution: null, bond: null, pending: null, credentials: [] };
+  if (!born && s.age >= 6) { k.literate = true; k.letters = 'before'; k.shrinePlace = false; }
 }
 /** The schooling record. A first-slice record (v0.64.0) gains the second slice's fields empty. */
 export const schooling = s => {
@@ -244,7 +247,7 @@ export function lettersLesson(s, ctx = {}) {
 
 /** The learned trades ask for letters and schooling the unlettered do not have. */
 export function credentialReason(s, professionId) {
-  if (!edition(s) || !schooling(s)) return null;
+  if (!schooling(s)) return null;
   const literate = isLiterate(s);
   const bond = bondReason(s, professionId); if (bond) return bond;
   switch (professionId) {
@@ -603,7 +606,7 @@ export function validateSchooling(k, s) {
   if (k === undefined) return true;
   const int = (n, max = 1000) => Number.isSafeInteger(n) && n >= 0 && n <= max;
   if (!k || typeof k !== 'object' || k.version !== 1 || typeof k.literate !== 'boolean') return false;
-  if (!(k.letters === null || ['tutor', 'home', 'school', 'self'].includes(k.letters)) || !(k.shrinePlace === null || typeof k.shrinePlace === 'boolean')) return false;
+  if (!(k.letters === null || ['tutor', 'home', 'school', 'self', 'before'].includes(k.letters)) || !(k.shrinePlace === null || typeof k.shrinePlace === 'boolean')) return false;
   if (!(k.scholarship === null || ['passed', 'failed'].includes(k.scholarship))) return false;
   if (!k.tuitionPaid || typeof k.tuitionPaid !== 'object' || !Object.entries(k.tuitionPaid).every(([route, age]) => TIERS[route] !== undefined && int(age, 300))) return false;
   if (!k.entrance || typeof k.entrance !== 'object' || !(k.entrance.academy === undefined || ['passed', 'failed'].includes(k.entrance.academy)) || !(k.entrance.academyYear === undefined || int(k.entrance.academyYear, 300))) return false;

@@ -74,12 +74,9 @@ test('danger by place: the roaming tier comes from where you stand, and enemies 
   const low = structuredClone(s); low.hero.level = 1; const high = structuredClone(s); high.hero.level = 12;
   const a = createBattle(low, 'free_beast', null), b = createBattle(high, 'free_beast', null);
   assert.deepEqual(a.actors.filter(x => x.side === 'enemy').map(x => [x.name, x.maxHp, x.attackPower]), b.actors.filter(x => x.side === 'enemy').map(x => [x.name, x.maxHp, x.attackPower]));
-  // a legacy life still grows its foes with the level
-  const legacy = engine.createBirthGame({ seed: 'bc-legacy-1', station: null }); legacy.hero.level = 12; legacy.age = 20; legacy.phase = 'adult';
-  const legacyLow = structuredClone(legacy); legacyLow.hero.level = 1;
-  const c = createBattle(legacyLow, 'forest', null), d = createBattle(legacy, 'forest', null);
-  assert.equal(c.fieldVersion, undefined); assert.ok(d.actors.find(x => x.id === 'enemy-1').maxHp > c.actors.find(x => x.id === 'enemy-1').maxHp);
-  assert.equal(legacy.battlecraft, undefined);
+  // One rulebook (v0.72.3): a life without a station has the field too.
+  const plain = engine.createBirthGame({ seed: 'bc-legacy-1', station: null }); plain.age = 20; plain.phase = 'adult';
+  assert.ok(plain.battlecraft); assert.equal(createBattle(plain, 'forest', null).fieldVersion, 68);
 });
 
 test('the arts: a tree per calling, learned for days and gold with the mentor, used in battle by the calling that owns them, once a fight when it says so', () => {
@@ -280,15 +277,15 @@ test('the bestiary: met, fought, killed twice and known; the archive teaches; na
   void known;
 });
 
-test('legacy: a life without a station fights the fight it had, and a save from before the field still loads', async () => {
-  const legacy = engine.createBirthGame({ seed: 'bc-legacy-2', station: null });
-  assert.equal(legacy.battlecraft, undefined); assert.equal(engine.validateSave(legacy), true);
-  legacy.age = 20; legacy.phase = 'adult';
-  const b = createBattle(legacy, 'forest', null); assert.equal(b.fieldVersion, undefined); assert.ok(!b.actors.some(a => a.row !== undefined));
-  assert.ok(!getBattleActions(b).some(a => a.id === 'shift' || a.id === 'settle' || a.id.startsWith('art_')));
+test('one rulebook: a life without a station has the field, and a save from before the field begins it when read', async () => {
+  const plain = engine.createBirthGame({ seed: 'bc-legacy-2', station: null });
+  assert.ok(plain.battlecraft); assert.equal(engine.validateSave(plain), true);
   const s = ready('bc-legacy-3'); if (!s) return;
-  const copy = structuredClone(s); delete copy.battlecraft; assert.equal(engine.validateSave(copy), true, 'an edition save from before v0.68 loads');
+  const copy = structuredClone(s); delete copy.battlecraft; assert.equal(engine.validateSave(copy), true, 'a save from before v0.68 loads');
+  // The older battle page stays for a fight begun without the field (and the rehearsal's fictional party).
   assert.equal(createBattle(copy, 'free_beast', null).fieldVersion, undefined);
+  const read = engine.migrateSave(JSON.parse(JSON.stringify(copy)));
+  assert.ok(read?.battlecraft, 'the field begins when the life is read (step 72)'); assert.equal(createBattle(read, 'free_beast', null).fieldVersion, 68);
   const grown = await createLifeAtAge({ seed: 'bc-legacy-4', startAge: 18 }); assert.ok(grown.battlecraft, 'a generated life has the field');
 });
 

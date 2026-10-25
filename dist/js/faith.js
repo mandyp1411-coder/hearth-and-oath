@@ -5,8 +5,8 @@
 // (the prior, the rival novice, the penitent, the doubter, the preacher), its
 // own stories, a world that reacts (the court's purge at the house door, the
 // tithe in a hungry village), ways out (the priory, lapsing, the defrocking,
-// the door held against the court), and a legacy. `state.faith` exists only
-// on edition lives; `realm.faithId` stays the congregation, and the cloth is
+// the door held against the court), and a legacy. `state.faith` is on every
+// life from v0.72.3; `realm.faithId` stays the congregation, and the cloth is
 // what a few of the congregation take.
 import { seededRoll, isSettlement, generatePersonName } from './world.js';
 import { FAITHS, REGION_TEMPLATES } from './realm-content-v18.js';
@@ -15,7 +15,6 @@ import { addStationTie } from './station.js';
 import { seasonOf, activeEvents } from './living-world.js';
 import { hasCredential } from './schooling.js';
 
-const edition = s => !!s?.hero?.station;
 export const RANKS = Object.freeze(['oblate', 'novice', 'brother', 'keeper', 'prior']);
 export const TITHE = 5, STIPEND = 10, OFFICE_DAYS = 3, NOVICE_SEASONS = 4, VOWS_STANDING = 40, KEEPER_STANDING = 70, KEEPER_YEARS = 5, ARREARS_DOOR = 3, ARREARS_OUT = 4, NOVICE_MISSED = 2, PENANCE_DAYS = 30, CALLED_DEVOTION = 3;
 const LIMITS = Object.freeze({ threads: 10, history: 24 });
@@ -57,7 +56,7 @@ const priorWord = m => m.prior.wing === 'strict' ? 'the strict wing' : 'the open
 
 // ---------------------------------------------------------------------------
 export function initializeFaith(s) {
-  if (!edition(s) || s.faith) return;
+  if (s.faith) return;
   s.faith = { version: 1, member: null, past: [], heir: null, threads: [], history: [], counters: { threads: 0 }, lastSeason: seasonOf(s.day), vow: null, oblateAsked: false, evidenceSeen: s.legal?.evidence || 0 };
 }
 /** The house's seat: the shrine at the capital of the region the faith is dominant in, or the nearest shrine. */
