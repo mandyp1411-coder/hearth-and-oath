@@ -550,15 +550,6 @@ textarea { resize: vertical; min-height: 100px; }
 .moon-forecast { padding-top: 20px; margin-top: 20px; border-top: 1px solid #4e4a44; }
 .moon-forecast strong { font: 22px/1.4 var(--serif); color: #c4b9aa; }
 .moon-forecast p { margin-top: 10px; font-size: 13px; }
-.dungeon-panel { border-top: 3px solid #aa7050; background-color: #1c1a18; }
-.dungeon-panel h2 { font-size: 32px; }
-.dungeon-room-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; margin: 25px 0; }
-.dungeon-room { display: flex; flex-direction: column; align-items: flex-start; gap: 9px; padding: 18px; background: #151412; border: 1px solid #423e39; }
-.dungeon-room > span { color: #938674; font-size: 20px; }
-.dungeon-room strong { color: #b8afa2; font: 19px/1.4 var(--serif); }
-.dungeon-room small { font: 10px var(--mono); color: #91887c; }
-.dungeon-room.current { border-color: #bc885e; background: #2a2417; }
-.dungeon-room.cleared { background: #23211e; border-color: #766a5a; }
 .room-story { border-top: 1px solid #494540; margin-top: 23px; padding-top: 22px; }
 .room-story p { font: 16px/1.85 var(--serif); color: #c2bbb1; }
 .turn-order { display: flex; flex-wrap: wrap; gap: 7px; margin: 18px 0 0; }
@@ -822,9 +813,6 @@ textarea { resize: vertical; min-height: 100px; }
   .actor-card .target-label { font-size: 11px; }
   .battle-actions .button { flex: 1 1 42%; }
   .battle-help { grid-template-columns: minmax(0,1fr); gap: 15px; }
-  .dungeon-room-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
-  .dungeon-room { padding: 16px 12px; }
-  .dungeon-room strong { font-size: 19px; }
   .journal-entry { grid-template-columns: minmax(0,1fr); gap: 13px; padding: 24px 0; }
   .journal-date { display: flex; align-items: center; gap: 12px; }
   .journal-date .badge { margin: 0; }
@@ -2436,8 +2424,6 @@ html[data-reading-font="plain"] body { font-family: Arial, Helvetica, sans-serif
 .battle-action-option { flex: 1 1 100%; min-width: 0; padding-bottom: 7px; border-bottom: 1px solid var(--line); }
 .battle-action-option > .button { width: 100%; }
 .battle-action-option .action-preview { margin: 5px 0 0; line-height: 1.45; overflow-wrap: anywhere; color: var(--muted); }
-.spatial-breadcrumbs { color:#c2b48d;line-height:1.8;font-size:calc(13px * var(--reading-scale,1));margin:0 0 18px;overflow-wrap:anywhere; }
-.spatial-moment { border-left:2px solid #8c7c58;padding-left:18px;margin-bottom:28px; }
 .hex-board { width:100%;background:#171613;border:1px solid #4f493e; }
 .hex-map-scroll { overflow:auto;overscroll-behavior:contain; }
 .hex-map-canvas { position:relative;min-width:720px;width:100%; }
@@ -2453,16 +2439,9 @@ html[data-reading-font="plain"] body { font-family: Arial, Helvetica, sans-serif
 .known-place-list,.city-room-list { display:flex;gap:10px;flex-wrap:wrap; }
 .known-place-list .button { display:grid;justify-items:start;min-width:140px;text-align:left; }
 .city-room-list { margin:18px 0; }
-.dungeon-graph svg { width:100%;max-height:360px;background:#181714; }
-.dungeon-graph line { stroke:#837656;stroke-width:2; }
-.dungeon-graph circle { fill:#2c2922;stroke:#a29473;stroke-width:1.5; }
-.dungeon-graph .current circle { fill:#665b3e;stroke:#e2cda2;stroke-width:3; }
-.dungeon-graph .unseen circle { fill:#12110f;stroke-dasharray:3 3; }
-.dungeon-graph text { fill:#d0c4a7;font-size:15px; }
-.dungeon-graph text.room-label { font-size:11px; }
 .journal-search { display:grid;gap:12px; }
 .reply-options small { display:block;margin-top:6px;color:var(--muted);font-weight:400; }
-@media (max-width:1000px){.world-layout{grid-template-columns:1fr}.world-map-panel{min-width:0}.spatial-moment{padding-left:10px}.hex-cell small{font-size:11px!important}.city-room-list .button{flex:1 1 160px}.known-place-list .button{flex:1 1 140px}.game-content{overflow-wrap:anywhere}.mobile-command-dock small,.bottom-nav span,.mobile-command-dock .eyebrow{font-size:calc(11px * var(--reading-scale,1))!important}}
+@media (max-width:1000px){.world-layout{grid-template-columns:1fr}.world-map-panel{min-width:0}.hex-cell small{font-size:11px!important}.city-room-list .button{flex:1 1 160px}.known-place-list .button{flex:1 1 140px}.game-content{overflow-wrap:anywhere}.mobile-command-dock small,.bottom-nav span,.mobile-command-dock .eyebrow{font-size:calc(11px * var(--reading-scale,1))!important}}
 .city-room-map{position:relative;max-width:650px;width:100%;aspect-ratio:560/405;background:#171613;border:1px solid #514938;margin:20px 0}.city-room-map svg{width:100%;height:100%}.city-room-map line{stroke:#6c6250;stroke-width:2}.city-room-map circle{fill:#302c24;stroke:#a2977c}.city-room-map circle.current{fill:#756548;stroke:#e9d7aa;stroke-width:2}.city-map-door{position:absolute;transform:translate(-50%,-50%);width:46px;height:46px;background:transparent;border:0;color:#c8b993;font-size:24px}.city-map-door:disabled{opacity:.75}.city-map-door small{position:absolute;left:50%;top:46px;transform:translateX(-50%);width:135px;font-size:11px!important;line-height:1.2;color:#c5bdab}.city-map-door:focus-visible{outline:2px solid #e0ca90}.city-map-door[aria-current]{color:#fff1c0}
 /* Keep the dense country chart legible; names are also in the synchronized list. */
 .hex-cell small{display:none}.hex-cell.selected small,.hex-cell:focus-visible small,.hex-cell:hover small{display:block}
@@ -2872,62 +2851,27 @@ body.game-mode .place-summary p { margin-bottom: 8px; }
 body.game-mode .place-summary .button { padding: 8px; }
 
 /* Country, streets and depths occupy the same chart table. Names remain live data. */
-body.game-mode .exploration-workspace { display: flex; flex-direction: column; width: 100%; height: 100%; min-width: 0; min-height: 0; gap: 10px; overflow: hidden; }
-body.game-mode .spatial-context { flex: 0 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; min-width: 0; max-height: min(140px,30dvh); padding-bottom: 8px; border-bottom: 1px solid var(--game-rule); overflow: auto; scrollbar-width: thin; }
-body.game-mode .spatial-context > div { flex: 1 1 160px; min-width: 0; }
-body.game-mode .spatial-context > div strong { display: block; color: var(--game-bone); font: 400 calc(17px * var(--reading-scale,1))/1.3 var(--serif); overflow-wrap: anywhere; }
-body.game-mode .spatial-context > div span { display: block; margin-top: 3px; color: var(--game-muted); font: calc(12px * var(--reading-scale,1))/1.35 var(--sans); }
-body.game-mode .spatial-context .spatial-mode-tabs { padding: 0; border: 0; }
-body.game-mode .spatial-objective { flex: 1 1 100%; color: #dfc799; font: calc(12px * var(--reading-scale,1))/1.4 var(--sans); overflow-wrap: anywhere; }
-body.game-mode .map-content .workspace-body > .spatial-moment { flex: 1 1 auto; width: 100%; min-width: 0; min-height: 0; margin: 0; overflow: auto; }
-body.game-mode :is(.spatial-tabs,.spatial-mode-tabs),
 body.game-mode .record-tabs,
 body.game-mode .pack-tabs { flex: 0 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding-bottom: 8px; border-bottom: 1px solid var(--game-rule); }
-body.game-mode :is(.spatial-tabs,.spatial-mode-tabs) .button,
 body.game-mode .record-tabs .button,
 body.game-mode .pack-tabs .button { border-color: transparent; background: transparent; color: var(--game-muted); }
-body.game-mode :is(.spatial-tabs,.spatial-mode-tabs) .button[aria-current],
-body.game-mode :is(.spatial-tabs,.spatial-mode-tabs) .button[aria-pressed="true"],
 body.game-mode .record-tabs .button[aria-pressed="true"],
 body.game-mode .pack-tabs .button[aria-pressed="true"],
-body.game-mode :is(.spatial-tabs,.spatial-mode-tabs) .button.active,
 body.game-mode .record-tabs .button.active,
 body.game-mode .pack-tabs .button.active { border-color: #9d8459; background: #2d261b; color: #efdab2; }
-body.game-mode .exploration-workspace .world-layout,
-body.game-mode .exploration-workspace .settlement-layout,
-body.game-mode .exploration-workspace :is(.depths-layout,.dungeon-workspace) {
-  flex: 1 1 auto;
-  display: grid;
-  grid-template-columns: minmax(0,1fr) minmax(245px,310px);
-  align-items: stretch;
-  gap: 12px;
-  width: 100%;
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-}
 body.game-mode .world-map-panel,
-body.game-mode .settlement-map,
-body.game-mode :is(.depths-map,.dungeon-graph) { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 0; margin: 0; overflow: hidden; }
+body.game-mode .settlement-map { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 0; margin: 0; overflow: hidden; }
 body.game-mode .map-inspector,
-body.game-mode .settlement-inspector,
-body.game-mode :is(.depths-inspector,.dungeon-inspector) { min-width: 0; min-height: 0; padding: 14px; margin: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+body.game-mode .settlement-inspector { min-width: 0; min-height: 0; padding: 14px; margin: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 body.game-mode .map-inspector h2,
 body.game-mode .settlement-inspector h2 { margin-bottom: 8px; font-size: calc(23px * var(--reading-scale,1)); }
 body.game-mode .map-inspector > .badge { margin-bottom: 10px; }
 body.game-mode .map-inspector p { font-size: calc(13px * var(--reading-scale,1)); line-height: 1.55; }
-body.game-mode .exploration-workspace .dungeon-graph { display: flex; flex-direction: column; align-items: stretch; gap: 8px; min-width: 0; min-height: 0; margin: 0; padding: 12px; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
-body.game-mode .dungeon-graph > .section-heading { flex: 0 0 auto; margin: 0; }
-body.game-mode .dungeon-graph > svg { flex: 1 1 auto; width: 100%; height: auto; min-height: 0; max-height: none; background: #161411; }
-body.game-mode .dungeon-graph > .small-copy { flex: 0 0 auto; margin: 0; font-size: calc(12px * var(--reading-scale,1)); }
-body.game-mode .dungeon-graph > .quick-actions { flex: 0 1 auto; min-height: 0; max-height: 45%; margin: 0; overflow: auto; scrollbar-width: thin; }
 body.game-mode .settlement-map > .section-heading { flex: 0 0 auto; width: 100%; margin: 0 0 8px; }
 body.game-mode .settlement-map > .small-copy { flex: 0 0 auto; max-height: 80px; margin: 8px 0 0; overflow: auto; font-size: calc(12px * var(--reading-scale,1)); line-height: 1.4; }
 body.game-mode .settlement-inspector:has(> .conversation-panel-v22) { display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
 body.game-mode .settlement-inspector:has(> .conversation-panel-v22) > :not(.conversation-panel-v22) { flex: 0 0 auto; margin: 0; }
 body.game-mode .settlement-inspector > .conversation-panel-v22.conversation-thread { flex: 1 1 auto; width: 100%; height: auto; min-width: 0; min-height: 0; margin: 0; }
-body.game-mode .spatial-breadcrumbs { flex: 0 0 auto; margin: 0; padding: 0 0 6px; font-size: calc(12px * var(--reading-scale,1)); line-height: 1.4; }
-body.game-mode .spatial-moment { min-height: 0; padding: 10px 12px; margin-bottom: 0; overflow: auto; }
 body.game-mode .route-preview,
 body.game-mode .location-leads { margin-top: 12px; padding-top: 12px; }
 body.game-mode .hex-board {
@@ -3216,9 +3160,6 @@ body.title-mode .creator-topline .button { min-height: var(--control-size); font
   body.game-mode .app-shell.has-life .header-person { grid-template-columns: minmax(0,1fr) minmax(110px,auto) auto; gap: 8px; }
   body.game-mode .app-shell.has-life .header-person .header-place { padding-left: 9px; max-width: 230px; }
   body.game-mode .app-shell.has-life .life-phone-layout { grid-template-columns: minmax(0,1.25fr) minmax(225px,.8fr); gap: 10px; }
-  body.game-mode .exploration-workspace .world-layout,
-  body.game-mode .exploration-workspace .settlement-layout,
-  body.game-mode .exploration-workspace :is(.depths-layout,.dungeon-workspace) { grid-template-columns: minmax(0,1fr) minmax(215px,265px); gap: 10px; }
 }
 @media (max-width:759px) {
   body.game-mode .app-shell.has-life { display: block; padding: 0; }
@@ -3252,12 +3193,8 @@ body.title-mode .creator-topline .button { min-height: var(--control-size); font
   body.game-mode .bottom-nav .ui-glyph { width: 19px; height: 19px; }
   body.game-mode .mobile-command-dock .bottom-nav button > span:last-child { font: calc(11px * var(--reading-scale,1))/1.15 var(--sans)!important; text-transform: none; letter-spacing: 0; max-width: 100%; min-width: 0; white-space: normal; overflow-wrap: anywhere; }
   body.game-mode .toast { bottom: calc(64px + env(safe-area-inset-bottom)); }
-  body.game-mode .exploration-workspace .world-layout,
-  body.game-mode .exploration-workspace .settlement-layout,
-  body.game-mode .exploration-workspace :is(.depths-layout,.dungeon-workspace) { grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(0,1fr) minmax(0,.75fr); gap: 8px; }
   body.game-mode .map-inspector,
-  body.game-mode .settlement-inspector,
-  body.game-mode :is(.depths-inspector,.dungeon-inspector) { padding: 10px; }
+  body.game-mode .settlement-inspector { padding: 10px; }
   body.game-mode .hex-board .map-toolbar { padding: 7px 9px; }
   body.game-mode .hex-board .map-legend { padding: 6px 8px; gap: 4px 10px; }
   body.game-mode .combat-grid { grid-template-columns: minmax(0,1fr); }
@@ -3310,7 +3247,6 @@ body.title-mode .creator-topline .button { min-height: var(--control-size); font
   body.game-mode .app-shell.has-life .status-bars { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px 14px; }
   body.game-mode .game-content .view-heading h1 { font-size: calc(22px * var(--reading-scale,1)); }
   body.game-mode .action-grid { grid-template-columns: minmax(0,1fr); }
-  body.game-mode :is(.spatial-tabs,.spatial-mode-tabs) .button { flex: 1 1 auto; padding: 8px 6px; font-size: calc(12px * var(--reading-scale,1)); }
   body.creation-mode .creator-portrait { grid-template-columns: 84px minmax(0,1fr); gap: 8px; }
   body.creation-mode .creator-portrait-stage.portrait-stage { width: 84px; height: 84px; min-height: 84px; }
   body.creation-mode .creator-identity-grid { grid-template-columns: minmax(0,1fr); }
@@ -3336,9 +3272,6 @@ body.title-mode .creator-topline .button { min-height: var(--control-size); font
   body.game-mode .game-content { padding: 6px; }
   body.game-mode .game-commandbar { padding-block: 3px; min-height: 50px; }
   body.game-mode .game-content .view-heading { margin-bottom: 8px; padding-bottom: 6px; }
-  body.game-mode .exploration-workspace .world-layout,
-  body.game-mode .exploration-workspace .settlement-layout,
-  body.game-mode .exploration-workspace :is(.depths-layout,.dungeon-workspace) { grid-template-columns: minmax(0,1fr) minmax(205px,.7fr); grid-template-rows: minmax(0,1fr); }
   body.creation-mode .creator-screen { padding: 6px 12px; }
   body.creation-mode .creator-topline { min-height: var(--control-size); padding: 0; }
   body.creation-mode .creator-steps { margin: 2px 0 6px; }
@@ -3356,9 +3289,6 @@ body.title-mode .creator-topline .button { min-height: var(--control-size); font
   body.game-mode .app-shell.has-life .header-person .header-place { grid-column: 1; flex-direction: row; max-width: none; }
   body.game-mode .app-shell.has-life .status-bars { grid-template-columns: repeat(2,minmax(0,1fr)); }
   body.game-mode .app-shell.has-life .life-phone-layout { grid-template-columns: minmax(0,1fr); }
-  body.game-mode .exploration-workspace .world-layout,
-  body.game-mode .exploration-workspace .settlement-layout,
-  body.game-mode .exploration-workspace :is(.depths-layout,.dungeon-workspace) { grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(0,1fr) minmax(0,.6fr); overflow: hidden; }
   body.creation-mode .creator-workspace { grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(100px,.5fr) minmax(0,1fr); }
   body.creation-mode .creator-portrait { display: grid; grid-template-columns: 76px minmax(0,1fr); }
   body.creation-mode .creator-portrait-stage.portrait-stage { width: 76px; height: 76px; min-height: 76px; }
@@ -3514,29 +3444,13 @@ body.game-mode .record-tabs .button[aria-current="page"] { border-color: #9d8459
 
 /* A phone shows one exploration pane at a time, so chart and commands both
    receive the complete remaining game window. Desktop keeps the shared table. */
-body.game-mode .spatial-focus-tabs,
 body.game-mode .mobile-inspector-title { display: none; }
 @media (max-width:759px) {
-  body.game-mode .spatial-focus-tabs { flex: 0 0 auto; display: flex; gap: 6px; }
-  body.game-mode .spatial-focus-tabs .button { flex: 1 1 0; min-height: 44px; }
-  body.game-mode .spatial-focus-tabs .button.active { border-color: #9d8459; background: #2d261b; color: #efdab2; }
-  body.game-mode .exploration-workspace .world-layout,
-  body.game-mode .exploration-workspace .settlement-layout,
-  body.game-mode .exploration-workspace .dungeon-workspace { grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(0,1fr); overflow: hidden; }
-  body.game-mode .exploration-workspace[data-spatial-pane="map"] .map-inspector,
-  body.game-mode .exploration-workspace[data-spatial-pane="map"] .settlement-inspector,
-  body.game-mode .exploration-workspace[data-spatial-pane="map"] .dungeon-inspector { display: none; }
-  body.game-mode .exploration-workspace[data-spatial-pane="actions"] .world-map-panel,
-  body.game-mode .exploration-workspace[data-spatial-pane="actions"] .settlement-map,
-  body.game-mode .exploration-workspace[data-spatial-pane="actions"] .dungeon-graph { display: none; }
   body.game-mode .mobile-inspector-title { display: block; flex: 0 0 auto; margin: 0 0 8px; }
   body.game-mode .hex-board:not(.compact) .map-toolbar > div:first-child { display: none; }
   body.game-mode .hex-board .map-legend { padding: 4px 8px; }
 }
 @media (max-height:500px) and (max-width:759px) {
-  body.game-mode .spatial-context > div:first-child { display: none; }
-  body.game-mode .spatial-context { gap: 0; padding-bottom: 0; }
-  body.game-mode .exploration-workspace[data-spatial-pane="map"] .spatial-objective { display: none; }
   body.game-mode .hex-board .map-legend,
   body.game-mode .hex-board .map-selection-caption { display: none; }
   body.game-mode .hex-board .map-toolbar { padding: 2px 8px; }
@@ -3670,7 +3584,7 @@ body.game-mode .settlement-map { background: var(--game-pane); }
 /* Complete transformation portraits, neutral ink, no layer compositing. */
 .raster-portrait.condition-vampire .preset-portrait-img,.raster-portrait.condition-lycanthrope .preset-portrait-img{filter:grayscale(1)}
 /* Compact additions stay inside the established game window. */
-.depth-disclosure{border:1px solid var(--border,#46413a);background:rgba(8,8,8,.28);margin:8px 0;padding:10px 12px}.depth-disclosure>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;font-size:.94rem}.depth-disclosure>summary span{font-size:.72rem;opacity:.65}.depth-circle{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:12px 0}.depth-circle article{display:flex;gap:12px;align-items:flex-start}.depth-circle p{font-size:.78rem;margin:5px 0}.depth-dungeon{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(240px,.8fr);gap:16px;min-height:0;max-height:64dvh;overflow:hidden}.depth-dungeon-map{min-width:0;display:flex;flex-direction:column;justify-content:center}.depth-dungeon-map svg{display:block;width:100%;max-height:42dvh;border:1px solid #5c554b}.depth-dungeon-map svg text{fill:#38362f;stroke:none}.depth-dungeon-actions{min-height:0;overflow-y:auto;overscroll-behavior:contain}.depth-dungeon-map .current circle{fill:#817b6d}.depth-project p{font-size:.85rem}.pack-tabs{flex-wrap:wrap}.depth-disclosure .activity-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}@media(max-width:760px){.depth-dungeon{grid-template-columns:1fr;max-height:none;overflow:visible}.depth-dungeon-map svg{max-height:32dvh}.depth-dungeon-actions{max-height:48dvh}.depth-circle{grid-template-columns:1fr}}@media(max-height:650px) and (min-width:761px){.depth-dungeon{max-height:59dvh}.depth-dungeon-map .small-copy{display:none}}
+.depth-disclosure{border:1px solid var(--border,#46413a);background:rgba(8,8,8,.28);margin:8px 0;padding:10px 12px}.depth-disclosure>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;font-size:.94rem}.depth-disclosure>summary span{font-size:.72rem;opacity:.65}.depth-circle{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:12px 0}.depth-circle article{display:flex;gap:12px;align-items:flex-start}.depth-circle p{font-size:.78rem;margin:5px 0}.depth-project p{font-size:.85rem}.pack-tabs{flex-wrap:wrap}.depth-disclosure .activity-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}@media(max-width:760px){.depth-circle{grid-template-columns:1fr}}
 
 /* v0.25: a deliberate journal, a useful pack, and readable places. */
 .quest-categories,.people-scope,.gear-filters {display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 20px}
@@ -3741,7 +3655,6 @@ body.game-mode .settlement-map { background: var(--game-pane); }
 .equipment-shop-offer { min-width: 0; width: 100%; }
 .equipment-shop-offer > .activity-row { width: 100%; }
 .equipment-shop-offer > .equipment-comparison { padding: 8px 12px; margin-top: 0; border: 1px solid #4b4438; border-top: 0; }
-.radiant-chart { min-width: 0; }
 .road-route-options { display: grid; gap: 9px; margin: 10px 0; }
 .road-route-option { display: flex; align-items: flex-start; gap: 9px; padding: 11px; border: 1px solid #655b4a; background: #24211c; color: #d3c7b2; cursor: pointer; min-width: 0; }
 .road-route-option:has(input:checked) { border-color: #a08c6a; background: #302a20; }
@@ -3755,34 +3668,11 @@ body.game-mode .settlement-map { background: var(--game-pane); }
 .saved-road-legs p { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin: 0; padding: 7px 0; border-bottom: 1px solid #51483a; }
 .saved-road-legs span { color: #b7ac98; }
 .area-illustration.scene-collection-c { background-image: url('./art/settlement-atlas-v258.webp'); background-size: 300% 100%; }
-.radiant-purpose { border-left: 3px solid #97856a; padding: 5px 10px; margin: 8px 0; background: #26221c; color: #d4c5aa; }
-.radiant-purpose p { margin: 5px 0; }
-.radiant-map-scroll { min-width: 0; overflow: auto; border: 1px solid #6e614c; }
-.radiant-map-scroll svg { display: block; width: 100%; min-width: 460px; max-height: 400px; }
-.radiant-edges { stroke: #6b6254; stroke-width: 2; fill: none; }
-.radiant-room { cursor: pointer; }
-.radiant-room circle { fill: #cec4b0; stroke: #655a48; stroke-width: 2; }
-.radiant-room.current circle { fill: #a19277; stroke: #453d30; }
-.radiant-room.resolved circle { stroke-width: 3; }
-.radiant-room.selected circle, .radiant-room:focus circle { stroke: #312b22; stroke-width: 4; }
-.radiant-room text { fill: #2d2923; font: 10px var(--sans); }
 .area-scene {position:relative;overflow:hidden;height:clamp(170px,24vw,245px);margin:0 0 20px;border:1px solid #595042;border-radius:4px;background:#161512}
 .area-illustration {position:absolute;top:50%;transform:translateY(-50%);width:100%;aspect-ratio:1;background-image:url('./art/area-atlas-v28.webp');background-size:300% 200%;background-repeat:no-repeat;filter:var(--illustration-tone)}
 .area-scene figcaption {position:absolute;inset:auto 0 0;padding:25px 14px 14px;background:linear-gradient(transparent,#151411 75%);color:#eee5d4}
 .area-scene figcaption span {display:block;font-size:1.15rem}
 .area-scene figcaption small {display:block;color:#c2b6a0;margin-top:5px}
-.dungeon-map-scroll {overflow:auto;scrollbar-width:thin;background:#1a1916;border:1px solid #514838;border-radius:4px}
-.dungeon-map-scroll svg {display:block;width:100%;min-width:480px;max-height:none}
-.dungeon-graph svg line {stroke:#857759;stroke-width:2;stroke-dasharray:4 3}
-.dungeon-room-node {cursor:pointer;outline:none}
-.dungeon-room-node rect {fill:#24231e;stroke:#7f7056;stroke-width:1.5}
-.dungeon-room-node text {fill:#d9c9ac;font:9px system-ui;letter-spacing:.08em;pointer-events:none}
-.dungeon-room-node text.room-label {font:10px Georgia,serif;letter-spacing:0;fill:#e5ddcf}
-.dungeon-room-node.current rect {fill:#514532;stroke:#e2c592;stroke-width:2}
-.dungeon-room-node.unseen rect {fill:#1d1c19;stroke-dasharray:4 3}
-.dungeon-room-node.reachable:hover rect,.dungeon-room-node:focus rect {stroke:#ecdfc5;stroke-width:3}
-.depth-dungeon-map g[role=button] {cursor:pointer}
-.depth-dungeon-map g[role=button]:focus circle,.depth-dungeon-map g[role=button]:hover circle {stroke:#877a60;stroke-width:3}
 .life-stage-track {display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;margin:20px 0}
 .life-stage-track span {border-top:2px solid #484338;padding-top:9px;color:#807768;font:11px/1.4 system-ui}
 .life-stage-track span.reached {color:#d5c4a4;border-color:#aa9470}
@@ -3791,7 +3681,7 @@ body.game-mode .settlement-map { background: var(--game-pane); }
 .upbringing-panel .action-grid {margin-top:14px}
 .story-context {padding:10px 0;font-size:.9em;color:#c5bbaa}
 .city-map-door {touch-action:manipulation}
-.dungeon-room-node,.hex-board [data-op] {touch-action:manipulation}
+.hex-board [data-op] {touch-action:manipulation}
 @media(max-width:700px){
   .equipment-slots {grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto repeat(5,minmax(76px,auto));gap:8px}
   .loadout-person {grid-column:1/3;grid-row:1;flex-direction:row;justify-content:center;padding:10px;min-height:88px}
@@ -3807,8 +3697,6 @@ body.game-mode .settlement-map { background: var(--game-pane); }
 }
 
 
-.depth-dungeon-map {overflow:auto}
-.depth-dungeon-map svg {min-width:480px;max-height:none}
 .descent-room-track {display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:16px 0}
 .descent-room-track>span {display:flex;flex-direction:column;align-items:center;padding:10px 4px;border:1px dashed #635a49;color:#a79b84;font:14px system-ui}
 .descent-room-track>span.current {border:1px solid #d4b781;background:#423828;color:#ead6ae}
@@ -3852,8 +3740,8 @@ body.game-mode .game-content .eyebrow { color: var(--game-muted); letter-spacing
 body.game-mode .game-content .panel { min-width: 0; max-height: none; margin: 0; padding: 22px 0; border: 0; border-bottom: 1px solid var(--game-rule); border-radius: 0; box-shadow: none; background: transparent; }
 body.game-mode .game-content :is(.career-grid,.commission-grid,.blueprint-grid,.calling-grid,.lore-grid,.rpg-contracts,.companion-grid,.quest-grid,.gear-grid,.structure-grid,.heir-grid,.health-grid) { display: grid; grid-template-columns: minmax(0,1fr); gap: 0; }
 body.game-mode .game-content :is(.career-card,.blueprint-card,.lore-card,.gear-card,.heir-card,.structure-card,.quest-card,.health-card) { min-width: 0; border: 0; border-bottom: 1px solid var(--game-rule); border-radius: 0; padding: 22px 0; margin: 0; background: transparent; box-shadow: none; }
-body.game-mode .game-content :is(.record-tabs,.pack-tabs,.quest-categories,.people-scope,.gear-filters,.spatial-mode-tabs,.spatial-focus-tabs) { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 18px; }
-body.game-mode .game-content :is(.record-tabs,.pack-tabs,.quest-categories,.people-scope,.gear-filters,.spatial-mode-tabs,.spatial-focus-tabs) .button { min-height: 42px; padding: 9px 12px; font-size: calc(12px * var(--reading-scale,1)); border-radius: 0; }
+body.game-mode .game-content :is(.record-tabs,.pack-tabs,.quest-categories,.people-scope,.gear-filters) { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 18px; }
+body.game-mode .game-content :is(.record-tabs,.pack-tabs,.quest-categories,.people-scope,.gear-filters) .button { min-height: 42px; padding: 9px 12px; font-size: calc(12px * var(--reading-scale,1)); border-radius: 0; }
 body.game-mode .game-content [aria-pressed=true] { border-color: var(--game-brass); }
 body.game-mode .game-content .quick-actions { display: grid; grid-template-columns: minmax(0,1fr); gap: 0; margin: 12px 0; }
 body.game-mode .game-content .activity-row { display: grid; grid-template-columns: 24px minmax(0,1fr) minmax(48px,auto) 14px; gap: 14px; width: 100%; min-width: 0; min-height: 68px; margin: 0; padding: 16px 8px; border: 0; border-bottom: 1px solid var(--game-rule); border-radius: 0; background: transparent; text-align: left; }
@@ -3926,15 +3814,13 @@ body.game-mode .dialogue-choices .dialogue-choice-note { font-size: calc(12px * 
 body.game-mode .dialogue-footer { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--game-rule); }
 body.game-mode .settlement-meeting { width: 100%; max-width: 980px; margin-inline: auto; }
 body.game-mode .settlement-meeting > .area-scene { height: 180px; margin-bottom: 24px; }
-body.game-mode .exploration-workspace { height: auto; min-height: 0; max-height: none; overflow: visible; }
-body.game-mode .game-content :is(.world-layout,.settlement-layout,.dungeon-workspace,.depth-dungeon) { display: grid; grid-template-columns: minmax(0,1.25fr) minmax(280px,.85fr); grid-template-rows: auto; gap: 24px; height: auto; min-height: 0; max-height: none; overflow: visible; align-items: start; }
-body.game-mode :is(.world-map-panel,.settlement-map,.map-inspector,.settlement-inspector,.dungeon-inspector,.depth-dungeon-actions) { height: auto; max-height: none; min-height: 0; overflow: visible; }
-body.game-mode :is(.map-inspector,.settlement-inspector,.dungeon-inspector) { padding-top: 0; padding-inline-start: 20px; border-inline-start: 1px solid var(--game-rule); }
+body.game-mode .game-content :is(.world-layout,.settlement-layout) { display: grid; grid-template-columns: minmax(0,1.25fr) minmax(280px,.85fr); grid-template-rows: auto; gap: 24px; height: auto; min-height: 0; max-height: none; overflow: visible; align-items: start; }
+body.game-mode :is(.world-map-panel,.settlement-map,.map-inspector,.settlement-inspector) { height: auto; max-height: none; min-height: 0; overflow: visible; }
+body.game-mode :is(.map-inspector,.settlement-inspector) { padding-top: 0; padding-inline-start: 20px; border-inline-start: 1px solid var(--game-rule); }
 body.game-mode .hex-board:not(.compact):not(.journey-world-map) { height: auto; min-height: 0; }
 body.game-mode .hex-map-scroll { height: clamp(320px,60dvh,620px); min-height: 320px; max-height: 66dvh; overflow: auto; }
 body.game-mode .city-map-viewport { min-height: 300px; max-height: none; container-type: normal; }
 body.game-mode .paper-city-map { width: 100%; height: auto; min-width: 360px; }
-body.game-mode .dungeon-map-scroll svg { max-height: none; }
 body.game-mode .life-activity-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0 28px; }
 body.game-mode .activity-category { border: 0; border-bottom: 1px solid var(--game-rule); border-radius: 0; background: transparent; padding: 20px 0; }
 body.game-mode .drawer-links .nav-item { border-radius: 0; min-height: 44px; }
@@ -3944,10 +3830,8 @@ body.game-mode .latest-result { margin-bottom: 16px!important; }
  body.game-mode .life-day-layout { grid-template-columns: minmax(0,1fr); }
  body.game-mode .life-surroundings { padding: 24px 0 0; border-inline-start: 0; border-top: 1px solid var(--game-rule); }
  body.game-mode .life-surroundings .area-scene { max-width: 620px; }
- body.game-mode .game-content :is(.world-layout,.settlement-layout,.dungeon-workspace,.depth-dungeon) { grid-template-columns: minmax(0,1fr); }
- body.game-mode :is(.map-inspector,.settlement-inspector,.dungeon-inspector) { padding-inline-start: 0; border-inline-start: 0; }
- body.game-mode .exploration-workspace[data-spatial-pane=actions] :is(.world-map-panel,.settlement-map,.dungeon-graph) { display: none; }
- body.game-mode .exploration-workspace[data-spatial-pane=map] :is(.map-inspector,.settlement-inspector,.dungeon-inspector) { display: none; }
+ body.game-mode .game-content :is(.world-layout,.settlement-layout) { grid-template-columns: minmax(0,1fr); }
+ body.game-mode :is(.map-inspector,.settlement-inspector) { padding-inline-start: 0; border-inline-start: 0; }
 }
 @media(max-width:760px) {
  body.game-mode .game-content { padding: 16px 12px 28px; }
@@ -4021,8 +3905,8 @@ body.creation-mode .creator-age .creator-past-note,body.creation-mode .portrait-
 @media(max-height:600px) { body.title-mode .title-screen { padding-block: 8px; min-height: 440px; }body.title-mode .title-crest,body.title-mode .title-tagline { display: none; }body.title-mode .title-wordmark { font-size: 48px; }body.title-mode .title-menu-item { min-height: 40px; font-size: 18px; } }
 
 /* A portrait, equipped slots and a real backpack grid share one inventory. */
-body.game-mode .inventory-heading,body.game-mode .place-heading,body.game-mode .explore-heading,body.game-mode .dungeon-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 22px; margin-bottom: 22px; }
-body.game-mode .inventory-heading h1,body.game-mode .place-heading h1,body.game-mode .explore-heading h1,body.game-mode .dungeon-heading h1 { margin: 4px 0; }
+body.game-mode .inventory-heading,body.game-mode .place-heading,body.game-mode .explore-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 22px; margin-bottom: 22px; }
+body.game-mode .inventory-heading h1,body.game-mode .place-heading h1,body.game-mode .explore-heading h1 { margin: 4px 0; }
 body.game-mode .inventory-gold { color: var(--game-brass); font: 16px var(--serif); }
 body.game-mode .inventory-layout { display: grid; grid-template-columns: 290px minmax(0,1fr); gap: 28px; align-items: start; }
 body.game-mode .inventory-character { min-width: 0; padding-right: 24px; border-right: 1px solid var(--game-rule); }
@@ -4092,47 +3976,11 @@ body.game-mode .place-current > .area-scene { height: clamp(180px,28dvh,300px); 
 body.game-mode .place-services { margin-block: 26px; }
 body.game-mode .place-current .nearby-people { margin-top: 30px; }
 
-/* The current dungeon room owns the scene. Its pocket map is optional. */
-body.game-mode .dungeon-crawler { max-width: 1180px; margin-inline: auto; }
-body.game-mode .dungeon-heading > div { flex: 1 1 250px; }
-body.game-mode .dungeon-room-stage { position: relative; height: clamp(250px,40dvh,440px); overflow: hidden; border: 1px solid var(--game-rule); background: var(--game-shell); isolation: isolate; }
-body.game-mode .dungeon-room-stage > .area-scene { position: absolute; inset: 0; height: 100%; width: 100%; min-height: 0; margin: 0; padding: 0; border: 0; }
-body.game-mode .dungeon-room-stage > .area-scene figcaption { display: none; }
-body.game-mode .dungeon-room-stage .area-illustration { height: 100%; filter: grayscale(1) brightness(.52); }
-body.game-mode .dungeon-perspective { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-body.game-mode .dungeon-left-wall,body.game-mode .dungeon-right-wall { fill: #171714d9; stroke: #5b5545; stroke-width: 1; }
-body.game-mode .dungeon-floor { fill: #333025ad; stroke: #6c6247; stroke-width: 1; }
-body.game-mode .dungeon-ceiling { fill: #0f100de6; stroke: #3c3b31; stroke-width: 1; }
-body.game-mode .dungeon-stone-lines { fill: none; stroke: #7b72543f; stroke-width: 2; }
-body.game-mode .dungeon-doors { position: absolute; inset: 0; }
-body.game-mode .dungeon-door { position: absolute; top: 22%; left: var(--door-position); transform: translateX(-50%); width: min(21%,170px); height: 70%; display: flex; flex-direction: column; align-items: center; justify-content: end; gap: 5px; border: 0; background: transparent; color: var(--game-bone); text-align: center; cursor: pointer; }
-body.game-mode .door-arch { display: flex; align-items: center; justify-content: center; width: 74%; height: 64%; min-height: 75px; border: 6px solid #5e5746; border-radius: 45% 45% 0 0; background: linear-gradient(#090a08,#131510,#28291e); box-shadow: 0 0 0 1px #a18c55,inset 0 0 30px #000; }
-body.game-mode .door-arch > span { color: #8f835c; font: 24px var(--serif); }
-body.game-mode .dungeon-door strong { font: 14px/1.25 var(--serif); text-shadow: 0 2px 5px #000; }
-body.game-mode .dungeon-door small { font: 10px/1.4 var(--sans); color: var(--game-muted); }
-body.game-mode .dungeon-door:hover .door-arch,body.game-mode .dungeon-door.selected .door-arch,body.game-mode .dungeon-door:focus-visible .door-arch { border-color: #a18c55; box-shadow: 0 0 18px #b29b4f45,inset 0 0 20px #000; }
-body.game-mode .dungeon-sealed { position: absolute; inset: 25%; display: grid; place-content: center; text-align: center; gap: 14px; color: var(--game-bone); text-shadow: 0 2px 7px #000; }
-body.game-mode .dungeon-sealed > span { font-size: 30px; color: var(--game-brass); }
-body.game-mode .dungeon-travel-strip { display: flex; flex-wrap: wrap; gap: 10px 24px; padding-block: 14px; margin-bottom: 8px; border-bottom: 1px solid var(--game-rule); font: 12px var(--sans); color: var(--game-muted); }
-body.game-mode .dungeon-door-inspection { padding: 18px 22px; margin-block: 20px; border: 1px solid var(--game-rule); background: var(--game-pane); }
-body.game-mode .dungeon-room-account { margin-block: 24px; }
-body.game-mode .dungeon-room-account .story-scene { border-inline: 0!important; padding-inline: 0!important; }
-body.game-mode .dungeon-party-strip { display: grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap: 16px; border-block: 1px solid var(--game-rule); padding-block: 16px; margin-block: 24px; }
-body.game-mode .dungeon-party-strip strong,body.game-mode .dungeon-party-strip span { display: block; font: 13px/1.5 var(--sans); }
-body.game-mode .dungeon-party-strip span { color: var(--game-muted); font-size: 11px; }
-body.game-mode .dungeon-objective,body.game-mode .dungeon-pocket-map { margin-block: 12px; padding-block: 10px; border-bottom: 1px solid var(--game-rule); }
-body.game-mode .dungeon-pocket-map svg { display: block; width: 100%; height: auto; max-height: 400px; background: #1a1b15; }
-body.game-mode .dungeon-map-paths { fill: none; stroke: #7e7557; stroke-width: 2; }
-body.game-mode .dungeon-pocket-map circle { fill: #37392b; stroke: #b4a172; }
-body.game-mode .dungeon-pocket-map text { fill: #c4b894; stroke: none; font-size: 12px; }
-body.game-mode .dungeon-pocket-map .current circle { fill: #81734e; }
-body.game-mode .dungeon-map-caption { font-size: 9px!important; }
-body.game-mode .dungeon-pocket-map g[role=button] { cursor: pointer; }
 body.game-mode .bottom-nav { grid-template-columns: repeat(7,minmax(0,1fr)); }
 body.game-mode .bottom-nav span { font-size: 10px!important; line-height: 1.15; }
 @media(max-width:1250px) { body.game-mode .inventory-backpack { display: block; }body.game-mode .inventory-detail { margin-top: 22px; padding: 18px 0 0; border-left: 0; border-top: 1px solid var(--game-rule); } }
 @media(max-width:1000px) { body.game-mode .inventory-layout { grid-template-columns: minmax(0,1fr); }body.game-mode .inventory-character { width: min(100%,360px); padding-right: 0; margin-inline: auto; border-right: 0; }body.game-mode .place-layout { grid-template-columns: minmax(180px,.6fr) minmax(0,1.4fr); gap: 20px; } }
-@media(max-width:700px) { body.game-mode .place-layout { grid-template-columns: minmax(0,1fr); }body.game-mode .place-areas { padding-right: 0; border-right: 0; }body.game-mode .place-areas h2 { margin-top: 0; }body.game-mode .place-area { grid-template-columns: 84px minmax(0,1fr) 16px; min-height: 68px; padding: 6px 0; }body.game-mode .hex-inspection { grid-template-columns: minmax(0,1fr); gap: 18px; }body.game-mode .dungeon-door { width: 25%; }body.game-mode .dungeon-door strong { font-size: 12px; }body.game-mode .door-arch { border-width: 4px; width: 74%; }body.game-mode .dungeon-door small { display: none; }body.game-mode .dungeon-room-stage { min-height: 240px; } }
+@media(max-width:700px) { body.game-mode .place-layout { grid-template-columns: minmax(0,1fr); }body.game-mode .place-areas { padding-right: 0; border-right: 0; }body.game-mode .place-areas h2 { margin-top: 0; }body.game-mode .place-area { grid-template-columns: 84px minmax(0,1fr) 16px; min-height: 68px; padding: 6px 0; }body.game-mode .hex-inspection { grid-template-columns: minmax(0,1fr); gap: 18px; } }
 
 /* Focus 14 / Explore follow-up: a chart to handle and places to inhabit. */
 .item-art.supplies-art { background-image: url('./art/supplies-atlas-v39.webp'); }
