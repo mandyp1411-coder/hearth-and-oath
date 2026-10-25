@@ -7,8 +7,6 @@ import { attachEnemyPlan, executeEnemyPlan, planIntent } from '../dist/js/enemy-
 import { TECHNIQUES_V27 } from '../dist/js/techniques-v27.js';
 import { createLifeAtAge } from '../dist/js/new-life.js';
 import * as E from '../dist/js/engine.js';
-import { enterDungeon, applyExplorationChoice } from '../dist/js/exploration.js';
-import { syncCartography } from '../dist/js/cartography.js';
 import { mountApp } from './helpers/ui-surface.mjs';
 
 // Controlled combat fixtures isolate command effects. They are not audit lives
@@ -135,22 +133,8 @@ test('public defeat resolution records actionable recovery once and still valida
  let s=publicBattle();for(const a of s.battle.actors.filter(a=>a.side==='party'))a.hp=0;s.battle.outcome='defeat';s.battle.currentActorId=null;s.battle.turnOrder=s.battle.actors.filter(a=>a.hp>0).map(a=>a.id);
  const complete=structuredClone(s.battle),day=s.day;s=E.resolveBattle(s,complete);assert.ok(E.validateSave(s));assert.ok(s.journal.some(j=>/Next: recover health/.test(j.text)));assert.ok(s.day>=day);const again=E.resolveBattle(s,complete);assert.equal(again.hero.gold,s.hero.gold);
 });
-test('peaceful proof, repair, safe passage and the final objective report concrete progress without combat spoils',()=>{
- const s=structuredClone(baseline);s.locationId='marsh';syncCartography(s);s.hero.skills.scholarship=10;s.hero.skills.survival=10;s.hero.skills.persuasion=10;for(const key of Object.keys(s.hero.skills))s.hero.skills[key]=10;s.equipment.materials.ore=5;s.equipment.materials.cloth=5;
- const ctx={setEvent:(id,title,category,body,choices)=>{s.event={id,title,category,body,choices};},spendDays:()=>{s.day++;},journal:(title,text)=>s.journal.push({title,text}),standing:()=>{}};
- assert.equal(enterDungeon(s,'cistern',null,ctx),true);
- function choose(id){const e=s.event;assert.ok(e.choices.find(c=>c.id===id&&!c.disabledReason),id);s.event=null;assert.equal(applyExplorationChoice(s,e.id,id,ctx),true);}
- const gold=s.hero.gold,exp=s.hero.exp;
- choose('route_service');choose('repair_route');assert.match(s.notice,/Passage secured/);assert.match(s.notice,/Practical aid completed/);assert.match(s.notice,/Negotiation evidence preserved/);
- assert.equal(s.hero.gold,gold);assert.equal(s.hero.exp,exp);
- // The generated layout has a stable maintenance route to the optional cache,
- // then its boss. Follow actual offered room IDs rather than inventing passage.
- const definition=s.dungeon.definition;const boss=definition.rooms.find(r=>r.kind==='boss');
- const path=(from,to)=>{const queue=[[from]],seen=new Set();while(queue.length){const p=queue.shift(),last=p.at(-1);if(last===to)return p;seen.add(last);for(const n of definition.rooms.find(r=>r.id===last).exits)if(!seen.has(n))queue.push([...p,n]);}};
- for(const id of path(s.dungeon.roomId,boss.id).slice(1)){if(!s.event.choices.some(c=>c.id==='route_'+id)){const offered=s.event.choices.find(c=>['take','preserve','search','parley'].includes(c.id)&&!c.disabledReason);assert.ok(offered);choose(offered.id);}choose('route_'+id);}
- const beforeParley=s.hero.gold;if(s.event.choices.some(c=>c.id==='listen'))choose('listen');choose('parley');assert.equal(s.hero.gold,beforeParley);assert.match(s.notice,/Progress is kept on return/);assert.equal(s.battle,null);
- const objective=definition.rooms.find(r=>r.kind==='objective');for(const id of path(s.dungeon.roomId,objective.id).slice(1))choose('route_'+id);choose('finish');assert.match(s.notice,/Expedition objective completed/);assert.equal(s.hero.gold,beforeParley);assert.equal(s.hero.exp,exp);
-});
+// The room engine's peaceful-proof walk left in v0.72.4; a begun authored maze keeps the same choices (maze-content-engine).
+
 test('production combat controls expose target previews and update them when a support target changes',async t=>{
  const s=publicBattle();s.battle.currentActorId='hero';const a=hero(s.battle);a.role='healer';a.specialization='healer';a.mp=20;a.status={};a.hp=a.maxHp;a.skills.devotion=4;
  const friend=s.companions[0];friend.recruited=true;friend.active=true;friend.hp=12;const b=createBattle({...s,hero:{...s.hero,specialization:'healer',path:'mage'}},'forest',null,{openingTurns:false});

@@ -38,3 +38,26 @@ export function statedDefaults(s) {
   initializeSchooling(s); initializeLivingWorld(s); initializeGuild(s); initializeDelves(s); initializeBattlecraft(s); initializeFaith(s);
   return s;
 }
+
+/** Whether a capture was saved in the middle of a walk in one of the older expedition engines that left
+ * in v0.72.4 (the room engine, the descent's rooms, the v0.27 regional rooms), or in one of their scenes
+ * or fights. Only old-rules captures can be. */
+export function heldOlderWalk(s) {
+  const c = s?.battle?.context;
+  return Boolean(s?.dungeon || s?.adventuring?.expedition || s?.rpg?.expedition
+    || s?.event?.id === 'adventure_room' || String(s?.event?.id || '').startsWith('dungeon_')
+    || c && (c.kind === 'dungeon' || c.kind === 'adventure' && ['descent', 'contract'].includes(c.mode) || c.kind === 'rpg' && !c.pursuitId));
+}
+
+/** What reading such a capture leaves (engine.js `closeOlderWalks`): the walk ends where it stands, its
+ * rooms stay recorded, and its scene and fight end with it. */
+export function assertOlderWalkClosed(assert, original, read) {
+  assert.equal(read.dungeon, null);
+  assert.ok(!read.adventuring?.expedition);
+  assert.ok(!read.rpg?.expedition);
+  if (original.dungeon) assert.deepEqual(read.flags.dungeonRecords[original.dungeon.id].visited, original.dungeon.visited, 'the rooms walked stay recorded');
+  if (original.adventuring?.expedition) assert.ok(read.adventuring.history.some(row => row.id === original.adventuring.expedition.id), 'the descent stays recorded');
+  if (original.rpg?.expedition) assert.ok(read.rpg.expeditions.some(row => row.id === original.rpg.expedition.id), 'the regional descent stays recorded');
+  if (heldOlderWalk({ event: original.event })) assert.equal(read.event, null);
+  if (heldOlderWalk({ battle: original.battle })) assert.equal(read.battle, null);
+}

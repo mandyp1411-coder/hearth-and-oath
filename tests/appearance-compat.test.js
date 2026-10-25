@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { DEFAULT_APPEARANCE, AVATAR_OPTIONS, isCanonicalAppearance } from '../dist/js/avatar.js';
 import { createBirthGame, chooseAction, migrateSave, validateSave } from '../dist/js/engine.js';
+import { heldOlderWalk, assertOlderWalkClosed } from './helpers/one-rulebook.mjs';
 
 const extensions = ['headgear', 'stature', 'relic', 'mantle', 'portraitFace', 'facialHair', 'faceVariant', 'facewear', 'coverColor', 'heritage', 'portraitPresentation', 'preset'];
 const historicalAppearance = value => Object.fromEntries(Object.entries(value).filter(([key]) => !extensions.includes(key)));
@@ -30,11 +31,14 @@ test('canonical old portraits may omit only the new expression fields', () => {
 test('every genuine earlier save validates and migrates without losing pending mechanics', () => {
   for (let version = 1; version <= 5; version++) {
     for (const [id, original] of Object.entries(fixture(version))) {
-      const snapshot = structuredClone(original);
-      assert.equal(validateSave(original), true, `v${version}/${id} still validates`);
+      const snapshot = structuredClone(original), walking = heldOlderWalk(original);
+      // A capture saved mid-walk in an older expedition engine (v0.72.4) is not a save this build holds as
+      // it stands; reading it ends the walk where it stood.
+      assert.equal(validateSave(original), !walking, `v${version}/${id} validates as it stands`);
       const restored = migrateSave(original);
       assert.ok(restored && validateSave(restored), `v${version}/${id} restores`);
       assert.deepEqual(original, snapshot, 'migration never mutates an imported file');
+      if (walking) { assertOlderWalkClosed(assert, original, restored); continue; }
       if(observationalInfancy(original)&&original.event&&(original.event.id==='birth_arrival'||/^birth_year_[012]$/.test(original.event.id)||original.event.id==='health_concern')){assert.equal(restored.event.id,original.event.id);assert.deepEqual(restored.event.choices.map(c=>c.id),['continue']);}else assertEventMechanics(original.event,restored.event);
       assert.deepEqual(restored.battle, original.battle, `${id}: exact combat turn`);
       assertMigrationMechanics(original.journal,restored.journal,'journal');

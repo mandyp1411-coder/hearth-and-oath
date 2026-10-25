@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { DUNGEONS, initializeExploration, explorationActions, validateExploration, encounterIds } from '../dist/js/exploration.js';
 import { createBattle, getBattleActions, takeBattleAction } from '../dist/js/combat.js';
 import { initializeGear } from '../dist/js/gear.js';
+import { initializeDelves } from '../dist/js/delve.js';
 
 function prepared(locationId = 'marsh') {
   const state = { version: 1, revision: 3, seed: 'deliberate-party', phase: 'adult', timeline: { mode: 'birth' }, age: 18, day: 6570, locationId, event: null, battle: null, flags: {}, campaign: { facts: {} },
@@ -12,7 +13,7 @@ function prepared(locationId = 'marsh') {
       { id: 'orrin', name: 'Orrin', role: 'mage', hp: 48, maxHp: 48, mp: 40, maxMp: 40, agility: 4, recruited: true, active: true },
       { id: 'kest', name: 'Kest', role: 'rogue', hp: 48, maxHp: 48, mp: 35, maxMp: 35, agility: 8, recruited: true, active: true },
     ], journal: [], expEarned: 0, campaignTouches: 0 };
-  initializeExploration(state); initializeGear(state, { starter: true });
+  initializeExploration(state); initializeDelves(state); initializeGear(state, { starter: true });
   return state;
 }
 

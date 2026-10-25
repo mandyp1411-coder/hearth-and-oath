@@ -88,9 +88,8 @@ test('a preserved non-nearby legacy reply returns from Your Years to Today inste
  const ui=await open(t,validate(s)),before=ui.current();await ui.click('workspace-section','life:years');await ui.click('show-contact',id);assert.equal(ui.root.querySelector('.workspace-page').dataset.workspaceSection,'present');assert.ok(ui.root.querySelector('.dialogue-scene [data-op="reply"]'));assert.deepEqual(ui.current(),before);
 });
 
-test('a genuine saved descent Return reaches its preserved room choices without changing the run',async t=>{
- const old=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v27-road-and-descent.json.gz',import.meta.url)))).descent,s=validate(E.migrateSave(old)),ui=await open(t,s),before=ui.current();assert.ok(before.adventuring.expedition);await ui.click('tab','inventory');await ui.click('workspace-open','life:present');assert.ok(ui.root.querySelector('[data-op="choice"]'));assert.deepEqual(ui.current(),before);
-});
+// A descent walked in the older engine ends where it stands when read (v0.72.4, tests/older-walks-v0724.test.js).
+
 
 test('genuine earlier planned year has a reachable Continue control in Today after migration',async t=>{
  const legacy=JSON.parse(readFileSync(new URL('./fixtures/legacy-v2.json',import.meta.url))).states.annualPlan;let s=E.migrateSave(legacy);s=settle(s);assert.ok(s.life.plan);const ui=await open(t,validate(s)),before=ui.current();assert.ok(ui.root.querySelector('.saved-year [data-op="continue-year"]'));await ui.click('tab','inventory');await ui.click('workspace-open','life:present');assert.ok(ui.root.querySelector('.saved-year [data-op="continue-year"]'));assert.deepEqual(ui.current(),before);

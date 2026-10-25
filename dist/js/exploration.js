@@ -284,8 +284,10 @@ export function authoredRoomChoices(state,definition,here,active,{modern:enriche
 
 
 
+/** The doors of the five campaign places. They open the delve (v0.72.3; delve.js), or an authored maze
+ * this life had already begun; a life without the delve has no door here. */
 export function explorationActions(state) {
-  if (!readyAge(state) || state.event || state.battle) return [];
+  if (!readyAge(state) || state.event || state.battle || !state.delves) return [];
   return DUNGEONS.filter((definition) => definition.locationId === state.locationId).map((definition) => ({ id: `explore_enter_${definition.id}`, label: `Enter ${definition.title}`, description: definition.description, days: 1, cost: 0, group: 'Adventure', ...(state.flags.dungeonRecords?.[definition.id]?.complete ? { disabledReason: 'This expedition is already complete.' } : state.hero.hp < 16 ? { disabledReason: 'Recover to at least 16 health before exploring.' } : {}) }));
 }
 
