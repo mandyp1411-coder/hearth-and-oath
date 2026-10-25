@@ -124,7 +124,6 @@ function choiceTags(eventId,id){
   if(eventId==='nature_slight')return id==='forgive'?['forgive','mercy']:id==='retaliate'?['vengeance','ruthless']:id==='account'?['truth','prudence']:id==='wait'?['patience','delay']:[];
   if(eventId==='career_invoice'&&id==='conceal')return ['deceit','take'];
   if(eventId==='career_invoice'&&id==='community')return ['truth','give'];
-  if(eventId==='adventure_room'&&id==='rush')return ['reckless','decisive'];
   if(['lie','cheat','deceive','false_account'].includes(id)||eventId==='childhood_3'&&id==='hide')return ['deceit'];
   if(eventId==='paladin_oath'&&id==='truth')return ['ritual'];
   if(['truth','confess','admit','honest'].includes(id))return ['truth'];
