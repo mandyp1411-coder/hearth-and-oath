@@ -7,12 +7,14 @@ door in main; a new-rules life plays in main and is turned away by the
 archive; a life begun in the archive is new rules and main keeps its date;
 the two games never share a browser database; a returning player whose old
 life is already in a slot sees it kept, never opened, and sends it to the
-archive whole; and both offline files behave the same from disk.
+archive whole; a player whose only save is the oldest single-save mirror
+finds it kept in the first slot and exported exactly as stored; and both
+offline files behave the same from disk.
 
     python3 scripts/browser-archive-check.py [--main dist] [--archive out-legacy]
         [--main-offline artifacts/hearth-and-oath.html]
         [--archive-offline artifacts/old-rules-archive/hearth-and-oath-old-rules.html]
-        [--snapshot docs/measures/archive-verification-v072.md]
+        [--snapshot docs/measures/archive-verification-v0721.md]
 
 The main game is served from `dist/` (what `npm start` serves) and the
 archive from `out-legacy/` (what `scripts/build-archive.mjs` packages), on two
@@ -177,7 +179,7 @@ def main():
 
     main_proc, main_url = serve(project / args.main)
     archive_proc, archive_url = serve(project / args.archive)
-    errors = {'main': [], 'archive': [], 'returning': []}
+    errors = {'main': [], 'archive': [], 'returning': [], 'mirror': []}
     try:
         with sync_playwright() as p:
             launch = {'headless': True, 'args': ['--no-sandbox']}
@@ -285,12 +287,13 @@ def main():
             record('returning: the old slot is kept, not opened', kept_slot.is_disabled() and kept_slot.get_attribute('data-refused-life') is not None and 'kept for the archive' in kept_slot.inner_text().lower(), kept_slot.inner_text().replace('\n', ' ')[:120])
             returning_page.screenshot(path=str(out / 'returning-kept-slot.png'), full_page=True)
             with returning_page.expect_download(timeout=20000) as download:
-                returning_page.locator('[data-archive-note] [data-op="export-session"][data-id="0"]').first.click()
+                returning_page.locator('[data-archive-note] [data-op="export-kept"][data-id="0"]').first.click()
             kept_export = out / ('returning-' + download.value.suggested_filename)
             download.value.save_as(str(kept_export))
             exported = json.loads(kept_export.read_text())
-            whole = exported.get('hero', {}).get('name') == kept_life['hero']['name'] and exported.get('day') == kept_life['day'] and exported.get('seed') == kept_life['seed'] and len(exported.get('journal', [])) == len(kept_life.get('journal', []))
-            record('returning: the kept life exports whole, named for its rules', kept_export.name.endswith('-old-rules.json') and whole, kept_export.name)
+            # v0.72.1: the old life is never decoded here, so its export is exactly what was stored.
+            whole = exported == kept_life
+            record('returning: the kept life exports exactly as stored, named for its rules', kept_export.name.endswith('-old-rules.json') and whole, kept_export.name)
             to_slots(archive)
             op(archive, 'import')
             import_file(archive, kept_export)
@@ -299,6 +302,29 @@ def main():
             record('archive: takes the returning player’s kept life and opens it', 'Old rules' in archive_review and archive.locator('.app-shell.has-life').count() == 1, archive_review.strip().replace('\n', ' ')[:100])
             record('returning: no page errors', not errors['returning'], str(errors['returning'][:2]))
             back.close()
+
+            # 8b. The oldest returning player: one old life in the single-save mirror, no slots at all.
+            # The first load moves browser storage into IndexedDB; the life must arrive kept in the first slot.
+            mirror_only = browser.new_context(viewport={'width': 1280, 'height': 900}, accept_downloads=True)
+            mirror_only.add_init_script("if (!localStorage.getItem('hearth-and-oath:seeded')) {"
+                                        f"localStorage.setItem('hearth-and-oath:life:v1', {json.dumps(json.dumps(kept_life))});"
+                                        "localStorage.setItem('hearth-and-oath:seeded', '1'); }")
+            single = mirror_only.new_page()
+            single.on('pageerror', lambda e: errors['mirror'].append(str(e)))
+            title(single, main_url)
+            card = single.locator('.title-life-kept').inner_text() if single.locator('.title-life-kept').count() else ''
+            record('single save: the title shows the old life kept, with nothing to continue', kept_life['hero']['name'] in card and 'kept for the archive' in card.lower() and single.locator('[data-op="title-continue"]').count() == 0, card.replace('\n', ' ')[:120])
+            op(single, 'title-load')
+            single.locator('.save-slots-screen').wait_for(timeout=15000)
+            first = single.locator('.save-slot[data-id="0"]')
+            record('single save: it is kept in the first slot, not opened', first.is_disabled() and kept_life['hero']['name'] in first.inner_text(), first.inner_text().replace('\n', ' ')[:120])
+            with single.expect_download(timeout=20000) as download:
+                single.locator('.slot-row-actions [data-op="export-kept"][data-id="0"]').first.click()
+            single_export = out / ('single-' + download.value.suggested_filename)
+            download.value.save_as(str(single_export))
+            record('single save: it exports exactly as stored', json.loads(single_export.read_text()) == kept_life, single_export.name)
+            record('single save: no page errors', not errors['mirror'], str(errors['mirror'][:2]))
+            mirror_only.close()
 
             # 9. The offline files: main shows the door to an old life and takes a new one; the archive takes the old.
             for name, path, incoming, expect_door in (('main offline file', project / args.main_offline, old_file, True),

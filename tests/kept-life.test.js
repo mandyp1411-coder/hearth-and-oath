@@ -5,15 +5,15 @@ import {gunzipSync} from 'node:zlib';
 import {setImmediate as nextTurn} from 'node:timers/promises';
 import {createSaveStore, LEGACY_SAVE_KEY} from '../dist/js/saves.js';
 import {migrateSave, validateSave} from '../dist/js/engine.js';
-import {rulesOf, NEW} from '../dist/js/edition.js';
+import {storedLifeDecoder, NEW_ONLY} from '../dist/js/rulebook.js';
 import {mountApp} from './helpers/ui-surface.mjs';
 
 // A stored life this build cannot decode is kept exactly as written: never an
 // empty slot, never dropped by another slot's save, replaced only by review,
 // deleted only by review, exported whole. Two honest sources of such a life:
-// a save written by a later build (an unknown revision) opened here, and the
-// v0.72 cutover's engine, which will not decode the old rules (simulated
-// below with a decoder that refuses them; the live game still decodes both).
+// a save written by a later build (an unknown revision) opened here, and since
+// v0.72.1 every old-rules life: the main game's decoder reads only new-rules
+// lives (rulebook.js `storedLifeDecoder`), so an old one is kept as stored.
 const KEY = 'hearth-and-oath:slots:v1';
 const release = v => JSON.parse(gunzipSync(readFileSync(new URL(`./fixtures/saves/v${v}.json.gz`, import.meta.url)))).states;
 const older = release('0600'), newer = release('0690');
@@ -21,7 +21,7 @@ const flush = async () => { for (let i = 0; i < 8; i++) await nextTurn(); };
 /** A life a later build wrote: the v0.69 engine's own save with a revision this build does not know. */
 function fromLaterBuild(state) { const s = structuredClone(state); s.revision = 6; return s; }
 const laterLife = fromLaterBuild(newer.eighteen);
-const afterCutover = life => rulesOf(life) === NEW ? migrateSave(life) : null; // the decoder once the old rules leave main
+const afterCutover = storedLifeDecoder(NEW_ONLY, migrateSave); // the main game's decoder
 const text = value => JSON.stringify(value);
 function memory(raw, mirror) {
   const values = new Map([[KEY, text(raw)], [LEGACY_SAVE_KEY, text(mirror)]]);

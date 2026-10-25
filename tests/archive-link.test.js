@@ -34,9 +34,10 @@ test('an actual old-rules save has the published archive route on its slot and i
   const row=ui.root.querySelector('[data-op="slot-load"][data-id="1"]').closest('.save-slot-row');
   assert.equal(row.querySelector('[data-op="slot-load"]').disabled,true,'the old life is kept, not opened');
   const note=row.querySelector('[data-archive-note]');assert.ok(note);
-  const exporter=note.querySelector('[data-op="export-session"]');assert.ok(exporter);assert.equal(exporter.dataset.id,'1');
+  // v0.72.1: an old life is kept as stored and never decoded here, so its export is the kept copy.
+  const exporter=note.querySelector('[data-op="export-kept"]');assert.ok(exporter);assert.equal(exporter.dataset.id,'1');
   const downloads=captureDownloads(t,ui);await ui.fire('click',exporter);
-  assert.equal(downloads.blobs.length,1);assert.deepEqual(JSON.parse(await downloads.blobs[0].text()),oldBefore,'the archive export retains the complete migrated saved life');
+  assert.equal(downloads.blobs.length,1);assert.ok(JSON.stringify(JSON.parse(await downloads.blobs[0].text()))===JSON.stringify(oldBefore),'the archive export is the complete saved life, exactly as stored');
   assert.equal(downloads.anchors[0].download,exportFileName(oldBefore));
   assert.equal(ui.storage.getItem(KEY),durable);assert.deepEqual(ui.current(),current);
   archiveAnchor(note);

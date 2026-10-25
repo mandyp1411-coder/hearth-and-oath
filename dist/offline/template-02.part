@@ -29387,7 +29387,7 @@ const __edition = (() => {
 // (subsystems are added to an older edition life as it plays on), so they
 // carry `began: null` and read "begun before v0.70". Never guess a date.
 
-const GAME_VERSION = '0.72.0';
+const GAME_VERSION = '0.72.1';
 /** The migration step this build brings a new-rules life to. Each later
  * release that changes what a new-rules save holds adds a step here. */
 const EDITION_STEP = 71;
@@ -37812,6 +37812,15 @@ function harnessRulebooks(moduleUrl) {
   } catch { return MAIN_ADMITS; }
 }
 
+/** How the save store reads a stored life. Under the new rules only, an old
+ * life is told by its own stored markers and never decoded: the store keeps it
+ * exactly as it was written (saves.js `kept`), so nothing of the old rules'
+ * code runs on it here and it leaves for the archive byte for byte. `BOTH`
+ * decodes every life, as before v0.72. */
+function storedLifeDecoder(admits = MAIN_ADMITS, decode = value => value) {
+  return admits === NEW_ONLY ? value => rulesOf(value) === NEW ? decode(value) : null : decode;
+}
+
 /** The entry policy for life-entry.js, the save store and the Ironman session:
  * under the new rules only, a life must carry a station or a debt ledger;
  * `BOTH` (the policy before v0.72) admits every decoded life. */
@@ -37819,7 +37828,7 @@ function admissionPolicy(admits = MAIN_ADMITS) {
   return admits === NEW_ONLY ? state => rulesOf(state) === NEW : undefined;
 }
 
-return {BOTH,MAIN_ADMITS,NEW_ONLY,admissionPolicy,harnessRulebooks};
+return {BOTH,MAIN_ADMITS,NEW_ONLY,admissionPolicy,harnessRulebooks,storedLifeDecoder};
 })();
 const __archive_link = (() => {
 // Where the Old Rules archive lives. The archive is the v0.69 game published
@@ -39573,6 +39582,15 @@ const SLOT_KEY = 'hearth-and-oath:slots:v1';
  * else is not a life and is read as nothing, as before. */
 const keepable = value => Boolean(value) && typeof value === 'object' && !Array.isArray(value)
   && Boolean(value.hero) && typeof value.hero === 'object' && typeof value.hero.name === 'string' && value.hero.name.trim().length > 0;
+/** An Ironman record this build keeps because its decoder refuses the life: the
+ * record is whole and well formed (it passed these same checks when an earlier
+ * build wrote it) and its life names a person. A record whose life decodes to
+ * something else is not kept; it is unreadable, as before. */
+function keptRecord(raw, runId, decode) {
+  const record = decodeIronmanRecord(raw, runId, value => value);
+  if (!record?.state || !keepable(record.state)) return null;
+  try { return decode(copy(record.state)) ? null : record; } catch { return record; }
+}
 /** The envelope a commit writes: a kept life goes back exactly as it was read. */
 const storedSlot = ({ kept, ...slot }) => kept ? { ...slot, state: kept } : slot;
 const storedBackups = backups => Object.fromEntries(Object.entries(backups).map(([id, { kept, ...backup }]) => [id, kept ? { ...backup, state: kept } : backup]));
@@ -39685,6 +39703,8 @@ function createSaveStore(storage, decodeStoredLife = value => value, options = {
         if (legacyText == null) legacyText = storage?.getItem(LEGACY_SAVE_KEY) ?? null;
         const legacy = JSON.parse(legacyText || 'null'), state = legacy && !isIronman(legacy) ? decodeStoredLife(legacy) : null;
         if (state) { slots[0] = { id: 0, state, updatedAt: null }; activeSlot = 0; }
+        // A life known only from the mirror is kept too: the first save writes it into its slot as it was.
+        else if (legacy && !isIronman(legacy) && keepable(legacy)) { slots[0] = { id: 0, state: null, updatedAt: null, kept: copy(legacy) }; activeSlot = 0; }
       } catch { readable = false; }
     }
     const value = { slots, activeSlot, backups, rawText, legacyText, readable, compatible, accessible };
@@ -39814,7 +39834,7 @@ function createSaveStore(storage, decodeStoredLife = value => value, options = {
           || typeof storage?.removeItem !== 'function') return { ok: false, reason: 'durable-storage-unavailable' };
       const before = enumerateKeys();
       if (!before) return { ok: false, reason: 'incomplete-discovery' };
-      const records = new Map(), ended = new Map();
+      const records = new Map(), kept = new Map(), ended = new Map();
       for (const key of before.filter(key => key.startsWith(IRONMAN_ENDED_PREFIX))) {
         const runId = key.slice(IRONMAN_ENDED_PREFIX.length);
         if (!validIronmanRunId(runId)) return { ok: false, reason: 'unreadable-ended-marker' };
@@ -39829,12 +39849,14 @@ function createSaveStore(storage, decodeStoredLife = value => value, options = {
         if (!marker.ok) return { ok: false, reason: 'unreadable-ended-marker' };
         if (marker.marker) { ended.set(runId, marker.marker); continue; }
         const raw = storage.getItem(key), record = raw === null ? null : decodeIronmanRecord(raw, runId, decodeStoredLife);
-        if (!record) return { ok: false, reason: 'unreadable-run-record' };
-        records.set(runId, record);
+        if (record) { records.set(runId, record); continue; }
+        const held = raw === null ? null : keptRecord(raw, runId, decodeStoredLife);
+        if (!held) return { ok: false, reason: 'unreadable-run-record' };
+        kept.set(runId, held);
       }
       const after = enumerateKeys();
       if (!after || !same(before, after)) return { ok: false, reason: 'incomplete-discovery' };
-      return { ok: true, records, ended };
+      return { ok: true, records, kept, ended };
     } catch { return { ok: false, reason: 'incomplete-discovery' }; }
   }
   function ownership(record, found) {
@@ -39843,9 +39865,18 @@ function createSaveStore(storage, decodeStoredLife = value => value, options = {
     const base = readBase(record.attachment.slotId);
     if (!base.ok) return { status: 'blocked', reason: base.reason };
     if (!base.empty || base.token !== record.attachment.baseToken) return { status: 'orphan', base };
-    const matching = [...found.records.values()].filter(other => other.state && other.attachment
+    const matching = claims(found).filter(other => other.state && other.attachment
       && other.attachment.slotId === record.attachment.slotId && other.attachment.baseToken === base.token);
     return { status: matching.length === 1 ? 'active' : 'conflict', base };
+  }
+  /** Every retained head that can hold a slot: the ones this build plays and the kept ones. */
+  const claims = found => [...found.records.values(), ...found.kept.values()];
+  /** The kept run that holds slot `id`, if one does. */
+  function keptHead(id) {
+    const found = discover();
+    if (!found.ok) return null;
+    const matching = [...found.kept.values()].filter(record => record.attachment?.slotId === id && ownership(record, found).status === 'active');
+    return matching.length === 1 ? matching[0] : null;
   }
   function displayHead(id) {
     const found = discover();
@@ -39856,7 +39887,7 @@ function createSaveStore(storage, decodeStoredLife = value => value, options = {
   function protectedTarget(id) {
     const found = discover();
     if (!found.ok) return false; // Standard durability cannot erase independent mortality keys.
-    return [...found.records.values()].some(record => record.attachment?.slotId === id
+    return claims(found).some(record => record.attachment?.slotId === id
       && ['active', 'conflict'].includes(ownership(record, found).status));
   }
   function displaySlots() {
@@ -39865,6 +39896,10 @@ function createSaveStore(storage, decodeStoredLife = value => value, options = {
     for (const record of found.records.values()) if (ownership(record, found).status === 'active') {
       const id = record.attachment.slotId;
       value[id] = { id, state: copy(record.state), updatedAt: record.updatedAt, revision: record.revision, ironman: true };
+    }
+    for (const record of found.kept.values()) if (ownership(record, found).status === 'active') {
+      const id = record.attachment.slotId;
+      value[id] = { id, state: null, kept: copy(record.state), updatedAt: record.updatedAt, revision: record.revision, ironman: true };
     }
     return value;
   }
@@ -39888,8 +39923,8 @@ function createSaveStore(storage, decodeStoredLife = value => value, options = {
       revision: nextRevision, updatedAt: new Date().toISOString(), state: copy(state),
       casualties: copy(state?.ironman.casualties ?? prior.casualties), attachment: copy(attachment) };
   }
-  function persistRecord(record) {
-    if (!decodeIronmanRecord(record, record.runId, decodeStoredLife)) return failure('invalid-run-record');
+  function persistRecord(record, { kept = false } = {}) {
+    if (!(kept ? keptRecord(record, record.runId, decodeStoredLife) : decodeIronmanRecord(record, record.runId, decodeStoredLife))) return failure('invalid-run-record');
     const key = ironmanRecordKey(record.runId), bytes = JSON.stringify(record);
     try {
       storage.setItem(key, bytes);
@@ -39922,7 +39957,7 @@ function createSaveStore(storage, decodeStoredLife = value => value, options = {
     if (!base.ok) return failure(base.reason);
     if (!base.empty) return failure('underlying-slot-occupied');
     if (unsaved.has(id)) return failure('unsaved-target');
-    if ([...found.records.values()].some(record => record.state && record.attachment?.slotId === id
+    if (claims(found).some(record => record.state && record.attachment?.slotId === id
         && record.attachment.baseToken === base.token)) return failure('ironman-slot-occupied');
     return { status: 'review', base };
   }
@@ -39943,6 +39978,19 @@ function createSaveStore(storage, decodeStoredLife = value => value, options = {
       return state === null || admits(state);
     } catch { return false; }
   }
+  /** A kept run is read only for its export: from its slot while it holds one,
+   * or wherever it is retained once released. It is never opened, reattached,
+   * imported over or begun again. */
+  function keptInspection(held, found, { intent, id, token, input, consume }) {
+    if (intent !== 'export') return failure('kept-position');
+    const owner = ownership(held, found);
+    if (owner.status === 'blocked') return failure(owner.reason);
+    if (owner.status === 'conflict') return failure('conflicting-claims');
+    const slot = owner.status === 'active' ? held.attachment.slotId : null;
+    if (slot !== null && id !== slot) return failure('orphaned-position', 'stale');
+    if (token !== undefined && token !== ironmanRecordToken(held) || typeof input !== 'string' && !same(input, held.state)) return failure('stale-position', 'stale');
+    return consumeHead(held, slot, consume);
+  }
   function inspect(input, { intent, slot, token, consume, acceptForPlay } = {}) {
     const id = idFor(slot), runId = inputRunId(input);
     if (!['create', 'import', 'reattach', 'resume', 'export'].includes(intent)
@@ -39952,6 +40000,8 @@ function createSaveStore(storage, decodeStoredLife = value => value, options = {
     if (!marker.ok) return failure('unreadable-ended-marker');
     if (marker.marker) return { status: 'ended', runId };
     let record = runId ? found.records.get(runId) : null;
+    const held = runId && !record ? found.kept.get(runId) : null;
+    if (held) return keptInspection(held, found, { intent, id, token, input, consume });
     if (record && !record.state) return failure('deleted-position');
     if (intent === 'create' || intent === 'import') {
       const state = input === null ? null : validatedPosition(input);
@@ -40010,6 +40060,7 @@ function createSaveStore(storage, decodeStoredLife = value => value, options = {
     const marker = markerFor(runId); if (!marker.ok) return failure('unreadable-ended-marker');
     if (marker.marker) return { status: 'ended', runId };
     if (!acceptsPlayPosition(state, acceptForPlay)) return failure('position-not-admitted');
+    if (found.kept.has(runId)) return failure('kept-position');
     const prior = found.records.get(runId);
     if (intent === 'continue') {
       if (!prior?.state) return failure(prior ? 'deleted-position' : 'missing-run-head');
@@ -40042,6 +40093,7 @@ function createSaveStore(storage, decodeStoredLife = value => value, options = {
     const found = discover(); if (!found.ok) return failure(found.reason);
     const marker = markerFor(runId); if (!marker.ok) return failure('unreadable-ended-marker');
     if (marker.marker) return { status: 'ended', runId };
+    if (found.kept.has(runId)) return failure('kept-position');
     const prior = found.records.get(runId);
     if (!prior?.state) return failure(prior ? 'deleted-position' : 'missing-run-head');
     if (!acceptsPlayPosition(prior.state, acceptForPlay)) return failure('position-not-admitted');
@@ -40061,12 +40113,13 @@ function createSaveStore(storage, decodeStoredLife = value => value, options = {
     const found = discover(); if (!found.ok) return failure(found.reason);
     const marker = markerFor(runId); if (!marker.ok) return failure('unreadable-ended-marker');
     if (marker.marker) return { status: 'ended', runId };
-    const prior = found.records.get(runId); if (!prior) return failure('missing-run-head');
+    // A kept run may be released from its slot (kept whole, still exportable) or deleted, by review.
+    const prior = found.records.get(runId) ?? found.kept.get(runId); if (!prior) return failure('missing-run-head');
     if (!prior.state) return { status: 'deleted', runId };
     if (token !== ironmanRecordToken(prior)) return failure('stale-run-revision', 'stale');
     const next = draftRecord(prior, remove ? null : prior.state, null);
     if (!next) return failure('secure-randomness-unavailable');
-    const saved = persistRecord(next);
+    const saved = persistRecord(next, { kept: found.kept.has(runId) && !remove });
     return saved.status === 'confirmed' ? { status: remove ? 'deleted' : 'archived', runId, token: ironmanRecordToken(next) } : saved;
   }
   function recoverableHeads() {
@@ -40074,7 +40127,7 @@ function createSaveStore(storage, decodeStoredLife = value => value, options = {
     // Do not resolve a duplicate claim by implicitly archiving whichever head
     // happened to be enumerated first. Only explicit reviewed archive/delete
     // may deliberately resolve it; leave every claimant unchanged here.
-    for (const record of found.records.values()) {
+    for (const record of claims(found)) {
       const owner = ownership(record, found);
       if (owner.status === 'blocked') return failure(owner.reason);
       if (owner.status === 'conflict') return failure('conflicting-claims');
@@ -40088,6 +40141,12 @@ function createSaveStore(storage, decodeStoredLife = value => value, options = {
       if (owner.status === 'orphan') { const result = revoke(record); if (result.status !== 'archived') return result; record = result.record; }
       runs.push({ runId: record.runId, token: ironmanRecordToken(record), name: record.state.hero.name,
         age: record.state.age, day: record.state.day, updatedAt: record.updatedAt, status: owner.status });
+    }
+    // A released kept run is listed for its export and deletion; it is never revoked or reattached.
+    for (const record of found.kept.values()) if (ownership(record, found).status !== 'active') {
+      const { age, day } = record.state;
+      runs.push({ runId: record.runId, token: ironmanRecordToken(record), name: record.state.hero.name,
+        age: Number.isInteger(age) ? age : null, day: Number.isInteger(day) ? day : null, updatedAt: record.updatedAt, status: 'kept', kept: true });
     }
     return { status: 'ready', runs };
   }
@@ -40150,20 +40209,21 @@ function createSaveStore(storage, decodeStoredLife = value => value, options = {
     health(id, state) {
       const index = idFor(id);
       if (index == null) return null;
-      const head = displayHead(index), position = state === undefined ? head?.state || slots[index].state : state;
+      const head = displayHead(index), held = head ? null : keptHead(index), position = state === undefined ? head?.state || slots[index].state : state;
       const dirty = head ? !same(position, head.state) : state === undefined && !unsaved.has(index) ? false : changed(index, position), reason = conflict?.id === index ? conflict.reason : null;
-      const timestamp = head?.updatedAt || observed.slots[index].updatedAt;
-      const kept = !position && Boolean(slots[index].kept);
+      const timestamp = head?.updatedAt || held?.updatedAt || observed.slots[index].updatedAt;
+      const kept = !position && Boolean(slots[index].kept || held);
       return { id: index, hasState: Boolean(position), hasChanges: dirty, available, kept,
         status: reason ? (dirty ? 'conflict' : 'stale') : dirty ? (unsaved.has(index) || !available ? 'unsaved' : 'pending') : position || kept ? 'saved' : 'empty',
         lastSavedAt: typeof timestamp === 'string' && Number.isFinite(Date.parse(timestamp)) ? timestamp : null,
-        hasDurableState: Boolean(head || observed.accessible && (observed.slots[index].state || observed.slots[index].kept)), conflict: reason };
+        hasDurableState: Boolean(head || held || observed.accessible && (observed.slots[index].state || observed.slots[index].kept)), conflict: reason };
     },
     checkForConflict(id) { const index = idFor(id), value = latest(); return index != null && value ? !checkTarget(value, index) : false; },
     read: id => copy(displayHead(Number(id))?.state || slots.find(slot => slot.id === Number(id))?.state || null),
     empty: () => displaySlots().find(slot => !slot.state && !slot.kept)?.id ?? null,
-    /** A life kept in a slot because this build cannot decode it: a copy of it exactly as stored, for its export. */
-    kept: id => copy(slots.find(slot => slot.id === Number(id))?.kept || null),
+    /** A life kept in a slot because this build cannot decode it, or the kept Ironman run that holds the slot:
+     * a copy of it exactly as stored. Export a kept run through `inspectIronman(runId, {intent: 'export'})`. */
+    kept: id => copy(slots.find(slot => slot.id === Number(id))?.kept || keptHead(idFor(id))?.state || null),
     keptBackup: id => copy(backups[Number(id)]?.kept || null),
     backup: id => copy(backups[Number(id)]?.state || null),
     reviewToken(id) { const index = idFor(id), head = index === null ? null : displayHead(index); return index == null ? null : head ? ironmanRecordToken(head) : slotToken(local(), index); },
@@ -40242,7 +40302,7 @@ function createSaveStore(storage, decodeStoredLife = value => value, options = {
   };
 }
 
-return {LEGACY_SAVE_KEY,SAVE_SLOT_COUNT,createSaveCoordinator,createSaveStore};
+return {LEGACY_SAVE_KEY,SAVE_SLOT_COUNT,createSaveCoordinator,createSaveStore,keepable};
 })();
 const __save_storage = (() => {
 // Durable save storage without the localStorage quota.
@@ -41043,7 +41103,7 @@ const { readDisplay, saveDisplay, applyDisplay, displayPreset, readWorkspace, sa
 const { personalityImpactText, personalityTrait } = __personality;
 const { voiceActions, voiceEvent, chapterHeading, whatMatters } = __voice;
 const { rulesLabel, rulesNote, oldRules, exportFileName, OLD_RULES_DOOR, OLD_RULES_BACKUP_DOOR } = __edition;
-const { admissionPolicy, harnessRulebooks } = __rulebook;
+const { admissionPolicy, harnessRulebooks, storedLifeDecoder } = __rulebook;
 const { ARCHIVE_URL, ARCHIVE_NAME } = __archive_link;
 const { createLifeEntry, LIFE_ENTRY_REFUSED, LIFE_ENTRY_CANCELLED } = __life_entry;
 const { schoolingView } = __schooling;
@@ -41082,7 +41142,7 @@ const { careerPage, healthPage, legacyPage, careerBatchPanel, householdBudgetPan
 const { travelPlanPreview, travelEncounterPerson } = __travel;
 const { getAudioSettings, setSoundEnabled, setSoundVolume, playUISound, setMusicEnabled, setMusicVolume, setAudioScene, audioSceneFor, unlockAudio } = __audio;
 const { renderCharacterCreator, captureCreatorDraft, randomizeCreatorDraft, defaultCreatorDraft, creatorStepTitles, selectCreatorPortrait, selectCreatorHeritage, rollCreatorName, toggleCreatorTrait, adjustCreatorAttribute, selectCreatorOrigin, normalizeCreatorDraft, randomizeCreatorPortrait, toggleCreatorLock, creatorDependencyChanges } = __creator;
-const { createSaveStore, createSaveCoordinator } = __saves;
+const { createSaveStore, createSaveCoordinator, keepable } = __saves;
 const { openSaveStorage } = __save_storage;
 const { createIronmanSession } = __ironman_session;
 const { isIronman, createIronmanMetadata } = __ironman;
@@ -41146,14 +41206,19 @@ let displaySettings=readDisplay(storage);applyDisplay(displaySettings);
 // One rulebook (v0.72): rulebook.js admits the new rules only. One policy feeds
 // ordinary entry, incoming writes and Ironman locked entry. Only the test
 // harness can import this module with the pre-v0.72 policy (harnessRulebooks).
-const positionAdmissionPolicy = admissionPolicy(harnessRulebooks("about:hearth-and-oath-offline"));
-const saveStore = createSaveStore(storage, migrateSave, {acceptPosition:positionAdmissionPolicy});
+const rulebooks = harnessRulebooks("about:hearth-and-oath-offline"), positionAdmissionPolicy = admissionPolicy(rulebooks);
+// An old-rules life is kept as it was stored and never decoded here (rulebook.js).
+const readStoredLife = storedLifeDecoder(rulebooks, migrateSave);
+const saveStore = createSaveStore(storage, readStoredLife, {acceptPosition:positionAdmissionPolicy});
 const lifeEntry = createLifeEntry({store:saveStore,coordinate:operation=>saveOperation(operation),acceptPosition:positionAdmissionPolicy});
 /** A life this page keeps and can export but will not let into play: an old-rules life once the cutover is taken (or rehearsed). Never true while both rulebooks are admitted. */
 const refusedHere = state => Boolean(state) && !lifeEntry.canEnter(state);
 /** Who is in a slot: the life this build can open, or one it keeps exactly as stored because it cannot decode it. */
 const occupantOf = id => saveStore.read(Number(id)) || saveStore.kept(Number(id));
+/** A previous life kept undecoded in a slot's backup because it lives by the old rules: it can meet its door and be exported. */
+const keptOldBackup = id => { const kept = saveStore.keptBackup(id); return kept && oldRules(kept) ? kept : null; };
 const KEPT_UNREADABLE = 'This life could not be read here. It is kept exactly as it was written; export it to hold your own copy.';
+const KEPT_RUN_DOOR = 'This Ironman run lives by the old rules. It is kept here as it was written and never opened; export it and open it in the archive.';
 let activeSlot = saveStore.active();
 let saved = saveStore.read(activeSlot);
 let storageAvailable = saveStore.available();
@@ -41261,17 +41326,28 @@ async function inspectIronmanImport(){
 function ironmanReviewDialog(){
  const review=ironmanReview;if(!review)return '<p>Review this position again.</p>';
  const recovery=review.kind==='recovery';
+ if(review.kept)return keptRunDialog(review);
  return `<span class="eyebrow">IRONMAN POSITION</span><h2>${e(review.name||'Review retained position')}</h2><p>${review.age!=null?'Age '+review.age+' · Day '+review.day:'Only the latest retained position can reattach.'}</p>${recovery?`<p>Reattach to freshly reviewed empty slot ${review.slot+1}. Existing backups and other lives remain intact.</p>${button('Reattach reviewed position','ironman-reattach','','primary')}`:`<p>Archive keeps the full position for later reviewed reattachment. Delete position removes that full position and keeps its nonplayable casualty record; importing a downloaded copy will not restore the deleted position.</p><div class="modal-buttons">${button('Archive position','ironman-archive','','secondary')}${button('Delete position','ironman-delete','','danger')}${review.attached?'':button('Review empty slot for reattachment','ironman-review-recovery',review.runId,'primary')}</div>`}`;
+}
+/** A kept Ironman run: export it for the archive, release its slot (it stays here, whole, among the retained positions), or delete it. It never opens here. */
+function keptRunDialog(review){
+ const door=review.oldRules?KEPT_RUN_DOOR:KEPT_UNREADABLE;
+ return `<span class="eyebrow">${review.oldRules?'KEPT FOR THE ARCHIVE':'KEPT AS IT WAS WRITTEN'}</span><h2>${e(review.name||'A kept Ironman run')}</h2><p>${review.age!=null?'Age '+review.age+(review.day!=null?' · Day '+review.day:''):''} · Ironman</p><p data-archive-door>${e(door)}</p><p>${review.attached?'Releasing the slot keeps the run here, whole, among the retained Ironman positions, and frees the slot for a new life. ':''}Deleting removes it from this browser; export it first.</p><div class="modal-buttons">${button(review.oldRules?'Export for the archive':'Export this run','ironman-export-kept',review.runId,'primary')}${review.attached?button('Release the slot','ironman-archive','','secondary'):''}${button('Delete the run','ironman-delete','','danger')}${review.oldRules?archiveLink('ghost'):''}</div>`;
 }
 async function reviewIronmanLifecycle(runId){
  const sequence=++ironmanReviewSequence,owner=viewOwner();let review=null;
- const attached=saveStore.list().find(row=>runIdOf(row.state)===runId);
+ const attached=saveStore.list().find(row=>runIdOf(row.state)===runId),held=attached?null:saveStore.list().find(row=>runIdOf(row.kept)===runId);
  if(attached){
   const result=await saveStore.inspectIronman(runId,{intent:'resume',slot:attached.id,consume:(state,authority)=>{review={kind:'lifecycle',runId,slot:authority.slot,token:authority.token,name:state.hero.name,age:state.age,day:state.day,attached:true};}});
+  if(result.status==='ended'){await fanoutIronmanMarkers([runId]);return;}
+ }else if(held){
+  // A kept run is read only through its export inspection: it is never resumed to be reviewed.
+  const result=await saveStore.inspectIronman(runId,{intent:'export',slot:held.id,consume:(state,authority)=>{review={kind:'lifecycle',runId,slot:authority.slot,token:authority.token,name:state.hero.name,age:keptAge(state),day:state.day,attached:true,kept:true,oldRules:oldRules(state)};}});
   if(result.status==='ended'){await fanoutIronmanMarkers([runId]);return;}
  }else{
   const result=await saveStore.listRecoverableIronman();
   const row=result.runs?.find(row=>row.runId===runId);if(row)review={...row,kind:'lifecycle',attached:false,slot:0};
+  if(row?.kept){const read=await saveStore.inspectIronman(runId,{intent:'export',slot:null,token:row.token,consume:state=>{review={...review,oldRules:oldRules(state)};}});if(read.status!=='ready')review=null;}
  }
  if(sequence!==ironmanReviewSequence||!ownsView(owner))return;
  if(!review){toast('This position changed or could not be reviewed. Nothing was changed.');return;}
@@ -41287,6 +41363,7 @@ async function handleIronmanControl(op,id){
  if(op==='ironman-review'&&status.unresolved&&['archive','delete','reattach'].includes(status.kind)&&!status.busy&&id===status.runId){await reviewIronmanLifecycle(id);return;}
  if(op==='ironman-use-authority'){const review=ironmanReview;if(review?.kind==='authority'&&!status.busy)ironmanSession.chooseAuthority(review.runId,review.slot,{reviewed:true,token:review.token});return;}
  if(op==='ironman-reattach'){const review=ironmanReview;if(review?.kind!=='recovery'||status.busy)return;const options={reviewed:true,token:review.token};if(status.unresolved&&['live','create','import'].includes(status.kind))ironmanSession.recoverCandidate(review.runId,review.slot,options);else ironmanSession.reattach(review.runId,review.slot,options);return;}
+ if(op==='ironman-export-kept'){const review=ironmanReview;if(review?.kept&&review.runId===id&&!status.busy)await exportKeptIronman(review.runId,review.attached?review.slot:null);return;}
  if(op==='ironman-archive'||op==='ironman-delete'){const review=ironmanReview;if(review?.kind!=='lifecycle'||status.busy)return;ironmanSession[op==='ironman-archive'?'archive':'delete'](review.runId,{reviewed:true,token:review.token});return;}
  if(ironmanFenced())return;
  if(op==='ironman-review'){await reviewIronmanLifecycle(id);return;}
@@ -41360,7 +41437,6 @@ function savedYearPanel(){return game.life?.plan?`<section class="panel saved-ye
 
 function e(value) { return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function title(value) { return String(value || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); }
-function readSave() { try { const raw=localStorage.getItem(SAVE_KEY); return raw ? migrateSave(JSON.parse(raw)) : null; } catch { return null; } }
 
 function admitLifeEntry(state){
   if(lifeEntry.canEnter(state))return true;
@@ -41545,7 +41621,7 @@ function navigationLabel(id,label){return id==='journal'&&game?.farm&&farmView(g
 function groupedNavigation(){return navigationGroups.map(([name,rows])=>`<details class="navigation-group" open><summary>${e(name)}</summary>${rows.map(([id,label])=>`<button type="button" class="nav-item ${tab===id?'active':''}" data-op="tab" data-id="${id}" ${tab===id?'aria-current="page"':''}>${uiIcon(id)}<span>${e(navigationLabel(id,label))}</span></button>`).join('')}</details>`).join('');}
 function sidebar() {
  const main=navigationGroups[0][1].map(([id,label])=>[id,navigationLabel(id,label)]);
- return `<aside class="sidebar game-rail"><button class="brand" type="button" data-op="menu" aria-label="Open game menu"><span class="brand-title">Hearth &amp; Oath</span><small>VOLUME I</small></button><nav aria-label="Main views">${main.map(([id,label])=>`<button type="button" class="nav-item ${tab===id?'active':''}" data-op="tab" data-id="${id}" aria-label="${label}" title="${label}" ${tab===id?'aria-current="page"':''}>${uiIcon(id)}<span>${label}</span></button>`).join('')}</nav><div class="rail-footer">${button('Character','tab','character','ghost small')}${button('Party','tab','party','ghost small')}${button('Main Menu','title-menu','','ghost small')}${button('Settings','game-settings','','ghost small')}<small>v0.72.0</small></div></aside>`;
+ return `<aside class="sidebar game-rail"><button class="brand" type="button" data-op="menu" aria-label="Open game menu"><span class="brand-title">Hearth &amp; Oath</span><small>VOLUME I</small></button><nav aria-label="Main views">${main.map(([id,label])=>`<button type="button" class="nav-item ${tab===id?'active':''}" data-op="tab" data-id="${id}" aria-label="${label}" title="${label}" ${tab===id?'aria-current="page"':''}>${uiIcon(id)}<span>${label}</span></button>`).join('')}</nav><div class="rail-footer">${button('Character','tab','character','ghost small')}${button('Party','tab','party','ghost small')}${button('Main Menu','title-menu','','ghost small')}${button('Settings','game-settings','','ghost small')}<small>v0.72.1</small></div></aside>`;
 }
 function ageControlState() {
   let reason='';
@@ -41607,15 +41683,15 @@ function menuItem(label, op, {disabled=false, detail='', id='', className=''}={}
 function titleScreen() {
   const occupied=saveStore.list().filter(slot=>slot.state||slot.kept);
   const newest=list=>list.find(slot=>slot.id===activeSlot)||[...list].sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''))[0];
-  const admitted=occupied.filter(slot=>slot.state&&!refusedHere(slot.id===activeSlot&&game?game:slot.state)),kept=occupied.filter(slot=>!admitted.includes(slot));
+  const admitted=occupied.filter(slot=>slot.state),kept=occupied.filter(slot=>!slot.state);
   const recent=newest(admitted),keptRecent=recent?null:newest(kept);
   const live=Boolean(recent&&recent.id===activeSlot&&game),state=live?game:recent?.state;
   const card=state?returnLifeCardView(state,slotSaveHealth(recent.id,live),{live,readCommitment:getLifeCommitment}):null;
   const place=state?properPlaceName(state.world.locations.find(place=>place.id===state.locationId)?.name||state.world.name):'';
   const primary=state?`<article class="title-life" data-return-life-card data-slot-live="${live}" aria-label="Your current life"><button type="button" class="title-menu-item title-continue-card" data-op="title-continue" data-id="${recent.id}"><span class="title-life-portrait" aria-hidden="true">${renderAvatar(state.hero,{size:'small',age:state.age??18})}</span><span class="title-life-copy"><span class="title-action-label">Continue</span><strong>${e(state.hero.name)}</strong><small>Age ${state.age??18} · ${isIronman(state)?'Ironman · ':''}Slot ${recent.id+1}</small>${rulesMarkup(state,{compact:true})}<span class="title-life-place">${e(place)}</span>${card.context?`<span class="title-life-context">${e(card.context)}</span>`:''}</span><span class="menu-arrow" aria-hidden="true">→</span></button><p class="title-source-note" data-slot-source ${card.sourceNote?'':'hidden'}>${e(card.sourceNote)}</p>${saveHealthMarkup(recent.id,{live})}</article>`:menuItem('Begin a new life','title-new',{detail:'Choose an origin, a face and your first year.',className:'title-begin'});
-  const keptCard=keptRecent?keptLifeCard(keptRecent.state||keptRecent.kept,keptRecent.id,{undecoded:!keptRecent.state}):'';
+  const keptCard=keptRecent?keptLifeCard(keptRecent.kept,keptRecent.id,{undecoded:true}):'';
   const keptNote=kept.length?` · ${kept.length} kept for the archive`:'';
-  return `<main class="title-screen" aria-labelledby="title-heading">${titleArtwork()}<header class="title-topline"><span>A DARK FANTASY LIFE</span>${button(fullscreenLabel(),'fullscreen','','ghost small')}</header><div class="title-content"><h1 id="title-heading" class="title-wordmark"><span>Hearth</span> <span><em>&amp;</em> Oath</span></h1><p class="title-tagline">The world is old.<br>${state?'Your story continues.':'Your story is unwritten.'}</p><nav class="title-menu" aria-label="Title menu">${keptCard}${primary}<div class="title-life-actions">${state?menuItem('New life','title-new'):''}${menuItem('Saved lives','title-load',{disabled:!occupied.length,detail:occupied.length?`${occupied.length} of 3 slots occupied${keptNote}`:'No lives saved in this browser'})}</div><div class="title-secondary">${menuItem('Settings','title-settings')}${menuItem('How to play','help')}${menuItem('Tactics rehearsal','practice-open',{id:'protect_ally',detail:'Practice with a fictional party'})}${menuItem('Import a saved life','import',{detail:'Open an exported save file'})}</div></nav>${!state?saveHealthMarkup(activeSlot):''}</div><footer class="title-footer"><div class="title-settings"><button type="button" class="button ghost small" data-op="music-toggle" aria-pressed="${getAudioSettings().musicEnabled}">♫ Music ${getAudioSettings().musicEnabled?'on':'off'}</button><span>Ambient score · adjustable in Settings</span></div><p class="title-save-note">Saves stay in this browser. Export a file to keep a separate copy.</p><div class="title-bottomline"><span>VOLUME I · THE BOOK OF A LIFE</span><span>v0.72.0</span></div></footer></main>`;
+  return `<main class="title-screen" aria-labelledby="title-heading">${titleArtwork()}<header class="title-topline"><span>A DARK FANTASY LIFE</span>${button(fullscreenLabel(),'fullscreen','','ghost small')}</header><div class="title-content"><h1 id="title-heading" class="title-wordmark"><span>Hearth</span> <span><em>&amp;</em> Oath</span></h1><p class="title-tagline">The world is old.<br>${state?'Your story continues.':'Your story is unwritten.'}</p><nav class="title-menu" aria-label="Title menu">${keptCard}${primary}<div class="title-life-actions">${state?menuItem('New life','title-new'):''}${menuItem('Saved lives','title-load',{disabled:!occupied.length,detail:occupied.length?`${occupied.length} of 3 slots occupied${keptNote}`:'No lives saved in this browser'})}</div><div class="title-secondary">${menuItem('Settings','title-settings')}${menuItem('How to play','help')}${menuItem('Tactics rehearsal','practice-open',{id:'protect_ally',detail:'Practice with a fictional party'})}${menuItem('Import a saved life','import',{detail:'Open an exported save file'})}</div></nav>${!state?saveHealthMarkup(activeSlot):''}</div><footer class="title-footer"><div class="title-settings"><button type="button" class="button ghost small" data-op="music-toggle" aria-pressed="${getAudioSettings().musicEnabled}">♫ Music ${getAudioSettings().musicEnabled?'on':'off'}</button><span>Ambient score · adjustable in Settings</span></div><p class="title-save-note">Saves stay in this browser. Export a file to keep a separate copy.</p><div class="title-bottomline"><span>VOLUME I · THE BOOK OF A LIFE</span><span>v0.72.1</span></div></footer></main>`;
 }
 /** The rules a life lives by, on its slot and its review: the label, and for an old-rules life the way to the archive. */
 function rulesMarkup(state,{slot=null,compact=false,undecoded=false,labelled=true}={}){
@@ -41626,7 +41702,7 @@ function rulesMarkup(state,{slot=null,compact=false,undecoded=false,labelled=tru
   }
   const label=`<small class="slot-rules ${oldRules(state)?'old-rules':'new-rules'}" data-rules="${oldRules(state)?'old':'new'}">${e(rulesLabel(state))}</small>`;
   if(compact||!oldRules(state))return label;
-  const refused=undecoded||refusedHere(state),note=rulesNote(state,{admitted:!refused}),link=archiveLink();
+  const refused=undecoded,note=rulesNote(state,{admitted:!refused}),link=archiveLink();
   return `${labelled?label:''}<div class="slot-archive-note" data-archive-note ${refused?'data-refused-life':''}><p>${e(note)}</p><div class="slot-row-actions">${slot===null?'':`<button class="button secondary small" type="button" data-op="${undecoded?'export-kept':'export-session'}" data-id="${slot}">Export for the archive</button>`}${link}</div></div>`;
 }
 function archiveLink(cls='ghost small'){return ARCHIVE_URL?`<a class="button ${cls}" href="${e(ARCHIVE_URL)}" target="_blank" rel="noopener" data-archive-link>Open ${e(ARCHIVE_NAME)}</a>`:'';}
@@ -41641,15 +41717,15 @@ function keptLifeCard(state,slot,{undecoded=false}={}){
 }
 /** A slot holding a life this build keeps but cannot decode: occupied, exportable, deletable only through review, never opened. */
 function keptSlotRow(slot,creating){
-  const state=slot.kept,action=creating?'Replace':oldRules(state)?'Kept for the archive':'Kept as it was written';
-  return `<article class="save-slot-row occupied-slot-row" data-kept-life aria-label="Saved life slot ${slot.id+1}"><button class="save-slot" type="button" data-op="${creating?'slot-new':'slot-load'}" data-id="${slot.id}" ${creating?'':'disabled'} data-refused-life><span class="slot-number">0${slot.id+1}</span><span class="slot-portrait">${keptFace(state,true)}</span><span class="slot-info"><strong>${e(state.hero.name)}</strong><span>Age ${keptAge(state)}</span><small>${e(keptPlace(state))}</small>${rulesMarkup(state,{compact:true,undecoded:true})}</span><span class="menu-arrow" aria-hidden="true">${creating?`${action} →`:action}</span></button><div class="slot-row-actions"><button class="button secondary small slot-export" type="button" data-op="export-kept" data-id="${slot.id}">Export</button><button class="button ghost small slot-delete" type="button" data-op="slot-delete" data-id="${slot.id}" aria-label="Delete ${e(state.hero.name)}">Delete</button></div>${rulesMarkup(state,{slot:slot.id,undecoded:true,labelled:false})}</article>`;
+  const state=slot.kept,run=isIronman(state),action=creating&&!run?'Replace':oldRules(state)?'Kept for the archive':'Kept as it was written';
+  return `<article class="save-slot-row occupied-slot-row" data-kept-life ${run?'data-kept-run':''} aria-label="Saved life slot ${slot.id+1}"><button class="save-slot" type="button" data-op="${creating?'slot-new':'slot-load'}" data-id="${slot.id}" ${creating&&!run?'':'disabled'} data-refused-life><span class="slot-number">0${slot.id+1}</span><span class="slot-portrait">${keptFace(state,true)}</span><span class="slot-info"><strong>${e(state.hero.name)}</strong><span>Age ${keptAge(state)}${run?' · Ironman':''}</span><small>${e(keptPlace(state))}</small>${rulesMarkup(state,{compact:true,undecoded:true})}</span><span class="menu-arrow" aria-hidden="true">${creating&&!run?`${action} →`:action}</span></button><div class="slot-row-actions"><button class="button secondary small slot-export" type="button" data-op="export-kept" data-id="${slot.id}">Export</button>${run?button('Review release or deletion','ironman-review',runIdOf(state),'ghost small'):`<button class="button ghost small slot-delete" type="button" data-op="slot-delete" data-id="${slot.id}" aria-label="Delete ${e(state.hero.name)}">Delete</button>`}</div>${rulesMarkup(state,{slot:slot.id,undecoded:true,labelled:false})}</article>`;
 }
 function saveSafetyHint(){return coordinateSave.locking()?'Close older game tabs after an update.':'This browser cannot lock saves across tabs. Keep only one game tab open to avoid simultaneous save conflicts.';}
 function saveSlotRow(slot,creating) {
   if(!slot.state&&slot.kept)return keptSlotRow(slot,creating);
-  const live=Boolean(slot.state&&slot.id===activeSlot&&game),state=live?game:slot.state,refused=refusedHere(state);
+  const live=Boolean(slot.state&&slot.id===activeSlot&&game),state=live?game:slot.state;
   const card=state?returnLifeCardView(state,slotSaveHealth(slot.id,true),{live,readCommitment:getLifeCommitment}):null;
-  return `<article class="save-slot-row ${state?'occupied-slot-row':''}" data-return-life-card data-slot-live="${live}" aria-label="Saved life slot ${slot.id+1}"><button class="save-slot ${state?'':'empty-slot'}" type="button" data-op="${creating?'slot-new':'slot-load'}" data-id="${slot.id}" ${(!creating&&(!state||refused)||creating&&isIronman(state))?'disabled':''}${refused?' data-refused-life':''}><span class="slot-number">0${slot.id+1}</span><span class="slot-portrait">${state?renderAvatar(state.hero,{size:'small',age:state.age??18}):'<span aria-hidden="true">†</span>'}</span><span class="slot-info"><strong>${state?e(state.hero.name):'An unwritten life'}</strong><span>${state?`Age ${state.age??18} · ${e(roleTitle(state.world.name))}`:'Empty save slot'}</span>${state?`<small>${e(roleTitle(state.world.locations.find(place=>place.id===state.locationId)?.name||''))}</small>${card.context?`<small class="slot-pending-context">${e(card.context)}</small>`:''}<small class="slot-source-note" data-slot-source ${card.sourceNote?'':'hidden'}>${e(card.sourceNote)}</small>${rulesMarkup(state,{compact:true})}`:''}</span><span class="menu-arrow" aria-hidden="true">${creating?(state?'Replace →':'Create →'):refused?'Kept for the archive':'Return →'}</span></button>${isIronman(state)?`<div class="slot-row-actions">${refused?button('Export for the archive','export-session',slot.id,'secondary small'):button(live?'Export current Ironman':'Resume to export',live?'export':'slot-load',slot.id,'secondary small')}${button('Review archive or deletion','ironman-review',runIdOf(state),'ghost small')}</div><p>Ironman · combat death ends this run.</p>${refused?rulesMarkup(state,{labelled:false}):''}`:state?`<div class="slot-row-actions"><button class="button secondary small slot-export" type="button" data-op="export-session" data-id="${slot.id}" aria-label="${e(card.exportLabel)}" title="${e(card.exportLabel)}">Export</button><button class="button ghost small slot-delete" type="button" data-op="slot-delete" data-id="${slot.id}" aria-label="Delete ${e(state.hero.name)}">Delete</button></div>${saveHealthMarkup(slot.id,{live:true,exportButton:false,unknownTimeLabel:'Save time unavailable'})}${oldRules(state)?rulesMarkup(state,{slot:slot.id,labelled:false}):''}`:''}</article>`;
+  return `<article class="save-slot-row ${state?'occupied-slot-row':''}" data-return-life-card data-slot-live="${live}" aria-label="Saved life slot ${slot.id+1}"><button class="save-slot ${state?'':'empty-slot'}" type="button" data-op="${creating?'slot-new':'slot-load'}" data-id="${slot.id}" ${(!creating&&!state||creating&&isIronman(state))?'disabled':''}><span class="slot-number">0${slot.id+1}</span><span class="slot-portrait">${state?renderAvatar(state.hero,{size:'small',age:state.age??18}):'<span aria-hidden="true">†</span>'}</span><span class="slot-info"><strong>${state?e(state.hero.name):'An unwritten life'}</strong><span>${state?`Age ${state.age??18} · ${e(roleTitle(state.world.name))}`:'Empty save slot'}</span>${state?`<small>${e(roleTitle(state.world.locations.find(place=>place.id===state.locationId)?.name||''))}</small>${card.context?`<small class="slot-pending-context">${e(card.context)}</small>`:''}<small class="slot-source-note" data-slot-source ${card.sourceNote?'':'hidden'}>${e(card.sourceNote)}</small>${rulesMarkup(state,{compact:true})}`:''}</span><span class="menu-arrow" aria-hidden="true">${creating?(state?'Replace →':'Create →'):'Return →'}</span></button>${isIronman(state)?`<div class="slot-row-actions">${button(live?'Export current Ironman':'Resume to export',live?'export':'slot-load',slot.id,'secondary small')}${button('Review archive or deletion','ironman-review',runIdOf(state),'ghost small')}</div><p>Ironman · combat death ends this run.</p>`:state?`<div class="slot-row-actions"><button class="button secondary small slot-export" type="button" data-op="export-session" data-id="${slot.id}" aria-label="${e(card.exportLabel)}" title="${e(card.exportLabel)}">Export</button><button class="button ghost small slot-delete" type="button" data-op="slot-delete" data-id="${slot.id}" aria-label="Delete ${e(state.hero.name)}">Delete</button></div>${saveHealthMarkup(slot.id,{live:true,exportButton:false,unknownTimeLabel:'Save time unavailable'})}${oldRules(state)?rulesMarkup(state,{slot:slot.id,labelled:false}):''}`:''}</article>`;
 }
 function saveSlotsScreen() {
   const creating=slotsMode==='new';
@@ -42102,7 +42178,7 @@ function audioSettingsPanel() {
 }
 
 function displaySettingsPanel(){return `<section class="display-settings"><div class="drawer-section-label">READING THE BOOK</div><div class="reading-presets" role="group" aria-label="Reading presets">${button('Book','reading-preset','book','secondary small')}${button('Clear reading','reading-preset','clear','secondary small')}${button('Quiet reading','reading-preset','quiet','secondary small')}</div><label for="reading-size">Text size <strong>${Math.round(displaySettings.scale*100)}%</strong></label><input id="reading-size" type="range" min="1" max="1.5" step=".1" value="${displaySettings.scale}"><label for="reading-font">Reading font</label><select id="reading-font"><option value="serif" ${displaySettings.font==='serif'?'selected':''}>Book serif</option><option value="plain" ${displaySettings.font==='plain'?'selected':''}>Plain &amp; clear</option></select><p class="reading-preview">The lantern burns beside an open book. Your next chapter is still unwritten.</p><label class="reading-shortcuts"><input id="single-key-shortcuts" type="checkbox"${displaySettings.singleKeyShortcuts?' checked':''}> Single-key navigation and numbered scene choices</label><p class="small-copy">Turn this off if these keys conflict with assistive reading controls. Tab, Enter, Space and Escape remain available.</p><label class="reading-shortcuts"><input id="reading-numbers" type="checkbox"${displaySettings.showNumbers?' checked':''}> Show the numbers behind each choice</label><label class="reading-shortcuts"><input id="reading-motion" type="checkbox"${displaySettings.reducedMotion?' checked':''}> Reduce movement</label>${button('Reset text size &amp; font','reading-reset','','ghost small')}</section>`;}
-function archiveDoorReview(){const fromBackup=importFromBackup;return `<div class="eyebrow">A LIFE FOR THE ARCHIVE</div><h2>${e(pendingImport.hero.name)} belongs in the archive</h2><p>${fromBackup?'The previous life in this slot':'Incoming'}: <strong>${e(pendingImport.hero.name)}</strong> · Age ${pendingImport.age}${isIronman(pendingImport)?' · Ironman':''}.</p><div class="import-rules">${rulesMarkup(pendingImport,{compact:true})}</div><p data-archive-door>${e(fromBackup?OLD_RULES_BACKUP_DOOR:OLD_RULES_DOOR)}</p><div class="modal-buttons">${fromBackup?button('Export for the archive','export-pending','','primary'):''}${archiveLink(fromBackup?'secondary':'primary')}${button('Close','close-modal','','ghost')}</div>`;}
+function archiveDoorReview(){const fromBackup=importFromBackup;return `<div class="eyebrow">A LIFE FOR THE ARCHIVE</div><h2>${e(pendingImport.hero.name)} belongs in the archive</h2><p>${fromBackup?'The previous life in this slot':'Incoming'}: <strong>${e(pendingImport.hero.name)}</strong> · Age ${keptAge(pendingImport)}${isIronman(pendingImport)?' · Ironman':''}.</p><div class="import-rules">${rulesMarkup(pendingImport,{compact:true})}</div><p data-archive-door>${e(fromBackup?OLD_RULES_BACKUP_DOOR:OLD_RULES_DOOR)}</p><div class="modal-buttons">${fromBackup?button('Export for the archive','export-pending','','primary'):''}${archiveLink(fromBackup?'secondary':'primary')}${button('Close','close-modal','','ghost')}</div>`;}
 function importReview(){if(refusedHere(pendingImport))return archiveDoorReview();if(isIronman(pendingImport))return `<span class="eyebrow">REVIEW IRONMAN IMPORT</span><h2>${e(pendingImport.hero.name)}</h2><div class="import-rules">${rulesMarkup(pendingImport)}</div><p>Existing run authority and casualty history take precedence over this file. An unknown run requires a freshly reviewed raw-empty slot; other lives and backups are preserved.</p>${entryNotice?`<p role="status">${e(entryNotice)}</p>`:''}<div class="import-slots">${saveStore.list().map(slot=>`<label><input type="radio" name="import-slot" value="${slot.id}" ${importSlot===slot.id?'checked':''}><span>Slot ${slot.id+1} · ${slot.state?e(slot.state.hero.name):slot.kept?e(slot.kept.hero.name):'Empty'}</span></label>`).join('')}</div>${button('Import into reviewed empty slot','confirm-import','','primary',!importToken)}${button('Review existing saved run','ironman-known-resume',runIdOf(pendingImport),'secondary')}${button('Review retained run','ironman-review-recovery',runIdOf(pendingImport),'secondary')}${button('Cancel import','close-modal','','ghost')}`;const old=occupantOf(importSlot);return `<div class="eyebrow">REVIEW AN IMPORTED LIFE</div><h2>Choose where this life belongs</h2><p>Incoming: <strong>${e(pendingImport.hero.name)}</strong> · Age ${pendingImport.age} · ${e(pendingImport.seed)}.</p><div class="import-rules">${rulesMarkup(pendingImport)}</div><div class="import-slots">${saveStore.list().map(slot=>`<label><input type="radio" name="import-slot" value="${slot.id}" ${importSlot===slot.id?'checked':''}><span>Slot ${slot.id+1} · ${slot.state?e(slot.state.hero.name)+' · Age '+slot.state.age:slot.kept?e(slot.kept.hero.name)+' · kept as it was written':'Empty'}</span></label>`).join('')}</div>${old?`<p class="notice">Replacing ${e(old.hero.name)}. A recoverable copy will be retained for this slot; export it for an independent backup.</p>${button('Export the existing life','export-slot',importSlot,'secondary')}`:'<p>This slot is empty.</p>'}<div class="modal-buttons">${button(old?'Replace this reviewed slot':'Import into the empty slot','confirm-import','','primary')}${button('Cancel import','close-modal','','ghost')}</div>`;}
 
 function saveConflictDialog() {
@@ -42114,11 +42190,11 @@ function saveConflictDialog() {
 }
 
 function recoveryDialog() {
-  const snapshot=saveStore.read(activeSlot),backup=saveStore.backup(activeSlot);
+  const snapshot=saveStore.read(activeSlot),backup=saveStore.backup(activeSlot)||keptOldBackup(activeSlot);
   return `<div class="eyebrow">KEEP YOUR STORY</div><h2>That action could not be completed.</h2><p>${game?'The action was not applied. Your last valid position is still active.':'The new position was not opened. Your existing saved lives are still available.'}</p><p>${game?.battle?game.battle.outcome?'The completed encounter returned a result that could not be used. You can reload or export its protected record.':'The encounter returned a result that could not be used. You can keep this combat position and choose another move, or reload the protected position.':'You can return to the position you were using or review a protected save.'}</p>${!storageAvailable?'<p class="notice warning">Browser storage is unavailable. The protected position is held for this session; export a copy before closing the page.</p>':''}<div class="modal-buttons">${button(game?'Keep this position':'Return','close-modal','','primary')}${snapshot?button('Reload protected position','recover-current','','secondary')+button('Export protected save','export-slot',activeSlot,'secondary'):''}${backup?button('Review previous slot life','restore-backup',activeSlot,'ghost'):''}${!game?button('Open saved lives','title-load','','ghost'):''}</div>`;
 }
 function menuDrawer() {
-  return `<div class="drawer-heading"><div><span class="eyebrow">HEARTH &amp; OATH / VOLUME I</span><h2 id="drawer-title">Your life &amp; world</h2></div></div><nav class="drawer-links" aria-label="All game views">${groupedNavigation()}</nav>${button('Sound &amp; display','game-settings','','secondary small')}<div class="drawer-section-label">KEEP YOUR STORY</div>${saveHealthMarkup(activeSlot,{live:true})}<div class="drawer-tools">${!isIronman(game)?button('Save in this browser','save','','secondary'):''}${button('Export life','export','','secondary')}${isIronman(game)?button('Archive or delete Ironman position','ironman-review',runIdOf(game),'secondary'):''}${button('Import save','import','','secondary')}${saveStore.backup(activeSlot)?button('Recover previous slot life','restore-backup',activeSlot,'secondary'):''}${button('How to play','help','','secondary')}${button('Tactics rehearsal','practice-open','protect_ally','secondary')}${button('New life','new','','ghost')}${button('Main menu','title-menu','','ghost')}</div>${renderOfflineDownload(offlineDownload.state())}<p class="form-note">${e(saveSafetyHint())}</p>`;
+  return `<div class="drawer-heading"><div><span class="eyebrow">HEARTH &amp; OATH / VOLUME I</span><h2 id="drawer-title">Your life &amp; world</h2></div></div><nav class="drawer-links" aria-label="All game views">${groupedNavigation()}</nav>${button('Sound &amp; display','game-settings','','secondary small')}<div class="drawer-section-label">KEEP YOUR STORY</div>${saveHealthMarkup(activeSlot,{live:true})}<div class="drawer-tools">${!isIronman(game)?button('Save in this browser','save','','secondary'):''}${button('Export life','export','','secondary')}${isIronman(game)?button('Archive or delete Ironman position','ironman-review',runIdOf(game),'secondary'):''}${button('Import save','import','','secondary')}${saveStore.backup(activeSlot)||keptOldBackup(activeSlot)?button('Recover previous slot life','restore-backup',activeSlot,'secondary'):''}${button('How to play','help','','secondary')}${button('Tactics rehearsal','practice-open','protect_ally','secondary')}${button('New life','new','','ghost')}${button('Main menu','title-menu','','ghost')}</div>${renderOfflineDownload(offlineDownload.state())}<p class="form-note">${e(saveSafetyHint())}</p>`;
 }
 function modalMarkup() {
   if(modal==='routine-review'&&routineReviewState){const q=routineReviewState.review;return `<div class="modal-overlay"><section class="modal routine-review-dialog" role="dialog" aria-modal="true" aria-labelledby="routine-review-title"><h2 id="routine-review-title">Review ${e(q.label)}</h2><p>${q.cycles} sessions · up to ${q.days} actual days · ${q.directFee} Gold in direct fees if every session is attended. Household living costs continue separately. Each session rechecks the current offer and affordability.</p><p>The routine stops for any decision, birthday, changed health, location or unfinished commitment. It never answers for you. Partial attendance and any fee already paid remain recorded.</p><div class="modal-buttons">${button('Keep planning','close-modal','','primary')}${button('Begin this routine','routine-confirm','','secondary')}</div></section></div>`;}
@@ -42126,7 +42202,7 @@ function modalMarkup() {
   if(modal==='herbal-care')return renderHerbalCareReview(game,herbalCareReview?.quote,uiHelpers());
   if(modal==='personal-note')return renderPersonalNoteReview(pendingPersonalNote,uiHelpers());
   if(!modal)return '';
-  if(modal==='ironman-review'||modal==='ironman-recoveries'){const body=modal==='ironman-review'?ironmanReviewDialog():`<h2>Retained Ironman positions</h2><p>Review and reattach an archive before playing or exporting it.</p>${(ironmanRecoveries||[]).map(row=>`<section class="panel"><h3>${e(row.name)}</h3><p>Age ${row.age} · Day ${row.day}</p>${button('Review position','ironman-review',row.runId,'secondary')}</section>`).join('')||'<p>No retained positions are available.</p>'}`;return `<div class="modal-overlay"><section class="modal" role="dialog" aria-modal="true" aria-label="Ironman review"><button class="modal-close button ghost" type="button" data-op="close-modal" aria-label="Close review">×</button>${body}</section></div>`;}
+  if(modal==='ironman-review'||modal==='ironman-recoveries'){const body=modal==='ironman-review'?ironmanReviewDialog():`<h2>Retained Ironman positions</h2><p>Review and reattach an archive before playing or exporting it.</p>${(ironmanRecoveries||[]).map(row=>`<section class="panel" ${row.kept?'data-kept-run':''}><h3>${e(row.name)}</h3><p>${row.age!=null?'Age '+row.age:''}${row.day!=null?' · Day '+row.day:''}${row.kept?' · Kept, not played here':''}</p>${button(row.kept?'Review export or deletion':'Review position','ironman-review',row.runId,'secondary')}</section>`).join('')||'<p>No retained positions are available.</p>'}`;return `<div class="modal-overlay"><section class="modal" role="dialog" aria-modal="true" aria-label="Ironman review"><button class="modal-close button ghost" type="button" data-op="close-modal" aria-label="Close review">×</button>${body}</section></div>`;}
   if(modal==='practice')return practiceDialog();
   if(modal==='inbox'&&game)return `<div class="modal-overlay inbox-overlay"><section class="modal inbox-drawer" id="notification-inbox" role="dialog" aria-modal="true" aria-labelledby="inbox-title"><button class="modal-close button ghost" type="button" data-op="close-modal" aria-label="Close Inbox">×</button>${renderInbox(game,uiHelpers(),{selectedId:selectedNotice,soundEnabled:getAudioSettings().enabled,page:inboxPage})}</section></div>`;
   if(modal==='delete-life'&&pendingDeletion)return `<div class="modal-overlay"><section class="modal delete-life-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-life-title"><button class="modal-close button ghost" type="button" data-op="close-modal" aria-label="Keep this life">×</button><span class="eyebrow">A SAVED LIFE</span><h2 id="delete-life-title">Delete ${e(pendingDeletion.name)}?</h2><p>This removes this character and their world from this browser.${pendingDeletion.backupName?' The recovery backup in this slot will be removed too.':''} Export a copy first if you want to keep it.</p><div class="modal-buttons">${button('Keep This Life','close-modal','','primary')}${button('Export This Life','export-slot',pendingDeletion.id,'secondary')}${button('Delete This Life','confirm-delete-life','','danger')}</div></section></div>`;
@@ -42382,9 +42458,8 @@ function toast(message) {
   t.textContent=message; t.hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>{t.hidden=true;},3200);
 }
 function exportSave() { exportState(screen==='creation'&&creatorDraft.lifeMode==='standard'&&creationCandidate?.state?creationCandidate.state:game); }
-function exportState(state,{slot=null}={}) {
+function exportState(state) {
   if(isIronman(state)){
-    if(state!==game&&refusedHere(state)&&slot!==null)return exportKeptIronman(state,slot);
     if(state!==game){toast('Resume this Ironman position before exporting. Retained archives must first be reattached.');return;}
     if(ironmanFenced())return;
     return ironmanSession.protect(head=>downloadState(head));
@@ -42396,7 +42471,7 @@ function exportState(state,{slot=null}={}) {
 async function exportKeptIronman(state,slot){
   if(ironmanFenced())return;
   const owner=viewOwner();
-  const result=await saveStore.inspectIronman(runIdOf(state),{intent:'export',slot,consume:head=>{downloadState(head);return true;}});
+  const result=await saveStore.inspectIronman(typeof state==='string'?state:runIdOf(state),{intent:'export',slot,consume:head=>{downloadState(head);return true;}});
   if(!ownsView(owner))return;
   if(result?.value!==true)toast('This run could not be read for export just now. Nothing was changed; try again.');
 }
@@ -42704,7 +42779,7 @@ root.addEventListener('click',async event=>{
     }
     return refreshSavedLives(()=>{if(Number.isInteger(slot)&&slot>=0&&slot<3&&saveStore.read(slot))return loadSlot(slot);screen='slots';slotsMode='load';entryNotice='That life is no longer in its slot. Choose a saved life below.';render();focusRoute('#slot-heading');});
   }
-  if(op==='slot-delete'){const life=occupantOf(id);if(!life)return;if(isIronman(life)){await reviewIronmanLifecycle(runIdOf(life));return;}pendingDeletion={id:Number(id),token:saveStore.deletionToken(id),name:life.hero.name,backupName:saveStore.backup(id)?.hero.name};openModal('delete-life',target);return;}
+  if(op==='slot-delete'){const life=occupantOf(id);if(!life)return;if(isIronman(life)){await reviewIronmanLifecycle(runIdOf(life));return;}pendingDeletion={id:Number(id),token:saveStore.deletionToken(id),name:life.hero.name,backupName:(saveStore.backup(id)||saveStore.keptBackup(id))?.hero.name};openModal('delete-life',target);return;}
   if(op==='confirm-delete-life'){
     if(!pendingDeletion)return;
     const choice=pendingDeletion;
@@ -42718,10 +42793,10 @@ root.addEventListener('click',async event=>{
   if(op==='slot-load'){return refreshSavedLives(()=>loadSlot(id));}
   if(op==='slot-new'){if(isIronman(saveStore.read(Number(id)))){toast('Archive or delete this Ironman position before using its slot.');return;}if(occupantOf(id)){overwriteSlot=Number(id);openModal('overwrite',target);}else beginCreator(id);return;}
   if(op==='confirm-overwrite'){beginCreator(overwriteSlot);return;}
-  if(op==='export-slot'){const state=saveStore.read(Number(id));if(!state&&saveStore.kept(id)){downloadState(saveStore.kept(id));return;}exportState(state,{slot:Number(id)});return;}
-  if(op==='export-kept'){const kept=saveStore.kept(id);if(kept)downloadState(kept);return;}
+  if(op==='export-slot'){const state=saveStore.read(Number(id)),kept=state?null:saveStore.kept(id);if(kept){if(isIronman(kept))await exportKeptIronman(kept,Number(id));else downloadState(kept);return;}exportState(state);return;}
+  if(op==='export-kept'){const kept=saveStore.kept(id);if(kept){if(isIronman(kept))await exportKeptIronman(kept,Number(id));else downloadState(kept);}return;}
   if(op==='export-pending'){if(pendingImport&&importFromBackup&&refusedHere(pendingImport))downloadState(pendingImport);return;}
-  if(op==='export-session'){exportState(Number(id)===activeSlot&&game?game:saveStore.read(Number(id)),{slot:Number(id)});return;}
+  if(op==='export-session'){exportState(Number(id)===activeSlot&&game?game:saveStore.read(Number(id)));return;}
   if(op==='attributes-training'){modal=null;focusReturn=null;workspaceSections.character='training';navigate('character');focusRoute('#main-content h2');return;}
   if(op==='creator-slots'){captureCreation();openModal('creator-slots',target);return;}
   if(op==='creator-use-slot'){if(modal!=='creator-slots'||occupantOf(id))return;activeSlot=Number(id);saveStore.select(activeSlot);saved=null;creationSlotToken=saveStore.reviewToken(activeSlot);creatorError='';closeModal();focusRoute('#creator-heading-2');return;}
@@ -42913,7 +42988,7 @@ root.addEventListener('click',async event=>{
   }
   if(op==='hex-select'){inspectSpatialTarget('hex',id);return;}
   if(op==='spatial-move'){const split=id.indexOf(':'),kind=id.slice(0,split);if(split<0||!['hex','room','dungeon','rpg'].includes(kind))return;moveSpatialTarget(kind,id.slice(split+1));return;}
-  if(op==='restore-backup'){pendingImport=saveStore.backup(Number(id));importFromBackup=Boolean(pendingImport);if(pendingImport){importSlot=Number(id);importToken=isIronman(pendingImport)?null:saveStore.reviewToken(importSlot);openModal('import-review',target);if(isIronman(pendingImport))await inspectIronmanImport();}return;}
+  if(op==='restore-backup'){pendingImport=saveStore.backup(Number(id))||keptOldBackup(Number(id));importFromBackup=Boolean(pendingImport);if(pendingImport){importSlot=Number(id);importToken=isIronman(pendingImport)?null:saveStore.reviewToken(importSlot);openModal('import-review',target);if(isIronman(pendingImport))await inspectIronmanImport();}return;}
   if(op==='map-select'){if(!game.cartography?.sites[id])return;spatialMode='country';spatialPane='actions';tab='map';selectedHex=null;selectedLocation=id;render();focusControl(op,id);rememberWorkspace();return;}
   if(op==='night-location'){const r=nightDiscoveryView(game).invitations.find(r=>r.id===id);if(r){spatialMode='country';spatialPane='map';selectedHex=r.hex;selectedLocation=r.locationId;tab='map';render();window.scrollTo({top:0,behavior:'instant'});}return;}
   if(op==='quest-location'){spatialMode='country';selectedHex=null;selectedLocation=id;tab='map';render();window.scrollTo({top:0,behavior:'instant'});focusRoute('#spatial-selection-title,#main-content h1,#main-content h2,.workspace-body');return;}
@@ -43018,7 +43093,7 @@ root.addEventListener('change',async event=>{
   const input=event.target,file=input.files[0],request=++importReadRun,origin=practiceContext(),originEpoch=ironmanSession.status().epoch,owner=viewOwner();
   const stillCurrent=()=>{const current=practiceContext();return ownsView(owner)&&originEpoch===ironmanSession.status().epoch&&!ironmanFenced()&&request===importReadRun&&input.isConnected!==false&&input.files?.[0]===file&&!practiceController.current()&&!practiceController.pending()&&Object.keys(origin).every(key=>origin[key]===current[key]);};
   if(file.size>MAX_SAVE_FILE_BYTES){toast('That file is too large for a saved life.');focusReturn=importOpener?.dataset;importOpener=null;restoreModalFocus();return;}
-  try {const text=await file.text();if(!stillCurrent())return;const state=migrateSave(JSON.parse(text));if(!state)throw new Error('Invalid');if(!stillCurrent())return;pendingImport=state;importFromBackup=false;importSlot=saveStore.empty()??activeSlot;importToken=isIronman(state)?null:saveStore.reviewToken(importSlot);openModal('import-review',importOpener);importOpener=null;if(isIronman(state)&&!refusedHere(state))await inspectIronmanImport();}
+  try {const text=await file.text();if(!stillCurrent())return;const parsed=JSON.parse(text),state=readStoredLife(parsed)??(oldRules(parsed)&&keepable(parsed)?parsed:null);if(!state)throw new Error('Invalid');if(!stillCurrent())return;pendingImport=state;importFromBackup=false;importSlot=saveStore.empty()??activeSlot;importToken=isIronman(state)?null:saveStore.reviewToken(importSlot);openModal('import-review',importOpener);importOpener=null;if(isIronman(state)&&!refusedHere(state))await inspectIronmanImport();}
   catch {if(stillCurrent()){toast('This is not a compatible Hearth & Oath save. Your current life is safe.');focusReturn=importOpener?.dataset;importOpener=null;restoreModalFocus();}}
 });
 

@@ -5,6 +5,27 @@ rulebook and Design Bible Volume II. This ledger keeps that handoff visible.
 
 ## Current release
 
+v0.72.0, One rulebook, is merged in
+[PR #19](https://github.com/mandyp1411-coder/hearth-and-oath/pull/19) as
+`69873b1670efa0446c075d81a13dd9a832c72065` from head
+`deb3dbfa57761be39318dc694970335b47658227`. The owner took the cutover on
+25 October 2026, before the farmer playtest. Main admits the new rules only;
+old-rules lives meet their door and play on in the public archive. Fast lane
+251 files: 3,246 passed, 12 failed in one file (opted in at `28567d3`, 12 of
+12), 3 skipped; slow lane 36 files: 741 passed, 0 failed, 1 skipped; release
+and archive builds pass; browser 24 of 24. The
+[record](../docs/measures/one-rulebook-v072-verification.md) keeps the rest.
+It is not deployed: the Sites host is outside this session, so the live game
+stays on Sites 106 until main is published there. The human farmer gate
+remains NOT RUN.
+
+v0.72.1, The old lives are kept as written, follows on branch
+`v0.72.1-kept-ironman`: the store never decodes an old-rules life, and old
+Ironman runs have their own kept path.
+
+## Earlier release
+
+
 v0.71.2, The old lives have a home, is published as main Sites version 106
 and archive version 1 in [PR #18](https://github.com/mandyp1411-coder/hearth-and-oath/pull/18),
 merged as `d1e218259b81e09fb33a2cb65913106a727e2996` from head

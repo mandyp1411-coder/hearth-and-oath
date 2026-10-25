@@ -99,7 +99,7 @@ test('with only old lives, the title shows the kept life, its export and the way
   assert.match(card.textContent, /archive keeps them now/);
   assert.equal(card.querySelector('[data-archive-link]').getAttribute?.('href') ?? card.querySelector('[data-archive-link]').href, ARCHIVE_URL);
   assert.ok(ui.root.querySelector('[data-op="title-new"]'), 'a new life can still begin');
-  await ui.fire('click', card.querySelector('[data-op="export-session"]'));
+  await ui.fire('click', card.querySelector('[data-op="export-kept"]'));
   assert.equal(files.blobs.length, 1);
   sameLife(JSON.parse(await files.blobs[0].text()), states[2], 'the whole life, as kept');
   assert.match(files.anchors[0].download, /-old-rules\.json$/);
@@ -123,7 +123,7 @@ test('an old slot is kept, not loaded; its export and delete review remain', asy
   await ui.fire('click', load); await flush();
   assert.equal(playing(ui), false);
   assert.ok(durable(ui).every((text, i) => text === before[i]), 'the durable saves are unchanged');
-  for (const control of [old.querySelector('[data-archive-note] [data-op="export-session"]'), old.querySelector('.slot-export')]) {
+  for (const control of [old.querySelector('[data-archive-note] [data-op="export-kept"]'), old.querySelector('.slot-export')]) {
     await ui.fire('click', control);
     sameLife(JSON.parse(await files.blobs.at(-1).text()), states[0], 'the old slot’s export');
     assert.match(files.anchors.at(-1).download, /-old-rules\.json$/);
@@ -175,7 +175,7 @@ test('a kept Ironman run is exported from its head without being opened', async 
   assert.equal(kept.querySelector('[data-op="slot-load"]').disabled, true);
   assert.equal([...kept.querySelectorAll('[data-op="slot-load"]')].length, 1, 'no “Resume to export”');
   assert.ok(kept.querySelector('[data-archive-note][data-refused-life]'));
-  await ui.fire('click', kept.querySelector('.slot-row-actions [data-op="export-session"]')); await flush();
+  await ui.fire('click', kept.querySelector('.slot-row-actions [data-op="export-kept"]')); await flush();
   assert.equal(files.blobs.length, 1, 'the head is exported');
   const exported = JSON.parse(await files.blobs[0].text());
   sameLife(exported, JSON.parse(head).state, 'the authoritative head, whole');

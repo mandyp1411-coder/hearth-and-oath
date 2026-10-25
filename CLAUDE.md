@@ -318,20 +318,36 @@ v0.61 life has no station and still takes station-gated legacy paths, and
 that new-rules lives begun before v0.67/v0.68 can hold an older maze or
 battle in progress: neither is old-rules classification.
 
-An old-rules life meets its door and opens nothing: the title continues the
-newest admitted life or shows the kept one, its slot is Kept for the archive,
-an old file meets `OLD_RULES_DOOR`, and a kept Ironman run exports its head
-through the store's `export` inspection without adoption. The store keeps a
-stored life it cannot decode (`slot.kept`, `backups[id].kept`,
-`store.kept(id)`): written back byte for byte, never empty, never
+An old-rules life meets its door and opens nothing. From v0.72.1 the app's
+store decoder is `storedLifeDecoder(rulebooks, migrateSave)`: it reads a
+stored life only when its own raw markers say new rules, so an old life is
+never decoded or migrated here. The store keeps a stored life it cannot
+decode (`slot.kept`, `backups[id].kept`, `store.kept(id)`, and a mirror-only
+life as slot 0's kept life): written back byte for byte, never empty, never
 overwritten by a live write, replaced or deleted only by review. In app code
 ask `occupantOf(id)` rather than `saveStore.read(id)` when the question is
-whether a slot is free. Old Ironman records still need their own kept path
-before the decoder may refuse old rules (the first step of v0.72.1).
+whether a slot is free. The title continues the newest decoded life or shows
+the kept one; a kept slot says Kept for the archive; an old file is read raw
+and meets `OLD_RULES_DOOR`; an old backup kept undecoded meets
+`OLD_RULES_BACKUP_DOOR` with its export (`keptOldBackup`).
+
+An Ironman record whose life the decoder refuses is a kept run
+(`found.kept` in saves.js `discover`; only a whole, well-formed record whose
+life is refused is kept, one that decodes to something else is still
+unreadable). It holds its slot (`displaySlots` row with `kept` and
+`ironman: true`; `protectedTarget`, `emptyTarget`), and the only inspection
+it answers is `export` (`keptInspection`): every other intent, commit and
+reattachment returns `kept-position`. Its review (`keptRunDialog`) exports
+it, releases the slot (`archiveIronman`, which re-persists the same life
+with no attachment) or deletes it; a released kept run is listed by
+`listRecoverableIronman` with `kept: true`. Export a kept run through
+`exportKeptIronman`, never by downloading `store.kept(id)` directly.
 
 UI tests whose scenarios still play on old-rules saves mount the app with the
 pre-v0.72 policy: `mountApp(t, {rulebooks: 'both'})`, which imports the module
-as `app.js?rulebooks=both` (`harnessRulebooks`; no page can reach it). Each
+as `app.js?rulebooks=both` (`harnessRulebooks`; no page can reach it, and the
+offline builder gives the bundled app a fixed address); under it the store
+decodes both rulebooks as before. Each
 such file says so in its first lines; that list is the old-rules UI coverage
 v0.72.1+ rebases onto new-rules lives or moves to the archive. Tests about
 the live game use the default. Whole-life comparisons in tests should compare

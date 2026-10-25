@@ -1,5 +1,26 @@
 # Hearth & Oath
 
+Version 0.72.1 is The old lives are kept as written. The main game no longer
+reads an old-rules life at all: it tells one by its own stored markers and
+keeps it exactly as it was written, so none of the old rules' code runs on it
+here and it leaves for the archive byte for byte.
+
+- **Old Ironman runs are kept too.** A run this build will not read no longer
+  stops every Ironman run from loading. It holds its slot, exports its head
+  whole for the archive, and is never opened, reattached or written over.
+  Its review can release the slot (the run stays here, whole, among the
+  retained positions, still exportable) or delete it.
+- **Nothing old is lost on the way.** A life known only from the oldest
+  single-save mirror is kept in the first slot and written into it by the
+  next save. An old previous life kept as a slot's backup is named in the
+  delete review and meets its door with its export. An old file meets the
+  door without being decoded.
+- **What leaves.** The slot paths for an opened old life, which no build
+  reaches now, and an unused save reader. The old rules' engine code goes
+  next, subsystem by subsystem. Save defaults are unchanged: migration step 71.
+
+Verification is in [the v0.72.1 record](docs/measures/one-rulebook-v0721-verification.md).
+
 Version 0.72.0 is One rulebook: the main game plays the new rules only.
 Lives written under the old rules have their home in the
 [Old Rules archive](https://hearth-and-oath-old-rules.nilled463.chatgpt.site/),
