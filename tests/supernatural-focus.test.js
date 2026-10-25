@@ -74,9 +74,7 @@ test('repeated calls, views and moving sites in an already checked week cannot r
 test('sheltered gaps do not backfill weeks and older cursors retain their previously checked week',()=>{
  const s=fresh(),old=s.day;s.nightEncounters={lastWeek:Math.floor((old+1)/7),pending:null,day:old};s.day++;queueRareNightEncounter(s,old,{outdoors:true,night:true});assert.equal(s.nightEncounters.checkedWeeks,0);const next=s.day+35;s.day=next;queueRareNightEncounter(s,next-1,{outdoors:true,night:true});assert.equal(s.nightEncounters.checkedWeeks,1);assert.equal(s.nightEncounters.eligibleDays,2);assert.ok(validateNightEncounters(s.nightEncounters,s));
 });
-test('eligible dungeon time uses the same weekly policy without requiring night travel',()=>{
- const s=fresh(),old=s.day;s.dungeon={id:'timing-fixture'};s.day+=21;queueRareNightEncounter(s,old,{outdoors:false,night:false});assert.equal(s.nightEncounters.eligibleDays,21);assert.ok(s.nightEncounters.checkedWeeks>=3);
-});
+// The room engine's dungeon days left in v0.72.4; a rare encounter keeps to the night road.
 for(const kind of ['patron','ranger'])test(`an actual rare ${kind} encounter can be deferred with its person and place, without conversion or quest acceptance`,()=>{
  const original=structuredClone(kind==='patron'?patronMeeting:rangerMeeting),counts=[original.life.people.length,original.society.people.length],quest=structuredClone(original.questLog),s=deferred(kind),r=s.nightEncounters.invitations[0];assert.ok(original.event.body.includes(r.personName));assert.equal(r.locationId,original.nightEncounters.meeting.locationId);assert.equal(r.hex,original.nightEncounters.meeting.hex);assert.equal(s.event,null);assert.deepEqual(s.questLog,quest);assert.deepEqual([s.life.people.length,s.society.people.length],counts);assert.equal(s.hero.condition,null);assert.equal(s.day,original.day);assert.equal(s.hero.gold,original.hero.gold);assert.match(s.notice,/Journal/);assert.ok(!E.getActions(s).some(a=>['vampire_invitation','lycan_invitation'].includes(a.id)));roundtrip(s);
 });

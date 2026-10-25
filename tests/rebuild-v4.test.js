@@ -1,4 +1,5 @@
 import { assertMigrationMechanics, assertEventMechanics, assertCapturedMigration } from './helpers/migration-mechanics.mjs';
+import { heldOlderWalk, assertOlderWalkClosed } from './helpers/one-rulebook.mjs';
 import { atService } from './helpers/service-visit.mjs';
 import { knownCurseMeeting } from './helpers/known-curse-meeting.mjs';
 import test from 'node:test';
@@ -146,10 +147,14 @@ test('authentic family-less v0.3 lives migrate additively with no rewritten hist
     assert.equal(original.revision, 3);
     assert.equal(Object.hasOwn(original, 'family'), false, 'the fixture must remain a genuine pre-family save');
     assert.equal(Object.hasOwn(original, 'education'), false);
-    assert.equal(engine.validateSave(original), true, `${id} remains importable`);
+    // The midbattle capture was saved inside the older room engine, which left in v0.72.4: it is read with
+    // that walk and its fight ended where they stood (tests/older-walks-v0724.test.js).
+    const walking = heldOlderWalk(original);
+    assert.equal(engine.validateSave(original), !walking, `${id} validates as it stands`);
     const migrated = transition(original, value => engine.migrateSave(value));
     assert.equal(migrated.version, 1);
     assert.equal(migrated.revision, 5);
+    if (walking) { assertOlderWalkClosed(assert, original, migrated); saveable(migrated); assert.deepEqual(engine.migrateSave(migrated), migrated); continue; }
     assertCapturedMigration(original,migrated);
     if(original.age>=3)assertEventMechanics(original.event,migrated.event);
     assert.deepEqual(migrated.battle, original.battle, 'an imported midbattle snapshot stays byte-for-byte identical');
@@ -160,7 +165,7 @@ test('authentic family-less v0.3 lives migrate additively with no rewritten hist
   }
 });
 
-test('v0.3 campaign, conversation, and combat continue with their captured pre-expansion effects', () => {
+test('v0.3 campaign and conversation continue with their captured pre-expansion effects', () => {
   const campaign = engine.migrateSave(legacy.states.campaign);
   const choice = legacy.expectations.campaignChoice;
   const nextCampaign = choose(campaign, choice.id);
@@ -175,16 +180,7 @@ test('v0.3 campaign, conversation, and combat continue with their captured pre-e
   preserved(expectedReply.people,nextReply.life.people,'people');
   assert.equal(nextReply.conversations.pending,null);assert.equal(nextReply.day,resources.day);assert.equal(nextReply.hero.gold,resources.gold);assert.deepEqual(nextReply.hero.skills,resources.skills);saveable(nextReply);
 
-  const combat = engine.migrateSave(legacy.states.midbattle);
-  const turn = legacy.expectations.battleTurn;
-  assert.deepEqual(takeBattleAction(combat.battle, turn.action, turn.target), turn.battle);
-  const retreated = takeBattleAction(combat.battle, 'retreat');
-  const resolved = transition(combat, value => engine.resolveBattle(value, retreated));
-  assert.equal(resolved.battle, null);
-  assert.equal(resolved.hero.gold, combat.hero.gold);
-  assert.equal(resolved.dungeon.cleared.includes('sluice'), false);
-  assert.equal(resolved.campaign.completed.includes('well'), false);
-  saveable(resolved);
+  // The v0.3 fight was in the older room engine; it ends where it stood when read (v0.72.4).
 });
 
 test('parented, orphan, and homeless lives retain actual caregivers and free learning access', () => {

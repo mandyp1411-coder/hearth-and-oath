@@ -37,10 +37,7 @@ test('unmet companions are discovered in the world rather than listed in party m
  const s=fresh(),ui=await resume(t,s,'party');for(const p of s.companions.filter(p=>!p.recruited)){assert.equal(control(ui,'recruit',p.id),null);assert.equal(control(ui,'show-contact',p.id),null);}assert.equal(JSON.stringify(ui.current()),JSON.stringify(s));
 });
 
-test('a resumable descent keeps its real continue and withdrawal routes on Life after the section split',async t=>{
- let s=E.chooseAction(atService(fresh(),'realm_ration'),'realm_ration');delete s.mazeBook;delete s.maze;delete s.delves;s=E.chooseAction(s,'adventure_descend');assert.ok(s.adventuring.expedition);assert.ok(s.event);s.event=null; // Controlled older resumable-descent fixture, accepted by the actual save validator.
- assert.ok(E.validateSave(s));const ui=await resume(t,s,'life'),before=ui.current();assert.ok(control(ui,'activity','adventure_continue'));assert.ok(control(ui,'activity','adventure_withdraw'));assert.equal(JSON.stringify(ui.current()),JSON.stringify(before));const expected=E.chooseAction(before,'adventure_continue');await ui.click('activity','adventure_continue');assert.equal(JSON.stringify(ui.current()),JSON.stringify(expected));assert.ok(ui.current().event);
-});
+// The older expedition engines and their pages left in v0.72.4 (tests/older-walks-v0724.test.js); their tests went with them.
 test('earlier exchange records preserve unknown meeting dates rather than inventing a visit',()=>{const s=fresh();delete s.conversations.meetings;const before=JSON.stringify(s),rows=rememberedContacts(s);assert.ok(rows.length);assert.ok(JSON.stringify(s)===before);assert.equal(s.conversations.meetings,undefined);});
 test('new meeting records reject future clocks or unknown places on import',()=>{
  const s=fresh(),person=getContacts(s)[0];for(const bad of ['clock','place']){const copy=structuredClone(s);copy.conversations.meetings={[person.id]:{locationId:bad==='place'?'missing':s.locationId,firstDay:s.day,lastDay:bad==='clock'?s.day+1:s.day}};assert.equal(E.validateSave(copy),false);}assert.ok(E.validateSave(s));

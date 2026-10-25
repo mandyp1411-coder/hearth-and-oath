@@ -10,7 +10,6 @@ import { createBattle,takeBattleAction,getBattleActions,combatTraining } from '.
 import { createSaveStore } from '../dist/js/saves.js';
 import { readDisplay,saveDisplay } from '../dist/js/display.js';
 import { loreView } from '../dist/js/lore.js';
-import { dungeonView,enterDungeon } from '../dist/js/exploration.js';
 import { audioSceneFor } from '../dist/js/audio.js';
 import { regionAt } from '../dist/js/realm.js';
 import {settlementWalkPath} from '../dist/js/exploration-ui.js';
@@ -101,18 +100,7 @@ test('urgent hunger cannot open a timed grievance or spend its yearly opportunit
   s=E.chooseEventOption(s,'pause');const before=structuredClone(s),offer=E.getActions(s).find(a=>a.id==='nature_reckoning');assert.match(offer.disabledReason,/feeding/);
   const blocked=E.chooseAction(s,'nature_reckoning');assert.deepEqual({...blocked,notice:''},{...before,notice:''});assert.equal(blocked.hero.personality.reflection,null);assert.ok(E.validateSave(blocked));
 });
-test('dungeon views and passage labels keep unvisited room names hidden',()=>{
-  const s=fresh();s.locationId='marsh';const ctx={setEvent:(id,title,category,body,choices)=>{s.event={id,title,category,body,choices};}};s.event=null;
-  assert.equal(enterDungeon(s,'cistern',null,ctx),true);const view=dungeonView(s);
-  assert.ok(view.rooms.some(r=>!r.visited));
-  for(const room of view.rooms.filter(r=>!r.visited)){
-    const original=s.dungeon.definition.rooms.find(r=>r.id===room.id);
-    assert.ok(room.title.startsWith('Unexplored passage'));assert.equal(room.exits.length,0);assert.ok(!room.title.includes(original.title));
-  }
-  const exits=s.event.choices.filter(c=>c.id.startsWith('route_'));
-  for(const exit of exits){const original=s.dungeon.definition.rooms.find(r=>r.id===exit.id.slice(6));assert.ok(exit.label.startsWith('Enter the unexplored passage'));assert.ok(!exit.label.includes(original.title));}
-  assert.equal(new Set(exits.map(c=>c.label)).size,exits.length,'Perceptible clues distinguish adjacent unknown exits');
-});
+// The older expedition engines and their pages left in v0.72.4 (tests/older-walks-v0724.test.js); their tests went with them.
 test('legacy authored coercive replies retain trait stress, while forged replies do nothing',()=>{
   let s=fresh();delete s.characterDialogueVersion;delete s.narrativeEdition; // Explicit retained pre-grounded authored dialogue contract, not a new edition-30 reply.
   s=E.choosePersonalityTrait(s,'compassionate');s=E.choosePersonalityTrait(s,'content');s=command(s,'talk_fellow');
