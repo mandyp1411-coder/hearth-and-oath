@@ -72,9 +72,19 @@ test('reviewing and cancelling an old backup in a new-life slot preserves both g
   const current = ui.current();
   await ui.click('restore-backup', 1);
   const review = ui.root.querySelector('.modal');
-  assert.ok(review?.querySelector('[data-rules="old"]')); assert.ok(review.querySelector('[data-archive-note]'));
+  assert.ok(review?.querySelector('[data-rules="old"]'));
   assert.match(review.textContent, new RegExp(older.birth.hero.name));
-  assert.ok(review.querySelector('[data-op="confirm-import"]'), 'recovery still requires an explicit replacement review');
+  // v0.72: one rulebook. The old backup cannot be brought back into play; it meets the door, which exports it whole.
+  assert.equal(review.querySelector('[data-op="confirm-import"]'), null, 'no replacement into play is offered');
+  assert.ok(review.querySelector('[data-archive-door]')); assert.ok(review.querySelector('[data-archive-link]'));
+  const blobs = [], create = URL.createObjectURL, revoke = URL.revokeObjectURL;
+  URL.createObjectURL = blob => { blobs.push(blob); return 'blob:old-backup'; }; URL.revokeObjectURL = () => {};
+  t.after(() => { URL.createObjectURL = create; URL.revokeObjectURL = revoke; });
+  const anchors = []; ui.document.createElement = () => { const anchor = {click() {}}; anchors.push(anchor); return anchor; };
+  await ui.click('export-pending');
+  assert.equal(blobs.length, 1, 'the old backup is exported');
+  assert.equal(JSON.stringify(JSON.parse(await blobs[0].text())), JSON.stringify(backup[1].state), 'whole, as kept');
+  assert.match(anchors[0].download, /-old-rules\.json$/);
   assert.equal(ui.storage.getItem(KEY), durable); assert.equal(ui.storage.getItem(LEGACY_SAVE_KEY), mirror);
   assert.deepEqual(ui.current(), current);
   await ui.click('close-modal');

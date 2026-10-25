@@ -12,6 +12,9 @@ import { questAccountReview, trackedQuest } from '../dist/js/quest-records.js';
 import { renderSimpleJournal } from '../dist/js/journal-ui-v30.js';
 import { atService } from './helpers/service-visit.mjs';
 import { mountApp } from './helpers/ui-surface.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 
 // Controlled scenarios cloned from one genuine played save. They are not new
 // played lives, journey coverage, or substitutes for release/browser QA.
@@ -200,6 +203,6 @@ test('accepted search tracking, pause and retirement distinguish it from a decli
 });
 
 test('production Journal handler reads and declines this single invitation without starting a search',async t=>{
- const s=fresh(),surface=await mountApp(t,{states:[s]});await surface.click('title-continue');await surface.click('menu','header');await surface.click('tab','journal');assert.ok(surface.root.querySelector('[data-family-origin-invitation]'));const before=structuredClone(surface.current());
+ const s=fresh(),surface=await mountApp(t, {rulebooks:'both', states:[s]});await surface.click('title-continue');await surface.click('menu','header');await surface.click('tab','journal');assert.ok(surface.root.querySelector('[data-family-origin-invitation]'));const before=structuredClone(surface.current());
  await surface.click('activity','origin_decline');assert.equal(surface.current().familyOrigins.run,null);assert.equal(surface.current().familyOrigins.invitation,'declined');assert.equal(surface.current().day,before.day);assert.equal(surface.current().hero.gold,before.hero.gold);roundtrip(surface.current());
 });

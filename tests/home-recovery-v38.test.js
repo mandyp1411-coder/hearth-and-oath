@@ -9,6 +9,9 @@ import {addCampingKit} from '../dist/js/travel-energy.js';
 import {householdCostPreview} from '../dist/js/budget.js';
 import {ownedHomeHere,homeRestReason,applyHomeRest} from '../dist/js/home-recovery-v38.js';
 import {mountApp} from './helpers/ui-surface.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 
 const fixture=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url))));
 const valid=s=>{assert.ok(E.validateSave(s),s.notice);return s;};
@@ -16,7 +19,7 @@ function walk(s,to){const path=settlementWalkPath(s,to);assert.ok(path);for(cons
 let bought=structuredClone(fixture.states.base);bought.hero.gold=1000;bought.locationId='city';bought.cartography.interior=null;syncCartography(bought);bought=walk(bought,'homes');bought=valid(E.chooseAction(bought,'life_home_cottage'));assert.equal(bought.life.home.source,'purchase');assert.equal(bought.life.home.locationId,'city');
 const fresh=()=>{const s=structuredClone(bought);s.hero.mp=1;s.life.stress=20;s.trail.daysWithoutRest=6;s.trail.daysTravelled=Math.max(6,s.trail.daysTravelled);addCampingKit(s,'tent');return valid(s);};
 const stable=s=>({...s,notice:''});
-async function recovery(t,s=fresh()){const ui=await mountApp(t,{states:[s]});await ui.click('title-continue');await ui.click('tab','activities');await ui.click('activities-pane','recovery');return ui;}
+async function recovery(t,s=fresh()){const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');await ui.click('tab','activities');await ui.click('activities-pane','recovery');return ui;}
 
 test('Recovery walks from another city area to the purchased home and rests for one real day',async t=>{
  const s=walk(fresh(),'tavern'),ui=await recovery(t,s),before=ui.current(),go=ui.root.querySelector('[data-op="activity-home"]');assert.ok(go&&!go.disabled);assert.equal(go.querySelector('.interaction-copy strong').textContent,'Go Home and Rest');assert.match(go.textContent,/1 Day · No Fee/);

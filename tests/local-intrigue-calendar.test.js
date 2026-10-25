@@ -5,6 +5,9 @@ import {gunzipSync} from 'node:zlib';
 import * as E from '../dist/js/engine.js';
 import {settlementServices} from '../dist/js/world-services.js';
 import {settlementWalkPath} from '../dist/js/exploration-ui.js';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 // Controlled calendar-boundary fixture, not a claim of a naturally played year.
 // The existing genuine v30 save supplies the full world; only its clock is
 // positioned one day before its next birthday to exercise interruption handling.
@@ -18,7 +21,7 @@ test('cancelling interrupted levy preserves spent time and grants no unfinished 
 import {mountApp} from './helpers/ui-surface.mjs';
 test('production handlers resume the authored levy scene from a saved life without accepting on defer',async t=>{
  let s=boundary();s=E.chooseAction(s,'rpg_intrigue_read');
- const ui=await mountApp(t,{states:[s]});await ui.click('title-continue');
+ const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');
  assert.match(ui.root.innerHTML,/seed jar behind the stove/);
  assert.match(ui.root.innerHTML,/Compare the papers at your own table/);
  const before=ui.current().day;await ui.click('choice','later');
@@ -31,7 +34,7 @@ test('production handlers resume the authored levy scene from a saved life witho
 import {activeJournalQuests} from '../dist/js/journal-ui-v30.js';
 test('guide offers levy, deferral stays outside active Journal, accepted investigation resumes from Journal',async t=>{
  let s=boundary();s.day-=364;const guide=settlementServices(s).find(r=>r.kind==='guide');
- const ui=await mountApp(t,{states:[s]});await ui.click('title-continue');await ui.click('place-open');await ui.click('service-open',guide.id);
+ const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');await ui.click('place-open');await ui.click('service-open',guide.id);
  await ui.click('activity','rpg_intrigue_read');assert.match(ui.root.innerHTML,/seed jar behind the stove/);await ui.click('choice','later');
  assert.equal(ui.current().rpg.intrigue.status,'offered');assert.ok(!activeJournalQuests(ui.current()).some(q=>q.key==='winter_levy'));
  await ui.click('tab','journal');assert.ok(!ui.root.querySelector('[data-op="activity"][data-id="rpg_intrigue_open"]'));
@@ -43,7 +46,7 @@ test('guide offers levy, deferral stays outside active Journal, accepted investi
 test('owned home Scholar work is reachable through production Work & School handlers',async t=>{
  let s=boundary();s.day-=363;s.hero.profession='Scholar';s.life.home={...s.life.home,tier:'cottage',locationId:s.locationId};
  for(const room of settlementWalkPath(s,'homes')||[])s=E.chooseAction(s,'atlas_room_'+room);
- assert.ok(E.validateSave(s));const ui=await mountApp(t,{states:[s]});await ui.click('title-continue');await ui.click('tab','activities');await ui.click('activities-pane','work');
+ assert.ok(E.validateSave(s));const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');await ui.click('tab','activities');await ui.click('activities-pane','work');
  const work=ui.root.querySelector('[data-op="activity"][data-id="career_work"]');assert.ok(work&&!work.disabled,'home employment work button is enabled');
  const before=ui.current().day;await ui.click('activity','career_work');assert.equal(ui.current().day,before+3);assert.equal(ui.current().locationId,s.locationId);assert.equal(ui.current().cartography.interior.roomId,'homes');assert.ok(E.validateSave(ui.current()));
 });

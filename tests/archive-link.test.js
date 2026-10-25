@@ -32,6 +32,7 @@ test('an actual old-rules save has the published archive route on its slot and i
   const durable=ui.storage.getItem(KEY),current=ui.current(),oldBefore=structuredClone(old),rawBefore=structuredClone(oldRaw);
   await ui.click('title-load');
   const row=ui.root.querySelector('[data-op="slot-load"][data-id="1"]').closest('.save-slot-row');
+  assert.equal(row.querySelector('[data-op="slot-load"]').disabled,true,'the old life is kept, not opened');
   const note=row.querySelector('[data-archive-note]');assert.ok(note);
   const exporter=note.querySelector('[data-op="export-session"]');assert.ok(exporter);assert.equal(exporter.dataset.id,'1');
   const downloads=captureDownloads(t,ui);await ui.fire('click',exporter);
@@ -40,7 +41,8 @@ test('an actual old-rules save has the published archive route on its slot and i
   assert.equal(ui.storage.getItem(KEY),durable);assert.deepEqual(ui.current(),current);
   archiveAnchor(note);
   await ui.import(JSON.stringify(oldRaw));
-  const review=ui.root.querySelector('.modal');assert.ok(review.querySelector('[data-op="confirm-import"]'));
+  // v0.72: the main game plays one rulebook, so an old file's review is the archive's door: the link and the label, no slot.
+  const review=ui.root.querySelector('.modal');assert.equal(review.querySelector('[data-op="confirm-import"]'),null);assert.ok(review.querySelector('[data-archive-door]'));
   assert.ok(review.querySelector('[data-rules="old"]'));archiveAnchor(review);
   assert.equal(ui.storage.getItem(KEY),durable,'reviewing the route cannot replace a slot');assert.deepEqual(ui.current(),current);
   await ui.click('close-modal');

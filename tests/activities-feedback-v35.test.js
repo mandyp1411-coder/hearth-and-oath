@@ -19,12 +19,15 @@ import {seededRoll} from '../dist/js/world.js';
 import {applyPersonalityBuild,personalityImpact} from '../dist/js/personality.js';
 import {getBattleActions,takeBattleAction} from '../dist/js/combat.js';
 import {mountApp} from './helpers/ui-surface.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 const fixture=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url))));
 const fresh=(key='base')=>E.migrateSave(structuredClone(fixture.states[key]));
 const valid=s=>{assert.ok(E.validateSave(s),s.notice);return s;};
 const stable=s=>({day:s.day,hp:s.hero.hp,mp:s.hero.mp,gold:s.hero.gold,cartography:s.cartography,justice:s.justice,life:s.life});
 function walk(s,room){for(const r of settlementWalkPath(s,room)||[])s=valid(E.chooseAction(s,'atlas_room_'+r));return s;}
-async function open(t,s=fresh()){const ui=await mountApp(t,{states:[s]});await ui.click('title-continue');return ui;}
+async function open(t,s=fresh()){const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');return ui;}
 function dieFor(s,a,n){return 1+seededRoll(s.seed,`misdeed:${s.dynasty?.generation||1}:${n}:${a.crime}:${a.targetId}`,20);}
 function fixDie(s,a,wanted){for(let n=1;n<500;n++)if(dieFor(s,a,n)===wanted){s.justice.crimeRolls=n-1;return;}assert.fail('missing die fixture');}
 
@@ -33,7 +36,7 @@ for(const race of ORIGIN_ANCESTRIES)test(race+' has three exclusive, selectable 
  let draft=captureCreatorDraft({ancestry:race,startAge:0},defaultCreatorDraft('origins-v35-'+race));draft=selectCreatorOrigin(draft,rows[2].id);assert.equal(draft.originId,rows[2].id);const s=await createLifeAtAge(draft);valid(s);assert.equal(s.hero.lifeOrigin.id,rows[2].id);assert.match(s.journal.at(-1).text,new RegExp(rows[2].communityName.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));assert.equal(s.hero.appearance.ancestry,race);assert.equal(s.family.setup==='homeless'?'poor':s.hero.household,s.hero.household);assert.deepEqual(E.migrateSave(s),s);
 });
 test('creation origin commands retain selection across steps, name editing, fate rolls and ancestry changes',async t=>{
- const ui=await mountApp(t);await ui.click('title-new');await ui.click('slot-new','0');ui.set('ancestry','dwarf');await ui.fire('input',ui.root.querySelector('[name="ancestry"]'));const id=availableOrigins('dwarf')[1].id;await ui.click('creator-origin',id);assert.equal(ui.root.form.controls.find(c=>c.name==='originId').value,id);assert.equal(ui.root.querySelector(`[data-op="creator-origin"][data-id="${id}"]`).getAttribute('aria-pressed'),'true');await ui.click('creator-step','1');await ui.click('creator-step','0');assert.equal(ui.root.form.controls.find(c=>c.name==='originId').value,id);await ui.click('creator-random');assert.equal(ui.root.form.controls.find(c=>c.name==='originId').value,id);ui.set('ancestry','elf');await ui.fire('input',ui.root.querySelector('[name="ancestry"]'));assert.equal(ui.root.form.controls.find(c=>c.name==='originId').value,'random');assert.equal(ui.root.querySelector(`[data-op="creator-origin"][data-id="${id}"]`),null);assert.equal(ui.current(),null);
+ const ui=await mountApp(t, {rulebooks:'both'});await ui.click('title-new');await ui.click('slot-new','0');ui.set('ancestry','dwarf');await ui.fire('input',ui.root.querySelector('[name="ancestry"]'));const id=availableOrigins('dwarf')[1].id;await ui.click('creator-origin',id);assert.equal(ui.root.form.controls.find(c=>c.name==='originId').value,id);assert.equal(ui.root.querySelector(`[data-op="creator-origin"][data-id="${id}"]`).getAttribute('aria-pressed'),'true');await ui.click('creator-step','1');await ui.click('creator-step','0');assert.equal(ui.root.form.controls.find(c=>c.name==='originId').value,id);await ui.click('creator-random');assert.equal(ui.root.form.controls.find(c=>c.name==='originId').value,id);ui.set('ancestry','elf');await ui.fire('input',ui.root.querySelector('[name="ancestry"]'));assert.equal(ui.root.form.controls.find(c=>c.name==='originId').value,'random');assert.equal(ui.root.querySelector(`[data-op="creator-origin"][data-id="${id}"]`),null);assert.equal(ui.current(),null);
 });
 test('fate labels conceal the drawn ancestry, identity, heritage and origin',()=>{
  const h=renderCharacterCreator(defaultCreatorDraft('concealed-v35'));assert.equal((h.match(/>Cast by Fate<\/option>/g)||[]).length,3);assert.doesNotMatch(h,/>Random</);assert.match(h,/Choose an ancestry above/);assert.equal((h.match(/data-op="creator-origin"/g)||[]).length,1);assert.ok(originAllowed('hearthborn','goblin'),'legacy origin remains valid');

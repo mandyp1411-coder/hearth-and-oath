@@ -9,6 +9,9 @@ import { settlementWalkPath } from '../dist/js/exploration-ui.js';
 import { tradeInventory } from '../dist/js/trading.js';
 import { createSaveStore } from '../dist/js/saves.js';
 import { mountApp } from './helpers/ui-surface.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 
 // Mounted production-handler checks. Synthetic affordability and a migrated
 // historical fixture are controlled QA inputs, not earned-play balance proof.
@@ -23,7 +26,7 @@ function fresh(kind='work'){
  for(const room of settlementWalkPath(s,provider.roomId))s=E.chooseAction(s,'atlas_room_'+room);
  assert.equal(s.event,null);assert.equal(s.battle,null);assert.ok(E.validateSave(s));return s;
 }
-async function open(t,s=fresh(),states=[s]){const ui=await mountApp(t,{states});await ui.click('title-continue');return ui;}
+async function open(t,s=fresh(),states=[s]){const ui=await mountApp(t, {rulebooks:'both', states});await ui.click('title-continue');return ui;}
 async function service(t,kind='work',state=fresh(kind)){
  const ui=await open(t,state),r=settlementServices(ui.current()).find(r=>r.kind===kind&&(kind!=='merchant'||r.subjectId==='market'));
  await ui.click('place-open');await ui.click('service-open',r.id);return {ui,r};

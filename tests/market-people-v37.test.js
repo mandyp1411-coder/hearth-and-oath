@@ -9,12 +9,15 @@ import {settlementWalkPath} from '../dist/js/exploration-ui.js';
 import {syncCartography} from '../dist/js/cartography.js';
 import {tradeInventory,newTradeDraft,quoteTrade,applyTrade} from '../dist/js/trading.js';
 import {mountApp} from './helpers/ui-surface.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 const fixture=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url))));
 function fresh(){let s=E.migrateSave(fixture.states.base);s.locationId='home';s.cartography.offsite=false;s.cartography.interior=null;syncCartography(s);for(const r of settlementWalkPath(s,'market'))s=E.chooseAction(s,'atlas_room_'+r);s.hero.gold=1000;s.realm.sites.home.merchant.potions=5;s.realm.sites.home.merchant.rations=6;assert.ok(E.validateSave(s));return s;}
 const valid=s=>{assert.ok(E.validateSave(s),s.notice);return s;};
 const people=(s,vendor)=>settlementServices(s).find(r=>r.kind==='merchant'&&r.subjectId===vendor);
 const draft=(s,vendor,id)=>({...newTradeDraft(s,vendor),buy:[{id,quantity:1}]});
-async function open(t,s=fresh()){const ui=await mountApp(t,{states:[s]});await ui.click('title-continue');await ui.click('place-open');return ui;}
+async function open(t,s=fresh()){const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');await ui.click('place-open');return ui;}
 
 test('the market presents three distinct local merchants only in People Here, without a dedicated counter',async t=>{
  const ui=await open(t),s=ui.current(),merchants=settlementServices(s).filter(r=>r.kind==='merchant');assert.equal(merchants.length,3);assert.equal(new Set(merchants.map(r=>r.personId)).size,3);assert.equal(new Set(merchants.map(r=>r.name)).size,3);assert.deepEqual(merchants.map(r=>r.role),['General Merchant','Apothecary','Travel Outfitter']);assert.equal(ui.root.querySelector('.shop-counter,.shop-approach,.shop-portrait'),null);for(const r of merchants){assert.equal(r.roomId,'market');assert.ok(r.here);const n=ui.root.querySelector(`.local-service-list [data-op="service-open"][data-id="${r.id}"]`);assert.ok(n);assert.ok(n.textContent.includes(r.name));assert.ok(n.querySelector('.fantasy-avatar'));}

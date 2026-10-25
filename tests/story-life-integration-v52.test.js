@@ -7,6 +7,9 @@ import {personalNoteOwner,personalNoteRows,reviewPersonalNote} from '../dist/js/
 import {renderSimpleJournal} from '../dist/js/journal-ui-v30.js';
 import {mountApp} from './helpers/ui-surface.mjs';
 import {copy,valid,roundtrip,freshStory,act,pick,walk,acceptResearch,draft,pieceId,researchFinished,deadline,pauseDeadline,adultFamily,introduceFamily,childRecord,calendarYear,closedChapter,archiveVisit} from './helpers/story-life-fixtures.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 
 const withoutNotice=s=>({...s,notice:''});
 function rejected(s,id){const n=E.chooseAction(s,id);assert.deepEqual(withoutNotice(n),withoutNotice(s));return roundtrip(n);}
@@ -48,7 +51,7 @@ test('public successor composes own livelihood/residence with closed100-note par
 });
 
 test('new story controls remain behind rehearsal isolation, with no real state or durable storage write',async t=>{
- const s=draft(acceptResearch(freshStory({home:true}))),ui=await mountApp(t,{states:[s]});await ui.click('title-continue');await ui.click('place-open');await ui.click('place-area','homes');assert.ok(ui.root.querySelector('.research-shelf'));assert.ok(ui.root.querySelector('.repertoire-book'));await ui.click('menu');await ui.click('practice-open','protect_ally');const original=copy(ui.current()),values=JSON.stringify([...ui.values]),writes=[],set=ui.storage.setItem.bind(ui.storage);ui.storage.setItem=(key,value)=>{writes.push(key);return set(key,value);};
+ const s=draft(acceptResearch(freshStory({home:true}))),ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');await ui.click('place-open');await ui.click('place-area','homes');assert.ok(ui.root.querySelector('.research-shelf'));assert.ok(ui.root.querySelector('.repertoire-book'));await ui.click('menu');await ui.click('practice-open','protect_ally');const original=copy(ui.current()),values=JSON.stringify([...ui.values]),writes=[],set=ui.storage.setItem.bind(ui.storage);ui.storage.setItem=(key,value)=>{writes.push(key);return set(key,value);};
  for(const id of ['research_copy_axle_rubbing',`repertoire_rehearse_${pieceId(s)}_solo`,'research_withdraw','repertoire_delete_'+pieceId(s)]){const button=ui.root.querySelector(`[data-op="activity"][data-id="${id}"]`);assert.ok(button?.isConnected,id);await ui.fire('click',button);}
  assert.deepEqual(ui.current(),original);assert.equal(JSON.stringify([...ui.values]),values);assert.deepEqual(writes,[]);assert.ok(ui.root.querySelector('.practice-modal'));await ui.click('practice-close');roundtrip(ui.current());
 });
@@ -59,7 +62,7 @@ test('interrupted two-day recital credits the child clock only for actual days a
 });
 
 test('actual Home research handlers postpone freely then complete once with exact literal proof and reload',async t=>{
- const s=freshStory({home:true}),ui=await mountApp(t,{states:[s]});await ui.click('title-continue');await ui.click('place-open');await ui.click('place-area','homes');await ui.click('activity','research_offer_third_mark');assert.equal(ui.current().researchPortfolio,undefined);await ui.click('choice','later');assert.equal(ui.current().researchPortfolio.runs.length,0);assert.equal(ui.current().day,s.day);await ui.click('place-open');await ui.click('place-area','homes');await ui.click('activity','research_offer_third_mark');await ui.click('choice','accept');await ui.click('place-open');await ui.click('place-area','homes');
+ const s=freshStory({home:true}),ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');await ui.click('place-open');await ui.click('place-area','homes');await ui.click('activity','research_offer_third_mark');assert.equal(ui.current().researchPortfolio,undefined);await ui.click('choice','later');assert.equal(ui.current().researchPortfolio.runs.length,0);assert.equal(ui.current().day,s.day);await ui.click('place-open');await ui.click('place-area','homes');await ui.click('activity','research_offer_third_mark');await ui.click('choice','accept');await ui.click('place-open');await ui.click('place-area','homes');
  for(const id of ['axle_rubbing','repair_shares'])await ui.click('activity','research_copy_'+id);await ui.click('activity','research_compare');await ui.click('choice','compare');await ui.click('place-open');await ui.click('place-area','homes');await ui.click('activity','research_interpret');await ui.click('choice','shared_repair');await ui.click('place-open');await ui.click('place-area','homes');await ui.click('activity','research_conclude');await ui.click('choice','self');const completed=copy(ui.current());assert.equal(completed.day,s.day+3);assert.equal(completed.hero.skills.scholarship,s.hero.skills.scholarship+1);assert.deepEqual(completed.careers,s.careers);assert.equal(completed.researchPortfolio.runs[0].status,'completed');const row=completed.journal.filter(r=>r.tag==='research').at(-1);assert.equal(row.narrativeEdition,30);assert.match(row.text,/share of flour is not ownership/);
  await ui.click('title-menu');await ui.click('title-continue');assert.deepEqual(ui.current(),completed);await ui.click('tab','journal');await ui.click('workspace-section','journal:archive');assert.ok(ui.root.querySelector('.research-archive'));assert.ok(ui.root.querySelector('.personal-note')===null,'earned folio is not a mutable personal-note card');roundtrip(ui.current());
 });

@@ -43,6 +43,8 @@ export function rulesNote(s, { admitted = true } = {}) {
 }
 /** What the door says to an old life arriving by file while this page refuses it. */
 export const OLD_RULES_DOOR = 'This life lives by the old rules. It belongs in the archive; open it there. Nothing here was changed.';
+/** The same door for a previous life kept as a slot's backup: the player has no file of it yet. */
+export const OLD_RULES_BACKUP_DOOR = 'This life lives by the old rules. It cannot be brought back here; export it and open it in the archive. Nothing here was changed.';
 
 /** Steps a new-rules save is brought through, in order. Each states the
  * default it gives a life that predates the system it concerns; none

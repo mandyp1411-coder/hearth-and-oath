@@ -8,12 +8,15 @@ import {settlementWalkPath} from '../dist/js/exploration-ui.js';
 import {innkeeper,innLedger} from '../dist/js/hospitality-v36.js';
 import {applyDaylifeAction} from '../dist/js/daylife-v35.js';
 import {mountApp} from './helpers/ui-surface.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 const fixture=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url))));
 const fresh=()=>E.migrateSave(fixture.states.base);
 const valid=s=>{assert.ok(E.validateSave(s),s.notice);return s;};
 function at(s,id='home',room='gate'){s.locationId=id;s.cartography.offsite=false;s.cartography.interior=null;syncCartography(s);for(const r of settlementWalkPath(s,room)||[])s=valid(E.chooseAction(s,'atlas_room_'+r));return valid(s);}
 function tavern(){const s=at(fresh(),'home','tavern');s.hero.gold=100;s.life.stress=60;s.life.happiness=40;s.hero.mp=5;s.hero.hp-=15;return s;}
-async function open(t,s=fresh(),width=1440){const ui=await mountApp(t,{states:[s],width});await ui.click('title-continue');return ui;}
+async function open(t,s=fresh(),width=1440){const ui=await mountApp(t, {rulebooks:'both', states:[s],width});await ui.click('title-continue');return ui;}
 const stable=s=>({day:s.day,hp:s.hero.hp,mp:s.hero.mp,gold:s.hero.gold,stress:s.life.stress,joy:s.life.happiness,leisure:s.socialLife.leisure});
 
 test('the map has only Find Me and Expand, hides scrollbars and gives political region titles their own fading class',async t=>{

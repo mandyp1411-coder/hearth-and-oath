@@ -7,6 +7,9 @@ import { completeLineageHistory } from '../dist/js/lineage.js';
 import { personalNoteRows, reviewPersonalNote as rawReview } from '../dist/js/personal-notes.js';
 import { renderSimpleJournal } from '../dist/js/journal-ui-v30.js';
 import { mountApp } from './helpers/ui-surface.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 const fixture=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url)))).states.base;
 const base=E.migrateSave(fixture), fresh=()=>structuredClone(base);
 const e=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -14,7 +17,7 @@ const helpers={e,paragraphs:text=>'<p>'+e(text)+'</p>',date:n=>'Day '+n,button:(
 const noteKey=(s,id)=>personalNoteRows(s).find(n=>n.id===id&&n.own)?.key||id;
 const reviewPersonalNote=(s,id)=>rawReview(s,noteKey(s,id));
 const control=(ui,op,id)=>ui.root.querySelector(`[data-op="${op}"]${id===undefined?'':`[data-id="${id}"]`}`);
-async function open(t,s=fresh(),other){const ui=await mountApp(t,{states:other?[s,other]:[s]});await ui.click('title-continue');await ui.click('tab','journal');await ui.click('workspace-section','journal:notes');return ui;}
+async function open(t,s=fresh(),other){const ui=await mountApp(t, {rulebooks:'both', states:other?[s,other]:[s]});await ui.click('title-continue');await ui.click('tab','journal');await ui.click('workspace-section','journal:notes');return ui;}
 function reload(s){assert.equal(E.validateSave(s),true);const next=E.migrateSave(JSON.parse(JSON.stringify(s)));assert.deepEqual(next,s);return next;}
 
 test('engine edits only the selected personal note, survives round-trip and cannot target earned events or lore',()=>{

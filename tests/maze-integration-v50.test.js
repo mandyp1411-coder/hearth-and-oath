@@ -7,6 +7,9 @@ import { mazeLayout, mazeRoomCell, validateMazes } from '../dist/js/maze-v31.js'
 import { validateExpeditionReceipts, expeditionVisitTotals } from '../dist/js/maze-receipts.js';
 import { validateSignatureMaze } from '../dist/js/maze-signature.js';
 import { mountApp } from './helpers/ui-surface.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 
 // The captured parent/child genealogy, public succession, content actions,
 // physical map and reminder authorship are genuine source-handler evidence.
@@ -63,7 +66,7 @@ test('canonical v2 unresolved danger blocks companion care without starting opti
 });
 
 test('actual v2 Party Enter/Space treatment matches whole source state once and full target cannot write again',async t=>{
- const s=active(),neighbor=copy(capture.states.unresolvedHeir),ui=await mountApp(t,{states:[s,neighbor]});await ui.click('title-continue');await ui.click('tab','party');
+ const s=active(),neighbor=copy(capture.states.unresolvedHeir),ui=await mountApp(t, {rulebooks:'both', states:[s,neighbor]});await ui.click('title-continue');await ui.click('tab','party');
  let expected=copy(s);for(const key of ['Enter',' ']){const trigger=ui.root.querySelector('[data-op="field-potion"][data-id="mira"]');assert.ok(trigger&&!trigger.disabled);trigger.focus();expected=E.useConsumable(expected,'potions','mira');await ui.key(key);assert.deepEqual(ui.current(),expected);assert.deepEqual(ui.lives()[1],neighbor);const once=copy(ui.current());await ui.fire('click',trigger);assert.deepEqual(ui.current(),once);}
  const target=ui.root.querySelector('[data-op="field-potion"][data-id="mira"]');assert.ok(target.disabled);const disk=[ui.storage.getItem('hearth-and-oath:slots:v1'),ui.storage.getItem('hearth-and-oath:life:v1')],writes=[],write=ui.storage.setItem;ui.storage.setItem=(key,value)=>{writes.push(key);write(key,value);};
  target.focus();await ui.key('Enter');await ui.fire('click',target);assert.deepEqual(writes,[]);assert.deepEqual([ui.storage.getItem('hearth-and-oath:slots:v1'),ui.storage.getItem('hearth-and-oath:life:v1')],disk);assert.deepEqual(ui.current(),expected);assert.equal(JSON.stringify(capture),sourceBytes);

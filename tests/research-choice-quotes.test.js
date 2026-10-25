@@ -6,6 +6,9 @@ import {preserveResearchEvent} from '../dist/js/research-scenes.js';
 import {copy,roundtrip} from './helpers/story-life-fixtures.mjs';
 import {researchQuotePending,researchQuoteVacancy} from './helpers/research-quote-fixtures.mjs';
 import {mountApp} from './helpers/ui-surface.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 
 for(const place of ['homes','archive'])for(const audience of ['public','private','public_quote'])test(`${place}/${audience}: the rendered delivery quote agrees with actual public command attendance`,()=>{
   const s=researchQuotePending({place,quote:audience==='public_quote'}),before=copy(s),raw=copy(s.event);
@@ -30,7 +33,7 @@ test('exact retired archivist is unavailable even with a current successor; self
   const {state:s,previous,next}=researchQuoteVacancy(researchQuotePending()),before=copy(s);assert.notEqual(previous.id,next.personId);assert.ok(preserveResearchEvent(s,s.event));
   for(const id of ['public','private']){const q=researchChoiceQuote(s,s.event,id);assert.equal(q.days,null);assert.match(q.disabledReason,/exact recorded archivist is unavailable/);assert.match(q.description,/Delivery is unavailable/);assert.equal(q.disabledReason,researchChoiceReason(s,s.event,id));const n=E.chooseEventOption(s,id);assert.deepEqual({...n,notice:''},{...s,notice:''});}
   assert.equal(researchChoiceQuote(s,s.event,'self').days,0);assert.deepEqual(s,before);
-  const ui=await mountApp(t,{states:[s]});await ui.click('title-continue');const node=ui.root.querySelector('[data-op="choice"][data-id="public"]');assert.ok(node.disabled);assert.match(node.textContent,/Delivery is unavailable/);
+  const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');const node=ui.root.querySelector('[data-op="choice"][data-id="public"]');assert.ok(node.disabled);assert.match(node.textContent,/Delivery is unavailable/);
   let writes=0;const set=ui.storage.setItem.bind(ui.storage);ui.storage.setItem=(k,v)=>{writes++;set(k,v);};const bytes=JSON.stringify([...ui.values]);await ui.fire('click',node);assert.equal(writes,0);assert.equal(JSON.stringify([...ui.values]),bytes);assert.deepEqual(ui.current(),s);
 });
 
@@ -41,14 +44,14 @@ test('render quoting rejects forged owner/text and leaves unrelated choices and 
 });
 
 for(const place of ['homes','archive'])test(`${place}: actual handlers render current quotes, preserve old raw event and settle once after reload`,async t=>{
-  const s=researchQuotePending({place}),raw=copy(s.event),ui=await mountApp(t,{states:[s]});await ui.click('title-continue');
+  const s=researchQuotePending({place}),raw=copy(s.event),ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');
   for(const id of ['public','private']){const c=ui.root.querySelector(`[data-op="choice"][data-id="${id}"]`);assert.ok(c&&!c.disabled);assert.match(c.textContent,place==='homes'?/Home collection takes 1 attended day/:/Direct deposit.*School & Archive takes no time or Gold/);}
   assert.deepEqual(ui.current(),s);assert.deepEqual(ui.current().event,raw);await ui.click('title-menu');await ui.click('title-continue');assert.deepEqual(ui.current().event,raw,'ordinary reload preserves the historical raw pending packet');
   const stale=ui.root.querySelector('[data-op="choice"][data-id="private"]'),expected=roundtrip(E.chooseEventOption(s,'private'));await ui.click('choice','private');assert.deepEqual(ui.current(),expected);const bytes=JSON.stringify([...ui.values]);await ui.fire('click',stale);assert.equal(JSON.stringify([...ui.values]),bytes);await ui.click('title-menu');await ui.click('title-continue');assert.deepEqual(ui.current(),expected,'completion cannot replay work, costs, permission or rewards');
 });
 
 test('a connected quoted delivery choice behind actual rehearsal cannot write or progress the pending life',async t=>{
-  const s=researchQuotePending(),ui=await mountApp(t,{states:[s]});await ui.click('title-continue');await ui.click('menu');await ui.click('practice-open','protect_ally');assert.ok(ui.root.querySelector('.practice-modal'));
+  const s=researchQuotePending(),ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');await ui.click('menu');await ui.click('practice-open','protect_ally');assert.ok(ui.root.querySelector('.practice-modal'));
   const node=ui.root.querySelector('[data-op="choice"][data-id="public"]');assert.ok(node?.isConnected&&!node.disabled,'capture the current connected background choice, not only a detached stale control');
   const bytes=JSON.stringify([...ui.values]);let writes=0;const set=ui.storage.setItem.bind(ui.storage);ui.storage.setItem=(k,v)=>{writes++;set(k,v);};await ui.fire('click',node);assert.equal(writes,0);assert.equal(JSON.stringify([...ui.values]),bytes);assert.deepEqual(ui.current(),s);assert.ok(ui.root.querySelector('.practice-modal'));
   await ui.key('Escape');assert.deepEqual(ui.current(),s);assert.equal(writes,0);

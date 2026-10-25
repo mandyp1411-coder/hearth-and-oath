@@ -9,6 +9,9 @@ import { settlementServices, serviceAccepts } from '../dist/js/world-services.js
 import { settlementWalkPath } from '../dist/js/exploration-ui.js';
 import { syncCartography } from '../dist/js/cartography.js';
 import { mountApp } from './helpers/ui-surface.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 const fixture=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url))));
 const valid=s=>{assert.ok(E.validateSave(s),s.notice);return s;};
 function walk(s,room){for(const id of settlementWalkPath(s,room))s=valid(E.chooseAction(s,'atlas_room_'+id));return s;}
@@ -18,7 +21,7 @@ function fresh(room='market'){
 const provider=(s,kind)=>settlementServices(s).find(r=>r.kind===kind);
 const stable=s=>({day:s.day,gold:s.hero.gold,equipment:s.equipment,careers:s.careers,obligations:s.obligations,locationId:s.locationId});
 async function open(t,s=fresh(),kind='work'){
- s=walk(s,provider(s,kind).roomId);const ui=await mountApp(t,{states:[s]});await ui.click('title-continue');await ui.click('place-open');await ui.click('service-open',provider(ui.current(),kind).id);return ui;
+ s=walk(s,provider(s,kind).roomId);const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');await ui.click('place-open');await ui.click('service-open',provider(ui.current(),kind).id);return ui;
 }
 const offer=s=>careerView(s).commissions.find(c=>!c.gearId);
 function accepted(){let s=fresh();s=walk(s,provider(s,'work').roomId);s=valid(E.chooseAction(s,offer(s).actionId));assert.ok(s.careers.active);return s;}

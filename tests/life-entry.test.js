@@ -100,10 +100,14 @@ test('the default app imports the genuine debt-only life and preserves both neig
   assert.deepEqual(JSON.parse(ui.storage.getItem(KEY)).backups[1].state, migrateSave(old.birth));
 });
 
-test('the default app still explicitly restores an old backup without replacing neighboring lives', async t => {
+test('the default app no longer brings an old backup back into play, and replaces no neighbouring life', async t => {
   const raw = envelope(), ui = await mountApp(t, {storageEntries: [[KEY, JSON.stringify(raw)], [LEGACY_SAVE_KEY, JSON.stringify(newer.eighteen)]]});
-  await ui.click('title-continue'); await ui.click('menu'); await ui.click('restore-backup', 1); await ui.click('confirm-import');
-  assert.deepEqual(ui.current(), migrateSave(old.birth));
-  assert.deepEqual(ui.lives(), [migrateSave(old.eighteen), migrateSave(old.birth), null]);
-  assert.deepEqual(JSON.parse(ui.storage.getItem(KEY)).backups[1].state, migrateSave(newer.eighteen));
+  await ui.click('title-continue'); await ui.click('menu');
+  const before = ui.storage.getItem(KEY);
+  await ui.click('restore-backup', 1);
+  // v0.72: one rulebook. An old backup meets the archive's door, with its export; nothing is restored.
+  assert.ok(ui.root.querySelector('[data-archive-door]'));
+  assert.equal(ui.root.querySelector('[data-op="confirm-import"]'), null);
+  assert.equal(ui.storage.getItem(KEY), before, 'nothing durable moves');
+  assert.equal(rulesOf(ui.current()), NEW, 'the life in play is still the new-rules one');
 });
