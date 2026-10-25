@@ -26,7 +26,8 @@ test('the farmer Day is scoped to the new farmer and does not replace a fight or
   assert.equal(farmerDayVisible(state()), true);
   assert.equal(farmerDayVisible({ ...state(), age: 15 }), false);
   assert.equal(farmerDayVisible({ ...state(), farm: undefined }), false);
-  for (const fields of [{ battle: {} }, { delve: {} }, { maze: {} }, { dungeon: {} }, { rpg: { expedition: {} } }, { adventuring: { expedition: {} } }]) assert.equal(farmerDayVisible({ ...state(), ...fields }), false);
+  // The older walks (the room engine, the v0.27 rooms, the descent's rooms) left in v0.72.4.
+  for (const fields of [{ battle: {} }, { delve: {} }, { maze: {} }]) assert.equal(farmerDayVisible({ ...state(), ...fields }), false);
 });
 
 test('serious risk and the actual time and fee stay on every choice with numbers hidden', () => {
