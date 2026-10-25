@@ -4,9 +4,10 @@
 (`rulebook.js`, `MAIN_ADMITS = 'new'`). The owner took it on 25 October 2026
 before the farmer playtest, which still gates every new kind of life; the
 archive has its verified public home (v0.71.2). Old-rules lives meet their
-door (below) and play on in the archive. The old rules' engine code is still
-in main; v0.72.1 onward removes it, starting with a kept path for old
-Ironman records. The sections below are the preparation that led here.
+door (below) and play on in the archive. **v0.72.1** stops reading them at
+all ([below](#v0721-the-old-lives-are-kept-as-written)); the old rules' engine
+code is still in main and leaves next, subsystem by subsystem. The sections
+below are the preparation that led here.
 
 ## Gates before the cutover
 
@@ -154,10 +155,46 @@ archive for old rules), exports it whole (`export-kept`), and asks before a
 new life takes its slot. `tests/kept-life.test.js` (7 tests) covers a later
 build's life and the genuine v0.60 lives under the cutover's decoder.
 
-Still open before the cutover: the Ironman records. `decodeIronmanRecord`
-uses the same decoder, so under a decoder that refuses old rules an old
-Ironman record would make run discovery fail as unreadable. That needs its
-own kept path before the engine drops the old rules.
+The Ironman records were still open here: `decodeIronmanRecord` uses the
+same decoder, so under a decoder that refuses old rules an old Ironman record
+would have made run discovery fail as unreadable. v0.72.1 gives them their
+own kept path (below).
+
+## v0.72.1: the old lives are kept as written
+
+The app's store decoder is `storedLifeDecoder(MAIN_ADMITS, migrateSave)`
+(rulebook.js): a stored life is decoded only when its own raw markers, a
+station or a debt ledger, say new rules. An old life is never migrated or
+validated here; the store keeps it as written (step 1 above), so no line of
+the old rules' code runs on it in main and its export is its stored bytes,
+which the archive reads with its own migrations.
+
+- **Kept Ironman runs.** `discover` keeps a record that is whole and well
+  formed (it passes the same envelope and Ironman checks it passed when it
+  was written) and whose life the decoder refuses; a record whose life
+  decodes to something else is unreadable, as before. A kept run holds its
+  slot, answers only the `export` inspection, refuses every other intent,
+  commit and reattachment with `kept-position`, and is released (the same
+  life re-persisted with no attachment) or deleted only by reviewed token.
+  A released kept run is listed among the retained positions, still
+  exportable, never reattached or revoked.
+- **The mirror-only life.** A life known only from the single-save mirror
+  (`hearth-and-oath:life:v1`, before slots) is kept as slot 0; the next save
+  writes it into the envelope as it was. Before, a refused mirror life would
+  have been overwritten by the first save.
+- **Old files and backups.** An imported file is read raw first: an old life
+  meets the door without being decoded. An old previous life kept undecoded
+  in a slot's backup is offered for review from the drawer and the recovery
+  dialog, meets `OLD_RULES_BACKUP_DOOR` and exports exactly as stored; the
+  delete review names it.
+- **Removed.** The decoded-but-refused slot paths (no build reaches them now:
+  under `NEW_ONLY` an old life is never decoded, under `BOTH` nothing is
+  refused) and an unused single-save reader in app.js.
+
+`tests/kept-ironman.test.js` (9 tests) covers discovery beside a kept run,
+every refused intent, the whole export, release and deletion by review, the
+unchanged unreadable case, the mirror-only life, and the app's kept-run row,
+review, release, retained list and kept old backup.
 
 ## Order of the eventual cutover
 

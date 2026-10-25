@@ -27,6 +27,15 @@ export function harnessRulebooks(moduleUrl) {
   } catch { return MAIN_ADMITS; }
 }
 
+/** How the save store reads a stored life. Under the new rules only, an old
+ * life is told by its own stored markers and never decoded: the store keeps it
+ * exactly as it was written (saves.js `kept`), so nothing of the old rules'
+ * code runs on it here and it leaves for the archive byte for byte. `BOTH`
+ * decodes every life, as before v0.72. */
+export function storedLifeDecoder(admits = MAIN_ADMITS, decode = value => value) {
+  return admits === NEW_ONLY ? value => rulesOf(value) === NEW ? decode(value) : null : decode;
+}
+
 /** The entry policy for life-entry.js, the save store and the Ironman session:
  * under the new rules only, a life must carry a station or a debt ledger;
  * `BOTH` (the policy before v0.72) admits every decoded life. */

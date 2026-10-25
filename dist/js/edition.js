@@ -15,7 +15,7 @@
 // (subsystems are added to an older edition life as it plays on), so they
 // carry `began: null` and read "begun before v0.70". Never guess a date.
 
-export const GAME_VERSION = '0.72.0';
+export const GAME_VERSION = '0.72.1';
 /** The migration step this build brings a new-rules life to. Each later
  * release that changes what a new-rules save holds adds a step here. */
 export const EDITION_STEP = 71;

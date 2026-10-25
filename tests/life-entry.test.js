@@ -96,8 +96,10 @@ test('the default app imports the genuine debt-only life and preserves both neig
   const raw = envelope(), ui = await mountApp(t, {storageEntries: [[KEY, JSON.stringify(raw)], [LEGACY_SAVE_KEY, JSON.stringify(newer.eighteen)]]});
   await ui.import(JSON.stringify(debtOnly.eighteen)); await ui.click('confirm-import');
   assert.deepEqual(ui.current(), migrateSave(debtOnly.eighteen));
-  assert.deepEqual(ui.lives(), [migrateSave(old.eighteen), migrateSave(newer.eighteen), migrateSave(debtOnly.eighteen)]);
-  assert.deepEqual(JSON.parse(ui.storage.getItem(KEY)).backups[1].state, migrateSave(old.birth));
+  // v0.72.1: the old neighbour and the old backup are kept exactly as stored; they are never decoded here.
+  const text = JSON.stringify, lives = ui.lives();
+  assert.ok(text(lives[0]) === text(old.eighteen) && text(lives[1]) === text(migrateSave(newer.eighteen)) && text(lives[2]) === text(migrateSave(debtOnly.eighteen)));
+  assert.ok(text(JSON.parse(ui.storage.getItem(KEY)).backups[1].state) === text(old.birth));
 });
 
 test('the default app no longer brings an old backup back into play, and replaces no neighbouring life', async t => {

@@ -53,8 +53,9 @@ test('old slots stay exportable beside a new life through the actual app, withou
   for (const id of [0, 2]) {
     const row = ui.root.querySelector(`[data-op="slot-load"][data-id="${id}"]`)?.closest('.save-slot-row');
     assert.ok(row?.querySelector('[data-rules="old"]'), `old slot ${id} is visibly occupied`);
-    await ui.fire('click', row.querySelector('[data-archive-note] [data-op="export-session"]'));
-    assert.deepEqual(JSON.parse(await blobs.at(-1).text()), migrateSave(raw.slots[id].state), 'the downloaded payload keeps the entire historical life');
+    // v0.72.1: an old life is kept undecoded, so its export is the life exactly as stored.
+    await ui.fire('click', row.querySelector('[data-archive-note] [data-op="export-kept"]'));
+    assert.ok(JSON.stringify(JSON.parse(await blobs.at(-1).text())) === JSON.stringify(raw.slots[id].state), 'the downloaded payload is the entire historical life, as stored');
     assert.match(anchors.at(-1).download, /-old-rules\.json$/);
   }
   assert.equal(blobs.length, 2); assert.equal(ui.storage.getItem(KEY), durable); assert.equal(ui.storage.getItem(LEGACY_SAVE_KEY), mirror);
@@ -66,9 +67,10 @@ test('reviewing and cancelling an old backup in a new-life slot preserves both g
   // Resuming may persist the new life's ordinary migration. The review and
   // cancellation must preserve that actual resumed position, too.
   const durable = ui.storage.getItem(KEY), mirror = ui.storage.getItem(LEGACY_SAVE_KEY);
-  for (const id of [0, 2]) assert.deepEqual(JSON.parse(durable).slots[id].state, migrateSave(raw.slots[id].state), 'resuming the new life keeps its complete migrated old neighbours');
+  // v0.72.1: the old neighbours and the old backup are kept exactly as stored, never decoded or migrated here.
+  for (const id of [0, 2]) assert.ok(JSON.stringify(JSON.parse(durable).slots[id].state) === JSON.stringify(raw.slots[id].state), 'resuming the new life keeps its old neighbours as stored');
   const backup = JSON.parse(durable).backups;
-  assert.deepEqual(backup[1].state, migrateSave(raw.backups[1].state));
+  assert.ok(JSON.stringify(backup[1].state) === JSON.stringify(raw.backups[1].state));
   const current = ui.current();
   await ui.click('restore-backup', 1);
   const review = ui.root.querySelector('.modal');
