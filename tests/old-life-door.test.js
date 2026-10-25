@@ -57,6 +57,11 @@ test('the main game admits the new rules only, by the markers the rules check', 
   for (const url of ['file:///repo/dist/js/app.js?handler-surface=1', 'https://game.example/js/app.js', 'https://game.example/hearth-and-oath.html?rulebooks=both',
     'https://game.example/index.html?rulebooks=both', 'https://game.example/js/engine.js?rulebooks=both', 'file:///repo/dist/js/app.js?rulebooks=new', 'nonsense'])
     assert.equal(harnessRulebooks(url), NEW_ONLY, url);
+  // The downloaded file is never the harness: its builder gives app.js a fixed address.
+  const builder = readFileSync(new URL('../scripts/build-offline.mjs', import.meta.url), 'utf8');
+  const offline = /^const OFFLINE_MODULE_URL = '([^']+)';$/m.exec(builder)?.[1];
+  assert.ok(offline && builder.includes("source.replaceAll('import.meta.url', JSON.stringify(OFFLINE_MODULE_URL))"), 'the builder replaces the module address');
+  assert.equal(harnessRulebooks(offline), NEW_ONLY, 'the offline file admits the new rules only');
 });
 
 test('an old slot that was active is no longer continued, and its life is not opened', async t => {
