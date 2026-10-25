@@ -5,7 +5,7 @@ import {gunzipSync} from 'node:zlib';
 import {setImmediate as nextTurn} from 'node:timers/promises';
 import {createSaveStore, createSaveCoordinator, LEGACY_SAVE_KEY} from '../dist/js/saves.js';
 import {migrateSave, validateSave} from '../dist/js/engine.js';
-import {storedLifeDecoder, NEW_ONLY, BOTH} from '../dist/js/rulebook.js';
+import {storedLifeDecoder} from '../dist/js/rulebook.js';
 import {rulesOf, OLD, NEW} from '../dist/js/edition.js';
 import {createIronmanMetadata} from '../dist/js/ironman.js';
 import {ironmanRecordKey} from '../dist/js/ironman-storage.js';
@@ -21,14 +21,15 @@ const OLD_RUN = '0a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d', NEW_RUN = '1b2c3d4e-5f6a
 const release = v => JSON.parse(gunzipSync(readFileSync(new URL(`./fixtures/saves/v${v}.json.gz`, import.meta.url)))).states;
 const older = release('0600'), newer = release('0690');
 const flush = async () => { for (let i = 0; i < 8; i++) await nextTurn(); };
-const decode = storedLifeDecoder(NEW_ONLY, migrateSave);
+const decode = storedLifeDecoder(migrateSave);
 function locks() {
   let serial = Promise.resolve();
   return {request(name, options, callback) { const result = serial.then(() => callback({name, mode: 'exclusive'})); serial = result.catch(() => {}); return result; }};
 }
 const ids = () => { let n = 0; return {randomUUID: () => `11112222-3333-4444-8555-${(++n).toString(16).padStart(12, '0')}`}; };
+// An old run is the life as an earlier build stored it; a new one is read into the rulebook.
 function run(source, runId) {
-  const state = migrateSave(source);
+  const state = rulesOf(source) === OLD ? structuredClone(source) : migrateSave(source);
   state.ironman = createIronmanMetadata(state, {randomUUID: () => runId});
   assert.ok(validateSave(state));
   return state;
@@ -37,11 +38,11 @@ function envelope(states, activeSlot = 0) {
   return {version: 1, activeSlot, backups: {},
     slots: [0, 1, 2].map(id => ({id, state: states[id] || null, updatedAt: states[id] ? `2026-10-2${id}T00:00:00.000Z` : null, revision: `run-${id}`}))};
 }
-/** An old run put in slot 0 by a store that still admitted both rulebooks, as v0.72.0 and earlier did. */
+/** An old run put in slot 0 by a store that took it as given, as builds before v0.72.1 did. */
 async function seeded({others = [null, null, migrateSave(newer.eighteen)], activeSlot = 2} = {}) {
   const surface = fakeSurface(), manager = locks(), state = run(older.eighteen, OLD_RUN);
   surface.storage.setItem(KEY, JSON.stringify(envelope(others, activeSlot)));
-  const before = createSaveStore(surface.storage, migrateSave, {coordinate: createSaveCoordinator(manager), crypto: ids()});
+  const before = createSaveStore(surface.storage, value => value, {coordinate: createSaveCoordinator(manager), crypto: ids()});
   const review = await before.inspectIronman(state, {intent: 'import', slot: 0}); assert.equal(review.status, 'review');
   const committed = await before.commitIronman(0, state, {intent: 'import', token: review.token}); assert.equal(committed.status, 'committed');
   return {surface, manager, state, head: surface.storage.getItem(ironmanRecordKey(OLD_RUN))};
@@ -53,7 +54,7 @@ test('the decoder reads only new-rules lives, by their own stored markers', () =
   assert.equal(decode(older.eighteen), null, 'an old life is not decoded');
   assert.equal(rulesOf(decode(newer.eighteen)), NEW);
   const v61 = release('0610').eighteen; assert.equal(rulesOf(decode(v61)), NEW, 'a v0.61 debt-only life is read');
-  assert.equal(storedLifeDecoder(BOTH, migrateSave)(older.eighteen)?.edition?.rules, OLD, 'the harness still decodes both');
+  assert.equal(rulesOf(migrateSave(older.eighteen)), NEW, 'the engine reads any life into the one rulebook; the door is the decoder');
 });
 
 test('a kept old run does not stop run discovery: it holds its slot, and a new run can still be begun', async () => {

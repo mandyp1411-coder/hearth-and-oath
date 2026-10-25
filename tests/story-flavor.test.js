@@ -12,9 +12,6 @@ import {flushPersonalAllegation,applyPersonalAllegationChoice} from '../dist/js/
 import {syncCartography} from '../dist/js/cartography.js';
 import {STORY_FLAVOR,flavoredCompletion} from '../dist/js/story-flavor.js';
 import {mountApp} from './helpers/ui-surface.mjs';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
 
 // Controlled fixtures based on an existing genuine save, not additional played
 // lives. Unit attendance isolates narrative from recurring living expenses.
@@ -106,7 +103,7 @@ test('older pending words and finished history do not receive retrospective flav
 });
 
 test('production story choice handler shows authored dialogue and retains the completed result after reloading',async t=>{
- const s=openPersonal(),ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');assert.match(ui.root.innerHTML,/soot-stained/);assert.match(ui.root.innerHTML,/Show me where it says years/);await ui.click('choice','care');const actual=ui.current();assert.equal(personalArc(actual).chapter,1);assert.match(actual.notice,/copy the amount/);assert.equal(actual.journal.findLast(r=>r.tag==='personal').text,actual.stories.history.at(-1).text);roundtrip(actual);
+ const s=openPersonal(),ui=await mountApp(t, {states:[s]});await ui.click('title-continue');assert.match(ui.root.innerHTML,/soot-stained/);assert.match(ui.root.innerHTML,/Show me where it says years/);await ui.click('choice','care');const actual=ui.current();assert.equal(personalArc(actual).chapter,1);assert.match(actual.notice,/copy the amount/);assert.equal(actual.journal.findLast(r=>r.tag==='personal').text,actual.stories.history.at(-1).text);roundtrip(actual);
 });
 
 test('a participant dying during first-chapter attendance cannot react to the completed disclosure',()=>{

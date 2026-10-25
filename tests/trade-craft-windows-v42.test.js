@@ -11,15 +11,12 @@ import {settlementServices} from '../dist/js/world-services.js';
 import {settlementWalkPath} from '../dist/js/exploration-ui.js';
 import {syncCartography} from '../dist/js/cartography.js';
 import {mountApp} from './helpers/ui-surface.mjs';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
 const fixture=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url))));
 function walk(s,room){for(const id of settlementWalkPath(s,room))s=E.chooseAction(s,'atlas_room_'+id);return s;}
 function fresh(kind='materials'){let s=E.migrateSave(structuredClone(fixture.states.base));s.locationId='home';s.cartography.offsite=false;s.cartography.interior=null;s.hero.gold=1000;syncCartography(s);s=E.migrateSave(s);return walk(s,settlementServices(s).find(r=>r.kind===kind).roomId);}
 const provider=(s,kind)=>settlementServices(s).find(r=>r.kind===kind);
 function draft(s,buy=[],sell=[]){return {...newTradeDraft(s,'materials'),buy:buy.map(id=>({id:'material:'+id,quantity:1})),sell:sell.map(id=>({id,quantity:1}))};}
-async function open(t,s=fresh(),kind='materials'){const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');await ui.click('place-open');await ui.click('service-open',provider(s,kind).id);return ui;}
+async function open(t,s=fresh(),kind='materials'){const ui=await mountApp(t, {states:[s]});await ui.click('title-continue');await ui.click('place-open');await ui.click('service-open',provider(s,kind).id);return ui;}
 const validate=s=>{assert.ok(E.validateSave(s),s.notice);assert.deepEqual(E.migrateSave(JSON.parse(JSON.stringify(s))),s);return s;};
 
 for(const [id,price] of Object.entries(MATERIAL_PRICES))test('barter '+id+' keeps exact three-unit bundle, price and one day',()=>{const s=fresh(),before=structuredClone(s),q=quoteTrade(s,draft(s,[id]));assert.equal(q.disabledReason,null);assert.equal(q.buyTotal,price*3);assert.equal(q.days,1);assert.deepEqual(s,before);const n=validate(E.completeTrade(s,q));assert.equal(n.day,s.day+1);assert.equal(n.hero.gold,s.hero.gold-price*3);assert.equal(n.equipment.materials[id],s.equipment.materials[id]+3);const again=E.completeTrade(n,q);assert.deepEqual(again.equipment,n.equipment);assert.equal(again.hero.gold,n.hero.gold);assert.equal(again.day,n.day);});

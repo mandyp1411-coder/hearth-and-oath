@@ -19,9 +19,22 @@ It is not deployed: the Sites host is outside this session, so the live game
 stays on Sites 106 until main is published there. The human farmer gate
 remains NOT RUN.
 
-v0.72.1, The old lives are kept as written, follows on branch
-`v0.72.1-kept-ironman`: the store never decodes an old-rules life, and old
-Ironman runs have their own kept path.
+v0.72.1, The old lives are kept as written, is merged in
+[PR #20](https://github.com/mandyp1411-coder/hearth-and-oath/pull/20) as
+`abfb73d52dd2b9f751b904df404b1055b6af4cea` from head
+`21d26cf6817107bce409bc52cdcb1d357e24e136`: the store never decodes an
+old-rules life, and old Ironman runs have their own kept path. Fast lane 252
+files: 3,267 passed, 0 failed, 3 skipped; slow lane 36 files: 741 passed,
+0 failed, 1 skipped; browser 28 of 28
+([record](../docs/measures/one-rulebook-v0721-verification.md)).
+
+v0.72.2, One rulebook in the engine, follows on branch
+`v0.72.2-one-rulebook-engine`: the edition checks leave the rules, and
+`migrateSave` reads any life into the one rulebook with stated defaults.
+Fast lane 252 files: 3,267 passed, 0 failed, 3 skipped; slow lane 36 files:
+741 passed, 0 failed, 1 skipped; browser 28 of 28; generated lives hash the
+same as main's ([record](../docs/measures/one-rulebook-v0722-verification.md)).
+Neither v0.72.1 nor v0.72.2 is deployed to the Sites host.
 
 ## Earlier release
 

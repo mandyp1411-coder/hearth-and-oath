@@ -381,7 +381,7 @@ function progressConditions(state, ctx) {
             // kill, and does more easily in a body already worn down. One
             // roll per step at most, so a long commitment or a moved clock
             // cannot deliver a year of danger in one go.
-            else if (condition.severity === 3 && !fatalRolled && state.householdBudget?.debt !== undefined && !state.health.deathCause && state.hero.condition?.type !== 'vampire') {
+            else if (condition.severity === 3 && !fatalRolled && !state.health.deathCause && state.hero.condition?.type !== 'vampire') {
               fatalRolled = true;
               const bodilyNow = state.life?.health ?? 80;
               // Per uncared fortnight at severity 3: a healthy adult who ignores
@@ -456,7 +456,7 @@ function childRecovery(state) {
 }
 function driftMood(state, day) {
   childRecovery(state);
-  if (!state.life || state.householdBudget?.debt === undefined || state.age < 14) return;
+  if (!state.life || state.age < 14) return;
   const joyTarget = restingJoy(state), stressTarget = restingStress(state);
   const joy = state.life.happiness, stress = state.life.stress;
   // A fifth of the gap each month: a surge fades over a year, a burden settles in over a season.
@@ -511,7 +511,7 @@ export function onHealthTime(state, { oldDay, newDay = state.day, outdoors = fal
     if (!protectedCare && happiness <= 32 && stress >= 45 && seededRoll(state.seed, `health:depression:${day}`, 100) < 10) onset(state, 'depression', 1, ctx, 'low_mood');
     // At the top of the scale something gives. The break is answered by the
     // player, and how they cope stays with them.
-    if (stress >= 100 && state.householdBudget?.debt !== undefined && !health.pending && !health.breakPending && (health.lastBreakDay == null || day - health.lastBreakDay >= 365)) health.breakPending = { offeredDay: day };
+    if (stress >= 100 && !health.pending && !health.breakPending && (health.lastBreakDay == null || day - health.lastBreakDay >= 365)) health.breakPending = { offeredDay: day };
     health.lastMentalCheckDay = day;
   }
   const year = Math.floor(newDay / 365);
@@ -521,8 +521,7 @@ export function onHealthTime(state, { oldDay, newDay = state.day, outdoors = fal
       const a=state.health.agePolicy===25?agingPolicy(state.hero):{elder:65,frail:90,late:105,extreme:120};
       if (age >= a.elder) wellbeing(state, 0, 0, -(age >= a.frail ? 2 : 1));
       const bodily = state.life?.health ?? 80;
-      const chance = state.householdBudget?.debt !== undefined ? mortalityChance(state, age, a, bodily)
-        : age >= a.extreme ? Math.min(45, 8 + (age - a.extreme) * 3) : age >= a.late && bodily < 55 ? 6 + Math.min(14, age - a.late) : age >= a.frail && bodily < 15 ? 5 : 0;
+      const chance = mortalityChance(state, age, a, bodily);
       if (chance && seededRoll(state.seed, `health:mortality:${nextYear}${cradle(state)}`, 100) < chance) {
         const cause = age >= a.late ? 'Natural death in advanced age' : age >= a.frail ? 'Complications of physical frailty in advanced age' : bodily < 40 ? 'A body worn out before its years' : 'Death in old age';
         health.deathCause = cause;

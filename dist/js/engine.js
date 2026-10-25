@@ -103,7 +103,7 @@ import { initializeFaith, onFaithTime, faithActions, applyFaithAction, applyFait
 import { stampEdition, validateEdition } from './edition.js';
 import { initializeFarm, onFarmTime, farmActions, applyFarmAction, applyFarmGates, flushFarmEvent, applyFarmChoice, validateFarm, FARM_EVENTS } from './farmer.js';
 import { inflictCondition } from './health.js';
-import { initializeHouseholdBudget, accrueHouseholdBudget, settleHouseholdBudget, chargeDebtInterest, debtReckoning, applyDebtReckoningChoice, DEBT_RECKONING_EVENT, applyAnnualFocus, annualWorkRatio, householdCostPreview, householdBudgetActions, applyHouseholdBudgetAction, validateHouseholdBudget } from './budget.js';
+import { initializeHouseholdBudget, openLedger, accrueHouseholdBudget, settleHouseholdBudget, chargeDebtInterest, debtReckoning, applyDebtReckoningChoice, DEBT_RECKONING_EVENT, applyAnnualFocus, annualWorkRatio, householdCostPreview, householdBudgetActions, applyHouseholdBudgetAction, validateHouseholdBudget } from './budget.js';
 import { initializeSociety, societyActions, applySocietyAction, applySocietyChoice, societyEventIds, onSocietyTime, flushSocietyEvent, validateSociety, inheritSociety, societyCustomerChoiceReason } from './society.js';
 import { initializeCommunity, communityActions, applyCommunityAction, applyCommunityChoice, communityEventIds, onCommunityTime, flushCommunityEvent, validateCommunity, inheritCommunity } from './community.js';
 import { initializeFellowship, fellowshipActions, applyFellowshipAction, applyFellowshipChoice, fellowshipEventIds, onFellowshipTime, flushFellowshipEvent, validateFellowship, inheritFellowship } from './fellowship.js';
@@ -692,7 +692,7 @@ export function createBirthGame(config = {}) {
   initializeSchooling(state);
   initializePreferences(state, { values: config.preferences }); initializeLore(state);
   initializeCareers(state); initializeHealth(state); initializeTravel(state); initializeTravelEnergy(state); initializeMaze(state); initializeSocialLife(state); initializeLineage(state,{startingAge:config.startAge});
-  initializeHouseholdBudget(state,{edition:true});initializeFortune(state,{attempt:Number.isInteger(config.attempt)&&config.attempt>0&&config.attempt<=12?config.attempt:0});
+  initializeHouseholdBudget(state);initializeFortune(state,{attempt:Number.isInteger(config.attempt)&&config.attempt>0&&config.attempt<=12?config.attempt:0});
   initializeFamilyDepth(state);initializeSociety(state);initializeCommunity(state);initializeFellowship(state);initializeSanctuaries(state);
   initializeSocial(state);initializePastimes(state);initializeLifeStories(state);
   initializeRealm(state,{fresh:true});initializeLivingWorld(state);initializeGuild(state);initializeDelves(state);initializeBattlecraft(state);initializeFaith(state);initializeJustice(state);initializeAdventuring(state);initializeCartography(state);initializeRegionalWorld(state);initializeRpg(state,{fresh:true},engineContext(state));
@@ -897,7 +897,7 @@ function engineContext(state, { annual = false, resolvingNeed=null } = {}) {
         // wage is 60% of the profession's figure, so shifts matter.
         const bonded=(state.householdBudget?.bondedUntil||0)>beforeDay;
         // Rents and allowances come whether or not the heir works; a bond takes the wage, not the rents.
-        const wage=(bonded?0:professionAnnualWage(state)*(state.householdBudget?annualWorkRatio(state)*(state.householdBudget.debt===undefined?1:PASSIVE_WAGE_FACTOR):1)*fortuneIncomeFactor(state,beforeDay))+stationIncome(state);
+        const wage=(bonded?0:professionAnnualWage(state)*(state.householdBudget?annualWorkRatio(state)*PASSIVE_WAGE_FACTOR:1)*fortuneIncomeFactor(state,beforeDay))+stationIncome(state);
         const income=Math.max(0,Math.floor(state.day*wage/365)-Math.floor(beforeDay*wage/365));
         state.hero.gold+=income;
         state.life.career.experience+=state.hero.profession==='Unemployed'?0:Math.floor(days/10);
@@ -1851,7 +1851,7 @@ function endLife(state, cause) {
 export function continueAsChild(original, childId) {if(terminalRun(original))return copy(original);
   if(original.revision<5||original.phase!=='retired')return {...copy(original),notice:'Close this chapter before continuing as a child.'};
   const next=createSuccessor(original,childId,createBirthGame);
-  if(next){if(!next.farm)initializeHouseholdBudget(next,{reset:true,edition:original.householdBudget?.debt!==undefined});if(original.fortune)initializeFortune(next);initializeConversations(next);inheritRpg(next,original);inheritStoryMazes(next,original);settlePublicRoster(next,{migration:true});}
+  if(next){if(!next.farm)initializeHouseholdBudget(next,{reset:true});initializeFortune(next);initializeConversations(next);inheritRpg(next,original);inheritStoryMazes(next,original);settlePublicRoster(next,{migration:true});}
   return next && next !== false && validateSave(next) ? next : {...copy(original),notice:'That child cannot continue this family story.'};
 }
 
@@ -2025,7 +2025,9 @@ function enableRoleplayUpdates(state) {
     if(state.progression.pendingCalling)state.progression.nextTrialVersion=1;
     else state.progression.trialVersion=1;
   }
-  initializeHouseholdBudget(state);
+  // One rulebook (v0.72.2): every life is read with the debt ledger and luck by season.
+  // A life from before them starts both today with the stated defaults: nothing owed, no luck behind it.
+  initializeHouseholdBudget(state);openLedger(state);initializeFortune(state);
   initializeFamilyOrigins(state);initializeFamilyDepth(state);initializeSociety(state,{migration:true});initializeCommunity(state,{migration:true});initializeFellowship(state,{migration:true});initializeSanctuaries(state,{migration:true});
   initializeSocial(state,{migration:true});initializePastimes(state,{migration:true});initializeLifeStories(state);
   initializeCurse(state);initializeRealm(state);initializeJustice(state);initializeAdventuring(state);initializeCartography(state,{migration:true});initializeRegionalWorld(state);initializeRpg(state,{migration:true});

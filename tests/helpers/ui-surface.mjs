@@ -196,9 +196,7 @@ export function fakeSurface() {
 let importedApps = 0;
 
 /** Install one isolated handler surface. No browser or CSS geometry is modeled. */
-/** `rulebooks: 'both'` mounts the app with the pre-v0.72 entry policy, for UI tests whose scenarios
- * still play on old-rules saves while the code they cover remains in main (rulebook.js harnessRulebooks). */
-export async function mountApp(t, { states = [], activeSlot = 0, width = 1440, height = 900, storageEntries = [], locks = null, rulebooks = null } = {}) {
+export async function mountApp(t, { states = [], activeSlot = 0, width = 1440, height = 900, storageEntries = [], locks = null } = {}) {
   const surface = fakeSurface(), originals = new Map(), windowListeners = new Map();
   surface.windowEvent = async (type, extra = {}) => { const event = { defaultPrevented:false, preventDefault(){this.defaultPrevented=true;}, ...extra }; for(const handler of windowListeners.get(type)||[])await handler(event); return event; };
   const spatialTimers=new Map(),touchTimers=new Map();let timerId=0;
@@ -225,7 +223,6 @@ export async function mountApp(t, { states = [], activeSlot = 0, width = 1440, h
   t.after(() => { for (const [key, descriptor] of originals) descriptor ? Object.defineProperty(globalThis, key, descriptor) : delete globalThis[key]; });
   const source = new URL('../../dist/js/app.js', import.meta.url);
   source.searchParams.set('handler-surface', String(++importedApps));
-  if (rulebooks === 'both') source.searchParams.set('rulebooks', 'both');
   await import(source.href);
   await Promise.resolve();
   return surface;

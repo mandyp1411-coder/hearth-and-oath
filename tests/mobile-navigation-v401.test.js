@@ -3,9 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {gunzipSync} from 'node:zlib';
 import {mountApp} from './helpers/ui-surface.mjs';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
+import {readIntoRulebook} from './helpers/one-rulebook.mjs';
 
 // Source/semantic regressions only. The fake DOM does not calculate CSS geometry;
 // the companion visual QA report records the real-browser viewport checks.
@@ -13,7 +11,7 @@ const css=readFileSync(new URL('../dist/styles.css',import.meta.url),'utf8');
 const fixture=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url))));
 
 test('mobile navigation exposes all six main views and its menu in order',async t=>{
- const ui=await mountApp(t, {rulebooks:'both', states:[structuredClone(fixture.states.base)]});
+ const ui=await mountApp(t, {states:[readIntoRulebook(fixture.states.base)]});
  await ui.click('title-continue');
  const buttons=ui.root.querySelectorAll('.mobile-command-dock .bottom-nav button');
  assert.deepEqual(buttons.map(b=>[b.dataset.op,b.dataset.id]),[

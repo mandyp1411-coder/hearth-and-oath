@@ -6,7 +6,7 @@ import {setImmediate as nextTurn} from 'node:timers/promises';
 import {createSaveStore, createSaveCoordinator, LEGACY_SAVE_KEY} from '../dist/js/saves.js';
 import {migrateSave, validateSave} from '../dist/js/engine.js';
 import {rulesOf, OLD, NEW, OLD_RULES_DOOR} from '../dist/js/edition.js';
-import {admissionPolicy, harnessRulebooks, MAIN_ADMITS, BOTH, NEW_ONLY} from '../dist/js/rulebook.js';
+import {admissionPolicy, storedLifeDecoder} from '../dist/js/rulebook.js';
 import {ARCHIVE_URL} from '../dist/js/archive-link.js';
 import {createIronmanMetadata} from '../dist/js/ironman.js';
 import {ironmanRecordKey} from '../dist/js/ironman-storage.js';
@@ -42,30 +42,23 @@ function sameLife(actual, expected, label) {
 }
 const playing = ui => ui.root.querySelector('.game-frame') !== null;
 
-test('the main game admits the new rules only, by the markers the rules check', () => {
-  assert.equal(MAIN_ADMITS, NEW_ONLY);
-  assert.equal(admissionPolicy(BOTH), undefined, 'the old policy admitted every decoded life');
-  const refuse = admissionPolicy();
-  for (const [name, raw] of Object.entries(older)) assert.equal(refuse(migrateSave(raw)), false, `v0.60 ${name} is old rules`);
-  for (const [name, raw] of Object.entries(newer)) assert.equal(refuse(migrateSave(raw)), true, `v0.69 ${name} is new rules`);
-  const v61 = release('0610').eighteen; assert.equal(v61.hero.station, undefined); assert.equal(refuse(migrateSave(v61)), true, 'a zero-debt ledger alone is the new rules');
-  const claimed = migrateSave(older.eighteen); claimed.edition = {rules: NEW, began: null, step: claimed.edition.step};
-  assert.equal(refuse(claimed), false, 'a claimed stamp alone admits nothing');
-
-  // Only the test harness reaches the pre-v0.72 policy: the module itself, imported with the query.
-  assert.equal(harnessRulebooks('file:///repo/dist/js/app.js?handler-surface=1&rulebooks=both'), BOTH);
-  for (const url of ['file:///repo/dist/js/app.js?handler-surface=1', 'https://game.example/js/app.js', 'https://game.example/hearth-and-oath.html?rulebooks=both',
-    'https://game.example/index.html?rulebooks=both', 'https://game.example/js/engine.js?rulebooks=both', 'file:///repo/dist/js/app.js?rulebooks=new', 'nonsense'])
-    assert.equal(harnessRulebooks(url), NEW_ONLY, url);
-  // The downloaded file is never the harness: its builder gives app.js a fixed address.
-  const builder = readFileSync(new URL('../scripts/build-offline.mjs', import.meta.url), 'utf8');
-  const offline = /^const OFFLINE_MODULE_URL = '([^']+)';$/m.exec(builder)?.[1];
-  assert.ok(offline && builder.includes("source.replaceAll('import.meta.url', JSON.stringify(OFFLINE_MODULE_URL))"), 'the builder replaces the module address');
-  assert.equal(harnessRulebooks(offline), NEW_ONLY, 'the offline file admits the new rules only');
+test('the main game admits the new rules only, by the markers a stored life carries', () => {
+  const admits = admissionPolicy(), read = storedLifeDecoder(migrateSave);
+  for (const [name, raw] of Object.entries(older)) {
+    assert.equal(admits(raw), false, `v0.60 ${name} is old rules`);
+    assert.equal(read(raw), null, `v0.60 ${name} is never decoded here`);
+  }
+  for (const [name, raw] of Object.entries(newer)) { assert.equal(admits(raw), true, `v0.69 ${name} is new rules`); assert.equal(rulesOf(read(raw)), NEW); }
+  const v61 = release('0610').eighteen; assert.equal(v61.hero.station, undefined); assert.equal(admits(v61), true, 'a zero-debt ledger alone is the new rules');
+  const claimed = structuredClone(older.eighteen); claimed.edition = {rules: NEW, began: null, step: 71};
+  assert.equal(admits(claimed), false, 'a claimed stamp alone admits nothing'); assert.equal(read(claimed), null);
+  // One build: the app reads no address of its own, and the offline builder refuses import.meta.
+  assert.doesNotMatch(readFileSync(new URL('../dist/js/app.js', import.meta.url), 'utf8'), /import\.meta/);
+  assert.match(readFileSync(new URL('../scripts/build-offline.mjs', import.meta.url), 'utf8'), /reads import\.meta, which the bundle cannot carry/);
 });
 
 test('an old slot that was active is no longer continued, and its life is not opened', async t => {
-  const ui = await mountApp(t, {storageEntries: entries([migrateSave(older.eighteen), migrateSave(newer.eighteen)], 0)});
+  const ui = await mountApp(t, {storageEntries: entries([older.eighteen, migrateSave(newer.eighteen)], 0)});
   assert.equal(ui.root.querySelector('[data-op="title-continue"][data-id="0"]'), null, 'the old life is not offered to continue');
   assert.ok(ui.root.querySelector('[data-op="title-continue"][data-id="1"]'), 'the new-rules life is');
   await ui.click('title-load');
@@ -76,7 +69,7 @@ test('an old slot that was active is no longer continued, and its life is not op
 });
 
 test('the title continues the newest admitted life and counts the kept ones', async t => {
-  const states = [migrateSave(older.eighteen), migrateSave(newer.eighteen), migrateSave(older.later)];
+  const states = [older.eighteen, migrateSave(newer.eighteen), older.later];
   const ui = await mountApp(t, {storageEntries: entries(states, 0)}), before = durable(ui);
   assert.equal(ui.root.querySelector('[data-op="title-continue"][data-id="0"]'), null, 'the active old life is not offered to continue');
   assert.ok(ui.root.querySelector('[data-op="title-continue"][data-id="1"]'), 'the admitted life is');
@@ -90,7 +83,7 @@ test('the title continues the newest admitted life and counts the kept ones', as
 });
 
 test('with only old lives, the title shows the kept life, its export and the way to the archive', async t => {
-  const states = [migrateSave(older.eighteen), null, migrateSave(older.later)];
+  const states = [older.eighteen, null, older.later];
   const ui = await mountApp(t, {storageEntries: entries(states, 2)}), files = downloads(t, ui), before = durable(ui);
   const card = ui.root.querySelector('.title-life-kept');
   assert.ok(card, 'the kept card is shown');
@@ -108,7 +101,7 @@ test('with only old lives, the title shows the kept life, its export and the way
 });
 
 test('an old slot is kept, not loaded; its export and delete review remain', async t => {
-  const states = [migrateSave(older.eighteen), migrateSave(newer.eighteen), null];
+  const states = [older.eighteen, migrateSave(newer.eighteen), null];
   const ui = await mountApp(t, {storageEntries: entries(states, 1)}), files = downloads(t, ui), before = durable(ui);
   await ui.click('title-load');
   const old = row(ui, 0), fresh = row(ui, 1), empty = row(ui, 2);
@@ -153,13 +146,14 @@ function locks() {
   let serial = Promise.resolve();
   return {request(name, options, callback) { const result = serial.then(() => callback({name, mode: 'exclusive'})); serial = result.catch(() => {}); return result; }};
 }
+// An old run is the life as an earlier build stored it, committed by a store that took it as given.
 async function keptIronman(source = older.eighteen) {
-  const surface = fakeSurface(), manager = locks(), state = migrateSave(source);
+  const old = rulesOf(source) === OLD, surface = fakeSurface(), manager = locks(), state = old ? structuredClone(source) : migrateSave(source);
   state.ironman = createIronmanMetadata(state, {randomUUID: () => RUN});
   assert.ok(validateSave(state));
   surface.storage.setItem(KEY, JSON.stringify(envelope([null, null, migrateSave(newer.eighteen)], 2)));
   let entropy = 0;
-  const store = createSaveStore(surface.storage, migrateSave, {coordinate: createSaveCoordinator(manager), crypto: {randomUUID: () => `11112222-3333-4444-8555-${(++entropy).toString(16).padStart(12, '0')}`}});
+  const store = createSaveStore(surface.storage, old ? value => value : migrateSave, {coordinate: createSaveCoordinator(manager), crypto: {randomUUID: () => `11112222-3333-4444-8555-${(++entropy).toString(16).padStart(12, '0')}`}});
   const review = await store.inspectIronman(state, {intent: 'import', slot: 0}); assert.equal(review.status, 'review');
   const committed = await store.commitIronman(0, state, {intent: 'import', token: review.token}); assert.equal(committed.status, 'committed');
   return {storageEntries: [...surface.values], manager, state};

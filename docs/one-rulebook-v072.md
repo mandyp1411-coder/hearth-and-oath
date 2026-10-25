@@ -196,6 +196,32 @@ every refused intent, the whole export, release and deletion by review, the
 unchanged unreadable case, the mirror-only life, and the app's kept-run row,
 review, release, retained list and kept old backup.
 
+## v0.72.2: one rulebook in the engine
+
+The debt ledger's edition checks are deleted, with the old rules' side of each:
+health (mortality by the elder ages and illness, a break at full Stress, the
+severe-illness roll), the budget (the old free support in place of borrowing,
+the interest guard, repayment offered to every life), careers (the tired
+worker's refusal, the worn wage), the passive wage factor, fortune and the
+guild's arrears into debt, the farmer's opening and its cost line, nature
+(`natureEdition`: no trait carries an attribute bonus; `traitAttributeBonuses`
+is gone), and the voice (`voice.js` speaks for every life). Every heir starts
+with a ledger.
+
+`migrateSave` reads any life into the one rulebook. A life from before the
+ledger gets the stated defaults on reading: `openLedger` (nothing owed,
+nothing borrowed) and fortune from the day it is read; no station and no date
+are invented. This is the engine's behaviour, not a player's: the app's
+store never decodes an old-rules life (`storedLifeDecoder` reads the raw
+markers first), so an old save is still kept as written and sent to the
+archive. The pre-v0.72 harness route (`harnessRulebooks`, `rulebooks:
+'both'`) is gone: UI tests that played old captures read them into the
+rulebook (`tests/helpers/one-rulebook.mjs`), and tests of the door store old
+lives as written. Real new-rules saves change in nothing they hold: step 71.
+
+Still to go: the six station-gated systems (v0.72.3), the older room engine
+and old pages once no life can reach them, and the pre-edition migrations.
+
 ## Order of the eventual cutover
 
 1. Preserve occupied old slots, backups and their complete exports before

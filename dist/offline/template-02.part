@@ -1,14 +1,4 @@
- const method = id.slice(7), def = definitions[p.id];
-  if (!id.startsWith('accept_') || !def || !FIRST_MISSION_METHODS[p.id].includes(method)) return 'That method is not part of this proposal.';
-  return offerReason(s, { id: p.id }, method);
-}
-function acceptFirstMission(s, d, method, ctx, { makeContact, note }) {
-  const faction = s.rpg.factions.find(f => f.id === d.id);
-  if (!faction || faction.rank !== 0 || faction.firstMission || !FIRST_MISSION_METHODS[d.id]?.includes(method) || offerReason(s, d, method)) return false;
-  const def = definitions[d.id], rows = settlementServices(s), cast = {};
-  const fieldLocationId = d.id === 'rootward_circle' && method === 'access' ? fieldDestination(s, s.locationId) : null;
-  for (const [key, [role, roomId]] of Object.entries(def.roles)) {
-    const p = makeContact(`first-${d.id}-${key}-${s.dynasty?.generation || 1}-${s.day}`, d.regionId, role, s.locationId);
+ty?.generation || 1}-${s.day}`, d.regionId, role, s.locationId);
     if (d.id === 'rootward_circle' && method === 'access' && key === 'tenant') p.locationId = fieldLocationId;
     p.roomId = d.id === 'rootward_circle' && method === 'access' && key === 'tenant' ? null : roomId === 'work' ? workRoom(s, s.locationId) : roomId;
     if (roomId === 'work') p.firstMissionWorkplace = 'smith';
@@ -1972,7 +1962,6 @@ function childhoodEvent(s,e) {
     // both editionScene and setEvent; the saved incident keeps its own words.
     // Other birthdays retain their existing prose and quotation rules.
     const opening=s.farm&&s.age===16&&e.id==='birth_year_16'
-      &&(s.hero?.station||s.householdBudget?.debt!==undefined)
       &&pending.age===s.age&&pending.day===s.day
       &&captured.title===e.title&&captured.body===e.body
       &&choices.length===3&&captured.choices?.length===3&&new Set(choices.map(c=>c.id)).size===3
@@ -19098,7 +19087,7 @@ function inheritGuild(old, s) {
   if (s.guild.family) { const parent = (s.life?.people || []).find(p => p.familyRole === 'parent'); if (parent && !m) parent.occupation = s.guild.family === 'merchant' ? 'merchant of the guild' : s.guild.family; }
   if (m) {
     s.guild.heir = { craft: m.craft, from: old.hero.name, rank: m.rank, warden: m.rank === 'warden' || m.rank === 'guildmaster' ? null : m.warden?.name || null };
-    if (m.dues.arrears > 0 && s.householdBudget && s.householdBudget.debt !== undefined) s.householdBudget.debt += m.dues.arrears * DUES[m.rank];
+    if (m.dues.arrears > 0 && s.householdBudget) s.householdBudget.debt += m.dues.arrears * DUES[m.rank];
     if (m.rival && m.rival.contests.some(c => !c.won) && s.hero.station?.ties) addTie(s, { kind: 'hates', name: m.rival.name, note: `${old.hero.name}’s rival at the guild’s bench, who has not forgotten the fair` });
   }
   for (const p of old.guild.past.filter(p => p.left === 'expelled')) if (s.hero.station?.ties) addTie(s, { kind: 'hates', name: GUILD_NAME[p.craft], note: `struck ${old.hero.name}’s name from its rolls` });
@@ -19579,7 +19568,7 @@ function consequence(s, effect) {
 
 /** A pure presentation of a captured age-sixteen farmer birthday. */
 function farmerOpeningEvent(s, ev) {
-  if (!s?.farm || !(s.hero?.station || s.householdBudget?.debt !== undefined) || s.age !== 16 || s.timeline?.mode !== 'birth' || s.timeline.contentVersion !== 7 || ev?.id !== 'birth_year_16') return ev;
+  if (!s?.farm || s.age !== 16 || s.timeline?.mode !== 'birth' || s.timeline.contentVersion !== 7 || ev?.id !== 'birth_year_16') return ev;
   const pending = s.timeline.storybook?.pending, scene = pending?.scene;
   if (!Number.isSafeInteger(s.day) || s.day < 0 || pending?.age !== s.age || pending?.day !== s.day || !plain(scene) || typeof scene.title !== 'string' || !scene.title.trim() || typeof scene.body !== 'string' || !scene.body.trim() || scene.title !== ev.title || scene.body !== ev.body || !Array.isArray(scene.choices) || !Array.isArray(ev.choices) || scene.choices.length !== 3 || ev.choices.length !== 3) return ev;
   if (new Set(ev.choices.map(c => c?.id)).size !== 3 || ev.choices.some((c, i) => !plain(c) || !plain(scene.choices[i]) || c.id !== PICKS[i] || scene.choices[i].id !== c.id || typeof c.label !== 'string' || !c.label.trim() || c.label !== scene.choices[i].label || quoted(c) || quoted(scene.choices[i]))) return ev;
@@ -19613,7 +19602,6 @@ const { farmerOpeningEvent } = __farmer_opening;
 // as `detail` and shown to those who ask for it. Nothing here changes what
 // an action or a choice does.
 
-const edition = s => !!s?.hero?.station || s?.householdBudget?.debt !== undefined;
 const nameOf = (s, id) => s.life?.people.find(p => p.id === id)?.name || s.companions?.find(p => p.id === id)?.name || s.society?.people?.find(p => p.id === id)?.name || null;
 const after = (label, prefix) => label.startsWith(prefix) ? label.slice(prefix.length) : null;
 
@@ -19748,7 +19736,7 @@ const PATTERNS = [
 
 /** The voiced action: a short situation to read, the engine's figures kept as detail. */
 function voiceAction(s, a) {
-  if (!a || !edition(s)) return a;
+  if (!a || !s) return a;
   const exact = EXACT[a.id];
   let line = exact ? exact : null;
   if (!line) for (const [re, fn] of PATTERNS) { const m = a.id.match(re); if (m) { line = fn(s, a, m); break; } }
@@ -19756,7 +19744,7 @@ function voiceAction(s, a) {
   const [label, description] = line;
   return { ...a, label: label || a.label, description, detail: a.description };
 }
-function voiceActions(s, actions) { return edition(s) ? actions.map(a => voiceAction(s, a)) : actions; }
+function voiceActions(s, actions) { return s ? actions.map(a => voiceAction(s, a)) : actions; }
 
 // Events: the same treatment for the moments every life meets. The choice ids
 // and effects are the engine's; only the words change.
@@ -19807,7 +19795,7 @@ function voiceSchool(s, ev) {
   return { ...ev, title, category: 'At school', body: body || ev.body, choices: ev.choices.map(c => choices[c.id] ? { ...c, label: choices[c.id][0], description: choices[c.id][1], detail: c.description } : c) };
 }
 function voiceEvent(s, ev) {
-  if (!ev || !edition(s)) return ev;
+  if (!ev || !s) return ev;
   if (ev.id === 'birth_year_16') return farmerOpeningEvent(s, ev);
   if (ev.id === 'health_concern') return voiceHealth(s, ev);
   if (ev.id === 'annual_deadline_review') return voiceDeadline(s, ev);
@@ -19857,7 +19845,7 @@ function validateEpitaph(v) { return v === undefined || (typeof v === 'string' &
 // situations, chosen from what the engine already offers. The full menu
 // stays beneath; this is the page you read first.
 function whatMatters(s, actions) {
-  if (!edition(s) || !Array.isArray(actions) || s.event || s.battle) return [];
+  if (!s || !Array.isArray(actions) || s.event || s.battle) return [];
   const open = id => actions.find(a => (typeof id === 'string' ? a.id === id : id.test(a.id)) && !a.disabledReason);
   let services = null; const roomFor = kind => { services ||= (() => { try { return settlementServices(s); } catch { return []; } })(); const row = services.find(r => r.kind === kind); return row ? open('atlas_room_' + row.roomId) : null; };
   const rows = [], take = (a, why) => { if (a && !rows.some(r => r.id === a.id) && rows.length < 5) rows.push({ ...a, why }); };
@@ -25611,7 +25599,7 @@ function progressConditions(state, ctx) {
             // kill, and does more easily in a body already worn down. One
             // roll per step at most, so a long commitment or a moved clock
             // cannot deliver a year of danger in one go.
-            else if (condition.severity === 3 && !fatalRolled && state.householdBudget?.debt !== undefined && !state.health.deathCause && state.hero.condition?.type !== 'vampire') {
+            else if (condition.severity === 3 && !fatalRolled && !state.health.deathCause && state.hero.condition?.type !== 'vampire') {
               fatalRolled = true;
               const bodilyNow = state.life?.health ?? 80;
               // Per uncared fortnight at severity 3: a healthy adult who ignores
@@ -25686,7 +25674,7 @@ function childRecovery(state) {
 }
 function driftMood(state, day) {
   childRecovery(state);
-  if (!state.life || state.householdBudget?.debt === undefined || state.age < 14) return;
+  if (!state.life || state.age < 14) return;
   const joyTarget = restingJoy(state), stressTarget = restingStress(state);
   const joy = state.life.happiness, stress = state.life.stress;
   // A fifth of the gap each month: a surge fades over a year, a burden settles in over a season.
@@ -25741,7 +25729,7 @@ function onHealthTime(state, { oldDay, newDay = state.day, outdoors = false } = 
     if (!protectedCare && happiness <= 32 && stress >= 45 && seededRoll(state.seed, `health:depression:${day}`, 100) < 10) onset(state, 'depression', 1, ctx, 'low_mood');
     // At the top of the scale something gives. The break is answered by the
     // player, and how they cope stays with them.
-    if (stress >= 100 && state.householdBudget?.debt !== undefined && !health.pending && !health.breakPending && (health.lastBreakDay == null || day - health.lastBreakDay >= 365)) health.breakPending = { offeredDay: day };
+    if (stress >= 100 && !health.pending && !health.breakPending && (health.lastBreakDay == null || day - health.lastBreakDay >= 365)) health.breakPending = { offeredDay: day };
     health.lastMentalCheckDay = day;
   }
   const year = Math.floor(newDay / 365);
@@ -25751,8 +25739,7 @@ function onHealthTime(state, { oldDay, newDay = state.day, outdoors = false } = 
       const a=state.health.agePolicy===25?agingPolicy(state.hero):{elder:65,frail:90,late:105,extreme:120};
       if (age >= a.elder) wellbeing(state, 0, 0, -(age >= a.frail ? 2 : 1));
       const bodily = state.life?.health ?? 80;
-      const chance = state.householdBudget?.debt !== undefined ? mortalityChance(state, age, a, bodily)
-        : age >= a.extreme ? Math.min(45, 8 + (age - a.extreme) * 3) : age >= a.late && bodily < 55 ? 6 + Math.min(14, age - a.late) : age >= a.frail && bodily < 15 ? 5 : 0;
+      const chance = mortalityChance(state, age, a, bodily);
       if (chance && seededRoll(state.seed, `health:mortality:${nextYear}${cradle(state)}`, 100) < chance) {
         const cause = age >= a.late ? 'Natural death in advanced age' : age >= a.frail ? 'Complications of physical frailty in advanced age' : bodily < 40 ? 'A body worn out before its years' : 'Death in old age';
         health.deathCause = cause;
@@ -29387,7 +29374,7 @@ const __edition = (() => {
 // (subsystems are added to an older edition life as it plays on), so they
 // carry `began: null` and read "begun before v0.70". Never guess a date.
 
-const GAME_VERSION = '0.72.1';
+const GAME_VERSION = '0.72.2';
 /** The migration step this build brings a new-rules life to. Each later
  * release that changes what a new-rules save holds adds a step here. */
 const EDITION_STEP = 71;
@@ -29407,11 +29394,9 @@ function rulesLabel(s) {
 }
 
 /** The sentence a slot or an import review adds under the label. */
-function rulesNote(s, { admitted = true } = {}) {
+function rulesNote(s) {
   if (rulesOf(s) !== OLD) return null;
-  return admitted
-    ? 'This life was written under the old rules. It plays on here for now; the archive keeps those rules for good, and a life exported from here opens there.'
-    : 'This life was written under the old rules, and the archive keeps them now. Export it and open it there. Its place here is kept until you do.';
+  return 'This life was written under the old rules, and the archive keeps them now. Export it and open it there. Its place here is kept until you do.';
 }
 /** What the door says to an old life arriving by file while this page refuses it. */
 const OLD_RULES_DOOR = 'This life lives by the old rules. It belongs in the archive; open it there. Nothing here was changed.';
@@ -29964,7 +29949,7 @@ function createSuccessor(original, childId, createBirthGame) {
   const parentRecord = old.lineage.people.find(p => p.id === old.dynasty.activePersonId);
   const ownLife=adultChildInheritance(old,old.lineage.people.find(p=>p.id===record.id));
   const childAge = Math.max(0, Math.floor((old.day - child.bornDay) / YEAR));
-  const start = createBirthGame({ name: child.name, pronouns:record.pronouns || child.pronouns, seed: old.seed, origin: old.hero.origin, station: old.householdBudget?.debt === undefined ? null : heirStation(old, `${old.seed}:heir:${generation}`, (record.appearance || old.hero.appearance)?.ancestry), household: inheritance.homeTier === 'estate' ? 'noble' : inheritance.homeTier === 'lodgings' ? 'poor' : 'tradesfolk', familySetup: 'single_parent', appearance: record.appearance || old.hero.appearance, difficulty: old.difficulty, belief: old.hero.belief, temperament: TRAITS.reduce((best, t) => record.development.traits[t] > record.development.traits[best] ? t : best, 'care') === 'curiosity' ? 'curious' : record.development.traits.courage > record.development.traits.care ? 'ambitious' : 'compassionate', preferences: record.preferences || child.preferences || old.hero.preferences });
+  const start = createBirthGame({ name: child.name, pronouns:record.pronouns || child.pronouns, seed: old.seed, origin: old.hero.origin, station: heirStation(old, `${old.seed}:heir:${generation}`, (record.appearance || old.hero.appearance)?.ancestry), household: inheritance.homeTier === 'estate' ? 'noble' : inheritance.homeTier === 'lodgings' ? 'poor' : 'tradesfolk', familySetup: 'single_parent', appearance: record.appearance || old.hero.appearance, difficulty: old.difficulty, belief: old.hero.belief, temperament: TRAITS.reduce((best, t) => record.development.traits[t] > record.development.traits[best] ? t : best, 'care') === 'curiosity' ? 'curious' : record.development.traits.courage > record.development.traits.care ? 'ambitious' : 'compassionate', preferences: record.preferences || child.preferences || old.hero.preferences });
   if (!start) return null;
   const s = clone(start);
   if (isIronman(old)) s.ironman = clone(old.ironman);
@@ -30053,8 +30038,7 @@ function createSuccessor(original, childId, createBirthGame) {
   }
   s.notice = `${child.name}'s life continues in the same world. No inherited oath, transformation, criminal evidence, or combat class follows them.`;
   initializeHealth(s, { reset: true }); initializeTravel(s, { reset: true });
-  // An heir of a new-edition life stays in the new edition, debt ledger and all.
-  initializeHouseholdBudget(s, { reset: true, edition: old.householdBudget?.debt !== undefined });
+  initializeHouseholdBudget(s, { reset: true });
   if (s.fortune) s.fortune = { version: 1, lastSeason: Math.floor(s.day / 92), incomeFactor: 1, factorUntil: 0, history: [] };
   // The changed world is the same world: the courts, guilds and packs keep their goals and their news; the parent's own stories stay in the parent's book.
   if (old.living && s.living) s.living = { ...clone(old.living), threads: [], bonds: {}, lastSeason: Math.floor(s.day / 92) };
@@ -32618,7 +32602,7 @@ const { initializeFaith, onFaithTime, faithActions, applyFaithAction, applyFaith
 const { stampEdition, validateEdition } = __edition;
 const { initializeFarm, onFarmTime, farmActions, applyFarmAction, applyFarmGates, flushFarmEvent, applyFarmChoice, validateFarm, FARM_EVENTS } = __farmer;
 const { inflictCondition } = __health;
-const { initializeHouseholdBudget, accrueHouseholdBudget, settleHouseholdBudget, chargeDebtInterest, debtReckoning, applyDebtReckoningChoice, DEBT_RECKONING_EVENT, applyAnnualFocus, annualWorkRatio, householdCostPreview, householdBudgetActions, applyHouseholdBudgetAction, validateHouseholdBudget } = __budget;
+const { initializeHouseholdBudget, openLedger, accrueHouseholdBudget, settleHouseholdBudget, chargeDebtInterest, debtReckoning, applyDebtReckoningChoice, DEBT_RECKONING_EVENT, applyAnnualFocus, annualWorkRatio, householdCostPreview, householdBudgetActions, applyHouseholdBudgetAction, validateHouseholdBudget } = __budget;
 const { initializeSociety, societyActions, applySocietyAction, applySocietyChoice, societyEventIds, onSocietyTime, flushSocietyEvent, validateSociety, inheritSociety, societyCustomerChoiceReason } = __society;
 const { initializeCommunity, communityActions, applyCommunityAction, applyCommunityChoice, communityEventIds, onCommunityTime, flushCommunityEvent, validateCommunity, inheritCommunity } = __community;
 const { initializeFellowship, fellowshipActions, applyFellowshipAction, applyFellowshipChoice, fellowshipEventIds, onFellowshipTime, flushFellowshipEvent, validateFellowship, inheritFellowship } = __fellowship;
@@ -33206,7 +33190,7 @@ function createBirthGame(config = {}) {
   initializeSchooling(state);
   initializePreferences(state, { values: config.preferences }); initializeLore(state);
   initializeCareers(state); initializeHealth(state); initializeTravel(state); initializeTravelEnergy(state); initializeMaze(state); initializeSocialLife(state); initializeLineage(state,{startingAge:config.startAge});
-  initializeHouseholdBudget(state,{edition:true});initializeFortune(state,{attempt:Number.isInteger(config.attempt)&&config.attempt>0&&config.attempt<=12?config.attempt:0});
+  initializeHouseholdBudget(state);initializeFortune(state,{attempt:Number.isInteger(config.attempt)&&config.attempt>0&&config.attempt<=12?config.attempt:0});
   initializeFamilyDepth(state);initializeSociety(state);initializeCommunity(state);initializeFellowship(state);initializeSanctuaries(state);
   initializeSocial(state);initializePastimes(state);initializeLifeStories(state);
   initializeRealm(state,{fresh:true});initializeLivingWorld(state);initializeGuild(state);initializeDelves(state);initializeBattlecraft(state);initializeFaith(state);initializeJustice(state);initializeAdventuring(state);initializeCartography(state);initializeRegionalWorld(state);initializeRpg(state,{fresh:true},engineContext(state));
@@ -33411,7 +33395,7 @@ function engineContext(state, { annual = false, resolvingNeed=null } = {}) {
         // wage is 60% of the profession's figure, so shifts matter.
         const bonded=(state.householdBudget?.bondedUntil||0)>beforeDay;
         // Rents and allowances come whether or not the heir works; a bond takes the wage, not the rents.
-        const wage=(bonded?0:professionAnnualWage(state)*(state.householdBudget?annualWorkRatio(state)*(state.householdBudget.debt===undefined?1:PASSIVE_WAGE_FACTOR):1)*fortuneIncomeFactor(state,beforeDay))+stationIncome(state);
+        const wage=(bonded?0:professionAnnualWage(state)*(state.householdBudget?annualWorkRatio(state)*PASSIVE_WAGE_FACTOR:1)*fortuneIncomeFactor(state,beforeDay))+stationIncome(state);
         const income=Math.max(0,Math.floor(state.day*wage/365)-Math.floor(beforeDay*wage/365));
         state.hero.gold+=income;
         state.life.career.experience+=state.hero.profession==='Unemployed'?0:Math.floor(days/10);
@@ -34365,7 +34349,7 @@ function endLife(state, cause) {
 function continueAsChild(original, childId) {if(terminalRun(original))return copy(original);
   if(original.revision<5||original.phase!=='retired')return {...copy(original),notice:'Close this chapter before continuing as a child.'};
   const next=createSuccessor(original,childId,createBirthGame);
-  if(next){if(!next.farm)initializeHouseholdBudget(next,{reset:true,edition:original.householdBudget?.debt!==undefined});if(original.fortune)initializeFortune(next);initializeConversations(next);inheritRpg(next,original);inheritStoryMazes(next,original);settlePublicRoster(next,{migration:true});}
+  if(next){if(!next.farm)initializeHouseholdBudget(next,{reset:true});initializeFortune(next);initializeConversations(next);inheritRpg(next,original);inheritStoryMazes(next,original);settlePublicRoster(next,{migration:true});}
   return next && next !== false && validateSave(next) ? next : {...copy(original),notice:'That child cannot continue this family story.'};
 }
 
@@ -34539,7 +34523,9 @@ function enableRoleplayUpdates(state) {
     if(state.progression.pendingCalling)state.progression.nextTrialVersion=1;
     else state.progression.trialVersion=1;
   }
-  initializeHouseholdBudget(state);
+  // One rulebook (v0.72.2): every life is read with the debt ledger and luck by season.
+  // A life from before them starts both today with the stated defaults: nothing owed, no luck behind it.
+  initializeHouseholdBudget(state);openLedger(state);initializeFortune(state);
   initializeFamilyOrigins(state);initializeFamilyDepth(state);initializeSociety(state,{migration:true});initializeCommunity(state,{migration:true});initializeFellowship(state,{migration:true});initializeSanctuaries(state,{migration:true});
   initializeSocial(state,{migration:true});initializePastimes(state,{migration:true});initializeLifeStories(state);
   initializeCurse(state);initializeRealm(state);initializeJustice(state);initializeAdventuring(state);initializeCartography(state,{migration:true});initializeRegionalWorld(state);initializeRpg(state,{migration:true});
@@ -37784,51 +37770,32 @@ function saveWorkspace(state,value,storage=globalThis.localStorage){try{storage?
 return {applyDisplay,displayPreset,normalizeDisplay,readDisplay,readWorkspace,saveDisplay,saveWorkspace};
 })();
 const __rulebook = (() => {
-// Which rulebook the main game lets into play.
+// Which lives the main game lets into play, and how it reads a stored one.
 //
-// The new rules only, from v0.72. A life is new rules when it carries a
+// One rulebook (v0.72). A stored life is told by its own stored markers, a
 // rolled station or a debt ledger (edition.js `rulesOf`, the markers the
-// rules themselves check; never a claimed stamp alone), which includes the
-// v0.61 lives that have a ledger and no station. A life written under the old
-// rules is kept in its slot, exported whole and sent to the Old Rules archive
-// (archive-link.js); it never opens here. The archive is the v0.69 game at its
-// own address with its own storage, and it admits only old-rules lives.
+// rules were written against; never a claimed stamp alone). A life written
+// under the old rules is never read here: the store keeps it exactly as it was
+// written (saves.js `kept`), and it leaves whole for the Old Rules archive
+// (archive-link.js), the v0.69 game at its own address with its own storage.
+//
+// Keep the store's decoder this one. The engine's `migrateSave` reads any
+// life it can into the one rulebook (a life from before the ledger is read
+// with the stated defaults); it is this door, not the engine, that sends an
+// old life to the archive.
 const { rulesOf, NEW } = __edition;
-const BOTH = 'both';
-const NEW_ONLY = 'new';
-const MAIN_ADMITS = NEW_ONLY;
-
-/** The test harness's route to the pre-v0.72 policy, for UI tests whose
- * scenarios still play on old-rules saves while the code they cover remains
- * in main (v0.72.1 onward rebases them or moves them to the archive). Only the
- * module itself imported as `…/app.js?rulebooks=both` qualifies
- * (tests/helpers/ui-surface.mjs). A page cannot reach it: the game's script
- * tag imports app.js without a query, and the offline file's inlined module
- * carries the page's own URL, which is not app.js. */
-function harnessRulebooks(moduleUrl) {
-  try {
-    const url = new URL(moduleUrl);
-    return /\/js\/app\.js$/.test(url.pathname) && url.searchParams.get('rulebooks') === BOTH ? BOTH : MAIN_ADMITS;
-  } catch { return MAIN_ADMITS; }
-}
-
-/** How the save store reads a stored life. Under the new rules only, an old
- * life is told by its own stored markers and never decoded: the store keeps it
- * exactly as it was written (saves.js `kept`), so nothing of the old rules'
- * code runs on it here and it leaves for the archive byte for byte. `BOTH`
- * decodes every life, as before v0.72. */
-function storedLifeDecoder(admits = MAIN_ADMITS, decode = value => value) {
-  return admits === NEW_ONLY ? value => rulesOf(value) === NEW ? decode(value) : null : decode;
+/** The store's decoder: a stored life is decoded only when it lives by the new rules. */
+function storedLifeDecoder(decode) {
+  return value => rulesOf(value) === NEW ? decode(value) : null;
 }
 
 /** The entry policy for life-entry.js, the save store and the Ironman session:
- * under the new rules only, a life must carry a station or a debt ledger;
- * `BOTH` (the policy before v0.72) admits every decoded life. */
-function admissionPolicy(admits = MAIN_ADMITS) {
-  return admits === NEW_ONLY ? state => rulesOf(state) === NEW : undefined;
+ * a life enters play only when it carries a station or a debt ledger. */
+function admissionPolicy() {
+  return state => rulesOf(state) === NEW;
 }
 
-return {BOTH,MAIN_ADMITS,NEW_ONLY,admissionPolicy,harnessRulebooks,storedLifeDecoder};
+return {admissionPolicy,storedLifeDecoder};
 })();
 const __archive_link = (() => {
 // Where the Old Rules archive lives. The archive is the v0.69 game published
@@ -37921,8 +37888,7 @@ function householdWords(s, choice) {
   if (short && feeOf(choice) <= s.hero.gold) {
     const nineteenth = s.timeline?.mode === 'birth' ? (s.timeline.birthDay || 0) + 19 * 365 : Infinity;
     const carriedOnce = s.age < 19 && !s.householdBudget.graceUsed && s.day + days < nineteenth;
-    risk = s.householdBudget.debt === undefined ? 'Without other coin, the house will need help.'
-      : carriedOnce ? 'Without other coin, the neighbours carry the house this once.'
+    risk = carriedOnce ? 'Without other coin, the neighbours carry the house this once.'
         : `Without other coin, the house will owe about ${short} gold.`;
   }
   return { text, risk };
@@ -37989,14 +37955,14 @@ function renderFarmerDay(s, view, actions, ui, { scene = '', continuation = '', 
 return {farmerDayVisible,renderFarmerBook,renderFarmerChoices,renderFarmerDay,renderFarmerScene};
 })();
 const __personality_ui = (() => {
-const { PERSONALITY_TRAITS, traitPointBudget, traitPoints, personalityTrait, personalityView, personalitySelectionReason, natureEdition } = __personality;
+const { PERSONALITY_TRAITS, traitPointBudget, traitPoints, personalityTrait, personalityView, personalitySelectionReason } = __personality;
 const e=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 // A nature is a trade-off on a new life; only older saves still carry the
 // attribute points a trait once bought.
-function traitBonusesLabel(t,state=null){return state&&!natureEdition(state)?Object.entries(t.attributes).map(([key,n])=>`+${n} ${key[0].toUpperCase()+key.slice(1)}`).join(' · '):t.acquired?'Written by life':'A trade-off, not a bonus';}
+function traitBonusesLabel(t){return t.acquired?'Written by life':'A trade-off, not a bonus';}
 function renderTraitPicker(ids,age,{creation=true,state=null}={}){
  const budget=traitPointBudget(age),remaining=budget-traitPoints(ids),slots=Array.from({length:3},(_,i)=>personalityTrait(ids[i]));
- return `<section class="personality-builder" aria-label="Personality traits"><div class="section-heading"><h3 tabindex="-1">Your Nature</h3><span class="badge" data-trait-points>${ids.length} / 3 traits</span></div><div class="trait-slots">${slots.map((t,i)=>t?`<div class="trait-slot filled"><strong>${e(t.name)}</strong><small>${e(traitBonusesLabel(t,state))}</small>${creation?`<button type="button" class="trait-remove" data-op="creator-trait" data-id="${t.id}" aria-label="Remove ${e(t.name)}">×</button>`:''}<p>${e(t.description)}</p></div>`:`<button type="button" class="trait-slot empty" data-op="trait-picker" data-id="${i}" ${age<3||remaining<1?'disabled':''} aria-label="Choose trait for slot ${i+1}"><span aria-hidden="true">+</span><small>${age<3?'Develops as you grow':'Add Trait'}</small></button>`).join('')}</div>${ids.length>3?`<p class="small-copy">Earlier traits remain: ${ids.slice(3).map(id=>e(personalityTrait(id)?.name||id)).join(', ')}. Your saved nature is retained.</p>`:''}<p class="small-copy">${age<3?'Nature develops after infancy.':'Choose up to three compatible traits. Conflicting traits cannot be paired.'}</p><details class="nature-rules"><summary>How Your Nature Affects Choices</summary><p>${state&&!natureEdition(state)?'Traits grant their listed attributes. ':'Some choices exist only for some natures, and people hold you by what their own people respect. '}Choices against a trait add 6 stress, up to 12 per decision, once per day; choices in harmony relieve up to 4, once per week. ${creation?'You may leave a slot open.':state&&natureEdition(state)?'Life writes the rest: how you cope when you break, what hunger makes of you, and what years of choosing otherwise do to a trait.':'Chosen traits are lasting.'}</p></details>${state?renderAcquired(state):''}</section>`;
+ return `<section class="personality-builder" aria-label="Personality traits"><div class="section-heading"><h3 tabindex="-1">Your Nature</h3><span class="badge" data-trait-points>${ids.length} / 3 traits</span></div><div class="trait-slots">${slots.map((t,i)=>t?`<div class="trait-slot filled"><strong>${e(t.name)}</strong><small>${e(traitBonusesLabel(t,state))}</small>${creation?`<button type="button" class="trait-remove" data-op="creator-trait" data-id="${t.id}" aria-label="Remove ${e(t.name)}">×</button>`:''}<p>${e(t.description)}</p></div>`:`<button type="button" class="trait-slot empty" data-op="trait-picker" data-id="${i}" ${age<3||remaining<1?'disabled':''} aria-label="Choose trait for slot ${i+1}"><span aria-hidden="true">+</span><small>${age<3?'Develops as you grow':'Add Trait'}</small></button>`).join('')}</div>${ids.length>3?`<p class="small-copy">Earlier traits remain: ${ids.slice(3).map(id=>e(personalityTrait(id)?.name||id)).join(', ')}. Your saved nature is retained.</p>`:''}<p class="small-copy">${age<3?'Nature develops after infancy.':'Choose up to three compatible traits. Conflicting traits cannot be paired.'}</p><details class="nature-rules"><summary>How Your Nature Affects Choices</summary><p>Some choices exist only for some natures, and people hold you by what their own people respect. Choices against a trait add 6 stress, up to 12 per decision, once per day; choices in harmony relieve up to 4, once per week. ${creation?'You may leave a slot open.':state?'Life writes the rest: how you cope when you break, what hunger makes of you, and what years of choosing otherwise do to a trait.':'Chosen traits are lasting.'}</p></details>${state?renderAcquired(state):''}</section>`;
 }
 function renderAcquired(state){const rows=personalityView(state).acquired;if(!rows.length)return '';return `<div class="trait-slots trait-marks" aria-label="What life has written">${rows.map(t=>`<div class="trait-slot filled"><strong>${e(t.name)}</strong><small>Since age ${Math.max(0,Math.floor((t.day-(state.timeline?.birthDay||0))/365))}</small><p>${e(t.description)}</p></div>`).join('')}</div>`;}
 function renderTraitSelection(ids,age,{creation=true,state=null}={}){
@@ -41103,7 +41069,7 @@ const { readDisplay, saveDisplay, applyDisplay, displayPreset, readWorkspace, sa
 const { personalityImpactText, personalityTrait } = __personality;
 const { voiceActions, voiceEvent, chapterHeading, whatMatters } = __voice;
 const { rulesLabel, rulesNote, oldRules, exportFileName, OLD_RULES_DOOR, OLD_RULES_BACKUP_DOOR } = __edition;
-const { admissionPolicy, harnessRulebooks, storedLifeDecoder } = __rulebook;
+const { admissionPolicy, storedLifeDecoder } = __rulebook;
 const { ARCHIVE_URL, ARCHIVE_NAME } = __archive_link;
 const { createLifeEntry, LIFE_ENTRY_REFUSED, LIFE_ENTRY_CANCELLED } = __life_entry;
 const { schoolingView } = __schooling;
@@ -41204,14 +41170,13 @@ const storage = await openSaveStorage();
 if(storage?.onChange)storage.onChange(event=>window.dispatchEvent(new StorageEvent('storage',{key:event.key,oldValue:event.oldValue,newValue:event.newValue})));
 let displaySettings=readDisplay(storage);applyDisplay(displaySettings);
 // One rulebook (v0.72): rulebook.js admits the new rules only. One policy feeds
-// ordinary entry, incoming writes and Ironman locked entry. Only the test
-// harness can import this module with the pre-v0.72 policy (harnessRulebooks).
-const rulebooks = harnessRulebooks("about:hearth-and-oath-offline"), positionAdmissionPolicy = admissionPolicy(rulebooks);
+// ordinary entry, incoming writes and Ironman locked entry.
+const positionAdmissionPolicy = admissionPolicy();
 // An old-rules life is kept as it was stored and never decoded here (rulebook.js).
-const readStoredLife = storedLifeDecoder(rulebooks, migrateSave);
+const readStoredLife = storedLifeDecoder(migrateSave);
 const saveStore = createSaveStore(storage, readStoredLife, {acceptPosition:positionAdmissionPolicy});
 const lifeEntry = createLifeEntry({store:saveStore,coordinate:operation=>saveOperation(operation),acceptPosition:positionAdmissionPolicy});
-/** A life this page keeps and can export but will not let into play: an old-rules life once the cutover is taken (or rehearsed). Never true while both rulebooks are admitted. */
+/** A life this page keeps and can export but will not let into play: an old-rules life arriving by file or kept as a backup. */
 const refusedHere = state => Boolean(state) && !lifeEntry.canEnter(state);
 /** Who is in a slot: the life this build can open, or one it keeps exactly as stored because it cannot decode it. */
 const occupantOf = id => saveStore.read(Number(id)) || saveStore.kept(Number(id));
@@ -41621,7 +41586,7 @@ function navigationLabel(id,label){return id==='journal'&&game?.farm&&farmView(g
 function groupedNavigation(){return navigationGroups.map(([name,rows])=>`<details class="navigation-group" open><summary>${e(name)}</summary>${rows.map(([id,label])=>`<button type="button" class="nav-item ${tab===id?'active':''}" data-op="tab" data-id="${id}" ${tab===id?'aria-current="page"':''}>${uiIcon(id)}<span>${e(navigationLabel(id,label))}</span></button>`).join('')}</details>`).join('');}
 function sidebar() {
  const main=navigationGroups[0][1].map(([id,label])=>[id,navigationLabel(id,label)]);
- return `<aside class="sidebar game-rail"><button class="brand" type="button" data-op="menu" aria-label="Open game menu"><span class="brand-title">Hearth &amp; Oath</span><small>VOLUME I</small></button><nav aria-label="Main views">${main.map(([id,label])=>`<button type="button" class="nav-item ${tab===id?'active':''}" data-op="tab" data-id="${id}" aria-label="${label}" title="${label}" ${tab===id?'aria-current="page"':''}>${uiIcon(id)}<span>${label}</span></button>`).join('')}</nav><div class="rail-footer">${button('Character','tab','character','ghost small')}${button('Party','tab','party','ghost small')}${button('Main Menu','title-menu','','ghost small')}${button('Settings','game-settings','','ghost small')}<small>v0.72.1</small></div></aside>`;
+ return `<aside class="sidebar game-rail"><button class="brand" type="button" data-op="menu" aria-label="Open game menu"><span class="brand-title">Hearth &amp; Oath</span><small>VOLUME I</small></button><nav aria-label="Main views">${main.map(([id,label])=>`<button type="button" class="nav-item ${tab===id?'active':''}" data-op="tab" data-id="${id}" aria-label="${label}" title="${label}" ${tab===id?'aria-current="page"':''}>${uiIcon(id)}<span>${label}</span></button>`).join('')}</nav><div class="rail-footer">${button('Character','tab','character','ghost small')}${button('Party','tab','party','ghost small')}${button('Main Menu','title-menu','','ghost small')}${button('Settings','game-settings','','ghost small')}<small>v0.72.2</small></div></aside>`;
 }
 function ageControlState() {
   let reason='';
@@ -41691,7 +41656,7 @@ function titleScreen() {
   const primary=state?`<article class="title-life" data-return-life-card data-slot-live="${live}" aria-label="Your current life"><button type="button" class="title-menu-item title-continue-card" data-op="title-continue" data-id="${recent.id}"><span class="title-life-portrait" aria-hidden="true">${renderAvatar(state.hero,{size:'small',age:state.age??18})}</span><span class="title-life-copy"><span class="title-action-label">Continue</span><strong>${e(state.hero.name)}</strong><small>Age ${state.age??18} · ${isIronman(state)?'Ironman · ':''}Slot ${recent.id+1}</small>${rulesMarkup(state,{compact:true})}<span class="title-life-place">${e(place)}</span>${card.context?`<span class="title-life-context">${e(card.context)}</span>`:''}</span><span class="menu-arrow" aria-hidden="true">→</span></button><p class="title-source-note" data-slot-source ${card.sourceNote?'':'hidden'}>${e(card.sourceNote)}</p>${saveHealthMarkup(recent.id,{live})}</article>`:menuItem('Begin a new life','title-new',{detail:'Choose an origin, a face and your first year.',className:'title-begin'});
   const keptCard=keptRecent?keptLifeCard(keptRecent.kept,keptRecent.id,{undecoded:true}):'';
   const keptNote=kept.length?` · ${kept.length} kept for the archive`:'';
-  return `<main class="title-screen" aria-labelledby="title-heading">${titleArtwork()}<header class="title-topline"><span>A DARK FANTASY LIFE</span>${button(fullscreenLabel(),'fullscreen','','ghost small')}</header><div class="title-content"><h1 id="title-heading" class="title-wordmark"><span>Hearth</span> <span><em>&amp;</em> Oath</span></h1><p class="title-tagline">The world is old.<br>${state?'Your story continues.':'Your story is unwritten.'}</p><nav class="title-menu" aria-label="Title menu">${keptCard}${primary}<div class="title-life-actions">${state?menuItem('New life','title-new'):''}${menuItem('Saved lives','title-load',{disabled:!occupied.length,detail:occupied.length?`${occupied.length} of 3 slots occupied${keptNote}`:'No lives saved in this browser'})}</div><div class="title-secondary">${menuItem('Settings','title-settings')}${menuItem('How to play','help')}${menuItem('Tactics rehearsal','practice-open',{id:'protect_ally',detail:'Practice with a fictional party'})}${menuItem('Import a saved life','import',{detail:'Open an exported save file'})}</div></nav>${!state?saveHealthMarkup(activeSlot):''}</div><footer class="title-footer"><div class="title-settings"><button type="button" class="button ghost small" data-op="music-toggle" aria-pressed="${getAudioSettings().musicEnabled}">♫ Music ${getAudioSettings().musicEnabled?'on':'off'}</button><span>Ambient score · adjustable in Settings</span></div><p class="title-save-note">Saves stay in this browser. Export a file to keep a separate copy.</p><div class="title-bottomline"><span>VOLUME I · THE BOOK OF A LIFE</span><span>v0.72.1</span></div></footer></main>`;
+  return `<main class="title-screen" aria-labelledby="title-heading">${titleArtwork()}<header class="title-topline"><span>A DARK FANTASY LIFE</span>${button(fullscreenLabel(),'fullscreen','','ghost small')}</header><div class="title-content"><h1 id="title-heading" class="title-wordmark"><span>Hearth</span> <span><em>&amp;</em> Oath</span></h1><p class="title-tagline">The world is old.<br>${state?'Your story continues.':'Your story is unwritten.'}</p><nav class="title-menu" aria-label="Title menu">${keptCard}${primary}<div class="title-life-actions">${state?menuItem('New life','title-new'):''}${menuItem('Saved lives','title-load',{disabled:!occupied.length,detail:occupied.length?`${occupied.length} of 3 slots occupied${keptNote}`:'No lives saved in this browser'})}</div><div class="title-secondary">${menuItem('Settings','title-settings')}${menuItem('How to play','help')}${menuItem('Tactics rehearsal','practice-open',{id:'protect_ally',detail:'Practice with a fictional party'})}${menuItem('Import a saved life','import',{detail:'Open an exported save file'})}</div></nav>${!state?saveHealthMarkup(activeSlot):''}</div><footer class="title-footer"><div class="title-settings"><button type="button" class="button ghost small" data-op="music-toggle" aria-pressed="${getAudioSettings().musicEnabled}">♫ Music ${getAudioSettings().musicEnabled?'on':'off'}</button><span>Ambient score · adjustable in Settings</span></div><p class="title-save-note">Saves stay in this browser. Export a file to keep a separate copy.</p><div class="title-bottomline"><span>VOLUME I · THE BOOK OF A LIFE</span><span>v0.72.2</span></div></footer></main>`;
 }
 /** The rules a life lives by, on its slot and its review: the label, and for an old-rules life the way to the archive. */
 function rulesMarkup(state,{slot=null,compact=false,undecoded=false,labelled=true}={}){
@@ -41702,8 +41667,8 @@ function rulesMarkup(state,{slot=null,compact=false,undecoded=false,labelled=tru
   }
   const label=`<small class="slot-rules ${oldRules(state)?'old-rules':'new-rules'}" data-rules="${oldRules(state)?'old':'new'}">${e(rulesLabel(state))}</small>`;
   if(compact||!oldRules(state))return label;
-  const refused=undecoded,note=rulesNote(state,{admitted:!refused}),link=archiveLink();
-  return `${labelled?label:''}<div class="slot-archive-note" data-archive-note ${refused?'data-refused-life':''}><p>${e(note)}</p><div class="slot-row-actions">${slot===null?'':`<button class="button secondary small" type="button" data-op="${undecoded?'export-kept':'export-session'}" data-id="${slot}">Export for the archive</button>`}${link}</div></div>`;
+  // An old-rules life here is always one kept as it was stored: it is never decoded.
+  return `${labelled?label:''}<div class="slot-archive-note" data-archive-note data-refused-life><p>${e(rulesNote(state))}</p><div class="slot-row-actions">${slot===null?'':`<button class="button secondary small" type="button" data-op="export-kept" data-id="${slot}">Export for the archive</button>`}${archiveLink()}</div></div>`;
 }
 function archiveLink(cls='ghost small'){return ARCHIVE_URL?`<a class="button ${cls}" href="${e(ARCHIVE_URL)}" target="_blank" rel="noopener" data-archive-link>Open ${e(ARCHIVE_NAME)}</a>`:'';}
 /** A kept life's face and place, read from what was stored; an undecoded life is never passed through the engine. */
@@ -41725,7 +41690,7 @@ function saveSlotRow(slot,creating) {
   if(!slot.state&&slot.kept)return keptSlotRow(slot,creating);
   const live=Boolean(slot.state&&slot.id===activeSlot&&game),state=live?game:slot.state;
   const card=state?returnLifeCardView(state,slotSaveHealth(slot.id,true),{live,readCommitment:getLifeCommitment}):null;
-  return `<article class="save-slot-row ${state?'occupied-slot-row':''}" data-return-life-card data-slot-live="${live}" aria-label="Saved life slot ${slot.id+1}"><button class="save-slot ${state?'':'empty-slot'}" type="button" data-op="${creating?'slot-new':'slot-load'}" data-id="${slot.id}" ${(!creating&&!state||creating&&isIronman(state))?'disabled':''}><span class="slot-number">0${slot.id+1}</span><span class="slot-portrait">${state?renderAvatar(state.hero,{size:'small',age:state.age??18}):'<span aria-hidden="true">†</span>'}</span><span class="slot-info"><strong>${state?e(state.hero.name):'An unwritten life'}</strong><span>${state?`Age ${state.age??18} · ${e(roleTitle(state.world.name))}`:'Empty save slot'}</span>${state?`<small>${e(roleTitle(state.world.locations.find(place=>place.id===state.locationId)?.name||''))}</small>${card.context?`<small class="slot-pending-context">${e(card.context)}</small>`:''}<small class="slot-source-note" data-slot-source ${card.sourceNote?'':'hidden'}>${e(card.sourceNote)}</small>${rulesMarkup(state,{compact:true})}`:''}</span><span class="menu-arrow" aria-hidden="true">${creating?(state?'Replace →':'Create →'):'Return →'}</span></button>${isIronman(state)?`<div class="slot-row-actions">${button(live?'Export current Ironman':'Resume to export',live?'export':'slot-load',slot.id,'secondary small')}${button('Review archive or deletion','ironman-review',runIdOf(state),'ghost small')}</div><p>Ironman · combat death ends this run.</p>`:state?`<div class="slot-row-actions"><button class="button secondary small slot-export" type="button" data-op="export-session" data-id="${slot.id}" aria-label="${e(card.exportLabel)}" title="${e(card.exportLabel)}">Export</button><button class="button ghost small slot-delete" type="button" data-op="slot-delete" data-id="${slot.id}" aria-label="Delete ${e(state.hero.name)}">Delete</button></div>${saveHealthMarkup(slot.id,{live:true,exportButton:false,unknownTimeLabel:'Save time unavailable'})}${oldRules(state)?rulesMarkup(state,{slot:slot.id,labelled:false}):''}`:''}</article>`;
+  return `<article class="save-slot-row ${state?'occupied-slot-row':''}" data-return-life-card data-slot-live="${live}" aria-label="Saved life slot ${slot.id+1}"><button class="save-slot ${state?'':'empty-slot'}" type="button" data-op="${creating?'slot-new':'slot-load'}" data-id="${slot.id}" ${(!creating&&!state||creating&&isIronman(state))?'disabled':''}><span class="slot-number">0${slot.id+1}</span><span class="slot-portrait">${state?renderAvatar(state.hero,{size:'small',age:state.age??18}):'<span aria-hidden="true">†</span>'}</span><span class="slot-info"><strong>${state?e(state.hero.name):'An unwritten life'}</strong><span>${state?`Age ${state.age??18} · ${e(roleTitle(state.world.name))}`:'Empty save slot'}</span>${state?`<small>${e(roleTitle(state.world.locations.find(place=>place.id===state.locationId)?.name||''))}</small>${card.context?`<small class="slot-pending-context">${e(card.context)}</small>`:''}<small class="slot-source-note" data-slot-source ${card.sourceNote?'':'hidden'}>${e(card.sourceNote)}</small>${rulesMarkup(state,{compact:true})}`:''}</span><span class="menu-arrow" aria-hidden="true">${creating?(state?'Replace →':'Create →'):'Return →'}</span></button>${isIronman(state)?`<div class="slot-row-actions">${button(live?'Export current Ironman':'Resume to export',live?'export':'slot-load',slot.id,'secondary small')}${button('Review archive or deletion','ironman-review',runIdOf(state),'ghost small')}</div><p>Ironman · combat death ends this run.</p>`:state?`<div class="slot-row-actions"><button class="button secondary small slot-export" type="button" data-op="export-session" data-id="${slot.id}" aria-label="${e(card.exportLabel)}" title="${e(card.exportLabel)}">Export</button><button class="button ghost small slot-delete" type="button" data-op="slot-delete" data-id="${slot.id}" aria-label="Delete ${e(state.hero.name)}">Delete</button></div>${saveHealthMarkup(slot.id,{live:true,exportButton:false,unknownTimeLabel:'Save time unavailable'})}`:''}</article>`;
 }
 function saveSlotsScreen() {
   const creating=slotsMode==='new';

@@ -21,7 +21,6 @@ let bundle = '';
 const modules = [];
 const visited = new Set();
 const visiting = new Set();
-const OFFLINE_MODULE_URL = 'about:hearth-and-oath-offline';
 const moduleVariable = name =>`__${name.replace(/[^a-zA-Z0-9_$]/g, '_')}`;
 async function discover(module) {
   if (visited.has(module)) return;
@@ -57,10 +56,7 @@ for (const entry of modules) {
   source = source.replace(/^import\s+\{([^}]+)\}\s+from\s+'\.\/([^']+)\.js';\s*$/gm,
     (_, symbols, dependency) => `const {${symbols.replace(/\b(\w+)\s+as\s+(\w+)\b/g, '$1: $2')}} = ${moduleVariable(dependency)};`);
   source = source.replace(/^export\s+/gm, '');
-  // The bundle is not a module graph, and the downloaded file is never the
-  // test harness: app.js reads its own URL only for `harnessRulebooks`, so the
-  // offline file gets a fixed address that admits the new rules only.
-  if (module === 'app') source = source.replaceAll('import.meta.url', JSON.stringify(OFFLINE_MODULE_URL));
+  // The bundle is not a module graph: no module may read its own address.
   if (/\bimport\.meta\b/.test(source)) throw new Error(`Offline module ${module} reads import.meta, which the bundle cannot carry.`);
   const result = names.length ? `return {${names.join(',')}};` : '';
   // The entry awaits its save database before rendering, so it runs as an

@@ -18,9 +18,6 @@ import { mazeMapRuntime, mazeLayout } from '../dist/js/maze-v31.js';
 import { mazeMapIdentity } from '../dist/js/maze-map-memory.js';
 import { fakeSurface, mountApp } from './helpers/ui-surface.mjs';
 import { freshStory } from './helpers/story-life-fixtures.mjs';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
 
 // Additional bounded SOURCE handler checks. Fixtures are controlled fictional
 // projections, not earned routes, browser timing or release certification.
@@ -58,7 +55,7 @@ async function seed(source){
   return {storageEntries:[...ui.values],locks,other};
 }
 async function mounted(t,source=ironman()){
-  const prepared=await seed(source),ui=await mountApp(t, {rulebooks:'both', storageEntries:prepared.storageEntries,locks:prepared.locks});await flush();await ui.click('title-continue');await flush();
+  const prepared=await seed(source),ui=await mountApp(t, {storageEntries:prepared.storageEntries,locks:prepared.locks});await flush();await ui.click('title-continue');await flush();
   assert.equal(phase(ui),'ready');assert.deepEqual(head(ui).state,source);return {...prepared,ui,source};
 }
 function captureExports(t,ui){const blobs=[],create=URL.createObjectURL,revoke=URL.revokeObjectURL;URL.createObjectURL=blob=>{blobs.push(blob);return 'blob:ironman-extended';};URL.revokeObjectURL=()=>{};ui.document.createElement=()=>({click(){}});t.after(()=>{URL.createObjectURL=create;URL.revokeObjectURL=revoke;});return blobs;}
@@ -67,7 +64,7 @@ async function heldCommand(ui,locks,source,operation){locks.hold();await operati
 async function finishHeld(ui,locks,expected){locks.release();await flush();assert.equal(phase(ui),'ready');assert.deepEqual(head(ui).state,expected);}
 
 test('actual adult Ironman submit completes Standard prehistory before committing its first new-run head',async t=>{
-  const locks=lockManager(),ui=await mountApp(t, {rulebooks:'both', locks});await ui.click('title-new');await ui.click('slot-new','0');
+  const locks=lockManager(),ui=await mountApp(t, {locks});await ui.click('title-new');await ui.click('slot-new','0');
   ui.set('name','Fictional Adult Opt In');ui.set('startAge','18');ui.set('lifeMode','ironman');
   const bytes=shared(ui);await ui.click('creator-step','2');await ui.submit();await flush();assert.equal(phase(ui),'ready');
   const keys=[...ui.values.keys()].filter(key=>key.startsWith('hearth-and-oath:ironman-run:v1:'));assert.equal(keys.length,1);
@@ -79,7 +76,7 @@ test('actual adult Ironman submit completes Standard prehistory before committin
 });
 
 test('a first-save write followed by lost readback freezes game-null entry and adopts that exact candidate after fresh reconciliation',async t=>{
-  const locks=lockManager(),ui=await mountApp(t, {rulebooks:'both', locks});await ui.click('title-new');await ui.click('slot-new','0');
+  const locks=lockManager(),ui=await mountApp(t, {locks});await ui.click('title-new');await ui.click('slot-new','0');
   ui.set('name','Fictional Unconfirmed Opening');ui.set('startAge','0');ui.set('lifeMode','ironman');
   const set=ui.storage.setItem.bind(ui.storage),get=ui.storage.getItem.bind(ui.storage);let saved=null,lost=true,writes=0;
   ui.storage.setItem=(key,value)=>{const result=set(key,value);if(key.startsWith('hearth-and-oath:ironman-run:v1:')){saved=JSON.parse(value);writes++;}return result;};
@@ -161,7 +158,7 @@ test('an orphan recovery cannot adopt a retained head changed by another real au
 });
 
 test('a delayed Standard file-read completion cannot open an obsolete import over a newly resumed Ironman life',async t=>{
-  const prepared=await seed(ironman()),ui=await mountApp(t, {rulebooks:'both', storageEntries:prepared.storageEntries,locks:prepared.locks});await flush();
+  const prepared=await seed(ironman()),ui=await mountApp(t, {storageEntries:prepared.storageEntries,locks:prepared.locks});await flush();
   await ui.click('title-load');await ui.click('slot-load','2');assert.ok(ui.root.querySelector('.game-frame'));
   let resolve;const text=new Promise(done=>{resolve=done;}),input=ui.root.querySelector('#save-file');input.files=[{size:100,text:()=>text}];
   const reading=ui.fire('change',input);await nextTurn();

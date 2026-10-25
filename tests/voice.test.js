@@ -90,9 +90,7 @@ test('the voice rewrites what the player reads and keeps the engine’s figures 
   assert.equal(talk.label, 'Speak with Mara'); assert.match(talk.description, /remembered/);
   const unknown = { id: 'some_other_thing', label: 'X', description: 'Y' };
   assert.deepEqual(voiceAction(s, unknown), unknown);
-  // Not for older lives.
-  const old = structuredClone(s); delete old.hero.station; delete old.farm; delete old.householdBudget.debt;
-  assert.equal(voiceActions(old, [{ id: 'career_work', label: 'Work a shift at the yard', description: 'Earn 25 gold.' }])[0].detail, undefined);
+  // One rulebook (v0.72.2): every life the main game plays is voiced; there is no older life to leave alone.
   // Through the real action list every voiced action keeps its id, days and cost.
   const real = engine.getActions(s), voiced = voiceActions(s, real);
   assert.equal(voiced.length, real.length);
@@ -157,9 +155,7 @@ test('right now: three to five things that matter today, chosen from what is off
   s.health.physical.push({ id: 'fever-now', type: 'fever', severity: 2, sinceDay: s.day, lastEffectDay: s.day, careUntil: 0, acknowledged: true });
   const sick = whatMatters(s, voiceActions(s, engine.getActions(s)));
   assert.equal(sick[0]?.id, 'health_rest'); assert.match(sick[0].why, /getting worse/);
-  // Never during a scene, never for an older life.
+  // Never during a scene.
   s.event = { id: 'x', title: 't', category: 'c', body: 'b', choices: [{ id: 'a', label: 'A', description: '' }] };
   assert.deepEqual(whatMatters(s, actions), []);
-  const old = structuredClone(adult('voice-now')); delete old.hero.station; delete old.farm; delete old.householdBudget.debt;
-  assert.deepEqual(whatMatters(old, engine.getActions(old)), []);
 });

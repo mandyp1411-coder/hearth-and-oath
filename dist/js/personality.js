@@ -62,9 +62,7 @@ export function traitPoints(ids=[]){return ids.reduce((sum,id)=>sum+(personality
 export function normalizePersonalityTraits(value,age=0){
   const result=[];for(const id of Array.isArray(value)?value:[]){const t=personalityTrait(id);if(!t||result.includes(id)||result.includes(t.opposite)||traitPoints(result)+t.cost>traitPointBudget(age))continue;result.push(id);}return result;
 }
-export function traitAttributeBonuses(ids=[]){const out={};for(const id of ids)for(const [key,n] of Object.entries(personalityTrait(id)?.attributes||{}))out[key]=(out[key]||0)+n;return out;}
-export const natureEdition=state=>state?.householdBudget?.debt!==undefined;
-export function personalityView(state){const traits=state?.hero?.personality?.traits||[],budget=traitPointBudget(state?.age),acquired=(state?.hero?.marks||[]).map(m=>({...personalityTrait(m.id),day:m.day,source:m.source})).filter(t=>t.id);return {traits:traits.map(personalityTrait).filter(Boolean),ids:[...traits],acquired,budget,spent:traitPoints(traits),remaining:budget-traitPoints(traits),bonuses:natureEdition(state)?{}:traitAttributeBonuses(traits),history:state?.hero?.personality?.history||[],stress:state?.life?.stress||0};}
+export function personalityView(state){const traits=state?.hero?.personality?.traits||[],budget=traitPointBudget(state?.age),acquired=(state?.hero?.marks||[]).map(m=>({...personalityTrait(m.id),day:m.day,source:m.source})).filter(t=>t.id);return {traits:traits.map(personalityTrait).filter(Boolean),ids:[...traits],acquired,budget,spent:traitPoints(traits),remaining:budget-traitPoints(traits),bonuses:{},history:state?.hero?.personality?.history||[],stress:state?.life?.stress||0};}
 export function initializePersonality(state){if(!state.hero.personality)state.hero.personality={version:1,traits:[],applied:[],cooldowns:{},history:[]};}
 const reflectionPause={id:'pause',label:'Leave this exchange for later',description:'Leave without spending time or changing the relationship. Meet any urgent need, then return to the grievance.'};
 export function initializePersonalityDecision(state){
@@ -84,16 +82,9 @@ export function personalitySelectionReason(state,id){
  * twice. On a new-edition life there are none: a nature is a trade-off, chosen
  * for who you want to be, not for a point of Strength. */
 export function applyPersonalityBuild(state,ids,{creation=false}={}){
-  initializePersonality(state);const p=state.hero.personality,chosen=normalizePersonalityTraits(ids,state.age),edition=natureEdition(state);
+  initializePersonality(state);const p=state.hero.personality,chosen=normalizePersonalityTraits(ids,state.age);
   if(p.traits.some(id=>!chosen.includes(id)))return false;
-  for(const id of chosen)if(!p.applied.includes(id)){
-    for(const [key,amount] of Object.entries(edition?{}:personalityTrait(id).attributes)){
-      state.hero.attributes[key]+=amount;
-      if(key==='vitality'){state.hero.maxHp+=amount*3;state.hero.hp=Math.min(state.hero.maxHp,state.hero.hp+amount*3);}
-      if(key==='intellect'){state.hero.maxMp+=amount*3;state.hero.mp=Math.min(state.hero.maxMp,state.hero.mp+amount*3);}
-    }
-    p.applied.push(id);
-  }
+  for(const id of chosen)if(!p.applied.includes(id))p.applied.push(id);
   p.traits=chosen;return true;
 }
 function actionTags(id){
@@ -184,10 +175,10 @@ export function applyPersonalityImpact(state,context){
   const amount=Math.max(-4,Math.min(12,entries.reduce((n,i)=>n+i.delta,0))),old=state.life.stress;
   state.life.stress=Math.max(0,Math.min(100,old+amount));
   for(const i of entries)p.cooldowns[`${i.id}:${i.tag}`]=state.day;
-  if(natureEdition(state))recordStrain(state,entries,context);
+  recordStrain(state,entries,context);
   // Where people can see it, acting on your nature moves how they hold you:
   // what their people respect draws them closer, what it scorns pushes them off.
-  if(natureEdition(state))for(const i of entries.filter(i=>i.delta<0))for(const person of state.life.people){
+  for(const i of entries.filter(i=>i.delta<0))for(const person of state.life.people){
     if(person.alive===false||person.locationId!==state.locationId||!person.appearance?.ancestry)continue;
     const regard=cultureRegard(person.appearance.ancestry,i.id);if(regard)person.bond=Math.max(0,Math.min(100,(person.bond||0)+regard));
   }

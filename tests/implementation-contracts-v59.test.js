@@ -26,9 +26,6 @@ import { displayPreset, normalizeDisplay } from '../dist/js/display.js';
 import { mountApp } from './helpers/ui-surface.mjs';
 import { compatibilityConversation, compatibilityView } from '../dist/js/family-depth.js';
 import { PORTRAIT_CATALOG, portraitPreset } from '../dist/js/portrait-catalog.js';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
 
 const readers={getActions:E.getActions,chooseAction:E.chooseAction,getLifeCommitment:E.getLifeCommitment};
 const ui={e:v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;'),date:d=>'Day '+d,paragraphs:v=>'<p>'+v+'</p>',button:(label,op,id,cls,disabled)=>`<button data-op="${op}" data-id="${id}"${disabled?' disabled':''}>${label}</button>`};
@@ -102,7 +99,7 @@ test('all three native descent sizes retain exact archived geometry beside a lat
  assert.deepEqual([...sizes].sort((a,b)=>a-b),[5,7,11]);
 });
 test('production Plans, review cancellation and reading presets change no game state',async t=>{
- const s=freshStory(),surface=await mountApp(t, {rulebooks:'both', states:[s]});await surface.click('title-continue');await surface.click('workspace-section','life:plans');assert.ok(surface.root.querySelector('[data-life-calendar]'));assert.ok(surface.root.querySelector('[data-consequence-ledger]'));const offer=surface.root.querySelector('[data-op="routine-review"]');assert.ok(offer);await surface.click('routine-review',offer.dataset.id);assert.equal(surface.document.activeElement?.dataset.op,'close-modal');await surface.click('close-modal');assert.deepEqual(surface.current(),s);
+ const s=freshStory(),surface=await mountApp(t, {states:[s]});await surface.click('title-continue');await surface.click('workspace-section','life:plans');assert.ok(surface.root.querySelector('[data-life-calendar]'));assert.ok(surface.root.querySelector('[data-consequence-ledger]'));const offer=surface.root.querySelector('[data-op="routine-review"]');assert.ok(offer);await surface.click('routine-review',offer.dataset.id);assert.equal(surface.document.activeElement?.dataset.op,'close-modal');await surface.click('close-modal');assert.deepEqual(surface.current(),s);
  await surface.click('game-settings');await surface.click('reading-preset','clear');assert.deepEqual(normalizeDisplay(displayPreset('clear')),{scale:1.3,font:'plain',singleKeyShortcuts:false,reducedMotion:true});assert.deepEqual(surface.current(),s);
 });
 test('new values discussions reveal one preference while older recorded knowledge remains intact',()=>{
@@ -118,12 +115,12 @@ test('project abandonment reviews committed losses, cancellation is free, and co
  let s=freshStory();s.hero.gold=1000;Object.assign(s.equipment.materials,{wood:20,stone:20,cloth:20});
  const provider=settlementServices(s).find(r=>r.kind==='smith');s=walk(s,provider.roomId);s.day=(s.timeline.birthDay||0)+(s.age+1)*365-1;s=act(s,'workshop_build_shelter');assert.ok(s.workshop.project);
  for(let i=0;s.event&&i<20;i++)s=pick(s,s.event.choices.find(c=>c.id==='care'&&!c.disabledReason)?.id||s.event.choices.find(c=>!c.disabledReason).id);
- roundtrip(s);const surface=await mountApp(t, {rulebooks:'both', states:[s]});await surface.click('title-continue');const before=surface.current();
+ roundtrip(s);const surface=await mountApp(t, {states:[s]});await surface.click('title-continue');const before=surface.current();
  await surface.click('activity','workshop_cancel');assert.match(surface.root.innerHTML,/Already committed/);assert.match(surface.root.innerHTML,/will not be refunded/);assert.equal(surface.document.activeElement?.dataset.op,'close-modal');assert.ok(isDeepStrictEqual(surface.current(),before));
  await surface.click('close-modal');assert.ok(isDeepStrictEqual(surface.current(),before));await surface.click('activity','workshop_cancel');const old=surface.root.querySelector('[data-op="project-abandon-confirm"]');await surface.click('project-abandon-confirm');const after=surface.current();assert.ok(isDeepStrictEqual(after,E.chooseAction(before,'workshop_cancel')));assert.equal(after.workshop.project,null);await surface.fire('click',old);assert.ok(isDeepStrictEqual(surface.current(),after));roundtrip(after);
 });
 test('unsubmitted notes warn on page exit without becoming a saved game note',async t=>{
- const s=freshStory(),surface=await mountApp(t, {rulebooks:'both', states:[s]});await surface.click('title-continue');await surface.click('tab','journal');await surface.click('workspace-section','journal:notes');const field=surface.root.querySelector('#note-text');field.value='Unsubmitted thought';await surface.fire('input',field);const leaving=await surface.windowEvent('beforeunload');assert.equal(leaving.defaultPrevented,true);assert.ok(isDeepStrictEqual(surface.current(),s));
+ const s=freshStory(),surface=await mountApp(t, {states:[s]});await surface.click('title-continue');await surface.click('tab','journal');await surface.click('workspace-section','journal:notes');const field=surface.root.querySelector('#note-text');field.value='Unsubmitted thought';await surface.fire('input',field);const leaving=await surface.windowEvent('beforeunload');assert.equal(leaving.defaultPrevented,true);assert.ok(isDeepStrictEqual(surface.current(),s));
 });
 
 test('a genuinely played long life can begin a battle beyond the former 2M save limit and reload exactly',()=>{

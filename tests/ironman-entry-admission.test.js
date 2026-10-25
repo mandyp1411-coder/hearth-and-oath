@@ -6,7 +6,7 @@ import {setImmediate} from 'node:timers/promises';
 import {createSaveCoordinator, createSaveStore, LEGACY_SAVE_KEY} from '../dist/js/saves.js';
 import {createIronmanSession} from '../dist/js/ironman-session.js';
 import {migrateSave, validateSave} from '../dist/js/engine.js';
-import {rulesOf, NEW} from '../dist/js/edition.js';
+import {rulesOf, NEW, OLD} from '../dist/js/edition.js';
 import {createIronmanMetadata, recordCombatZero, ironmanHeroDeath} from '../dist/js/ironman.js';
 import {createBattle} from '../dist/js/combat.js';
 import {ironmanRecordKey, ironmanEndedKey, ironmanRecordToken} from '../dist/js/ironman-storage.js';
@@ -19,12 +19,15 @@ const KEY = 'hearth-and-oath:slots:v1', RUN = '00112233-4455-4677-8899-aabbccdde
 const copy = value => structuredClone(value), newOnly = state => rulesOf(state) === NEW;
 const release = version => JSON.parse(gunzipSync(readFileSync(new URL(`./fixtures/saves/v${version}.json.gz`, import.meta.url)))).states;
 const historical = Object.fromEntries(['0600', '0610', '0690'].map(version => [version, release(version)]));
-const old = migrateSave(historical['0600'].eighteen), newer = migrateSave(historical['0690'].eighteen);
+// v0.72.2: the engine reads any life into the one rulebook, so these store/session tests decode
+// with a reader that keeps an old life as its own stored rules: the subject is the entry fence.
+const readBoth = value => rulesOf(value) === OLD ? (validateSave(value) ? structuredClone(value) : null) : migrateSave(value);
+const old = readBoth(historical['0600'].eighteen), newer = migrateSave(historical['0690'].eighteen);
 let entropy = 0;
 function optedIn(version = '0600') {
-  const state = migrateSave(historical[version].eighteen);
+  const state = readBoth(historical[version].eighteen);
   state.ironman = createIronmanMetadata(state, {randomUUID: () => RUN});
-  assert.ok(validateSave(state)); assert.deepEqual(migrateSave(state), state); return state;
+  assert.ok(validateSave(state)); assert.deepEqual(readBoth(state), state); return state;
 }
 function deferred() {let resolve; const promise = new Promise(yes => {resolve = yes;}); return {promise, resolve};}
 function locks() {
@@ -53,7 +56,7 @@ function setup() {
     getItem: key => values.get(key) ?? null,
     setItem(key, value) {this.writes++; values.set(key, String(value));}, removeItem(key) {this.writes++; values.delete(key);}};
   const manager = locks(), coordinate = createSaveCoordinator(manager);
-  const store = createSaveStore(storage, migrateSave, {coordinate,
+  const store = createSaveStore(storage, readBoth, {coordinate,
     crypto: {randomUUID: () => `aaaaaaaa-bbbb-4ccc-8ddd-${(++entropy).toString(16).padStart(12, '0')}`}});
   return {storage, manager, store};
 }
@@ -82,7 +85,7 @@ async function exported(store) {
 }
 function assertNeighbours(store) {
   assert.deepEqual(store.read(0), old); assert.deepEqual(store.read(1), newer);
-  assert.deepEqual(store.backup(1), migrateSave(historical['0600'].birth));
+  assert.deepEqual(store.backup(1), readBoth(historical['0600'].birth));
 }
 
 test('default sessions still enter an exact old life; configured new-rule sessions admit genuine zero-debt and later lives', async () => {

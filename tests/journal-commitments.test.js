@@ -13,9 +13,6 @@ import { syncCartography } from '../dist/js/cartography.js';
 import { getContacts } from '../dist/js/conversations.js';
 import { educationTeacher } from '../dist/js/household.js';
 import { mountApp } from './helpers/ui-surface.mjs';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
 
 const fixture = JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz', import.meta.url)))).states.base;
 const base = E.migrateSave(fixture);
@@ -153,7 +150,7 @@ test('unresolved real obligations remain visible and resolved obligations vanish
 });
 
 test('production Journal Find and provider continuation navigate without time, Gold or rewards', async t => {
-  const s = accepted(), c = s.careers.active, surface = await mountApp(t, {rulebooks:'both',  states: [s], width: 390, height: 844 });
+  const s = accepted(), c = s.careers.active, surface = await mountApp(t, { states: [s], width: 390, height: 844 });
   await surface.click('title-continue'); await surface.click('tab', 'journal');
   assert.ok(surface.root.querySelector('[data-journal-commitments]')); assert.ok(surface.root.querySelector('[data-commitment="commission:' + c.id + '"]'));
   const before = surface.current(); await surface.click('quest-location', c.locationId); assert.equal(surface.current().day, before.day); assert.equal(surface.current().hero.gold, before.hero.gold);
@@ -164,7 +161,7 @@ test('production Journal Find and provider continuation navigate without time, G
 });
 
 test('production Journal pause/resume targets only the chosen story and Continue opens its real proposal', async t => {
-  const s = readyStory(), id = s.stories.arcs[0].id, surface = await mountApp(t, {rulebooks:'both',  states: [s] });
+  const s = readyStory(), id = s.stories.arcs[0].id, surface = await mountApp(t, { states: [s] });
   await surface.click('title-continue'); await surface.click('tab', 'journal'); const before = surface.current();
   await surface.click('activity', 'journal_pause_story:' + id); assert.equal(surface.current().stories.arcs[0].paused, true);
   assert.equal(surface.root.querySelector('[data-op="activity"][data-id="stories_open_' + id + '"]'), null);
@@ -189,7 +186,7 @@ test('legacy returned-story dates use the fixed adult calendar origin, not the d
 });
 
 test('Journal search opens matching commitments even after a closed ordinary disclosure', async t => {
-  const s = accepted(), surface = await mountApp(t, {rulebooks:'both',  states: [s] });
+  const s = accepted(), surface = await mountApp(t, { states: [s] });
   await surface.click('title-continue'); await surface.click('tab', 'journal');
   surface.root.querySelector('[data-journal-commitments]').open = false;
   const form = surface.root.querySelector('#journal-search'); form.controls.find(c => c.name === 'query').value = s.careers.active.customerName;
@@ -281,7 +278,7 @@ test('fellowship directions match its own undertaking rather than a companion RP
 });
 
 test('production Journal delivery uses the actual steward invoice and removes the commission only after payment', async t => {
-  const s = readyCommission(), c = s.careers.active, surface = await mountApp(t, {rulebooks:'both',  states: [s] });
+  const s = readyCommission(), c = s.careers.active, surface = await mountApp(t, { states: [s] });
   await surface.click('title-continue'); await surface.click('tab', 'journal');
   assert.match(surface.root.innerHTML, /Ready to deliver/);
   const before = surface.current(); await surface.click('activity-visit', 'work-' + c.locationId); await surface.click('service-topic', 'commissions');
@@ -292,7 +289,7 @@ test('production Journal delivery uses the actual steward invoice and removes th
 });
 
 test('production Journal release is the existing steward action and closes the card without payment or duplicate history', async t => {
-  const s = accepted(), c = s.careers.active, surface = await mountApp(t, {rulebooks:'both',  states: [s] });
+  const s = accepted(), c = s.careers.active, surface = await mountApp(t, { states: [s] });
   await surface.click('title-continue'); await surface.click('tab', 'journal'); const before = surface.current();
   await surface.click('activity-visit', 'work-' + c.locationId); await surface.click('service-topic', 'commissions'); await surface.click('activity', 'career_abandon');
   await surface.click('tab', 'journal'); assert.equal(surface.current().careers.active, null);
@@ -302,7 +299,7 @@ test('production Journal release is the existing steward action and closes the c
 });
 
 test('production Journal waiting return stays optional through navigation and exposes only its pause control', async t => {
-  const s = story(), a = s.stories.arcs[0], surface = await mountApp(t, {rulebooks:'both',  states: [s] });
+  const s = story(), a = s.stories.arcs[0], surface = await mountApp(t, { states: [s] });
   await surface.click('title-continue'); await surface.click('tab', 'journal'); const before = surface.current();
   assert.ok(surface.root.querySelector('[data-commitment="story:' + a.id + '"]'));
   assert.ok(surface.root.querySelector('[data-op="activity"][data-id="journal_pause_story:' + a.id + '"]'));

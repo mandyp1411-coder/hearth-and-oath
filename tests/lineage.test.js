@@ -68,7 +68,9 @@ function grow(s, age) {
   for (let guard = 0; guard < 150 && (s.age < age || s.event || s.timeline.yearTarget !== null); guard++) {
     if (s.event) {
       const policy = { health_concern: 'support', lineage_bereavement: 'share', career_year: 'care', deadline_review: 'pause', life_birthday: 'people' };
-      const choice = s.event.id.startsWith('birth_') ? s.event.choices.some(c => c.id === 'care') ? 'care' : 'curiosity' : policy[s.event.id];
+      // One rulebook (v0.72.2): an untreated wound or fever can kill, so a health concern takes the best open care.
+      const care = ['care', 'rest', 'support', 'routine', 'continue'].find(id => s.event.choices.some(c => c.id === id && !c.disabledReason));
+      const choice = s.event.id.startsWith('birth_') ? s.event.choices.some(c => c.id === 'care') ? 'care' : 'curiosity' : s.event.id === 'health_concern' ? care : policy[s.event.id];
       assert.ok(choice, `A lawful continuation needs a policy for ${s.event.id}`);
       s = settle(s, choice);
     } else s = s.timeline.yearTarget === null ? engine.ageUp(s) : engine.continueAgeUp(s);

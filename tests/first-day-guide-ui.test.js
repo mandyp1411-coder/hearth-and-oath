@@ -11,9 +11,6 @@ import { imprison } from '../dist/js/justice.js';
 import { mountApp } from './helpers/ui-surface.mjs';
 import { uiSoundProbe } from './helpers/ui-sound-probe.mjs';
 import { getAudioSettings, setMusicEnabled } from '../dist/js/audio.js';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
 
 // Semantic/engine integration only. Run in the serialized verification lane.
 // Existing captured lives avoid generating decades of synthetic past actions.
@@ -25,7 +22,7 @@ function fixture(raw = recorded.base, guide = true) {
   if (guide) s.hero.firstDayGuide = { version: 1, dismissed: false }; else delete s.hero.firstDayGuide;
   return valid(s);
 }
-async function open(t, s) { const ui = await mountApp(t, {rulebooks:'both',  states: [s] }); await ui.click('title-continue'); return ui; }
+async function open(t, s) { const ui = await mountApp(t, { states: [s] }); await ui.click('title-continue'); return ui; }
 const guide = ui => ui.root.querySelector('.first-day-guide');
 const readers = { actions: E.getActions, unlocks: E.getAgeUnlocks, services: settlementServices, walkPath: settlementWalkPath, offers: serviceMeetingOffers, commitment: E.getLifeCommitment, ageControl: () => ({}) };
 const view = s => firstDayGuideView(s, readers);
@@ -122,7 +119,7 @@ test('the saving step opens the existing menu and leaves canonical health status
 
 
 test('same-seed independent slots do not share saved dismissal or manual reopening',async t=>{
-  const first=fixture(),second=structuredClone(first),ui=await mountApp(t, {rulebooks:'both', states:[first,second]});await ui.click('title-continue');
+  const first=fixture(),second=structuredClone(first),ui=await mountApp(t, {states:[first,second]});await ui.click('title-continue');
   await ui.click('footing-dismiss');const dismissed=structuredClone(first);dismissed.hero.firstDayGuide.dismissed=true;assert.deepEqual(ui.lives(),[dismissed,second,null]);
   await ui.click('menu');await ui.click('help');await ui.click('footing-open');assert.ok(guide(ui));
   await ui.click('title-menu');await ui.click('title-load');await ui.click('slot-load','1');assert.ok(guide(ui));assert.deepEqual(ui.current(),second);

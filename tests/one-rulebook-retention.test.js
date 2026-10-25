@@ -6,6 +6,7 @@ import {createSaveStore, LEGACY_SAVE_KEY} from '../dist/js/saves.js';
 import {migrateSave, validateSave} from '../dist/js/engine.js';
 import {rulesOf, OLD, NEW} from '../dist/js/edition.js';
 import {mountApp} from './helpers/ui-surface.mjs';
+import {storedLifeDecoder} from '../dist/js/rulebook.js';
 
 const KEY = 'hearth-and-oath:slots:v1';
 const release = v => JSON.parse(gunzipSync(readFileSync(new URL(`./fixtures/saves/v${v}.json.gz`, import.meta.url)))).states;
@@ -26,17 +27,17 @@ function memory(raw) {
 // apparent empty place for a new character.
 test('mixed old/new durable slots and old backups remain complete and occupied across read and reload', () => {
   const raw = envelope(), storage = memory(raw), bytes = [...storage.values], original = structuredClone(raw);
-  const store = createSaveStore(storage, migrateSave);
+  // The main game's decoder: an old life is kept as stored, a new one is read.
+  const store = createSaveStore(storage, storedLifeDecoder(migrateSave)), text = JSON.stringify;
   for (let pass = 0; pass < 2; pass++) {
     assert.equal(store.active(), 1); assert.equal(store.empty(), null);
     for (const [id, slot] of raw.slots.entries()) {
-      const state = store.read(id); assert.ok(state && validateSave(state), `slot ${id} remains a valid whole life`);
-      assert.deepEqual(state, migrateSave(slot.state));
-      assert.equal(rulesOf(state), id === 1 ? NEW : OLD);
+      if (id === 1) { const state = store.read(id); assert.ok(state && validateSave(state)); assert.ok(text(state) === text(migrateSave(slot.state))); assert.equal(rulesOf(state), NEW); }
+      else { assert.equal(store.read(id), null, `old slot ${id} is not read`); assert.ok(text(store.kept(id)) === text(slot.state), `old slot ${id} is kept whole`); assert.equal(rulesOf(store.kept(id)), OLD); }
       assert.equal(store.health(id).hasDurableState, true);
     }
-    assert.deepEqual(store.backup(1), migrateSave(older.birth), 'the new life retains its actual older previous-life backup');
-    assert.equal(rulesOf(store.backup(1)), OLD);
+    assert.equal(store.backup(1), null);
+    assert.ok(text(store.keptBackup(1)) === text(older.birth), 'the new life retains its actual older previous-life backup, as stored');
     assert.equal(store.reload(), true);
   }
   assert.equal(storage.writes, 0); assert.deepEqual([...storage.values], bytes); assert.deepEqual(raw, original);

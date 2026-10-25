@@ -25,7 +25,7 @@ test('the cutover index is reproducible and every source reference resolves to t
   for (const ref of report.references) assert.ok(sources.get(ref.file).slice(ref.line - 1).join('\n').slice(ref.column - 1).startsWith(ref.match), `${ref.file}:${ref.line}:${ref.column}`);
   for (const [file, category, code] of [
     ['dist/js/edition.js', 'debt', 'householdBudget?.debt'],
-    ['dist/js/lineage.js', 'debt', 'householdBudget?.debt'],
+    ['dist/js/station.js', 'debt', 'householdBudget?.debt'],
     ['dist/js/engine.js', 'station', 'hero.station'],
     ['dist/js/app.js', 'saved-mode', 'fieldVersion'],
   ]) assert.ok(report.references.some(ref => ref.file === file && ref.category === category && ref.match === code), `${file}: known cutover boundary is indexed`);

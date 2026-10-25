@@ -35,32 +35,37 @@ test('the markers decide: a station or a debt ledger is the new rules, neither i
   assert.equal(rulesOf(null), OLD); assert.equal(rulesOf({}), OLD);
 });
 
-test('an old save migrated today is labelled Old rules, keeps its rules, and reads the way to the archive', () => {
+test('an old save is labelled Old rules by what it holds, and the engine reads it into the one rulebook with stated defaults', () => {
   for (const [name, raw] of Object.entries(legacy.states)) {
+    assert.equal(rulesOf(raw), OLD, name); assert.equal(rulesLabel(raw), 'Old rules');
+    assert.match(rulesNote(raw), /old rules.*archive/); assert.ok(archiveAccepts(raw));
+    assert.match(exportFileName(raw), /-old-rules\.json$/);
+    // v0.72.2: one rulebook. The main game never reads an old life into play (rulebook.js keeps it as
+    // stored); the engine itself reads any life into the one rulebook: nothing owed, luck from today,
+    // no station invented, no date given after the fact.
     const s = engine.migrateSave(raw);
-    assert.ok(s, name); assert.ok(engine.validateSave(s), name);
-    assert.deepEqual(s.edition, { rules: OLD, began: null, step: EDITION_STEP }, name);
-    assert.equal(rulesLabel(s), 'Old rules');
-    assert.match(rulesNote(s), /old rules.*archive/);
-    assert.ok(archiveAccepts(s));
-    assert.match(exportFileName(s), /-old-rules\.json$/);
-    assert.equal(s.hero.station, undefined); assert.equal(s.householdBudget.debt, undefined);
+    assert.ok(s && engine.validateSave(s), name);
+    assert.equal(s.householdBudget.debt, 0); assert.equal(s.fortune.lastSeason, Math.floor(s.day / 92));
+    assert.equal(s.hero.station, undefined);
+    assert.deepEqual(s.edition, { rules: NEW, began: null, step: EDITION_STEP }, name);
   }
 });
 
-test('real saves from v0.60, v0.61, v0.62, v0.66 and v0.69 load, keep their rule markers, and continue through public commands', () => {
+test('real saves from v0.60, v0.61, v0.62, v0.66 and v0.69 are told by their stored markers, load into the one rulebook and continue through public commands', () => {
   const expect = { '0600': OLD, '0610': NEW, '0620': NEW, '0660': NEW, '0690': NEW };
   for (const [v, rules] of Object.entries(expect)) {
     const fixture = release(v);
     assert.equal(fixture.source.version.replace(/\./g, ''), v);
     for (const [name, raw] of Object.entries(fixture.states)) {
       assert.equal(raw.edition, undefined, `${v} ${name}: written before the stamp existed`);
+      assert.equal(rulesOf(raw), rules, `${v} ${name}: told by what it holds`);
       const s = engine.migrateSave(raw);
       assert.ok(s && engine.validateSave(s), `${v} ${name} loads`);
-      assert.equal(s.edition.rules, rules, `${v} ${name}`);
+      assert.equal(s.edition.rules, NEW, `${v} ${name}: read into the one rulebook`);
       assert.equal(s.edition.began, null, 'a life begun before v0.70 is never given a date after the fact');
       assert.equal(s.edition.step, EDITION_STEP);
-      assert.equal(rulesLabel(s), rules === OLD ? 'Old rules' : 'New rules, begun before v0.70');
+      assert.equal(rulesLabel(raw), rules === OLD ? 'Old rules' : 'New rules, begun before v0.70');
+      assert.equal(rulesLabel(s), 'New rules, begun before v0.70');
       if (v === '0610') {
         // Genuine pre-station births: zero debt is a defined ledger and
         // therefore new rules. No modern fixture has had a marker removed.
@@ -98,17 +103,17 @@ test('the validator accepts a well-formed stamp or none, and refuses a malformed
   const clean = structuredClone(s); delete clean.edition; assert.ok(engine.validateSave(clean), 'a save from before the stamp still validates');
 });
 
-test('an heir begins under the rules its own budget and station say, dated to the release that made it', () => {
-  // The legacy parent fixture, retired by hand the way lineage.test.js does it: its heir has no debt ledger and no station, so it keeps the old rules.
+test('an heir begins under the one rulebook, dated to the release that made it', () => {
+  // The legacy parent fixture, read into the one rulebook and retired by hand the way lineage.test.js does it.
   const s = engine.migrateSave(structuredClone(legacy.states.parent));
-  assert.equal(s.edition.rules, OLD);
+  assert.equal(s.edition.rules, NEW); assert.equal(s.hero.station, undefined);
   s.phase = 'retired'; s.event = null; s.chronicle = `${s.hero.name}'s chapter closes.`;
   completeLineageHistory(s, 'retirement');
   const heir = createSuccessor(s, s.life.children[0].id, engine.createBirthGame);
   assert.ok(heir && engine.validateSave(heir));
-  assert.ok(!heir.hero.station); assert.equal(heir.householdBudget.debt, undefined);
-  assert.deepEqual(heir.edition, { rules: OLD, began: GAME_VERSION, step: EDITION_STEP }, 'the stamp is recomputed after the budget reset, not copied from the birth');
-  assert.equal(rulesLabel(heir), 'Old rules');
+  assert.equal(heir.hero.station ?? null, null, 'a parent without a station passes none on'); assert.equal(heir.householdBudget.debt, 0);
+  assert.deepEqual(heir.edition, { rules: NEW, began: GAME_VERSION, step: EDITION_STEP }, 'the stamp is recomputed after the budget reset, not copied from the birth');
+  assert.equal(rulesLabel(heir), `New rules, begun in v${GAME_VERSION.replace(/\.0$/, '')}`);
 });
 
 test('the fixtures of real saves are what the generator says they are', () => {

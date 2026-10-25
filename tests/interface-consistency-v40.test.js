@@ -8,14 +8,11 @@ import {cityRooms,syncCartography} from '../dist/js/cartography.js';
 import {settlementServices} from '../dist/js/world-services.js';
 import {settlementWalkPath} from '../dist/js/exploration-ui.js';
 import {mountApp} from './helpers/ui-surface.mjs';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
 const fixture=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url))));
 function fresh(room='gate'){
  let s=E.migrateSave(fixture.states.base);s.locationId='home';s.cartography.offsite=false;s.cartography.interior=null;syncCartography(s);for(const id of settlementWalkPath(s,room))s=E.chooseAction(s,'atlas_room_'+id);assert.ok(E.validateSave(s));return E.migrateSave(s);
 }
-async function open(t,s){const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');return ui;}
+async function open(t,s){const ui=await mountApp(t, {states:[s]});await ui.click('title-continue');return ui;}
 
 test('public markets have the same neutral title regardless of the individual shopkeeper',()=>{
  const s=fresh('market'),before=structuredClone(s);assert.equal(cityRooms(s).find(r=>r.id==='market').name,'Market');s.realm.sites.home.merchant.name='A Different Merchant';assert.equal(cityRooms(s).find(r=>r.id==='market').name,'Market');assert.equal(before.realm.sites.home.merchant.name,fixture.states.base.realm.sites.home.merchant.name);

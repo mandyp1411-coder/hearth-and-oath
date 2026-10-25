@@ -11,16 +11,13 @@ import { settlementServices } from '../dist/js/world-services.js';
 import { settlementWalkPath } from '../dist/js/exploration-ui.js';
 import { syncCartography } from '../dist/js/cartography.js';
 import { mountApp } from './helpers/ui-surface.mjs';
-// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
-// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
-// or moves it to the archive as the old rules' code leaves main.
 
 // These exercise the production handlers with synthetic lives and a real prior
 // save fixture. They do not emulate browser layout or a screen reader.
 const fixture=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url))));
 const base=E.migrateSave(fixture.states.base);
 function fresh(kind=null){let s=structuredClone(base);s.hero.gold=1000;for(const key of Object.keys(s.equipment.materials))s.equipment.materials[key]=30;if(kind){const provider=settlementServices(s).find(r=>r.kind===kind);assert.ok(provider,kind);for(const id of settlementWalkPath(s,provider.roomId))s=E.chooseAction(s,'atlas_room_'+id);}return s;}
-async function open(t,s=fresh()){const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');return ui;}
+async function open(t,s=fresh()){const ui=await mountApp(t, {states:[s]});await ui.click('title-continue');return ui;}
 async function atService(t,s,kind){const ui=await open(t,s);await ui.click('place-open');await ui.click('service-open',settlementServices(s).find(r=>r.kind===kind).id);return ui;}
 function announcements(ui){let value=ui.viewStatus.textContent;const messages=[];Object.defineProperty(ui.viewStatus,'textContent',{configurable:true,get:()=>value,set(next){value=next;if(next)messages.push(next);}});return messages;}
 function queuedFrames(){const callbacks=[];globalThis.requestAnimationFrame=callback=>{callbacks.push(callback);return callbacks.length;};return ()=>{for(let turns=0;callbacks.length&&turns<20;turns++){const batch=callbacks.splice(0);for(const callback of batch)callback();}assert.equal(callbacks.length,0);};}
@@ -28,13 +25,13 @@ function active(ui,op,id){assert.equal(ui.document.activeElement?.dataset?.op,op
 function heldLocks(){let blocked=false;const gates=[];return {hold(){blocked=true;},release(){blocked=false;for(const resolve of gates.splice(0))resolve();},async request(name,options,operation){if(blocked)await new Promise(resolve=>gates.push(resolve));return operation();}};}
 
 for(const op of ['creator-random','creator-name'])test(op+' retains its trigger over repeated Enter and Space rerenders',async t=>{
- const ui=await mountApp(t, {rulebooks:'both'});await ui.click('title-new');await ui.click('slot-new','0');const before=ui.storage.getItem('hearth-and-oath:slots:v1');
+ const ui=await mountApp(t);await ui.click('title-new');await ui.click('slot-new','0');const before=ui.storage.getItem('hearth-and-oath:slots:v1');
  for(const key of ['Enter',' ','Enter']){const trigger=ui.root.querySelector('[data-op="'+op+'"]');trigger.focus();await ui.key(key);active(ui,op,'');assert.notEqual(ui.document.activeElement,trigger,'focus moves to the replacement, never its detached predecessor');}
  assert.equal(ui.storage.getItem('hearth-and-oath:slots:v1'),before,'rerolling never creates or replaces a saved life');
 });
 
 test('a queued creator restoration cannot pull focus out of a newer modal, whose Tab/Escape behavior remains intact',async t=>{
- const ui=await mountApp(t, {rulebooks:'both'});await ui.click('title-new');await ui.click('slot-new','0');const flush=queuedFrames();
+ const ui=await mountApp(t);await ui.click('title-new');await ui.click('slot-new','0');const flush=queuedFrames();
  ui.root.querySelector('[data-op="creator-name"]').focus();await ui.click('creator-name');await ui.click('creator-portraits');await Promise.resolve();flush();
  assert.ok(ui.document.activeElement.classList.contains('modal-close'));
  const controls=ui.root.querySelectorAll('.modal button:not(:disabled), .modal a[href], .modal input:not(:disabled), .modal select:not(:disabled), .modal textarea:not(:disabled), .modal [tabindex="0"]').filter(el=>el.getClientRects().length),first=controls[0],last=controls.at(-1);
@@ -118,7 +115,7 @@ test('a synchronous trade-save conflict cannot be bypassed by the counter focus 
 });
 
 for(const timing of ['before frames','after frames','after newer navigation'])test('queued quota failure '+timing+' preserves current focus and never replays the outcome',async t=>{
- const s=fresh();s.hero.hp=1;s.hero.maxHp=1000;s.hero.potions=3;const locks=heldLocks(),mounting=mountApp(t, {rulebooks:'both', states:[s]});window.navigator={locks};const ui=await mounting;await ui.click('title-continue');await settle();await ui.click('tab','inventory');await ui.click('inventory-item','supply:potions');const before=ui.current(),expected=E.useConsumable(before,'potions'),messages=announcements(ui),flush=queuedFrames(),write=ui.storage.setItem;
+ const s=fresh();s.hero.hp=1;s.hero.maxHp=1000;s.hero.potions=3;const locks=heldLocks(),mounting=mountApp(t, {states:[s]});window.navigator={locks};const ui=await mounting;await ui.click('title-continue');await settle();await ui.click('tab','inventory');await ui.click('inventory-item','supply:potions');const before=ui.current(),expected=E.useConsumable(before,'potions'),messages=announcements(ui),flush=queuedFrames(),write=ui.storage.setItem;
  ui.storage.setItem=(key,value)=>{if(key.startsWith('hearth-and-oath:slots:')||key==='hearth-and-oath:life:v1')throw Error('Synthetic quota');write(key,value);};locks.hold();ui.root.querySelector('[data-op="use-consumable"][data-id="potions"]').focus();await ui.click('use-consumable','potions');
  if(timing==='after frames')flush();if(timing==='after newer navigation')await ui.click('tab','relationships');const restored=timing==='after frames'?ui.document.activeElement:null;
  const regionBeforeRelease=ui.root.querySelector('#storage-warning');assert.equal(regionBeforeRelease.hidden,false);assert.equal(regionBeforeRelease.getAttribute('aria-hidden'),null);locks.release();await settle();await settle();const warning=ui.root.querySelector('#storage-warning');assert.equal(warning,regionBeforeRelease,'availability-only feedback retains its mounted live region');assert.equal(warning.hidden,false);assert.equal(warning.getAttribute('aria-hidden'),null);assert.equal(warning.getAttribute('role'),'status');assert.equal(warning.getAttribute('aria-live'),'polite');assert.equal(warning.getAttribute('aria-atomic'),'true');assert.match(warning.textContent,/Browser storage is unavailable/);flush();assert.deepEqual(ui.current(),before,'a storage failure never pretends the new position became durable');assert.equal(ui.root.querySelector('.latest-result p').textContent,expected.notice);
@@ -127,5 +124,5 @@ for(const timing of ['before frames','after frames','after newer navigation'])te
 });
 
 test('a late queued-save conflict owns focus and blocks obsolete action announcements without overwriting either life',async t=>{
- const s=fresh(),locks=heldLocks(),mounting=mountApp(t, {rulebooks:'both', states:[s]});window.navigator={locks};const ui=await mounting;await ui.click('title-continue');await settle();await ui.click('tab','activities');await ui.click('activities-pane','fun');const messages=announcements(ui),flush=queuedFrames(),before=ui.current();locks.hold();await ui.click('activity','leisure_walk');const remote=E.chooseAction(before,'leisure_read');assert.ok(createSaveStore(ui.storage,E.migrateSave).write(0,remote));locks.release();await settle();await settle();flush();await Promise.resolve();assert.ok(ui.root.querySelector('[data-save-conflict-dialog]'));assert.ok(ui.document.activeElement.classList.contains('modal-close'));assert.deepEqual(messages,[]);assert.deepEqual(ui.current(),remote);assert.match(ui.root.innerHTML,/has not overwritten/);
+ const s=fresh(),locks=heldLocks(),mounting=mountApp(t, {states:[s]});window.navigator={locks};const ui=await mounting;await ui.click('title-continue');await settle();await ui.click('tab','activities');await ui.click('activities-pane','fun');const messages=announcements(ui),flush=queuedFrames(),before=ui.current();locks.hold();await ui.click('activity','leisure_walk');const remote=E.chooseAction(before,'leisure_read');assert.ok(createSaveStore(ui.storage,E.migrateSave).write(0,remote));locks.release();await settle();await settle();flush();await Promise.resolve();assert.ok(ui.root.querySelector('[data-save-conflict-dialog]'));assert.ok(ui.document.activeElement.classList.contains('modal-close'));assert.deepEqual(messages,[]);assert.deepEqual(ui.current(),remote);assert.match(ui.root.innerHTML,/has not overwritten/);
 });
