@@ -16,6 +16,6 @@
     "measure:voice": "node scripts/voice-lint.mjs",
     "measure:content": "node scripts/content/validate.mjs",
     "measure:ui": "python3 scripts/interface-harness.py",
-    "check:archive": "python3 scripts/browser-archive-check.py --snapshot docs/measures/archive-verification-v072.md"
+    "check:archive": "python3 scripts/browser-archive-check.py --snapshot docs/measures/archive-verification-v0721.md"
   }
 }
