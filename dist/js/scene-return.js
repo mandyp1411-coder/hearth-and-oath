@@ -4,7 +4,7 @@ import { isSettlement } from './world.js';
 // commands, save writes, whole-save copies or remotely projected providers.
 export const sceneUtilityTab = tab => ['inventory','journal','quests','lore'].includes(tab);
 export function sceneReturnBlocked(s) {
- return !s?.hero || s.hero.alive===false || ['dead','retired'].includes(s.phase) || Boolean(s.event||s.battle||s.conversations?.pending||s.maze||s.justice?.prison||s.timeline?.journey||s.cartography?.pending||s.cartography?.offsite);
+ return !s?.hero || s.hero.alive===false || ['dead','retired'].includes(s.phase) || Boolean(s.event||s.battle||s.conversations?.pending||s.maze||s.delve||s.justice?.prison||s.timeline?.journey||s.cartography?.pending||s.cartography?.offsite);
 }
 const available = p => p && typeof p.id==='string' && p.alive!==false && p.available!==false && p.retired!==true;
 const room = s => s.cartography?.interior?.roomId||'gate';

@@ -64,7 +64,7 @@ test('risk checks require actual time, stay seeded, and never reroll on view or 
   assert.deepEqual(state, restored);
 });
 
-test('queued concerns preserve existing birth scenes, combat, threads and dungeon decisions', () => {
+test('queued concerns preserve existing birth scenes, combat and threads', () => {
   const state = life(); condition(state, 'fever');
   state.event = { id: 'birth_age' };
   assert.equal(flushHealthEvent(state, context(state)), false);
@@ -73,9 +73,7 @@ test('queued concerns preserve existing birth scenes, combat, threads and dungeo
   assert.equal(flushHealthEvent(state, context(state)), false);
   state.battle = null; state.conversations.pending = { personId: 'kin' };
   assert.equal(flushHealthEvent(state, context(state)), false);
-  state.conversations.pending = null; state.dungeon = { roomId: 'entry' };
-  assert.equal(flushHealthEvent(state, context(state)), false);
-  state.dungeon = null;
+  state.conversations.pending = null; // the older room engine's decisions left in v0.72.4
   assert.equal(flushHealthEvent(state, context(state)), true);
   assert.equal(state.event.id, 'health_concern');
   assert.match(state.event.body, /severity 1\/3/);

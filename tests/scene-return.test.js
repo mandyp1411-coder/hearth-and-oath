@@ -61,7 +61,7 @@ for(const [name,change] of [
 });
 
 for(const [name,change] of [
- ['event',f=>f.game.event={id:'mandatory'}],['battle',f=>f.game.battle={id:'actual'}],['pending reply',f=>f.game.conversations={pending:{personId:f.person.id}}],['journey',f=>f.game.timeline.journey={destination:'elsewhere'}],['offsite',f=>f.game.cartography.offsite=true],['pending crossing',f=>f.game.cartography.pending={}],['prison',f=>f.game.justice={prison:{}}],['maze',f=>f.game.maze={}],['dungeon',f=>f.game.dungeon={}],['expedition',f=>f.game.rpg={expedition:{}}],['adventuring descent',f=>f.game.adventuring={expedition:{}}],['ended life',f=>f.game.hero.alive=false],['retirement',f=>f.game.phase='retired'],
+ ['event',f=>f.game.event={id:'mandatory'}],['battle',f=>f.game.battle={id:'actual'}],['pending reply',f=>f.game.conversations={pending:{personId:f.person.id}}],['journey',f=>f.game.timeline.journey={destination:'elsewhere'}],['offsite',f=>f.game.cartography.offsite=true],['pending crossing',f=>f.game.cartography.pending={}],['prison',f=>f.game.justice={prison:{}}],['maze',f=>f.game.maze={}],['delve',f=>f.game.delve={}],['ended life',f=>f.game.hero.alive=false],['retirement',f=>f.game.phase='retired'],
 ])test(name+' wins without looking up any provider',()=>{
  const f=setup(),trail=capture(f);change(f);const before={...f.calls};assert.equal(validSceneReturn(trail,f.context,f.readers),false);assert.equal(capture(f),null);assert.deepEqual(f.calls,before);
 });

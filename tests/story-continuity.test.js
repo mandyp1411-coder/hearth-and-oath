@@ -6,7 +6,6 @@ import { createLifeAtAge } from '../dist/js/new-life.js';
 import { syncCartography } from '../dist/js/cartography.js';
 import { LIFE_STORIES, applyStoryChoice, applyStoryAction, storyChoiceReason } from '../dist/js/life-stories.js';
 import { captureStoryRow, storyDeeds } from '../dist/js/story-continuity.js';
-import { enterDungeon, explorationActions, dungeonView, negotiationChecklist } from '../dist/js/exploration.js';
 import { getContacts, getThread } from '../dist/js/conversations.js';
 import { mountApp } from './helpers/ui-surface.mjs';
 
@@ -171,48 +170,9 @@ test('campaign refuge preparation records an explicit pledge using existing capa
   assert.deepEqual(s.equipment.materials,before.equipment.materials);assert.deepEqual(s.world.locations,before.world.locations);roundtrip(s);
 });
 
-function dungeonFixture(){
-  const s=fresh();s.locationId='marsh';syncCartography(s);for(const key of Object.keys(s.hero.skills))s.hero.skills[key]=5;
-  const context={setEvent:(id,title,category,body,choices)=>{s.event={id,title,category,body,choices};},journal:()=>{}};
-  assert.equal(enterDungeon(s,'cistern',null,context),true);assert.ok(E.validateSave(s));return s;
-}
 function pick(s,id){assert.ok(s.event.choices.some(c=>c.id===id&&!c.disabledReason),id);const before=s.day;s=E.chooseEventOption(s,id);assert.ok(E.validateSave(s));assert.ok(s.day>=before);return s;}
-function walk(s,target){
-  for(let n=0;n<30&&s.dungeon.roomId!==target;n++){
-    const current=s.dungeon.definition.rooms.find(r=>r.id===s.dungeon.roomId);
-    if(!s.dungeon.cleared.includes(current.id)&&current.kind!=='safe'&&current.kind!=='boss'){
-      if(current.kind==='fight'){if(!s.dungeon.facts['listened_'+current.id])s=pick(s,'listen');s=pick(s,'parley');}
-      else if(current.kind==='hazard')s=pick(s,'search');
-      else if(current.kind==='treasure')s=pick(s,'take');
-      else if(current.kind==='witness'){if(!s.dungeon.facts.witnessHeard)s=pick(s,'hear_witness');s=pick(s,'record_witness');}
-      else if(current.kind==='dilemma')s=pick(s,'preserve');
-    }
-    const offered=new Set(s.event.choices.filter(c=>c.id.startsWith('route_')).map(c=>c.id.slice(6)));
-    const queue=[[s.dungeon.roomId]],seen=new Set();let path;
-    while(queue.length){const candidate=queue.shift(),id=candidate.at(-1);if(id===target){path=candidate;break;}if(seen.has(id))continue;seen.add(id);const room=s.dungeon.definition.rooms.find(r=>r.id===id);for(const exit of room.exits)if(candidate.length>1||offered.has(exit))queue.push([...candidate,exit]);}
-    assert.ok(path?.[1],'Fixture has a reachable offered route');s=pick(s,'route_'+path[1]);
-  }
-  assert.equal(s.dungeon.roomId,target);return s;
-}
 
-test('recovered cache objects stay distinct from examined testimony, actual aid and trusted judgment',()=>{
-  let s=walk(dungeonFixture(),'cache');s=pick(s,'take');assert.equal(Boolean(s.dungeon.facts.variantProof),false);s=walk(s,'keeper');s=pick(s,'listen');
-  const initial=negotiationChecklist(s);assert.equal(initial.find(r=>r.id==='account').met,true);assert.equal(initial.find(r=>r.id==='proof').met,false);assert.equal(initial.find(r=>r.id==='aid').met,false);assert.equal(initial.find(r=>r.id==='judgment').met,true);
-  assert.match(s.event.choices.find(c=>c.id==='parley').disabledReason,/Missing preserved account/);assert.match(s.event.choices.find(c=>c.id==='parley').disabledReason,/Missing practical aid/);
-  const evidence=s.dungeon.definition.rooms.find(r=>r.optional&&['witness','dilemma'].includes(r.kind));s=walk(s,evidence.id);
-  if(evidence.kind==='witness'){s=pick(s,'hear_witness');s=pick(s,'record_witness');}else s=pick(s,'preserve');
-  s=walk(roundtrip(s),'keeper');assert.equal(negotiationChecklist(s).find(r=>r.id==='proof').met,true);assert.equal(negotiationChecklist(s).find(r=>r.id==='aid').met,false);
-  assert.doesNotMatch(s.event.choices.find(c=>c.id==='parley').disabledReason,/Missing preserved account/);
-  const aid=evidence.kind==='witness'?evidence:s.dungeon.definition.rooms.find(r=>r.id==='service');s=walk(s,aid.id);
-  const material=aid.id==='service'?'ore':'cloth',amount=s.equipment.materials[material],day=s.day;s=pick(s,'aid_only');assert.equal(s.equipment.materials[material],amount-1);assert.equal(s.day,day+1);
-  s=walk(roundtrip(s),'keeper');assert.ok(negotiationChecklist(s).every(r=>r.met));const gold=s.hero.gold,exp=s.hero.exp;s=pick(s,'parley');assert.ok(s.dungeon.cleared.includes('keeper'));assert.ok(s.hero.gold<=gold);assert.equal(s.hero.exp,exp);roundtrip(s);
-});
-
-test('negotiation hints expose only known rooms and views do not create evidence or move the life',()=>{
-  const s=dungeonFixture(),before=structuredClone(s),view=dungeonView(s);
-  for(const room of view.rooms.filter(r=>!r.visited)){const actual=s.dungeon.definition.rooms.find(r=>r.id===room.id);assert.notEqual(room.title,actual.title);assert.ok(room.title.startsWith('Unexplored passage'));}
-  dungeonView(s);negotiationChecklist(s);explorationActions(s);assert.deepEqual(s,before);
-});
+// The room engine's negotiation walk left in v0.72.4; a begun authored maze keeps the same checklist (maze-content-engine).
 
 test('production UI explains physical attendance and lets the player defer without losing the saved chapter',async t=>{
   let s=complete(open(fresh(),'cracked_mark'),'enterprise');s=next(s,'cracked_mark');
@@ -220,11 +180,4 @@ test('production UI explains physical attendance and lets the player defer witho
   const surface=await mountApp(t,{states:[s]});await surface.click('title-continue');const before=surface.current();
   assert.ok(surface.root.controls.find(c=>c.dataset.op==='choice'&&c.dataset.id==='care').disabled);assert.match(surface.root.innerHTML,/Travel to/);
   await surface.click('choice','defer');assert.equal(surface.current().day,before.day);assert.equal(surface.current().hero.gold,before.hero.gold);assert.equal(surface.current().stories.arcs[0].chapter,1);
-});
-
-test('production dungeon preview shows separate requirement states without rewriting an older saved scene',async t=>{
-  let s=walk(dungeonFixture(),'keeper');s=pick(s,'listen');s.event.body='An older saved guardian scene.';const body=s.event.body;
-  const surface=await mountApp(t,{states:[s]});await surface.click('title-continue');
-  assert.ok(surface.root.querySelector('[data-negotiation-checklist]'));assert.match(surface.root.innerHTML,/Examined negotiation evidence/);assert.match(surface.root.innerHTML,/Practical aid/);assert.match(surface.root.innerHTML,/Judgment or trusted support/);
-  assert.equal(surface.current().event.body,body);
 });
