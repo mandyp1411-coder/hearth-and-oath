@@ -6,7 +6,7 @@ import { createLifeAtAge } from '../dist/js/new-life.js';
 import { isSettlement } from '../dist/js/world.js';
 import { syncCartography } from '../dist/js/cartography.js';
 import { storyInvitations, storyView } from '../dist/js/life-stories.js';
-import { refreshAdventureBoard, contractArchive, afterAdventureBattle } from '../dist/js/adventuring.js';
+import { refreshAdventureBoard, contractArchive } from '../dist/js/adventuring.js';
 import { renderQuestJournal } from '../dist/js/quest-journal.js';
 import { trackedQuest, questReturnForecast, questAccountReview } from '../dist/js/quest-records.js';
 import { mountApp } from './helpers/ui-surface.mjs';
@@ -188,7 +188,8 @@ test('abandonment retains failed/withdrawn attempts without inventing completion
   let state=fresh();const offer=E.getActions(state).find(a=>a.id.startsWith('adventure_accept_'));
   state=contractAction(state,offer.id);const id=offer.id.slice('adventure_accept_'.length),gold=state.hero.gold;
   // Isolated outcome-recording fixture; no invented successful playthrough.
-  afterAdventureBattle(state,{instanceId:'failed-record-fixture',context:{kind:'adventure',mode:'contract',token:id}},{outcome:'defeat'},{journal(){}});
+  // The single-battle contract that recorded attempts left in v0.72.4; a contract carrying one is held as data.
+  state.adventuring.contracts.find(c=>c.id===id).attempts=[{battleId:'failed-record-fixture',day:state.day,outcome:'defeat'}];
   state=E.chooseAction(state,'adventure_abandon_'+id);refreshAdventureBoard(state);const record=contractArchive(state).find(c=>c.id===id);
   assert.equal(record.result,'abandoned');assert.equal(record.proof,null);assert.equal(record.reward,0);assert.equal(record.attempts[0].outcome,'defeat');
   assert.equal(state.hero.gold,gold);roundtrip(state);assert.ok(journal(state,{category:'archive'}).includes('Failed combat attempt'));
