@@ -3,11 +3,12 @@
 export function mazeBegun(s,dungeonId) {
  return Boolean(s.maze?.kind==='authored'&&s.maze.sourceId===dungeonId||s.mazeBook?.records?.some(r=>r.kind==='authored'&&r.sourceId===dungeonId));
 }
-/** Match the entry resolver without changing any recorded legacy expedition. */
+/** Match the entry resolver without changing any recorded expedition. The board's descent is a delve
+ * for every life (v0.72.3); a radiant maze already begun is walked to its end, and none begins (v0.72.4). */
 export function isMazeEntry(s,id) {
- return Boolean(s.mazeBook && (id==='adventure_descend' || id.startsWith('adventure_pursue_')
-  || id.startsWith('explore_enter_') && !s.flags.dungeonRecords?.[id.slice(14)]
-  || id.startsWith('rpg_enter_') && !s.rpg.expeditions.some(x=>x.id===id.slice(10)&&x.locationId===s.locationId)));
+ return Boolean(s.mazeBook && (id.startsWith('adventure_pursue_')
+  || id.startsWith('explore_enter_') && mazeBegun(s,id.slice(14))
+  || id.startsWith('rpg_enter_')));
 }
 export const MAZE_ENTRY_RULES='New ordinary expeditions vary between short, medium and deep layouts (5 × 5, 7 × 7 or 11 × 11). Authored sites and earlier saved maps keep their exact layout. All have finite caches and hidden passages. Each successful walk uses 1 Focus until empty. Every sixth total step takes one day; with no Focus before a step, every third total step does instead. Leave through the entrance stair or the objective’s stair after completing it.';
 const stepQuote=(steps,focus)=>({

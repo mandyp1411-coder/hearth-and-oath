@@ -4,7 +4,6 @@ import { openFirstMissionOffer, firstMissionOfferReason, acceptFirstMission, fir
 import { recordMazeFee } from './maze-receipt-runtime.js';
 import { STORY_FLAVOR } from './story-flavor.js';
 import { intrigueActions, openIntrigue, intrigueChoiceIds, intrigueChoiceReason, applyIntrigueChoice, finishIntrigueProject, validateIntrigue } from './local-intrigue.js';
-import { passageDirection } from './dungeon-directions.js';
 import { REGIONAL_STORIES_V27 } from './regional-stories-v27.js';
 import { COMPANION_DIALOGUE_V27 } from './companion-dialogue-v27.js';
 import { TECHNIQUES_V27, advancedTechnique } from './techniques-v27.js';
@@ -15,7 +14,7 @@ import { regionAt } from './realm.js';
 import { FAITHS } from './realm-content-v18.js';
 import { agingPolicy } from './aging-policy-v25.js';
 import { isCanonicalAppearance } from './avatar.js';
-import { initializeBossStories, bossRoomActions, applyBossAction, bossChoiceReason, resolveBossApproach, propertyActions, applyPropertyAction, afterPropertyBattle, validateBossStories } from './boss-stories-v27.js';
+import { resolveBossApproach, propertyActions, applyPropertyAction, afterPropertyBattle, validateBossStories } from './boss-stories-v27.js';
 
 const clamp=(n,min=0,max=100)=>Math.max(min,Math.min(max,n));
 const openSite=(s,id)=>{const p=s.world.locations.find(p=>p.id===id);return p&&!['destroyed','evacuated'].includes(p.status)&&p.servicesAvailable!==false;};
@@ -41,7 +40,7 @@ export function regionalAnchor(s,regionId){
  return anchorPriority[regionId]?.map(id=>candidates.find(p=>p.id===id)).find(Boolean)||candidates.find(p=>isSettlement(s.world,p.id))||candidates[0]||null;
 }
 export function openStoryBoard(s){return openSite(s,s.locationId)&&(settled(s)||s.realm?.regions.some(r=>regionalAnchor(s,r.id)?.id===s.locationId));}
-const ready=s=>s.rpg&&s.age>=18&&s.phase==='adult'&&!s.event&&!s.battle&&!s.conversations?.pending&&!s.timeline?.journey&&!s.cartography?.offsite&&!s.cartography?.pending&&!s.dungeon&&!s.adventuring?.expedition&&!s.justice?.prison;
+const ready=s=>s.rpg&&s.age>=18&&s.phase==='adult'&&!s.event&&!s.battle&&!s.conversations?.pending&&!s.timeline?.journey&&!s.cartography?.offsite&&!s.cartography?.pending&&!s.justice?.prison;
 function addCircle(s,ctx={}){
  for(const d of extraCompanions)if(!s.companions.some(p=>p.id===d.id)){
   const n=generateCharacter(s.seed,'circle:'+d.id,{ancestry:d.ancestry,age:19,role:d.classId});
@@ -173,42 +172,15 @@ function finishProject(s,ctx,finishMaze=null){
   const a=s.rpg.factions.find(a=>a.id===p.id),d=RPG_FACTIONS_V27.find(d=>d.id===p.id);reward=p.choice==='trade'?20:p.choice==='scheme'?32:0;outcome=d.missions[a.rank]+' '+(p.choice==='care'?'You spent time and supplies supporting the affected households.':p.choice==='trade'?'You completed a limited paid agreement and recorded its terms.':'You used the private account to take control; the witnesses keep their own copy.');a.rank++;a.nextDay=s.day+28;a.choices.push({id:p.choice,day:s.day,outcome});s.hero.skills[d.skill]=Math.min(10000,s.hero.skills[d.skill]+1);
   if(p.choice==='scheme'){ctx.breakOath?.('You coerced a faction’s living petitioners.');if(d.id==='quiet_table'&&!regionAt(s)?.law.contrabandAllowed)ctx.addEvidence?.(1,'A local courier witnessed the prohibited contraband exchange.');}
   if(a.rank===3)addRpgService(s,{kind:d.id==='quiet_table'?'smuggling':d.id==='ash_company'?'war_relief':d.id==='unbound_archive'?'school':d.id==='salt_ledger'?'market':d.id==='rootward_circle'?'route':'shelter',rule:p.choice==='scheme'?'controlled':p.choice==='trade'?'priced':'shared',ownerId:'faction-'+d.id,source:'faction-'+d.id});
- }else if(p.kind==='boss'||p.kind==='property'){resolveBossApproach(s,p,ctx);return;
- }else if(p.kind==='room'){
-  const x=s.rpg.expedition,r=x?.rooms.find(r=>r.id===p.id);if(!r)return;
-  if(p.choice==='cache'&&!r.cacheTaken){r.cacheTaken=true;s.equipment.materials.ore+=2;s.equipment.materials.cloth+=1;reward=8;outcome='You recovered two ore, one cloth, and eight gold from the finite side cache.';}
-  else if(p.choice==='repair'){s.equipment.materials.ore--;s.equipment.materials.cloth--;r.resolved=true;x.facts.repair=true;outcome='One ore and one cloth repaired the actual crossing; the same hazard will not return.';}
-  else if(p.choice==='survey'){r.resolved=true;x.facts.survey=true;s.flags.herbs=(s.flags.herbs||0)+2;outcome='Two real survey days found a safe passage and two herb bundles.';}
-  else if(p.choice==='parley'){r.resolved=true;outcome='Your real paid agreement opens this guard’s passage without claiming a kill.';}
-  else if(p.choice==='copy'){r.resolved=true;x.facts.archive=true;outcome='You copied the side ledger during one attended day. Its evidence remains in this descent.';}
-  else if(p.choice==='risk'){r.resolved=true;s.hero.hp=Math.max(0,s.hero.hp-10);if(!s.hero.hp)ctx.endLife?.('An unrepaired dungeon crossing ended this life.');outcome='You crossed the unrepaired hazard and lost ten actual health.';}
-  else if(['care','trade','scheme'].includes(p.choice)){r.resolved=true;x.completed=true;reward=p.choice==='care'?12:p.choice==='trade'?35:55;outcome=p.choice==='care'?'You establish a shared service using the accounts and people actually met in this descent.':p.choice==='trade'?'You establish a priced service with its limits recorded.':'You establish a controlled service. Excluded households retain the account of your claim.';addRpgService(s,{kind:x.signature?'route':'workshop',rule:p.choice==='scheme'?'controlled':p.choice==='trade'?'priced':'shared',locationId:x.locationId,source:x.id});if(p.choice==='scheme')ctx.breakOath?.('You claimed a shared dungeon resource through pressure.');}
+ }else if(p.kind==='property'){resolveBossApproach(s,p,ctx);return;
  }
  s.hero.gold+=reward;if(p.details?.choice?.narrativeFlavor===STORY_FLAVOR){const service=s.rpg.services.find(v=>v.source===p.id+'-0');outcome+=` ${p.totalDays} actual days completed; ${p.cost} gold fee paid. Local standing ${s.factions.villagers-standingBefore>=0?'+':''}${s.factions.villagers-standingBefore}.`+(service?` A ${service.rule} ${service.kind} service is recorded at the crossing.`:'');}note(s,ctx,p.details?.choice?.narrativeFlavor===STORY_FLAVOR?'The Flooded Causeway · A Light Too Low':'A decision becomes part of the world',outcome+(reward?` ${reward} gold actually changed hands.`:''),p.details?.choice?.narrativeFlavor===STORY_FLAVOR?{narrativeEdition:30}:{});
 }
 const signatureNames={rainward:'The Sluice of Shut Gates',saltreach:'The Unmoored Banquet',highstone:'The Furnace of Unfinished Kin',blackgrove:'The Orchard of Empty Nests',ashplain:'The Crown beneath the Barracks',bellwater:'The House below the Bell'};
 export const RPG_DUNGEONS_V27=[...Object.entries(signatureNames).map(([regionId,title])=>({id:'signature_'+regionId,title,regionId,signature:true})),...Array.from({length:12},(_,i)=>({id:'modular_'+i,title:['Abandoned salt stores','The unclaimed watchroom','The root-choked cellar','A flooded counting house','The broken kiln','The quiet crypt'][i%6]+(i>=6?' · deeper passage':''),regionId:RPG_FACTIONS_V27[i%6].regionId,signature:false}))];
-function createDescent(s,d){
- const variant=seededRoll(s.seed,'descent:'+d.id,3),bosses=ENCOUNTER_DESIGN_V27.bosses.filter(b=>b.regionId===d.regionId),ids=d.signature?['entry','crossing','ledger','stores','guardian','last','goal']:['entry','crossing','ledger','stores','guardian','goal'];
- const edges=variant===0?[['entry','crossing'],['entry','ledger'],['ledger','stores'],['stores','crossing'],['crossing','guardian'],['guardian',d.signature?'last':'goal'],...(d.signature?[['last','goal']]:[])]:variant===1?[['entry','ledger'],['entry','stores'],['stores','crossing'],['ledger','crossing'],['crossing','guardian'],['guardian',d.signature?'last':'goal'],...(d.signature?[['last','goal']]:[])]:[['entry','crossing'],['crossing','ledger'],['ledger','stores'],['stores','guardian'],['crossing','guardian'],['guardian',d.signature?'last':'goal'],...(d.signature?[['last','goal']]:[])];
- const rooms=ids.map((id,i)=>({id,type:id==='entry'?'entrance':id==='crossing'?'hazard':id==='ledger'?'archive':id==='stores'?'cache':id==='goal'?'goal':'guardian',title:{entry:'The outside stair',crossing:'A broken crossing',ledger:'The side ledger',stores:'The abandoned stores',guardian:bosses[0]?.name||'The lower guard',last:bosses[1]?.name||'The final guard',goal:'The last working room'}[id],x:[0,1,0,1,2,3,4][i],y:[1,1,0,0,1,1,1][i],neighbors:edges.filter(e=>e.includes(id)).map(e=>e.find(v=>v!==id)),visited:id==='entry',resolved:id==='entry',cacheTaken:false,...(d.signature&&['guardian','last'].includes(id)?{bossId:bosses[id==='last'?1:0].id}:{})}));
- return {id:d.id,version:2,title:d.title,locationId:s.locationId,regionId:d.regionId,signature:d.signature,variant,roomId:'entry',rooms,facts:{archive:false,survey:false,repair:false},completed:false,pendingRoom:null};
-}
-function descentActions(s){
- const x=s.rpg.expedition,r=x.rooms.find(r=>r.id===x.roomId),results=[offer('rpg_exit','Return to the outside stair','Leave with your actual findings. Rooms, used caches and decisions persist; no unfinished goal reward.',0,0)];
- if(r.resolved)for(const id of r.neighbors){const n=x.rooms.find(r=>r.id===id);results.push(offer('rpg_move_'+id,n.visited?n.title:passageDirection(s.seed,x.id,r,n),'Move to one connected room. No map knowledge is granted beyond this doorway.',0,0));}
- if(r.type==='hazard'&&!r.resolved)results.push(offer('rpg_room_repair','Repair the crossing',`2 actual days, ore 1 (have ${s.equipment.materials.ore}) and cloth 1 (have ${s.equipment.materials.cloth}). Permanently clear this hazard.`,2,0,s.equipment.materials.ore<1||s.equipment.materials.cloth<1?'Requires one ore and one cloth.':null),offer('rpg_room_survey','Survey a safe passage',`2 actual days. Survival ${s.hero.skills.survival}/4; a completed survey finds a safe passage and two herbs.`,2,0,s.hero.skills.survival<4?'Requires survival 4.':null),offer('rpg_room_risk','Cross the broken span','1 actual day and ten health. This can end a weak life.',1,0));
- if(r.type==='archive'&&!r.resolved)results.push(offer('rpg_room_copy','Copy the surviving ledger','1 actual day. Retain actual archive evidence.',1,0));
- if(r.type==='cache')results.push(offer('rpg_room_cache','Recover the side stores','1 actual day. Two ore, one cloth and eight gold, once.',1,0,r.cacheTaken?'These stores are empty.':null),offer('rpg_room_clear','Leave the empty stores','Clear this side room without receiving a reward.',0,0));
- results.push(...bossRoomActions(s));
- if(r.type==='guardian'&&!r.resolved){results.push(offer('rpg_room_fight','Face the guardian','Start the displayed battle. Victory clears only this actual room; retreat leaves its guardian.',0,0));if(!r.bossId)results.push(offer('rpg_room_parley_0','Negotiate safe passage',`2 actual days and 12 gold (have ${s.hero.gold}); persuasion ${s.hero.skills.persuasion}/6; side ledger ${x.facts.archive?'recorded':'missing: visit and copy the side ledger'}. Safe passage grants no combat spoils.`,2,12,!x.facts.archive?'Find the side ledger first.':s.hero.skills.persuasion<6?'Requires persuasion 6.':s.hero.gold<12?'Requires 12 gold.':null));}
- if(r.type==='goal'&&!r.resolved)for(const id of ['care','trade','scheme'])results.push(offer('rpg_room_finish_'+id,id==='care'?'Open the recovered room to its neighbors':id==='trade'?'Establish a limited paid practice':'Claim the recovered resource for yourself','3 actual days. Receive '+(id==='care'?12:id==='trade'?35:55)+' gold and create a usable '+(id==='care'?'shared':id==='trade'?'priced':'controlled')+' service.',3,id==='care'?8:0,id==='care'&&s.hero.gold<8?'Requires 8 gold.':null));
- return results;
-}
 export function rpgActions(s){
  if(!ready(s))return [];
  if(s.rpg.project)return [offer('rpg_continue','Keep the time you agreed',`${s.rpg.project.remainingDays} actual days remain. Paid fees are not charged again.`,0,0,s.rpg.project.kind==='faction-objective'?factionObjectiveProjectReason(s,s.rpg.project):null),offer('rpg_cancel','Withdraw from this work','Keep time and fees already spent. Receive no unfinished reward.',0,0)];
- if(s.rpg.expedition)return descentActions(s);
  const result=[...intrigueActions(s,{settled:settled(s)})];
  if(s.rpg.rosterVersion!==1)result.push(offer('rpg_expand_circle','Meet new paths around the hearth','Introduce three actual companions with separate lives, portraits and five-part stories.',0,0));
  for(const d of REGIONAL_STORIES_V27){const a=s.rpg.arcs.find(a=>a.id===d.id),p=regionalAnchor(s,d.regionId);if(!p||a?.status==='completed'||a?.status==='abandoned')continue;
@@ -225,7 +197,7 @@ export function rpgActions(s){
  for(const t of TECHNIQUES_V27.filter(t=>(s.progression?.learnedClassIds||[]).includes(t.classId)&&s.hero.skills[t.skill]<t.min&&s.progression.mentors[t.classId]?.met&&s.progression.mentors[t.classId].locationId===s.locationId))result.push(offer('rpg_practice_'+t.id,'Practice '+t.skill+' with '+s.progression.mentors[t.classId].name,'Three actual days and 6 gold develop the skill needed for '+t.name+'.',3,6,s.hero.gold<6?'Requires 6 gold.':null));
  if(openStoryBoard(s)){const needs=[...new Set(TECHNIQUES_V27.filter(t=>(s.progression?.learnedClassIds||[]).includes(t.classId)&&!s.rpg.trainedTechniques.includes(t.id)&&s.hero.skills[t.skill]<t.min).map(t=>t.skill))];for(const skill of needs)result.push(offer('rpg_practice_'+skill,'Practice '+skill+' for advanced techniques','Three attended days and three gold improve this actual skill by one. An earned calling must already require this practice.',3,3,s.hero.gold<3?'Requires 3 gold.':null));}
  if(openStoryBoard(s)||Object.values(s.progression?.mentors||{}).some(m=>m.met&&m.locationId===s.locationId))for(const t of TECHNIQUES_V27.filter(t=>(s.progression?.learnedClassIds||[]).includes(t.classId)&&!s.rpg.trainedTechniques.includes(t.id)))result.push(offer('rpg_train_'+t.id,'Learn '+t.name,t.description+' Three attended days and 12 gold; requires '+t.skill+' '+t.min+'.',3,12,s.hero.skills[t.skill]<t.min?'Requires '+t.skill+' '+t.min+'.':s.hero.gold<12?'Requires 12 gold.':null));
- if(openStoryBoard(s))for(const d of RPG_DUNGEONS_V27.filter(d=>d.regionId===regionAt(s)?.id)){const maze=s.mazeBook&&!s.rpg.expeditions.some(x=>x.id===d.id&&x.locationId===s.locationId);result.push(offer('rpg_enter_'+d.id,'Explore '+d.title,maze?'Spend one day entering a large saved maze. Each block is a room; find the objective and a real return stair.':'Resume your saved descent with its existing rooms and decisions.',maze?1:0,0,s.hero.hp<12?'Recover to at least 12 health.':null));}
+ if(openStoryBoard(s))for(const d of RPG_DUNGEONS_V27.filter(d=>d.regionId===regionAt(s)?.id))result.push(offer('rpg_enter_'+d.id,'Explore '+d.title,'Spend one day entering a large saved maze. Each block is a room; find the objective and a real return stair.',1,0,s.hero.hp<12?'Recover to at least 12 health.':null));
  result.push(...firstMissionActions(s),...serviceActions(s),...propertyActions(s));return result;
 }
 export function applyRpgAction(s,id,ctx={}){
@@ -243,16 +215,7 @@ export function applyRpgAction(s,id,ctx={}){
  if(id.startsWith('rpg_faction_'))return openFaction(s,RPG_FACTIONS_V27.find(d=>d.id===id.slice(12)),ctx);
  if(id.startsWith('rpg_practice_')){const key=id.slice(13),skill=advancedTechnique(key)?.skill||key;return startProject(s,'training',skill,'practice',3,a.cost,{},ctx);}
  if(id.startsWith('rpg_train_'))return startProject(s,'training',id.slice(10),'learn',3,12,{},ctx);
- if(id.startsWith('rpg_enter_')){const d=RPG_DUNGEONS_V27.find(d=>d.id===id.slice(10)),old=s.rpg.expeditions.find(x=>x.id===d.id&&x.locationId===s.locationId);s.rpg.expedition=old?structuredClone(old):createDescent(s,d);if(d.signature)initializeBossStories(s,s.rpg.expedition);return true;}
- if(id==='rpg_exit'){const x=s.rpg.expedition,i=s.rpg.expeditions.findIndex(d=>d.id===x.id&&d.locationId===x.locationId);if(i<0)s.rpg.expeditions.push(structuredClone(x));else s.rpg.expeditions[i]=structuredClone(x);s.rpg.expedition=null;return true;}
- if(id.startsWith('rpg_move_')){const x=s.rpg.expedition;x.roomId=id.slice(9);x.rooms.find(r=>r.id===x.roomId).visited=true;return true;}
- if(id==='rpg_room_clear'){s.rpg.expedition.rooms.find(r=>r.id===s.rpg.expedition.roomId).resolved=true;return true;}
- if(id==='rpg_room_fight'){const x=s.rpg.expedition,r=x.rooms.find(r=>r.id===x.roomId);x.pendingRoom=r.id;ctx.startBattle('rpg_guardian',{kind:'rpg',dungeonId:x.id,roomId:r.id,locationId:x.locationId,bossId:r.bossId||'ordinary'});return true;}
- if(id.startsWith('rpg_room_parley_')&&s.rpg.expedition.rooms.find(r=>r.id===s.rpg.expedition.roomId).bossId)return applyBossAction(s,id,ctx,{startProject});
- if(id==='rpg_room_parley_0'&&!s.rpg.expedition.rooms.find(r=>r.id===s.rpg.expedition.roomId).bossId)return startProject(s,'room',s.rpg.expedition.roomId,'parley',2,12,{},ctx);
- if(id.startsWith('rpg_room_')){const pick=id.slice(9).replace('finish_',''),r=s.rpg.expedition.rooms.find(r=>r.id===s.rpg.expedition.roomId);return startProject(s,'room',r.id,pick,a.days,a.cost,{},ctx);}
  if(id.startsWith('rpg_service_')){const v=s.rpg.services.find(v=>v.id===id.slice(12)),old=s.day,taken=ctx.spendDays(1);if(taken!==1||s.day-old!==1||s.phase==='retired')return true;s.hero.gold-=a.cost;v.lastUsedDay=s.day;if(['shelter','clinic'].includes(v.kind))s.hero.hp=Math.min(s.hero.maxHp,s.hero.hp+15);else if(v.kind==='route')s.adventuring.rations=Math.min(10000,s.adventuring.rations+2);else{s.hero.skills[serviceSkill[v.kind]||'survival']=Math.min(10000,s.hero.skills[serviceSkill[v.kind]||'survival']+1);}note(s,ctx,'A story’s service remains usable',`One real day${a.cost?' and '+a.cost+' gold':''} at the ${v.rule} ${v.kind}.`);return true;}
- if(id.startsWith('rpg_boss_'))return applyBossAction(s,id,ctx,{startProject});
  if(id.startsWith('rpg_property_'))return applyPropertyAction(s,id,ctx,{startProject});
  return false;
 }
@@ -270,13 +233,11 @@ export function rpgEventIds(){return {rpg_intrigue:intrigueChoiceIds,rpg_regiona
 export function afterRpgBattle(s,b,ctx={}){
  if(b.context?.kind!=='rpg')return false;
  if(b.context.pursuitId)return afterPropertyBattle(s,b,ctx);
- const x=s.rpg.expedition,r=x?.rooms.find(r=>r.id===x.pendingRoom);if(!r)return false;x.pendingRoom=null;
- if(b.outcome==='victory'){r.resolved=true;if(r.bossId){const record=s.rpg.bosses.find(b=>b.id===r.bossId);record.resolutions.push({id:'combat',day:s.day,days:0,gold:0,outcome:'The actual guardian was defeated. No unperformed rescue or returned property was claimed.',participantIds:[]});}note(s,ctx,'A guardian overcome','Victory clears '+r.title+'. The side accounts and final room remain separate work.');}
- return true;
+ return false;
 }
 export function validRpgBattleContext(s,c){
  if(c.pursuitId)return !!s.rpg?.propertyBattle&&s.rpg.propertyBattle.propertyId===c.pursuitId&&c.locationId===s.locationId;
- const x=s.rpg?.expedition,r=x?.rooms.find(r=>r.id===x.pendingRoom);return !!x&&c.dungeonId===x.id&&r?.id===c.roomId&&c.locationId===x.locationId&&c.bossId===(r.bossId||'ordinary');
+ return false;
 }
 export function rpgContacts(s){return [...(s.rpg?.contacts||[]),...(s.rpg?.bosses||[]).flatMap(b=>!b.mazeDiscovery||b.mazeDiscovery.discoveredDay!==null?b.people||[]:[])].filter(p=>p.alive!==false).map(p=>({...p,roomId:firstMissionContactRoom(s,p),minAge:16,kind:'extra',available:p.alive!==false&&p.available!==false&&!p.retired,bond:p.bond||35,description:p.character?.detail||'A living participant in a saved regional account.',source:p}));}
 export function onRpgTime(s,{oldDay,newDay},ctx={}){
@@ -314,10 +275,10 @@ export function validateRpg(v,s){
  if(!Array.isArray(v.factions)||v.factions.length>6||new Set(v.factions.map(a=>a.id)).size!==v.factions.length||!v.factions.every(a=>RPG_FACTIONS_V27.some(d=>d.id===a.id)&&int(a.rank,0,3)&&int(a.joinedDay,0,s.day)&&int(a.nextDay)&&Array.isArray(a.choices)&&a.choices.length===a.rank&&validateFactionFirstMission(a.firstMission,a,s)))return false;
  if(!Array.isArray(v.services)||v.services.length>512||!v.services.every(v=>str(v.id,180)&&site(v.locationId)&&['shelter','workshop','clinic','market','school','ward','smuggling','blackmail','ritual','war_relief','claim','route'].includes(v.kind)&&['shared','priced','controlled'].includes(v.rule)&&int(v.day,0,s.day)&&(v.lastUsedDay===null||int(v.lastUsedDay,0,s.day))))return false;
  if(!Array.isArray(v.trainedTechniques)||v.trainedTechniques.length>24||new Set(v.trainedTechniques).size!==v.trainedTechniques.length||!v.trainedTechniques.every(id=>advancedTechnique(id)))return false;
- if(v.project!==null){const p=v.project;if(!obj(p)||!['practice','training','regional','companion','faction','room','boss','property','intrigue','faction-objective','maze'].includes(p.kind)||!str(p.id,160)||!str(p.choice,160)||!int(p.totalDays,1,30)||!int(p.remainingDays,1,p.totalDays)||!int(p.completedDays,0,p.totalDays)||p.remainingDays+p.completedDays!==p.totalDays||!int(p.cost,0,500)||typeof p.paid!=='boolean'||!site(p.locationId)||!obj(p.details)||!int(p.startedDay,0,s.day)||p.kind==='faction-objective'&&!validateFactionObjectiveProject(s,p))return false;}
+ if(v.project!==null){const p=v.project;if(!obj(p)||!['practice','training','regional','companion','faction','property','intrigue','faction-objective','maze'].includes(p.kind)||!str(p.id,160)||!str(p.choice,160)||!int(p.totalDays,1,30)||!int(p.remainingDays,1,p.totalDays)||!int(p.completedDays,0,p.totalDays)||p.remainingDays+p.completedDays!==p.totalDays||!int(p.cost,0,500)||typeof p.paid!=='boolean'||!site(p.locationId)||!obj(p.details)||!int(p.startedDay,0,s.day)||p.kind==='faction-objective'&&!validateFactionObjectiveProject(s,p))return false;}
  if(v.pending!==null){const p=v.pending;if(!obj(p)||!['regional','companion','faction'].includes(p.kind)||!str(p.id,160)||!int(p.chapter,0,4)||!site(p.locationId)||s.event?.id!=='rpg_'+p.kind||v.project)return false;if(p.firstOffer!==undefined&&(p.firstOffer!==true||p.kind!=='faction'||p.chapter!==0||!v.factions.some(f=>f.id===p.id&&f.rank===0&&!f.firstMission)||!s.event.choices.every(c=>c.id==='leave'||FIRST_MISSION_METHODS[p.id]?.some(method=>c.id==='accept_'+method))))return false;if(p.objectiveDecision!==undefined&&(p.kind!=='faction'||p.chapter!==0||!v.factions.some(f=>f.id===p.id&&f.firstMission?.status==='active'&&f.firstMission.decisionStep===p.objectiveDecision)||!s.event.choices.every(c=>['conclude_correct','conclude_wrong','leave'].includes(c.id))))return false;}
  const dungeon=x=>obj(x)&&x.version===2&&RPG_DUNGEONS_V27.some(d=>d.id===x.id)&&site(x.locationId)&&Array.isArray(x.rooms)&&x.rooms.length>=6&&x.rooms.length<=7&&new Set(x.rooms.map(r=>r.id)).size===x.rooms.length&&x.rooms.some(r=>r.id===x.roomId)&&x.rooms.every(r=>str(r.id,40)&&typeof r.resolved==='boolean'&&typeof r.visited==='boolean'&&Array.isArray(r.neighbors)&&r.neighbors.every(id=>x.rooms.some(n=>n.id===id&&n.neighbors.includes(r.id))))&&obj(x.facts)&&(x.pendingRoom===null||x.rooms.some(r=>r.id===x.pendingRoom));
- if(!Array.isArray(v.expeditions)||v.expeditions.length>18||!v.expeditions.every(dungeon)||v.expedition!==null&&!dungeon(v.expedition))return false;
+ if(!Array.isArray(v.expeditions)||v.expeditions.length>18||!v.expeditions.every(dungeon)||v.expedition!==null)return false; // no older regional walk is held now (v0.72.4); its records stay
  if(!Array.isArray(v.history)||v.history.length>180||!v.history.every(h=>int(h.day,0,s.day)&&str(h.title)&&str(h.text)&&site(h.locationId)))return false;
  if(!Array.isArray(v.curseSurvivors)||v.curseSurvivors.length>60||!Array.isArray(v.warAccounts)||v.warAccounts.length>40||!Array.isArray(v.inheritedAccounts)||v.inheritedAccounts.length>40)return false;
  return validateBossStories(s)&&validateIntrigue(s);

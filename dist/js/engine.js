@@ -67,7 +67,7 @@ import { initializeTimeline, getAgeActivities, getAgeUnlocks, getLifeStage, appl
 import { CLASS_CATALOG, initializeProgression, classView, capturePendingMentor, callingActions, applyCallingAction, applyCallingChoice, callingEventIds, validateProgression } from './classes.js';
 import { initializeConversations, getContacts, upgradeDialogueEdition, dialogueActions, applyDialogueAction, replyToConversation, onConversationAge, dialogueEventIds, validateConversations } from './conversations.js';
 import { campaignView, initializeCampaign, campaignActions, applyCampaignAction, applyCampaignChoice, afterCampaignBattle, campaignEventIds, validateCampaign, onCampaignAge } from './campaign.js';
-import { DUNGEONS, initializeExploration, explorationActions, applyExplorationAction, applyExplorationChoice, afterExplorationBattle, explorationEventIds, validateExploration, encounterIds, enterDungeon } from './exploration.js';
+import { DUNGEONS, initializeExploration, explorationActions, validateExploration, encounterIds } from './exploration.js';
 
 import { researchActions, applyResearchAction, applyResearchChoice, researchChoiceReason, researchTransition, closeResearchLife } from './research-runtime.js';
 import { validateResearchPortfolio } from './research-portfolio.js';
@@ -87,7 +87,7 @@ import { flushPersonalAllegation } from './story-allegations.js';
 import { recordLifeAtmosphere } from './life-atmosphere.js';
 import { initializeRealm, realmActions, applyRealmAction, onRealmTime, regionAt, validateRealm } from './realm.js';
 import { initializeJustice, justiceActions, applyJusticeAction, applyJusticeChoice, imprison, onJusticeTime, flushJustice, justiceEventIds, validateJustice } from './justice.js';
-import { initializeAdventuring, adventureActions, applyAdventureAction, applyAdventureChoice, adventureEventIds, afterAdventureBattle, onAdventuringTime, refreshAdventureBoard, validAdventureContext, validateAdventuring } from './adventuring.js';
+import { initializeAdventuring, adventureActions, applyAdventureAction, afterAdventureBattle, onAdventuringTime, refreshAdventureBoard, validAdventureContext, validateAdventuring } from './adventuring.js';
 import { validEnemyIllustration } from './enemies.js';
 import { initializeTravelEnergy, travelEnergyView, travelEnergyForecast, progressTravelStep, campingActions, applyCampingAction, noteTravelRest, validateTravelEnergy } from './travel-energy.js';
 import { initializeTravel, setTravelPlan, travelPlanPreview, beginTravelJourney, onTravelLeg, travelActions, applyTravelAction, applyTravelChoice, flushTravelEvent, afterTravelBattle, travelEventIds, validateTravel } from './travel.js';
@@ -130,8 +130,6 @@ export function getLifeCommitment(state) {
   if(state?.cartography?.pending){const p=state.cartography.pending;return {kind:'atlas',title:'Your journey through the country',locationId:state.locationId,totalDays:p.totalDays,completedDays:p.progress,remainingDays:p.totalDays-p.progress};}
   if(state?.justice?.prison){const p=state.justice.prison;return {kind:'prison',title:'A regional sentence',locationId:p.locationId,totalDays:p.totalDays,completedDays:p.servedDays,remainingDays:p.totalDays-p.servedDays};}
   const counting=countingTableCommitment(state);if(counting){const {run,phase}=counting,completedDays=phase.completedDay===null?0:1;return {kind:'justice_job',title:'The Counting-Table Silver · '+run.stage,locationId:run.locationId,totalDays:1,completedDays,remainingDays:1-completedDays};}
-  if(state?.rpg?.expedition){const p=state.rpg.expedition;return {kind:'rpg',title:p.title,locationId:p.locationId,totalDays:0,completedDays:0,remainingDays:0};}
-  if(state?.adventuring?.expedition){const p=state.adventuring.expedition;return {kind:'adventure',title:'The '+p.theme+' descent',locationId:p.locationId,totalDays:0,completedDays:0,remainingDays:0};}
   const kind=state&&experienceModule(state);if(!kind)return null;
   if(kind==='lineage_adoption'){
     const p=state.lineage.adoption.preparation,total=p.stage==='prepare'?3:2;
@@ -502,9 +500,6 @@ function unfilteredActions(state) {
   if(state.delve)return delveActions(state);
   if(state.maze)return mazeActions(state);
   if (state.justice?.prison) return [...justiceActions(state),...curseActions(state)];
-  if(state.rpg?.expedition)return rpgActions(state);
-  if (state.adventuring?.expedition) return adventureActions(state);
-  if (state.dungeon) return explorationActions(state);
   if(state.cartography?.pending)return [...cartographyActions(state),...(state.hero.condition?.type==='vampire'?[action('feed_vampire','Arrange feeding before continuing','Arrange a meal on this crossing. Consent, supplies and the meal’s own time remain visible in the next decision.',1,0,'Vampirism')]:[])];
   if(state.cartography?.offsite)return [...fieldActions(state),...(!state.hero.condition?curseActions(state):[]),...cartographyActions(state),...adventureActions(state).filter(a=>a.id.startsWith('adventure_roam_')),...(state.hero.condition?.type==='vampire'?[action('feed_vampire','Arrange animal blood on the trail','Spend one day meeting blood hunger without coercion.',1,0,'Vampirism')]:[])];
   const experience=experienceModule(state);
@@ -612,7 +607,7 @@ function fieldPotionOptions(s,targetId){
  // cannot be treated remotely through attended work, custody or other pledges.
  if(targetId!=='hero'){
   if(s.justice?.prison||s.workshop?.project||s.careers?.batch||s.life?.plan||experienceModule(s))return {contextReason:'Finish or cancel your current commitment before treating a companion.'};
-  return {mazeRoom:s.maze&&[1,2].includes(s.maze.version)?mazeRoomCell(s.maze):null,legacyDungeonRooms:s.dungeon?.definition?.rooms||DUNGEONS.find(d=>d.id===s.dungeon?.id)?.rooms||[]};
+  return {mazeRoom:s.maze&&[1,2].includes(s.maze.version)?mazeRoomCell(s.maze):null};
  }
  return {};
 }
@@ -914,7 +909,7 @@ function engineContext(state, { annual = false, resolvingNeed=null } = {}) {
     startBattle: (id, context) => beginBattle(state, id, context),
     // Every life has the delve (v0.72.3). A dungeon already begun in the maze is resumed there, and one
     // already walked in the older room engine keeps its record there: each is finished the way it began.
-    startDungeon: (id, questId) => state.flags.dungeonRecords?.[id]?enterDungeon(state,id,questId,engineContext(state)):mazeBegun(state,id)?enterMaze(state,id,questId,engineContext(state,{annual:true})):enterDelve(state,id,questId,engineContext(state,{annual:true})),
+    startDungeon: (id, questId) => mazeBegun(state,id)?enterMaze(state,id,questId,engineContext(state,{annual:true})):enterDelve(state,id,questId,engineContext(state,{annual:true})),
     touchCampaign: () => { if (state.campaign && !waiting(state)) onCampaignAge(state, engineContext(state)); },
     onBirthday: () => {
       if (state.family && state.education) onHouseholdAge(state, engineContext(state));
@@ -1120,7 +1115,7 @@ function performAction(original, id) {
   if (id.startsWith('gear_') && applyGearAction(state, id, engineContext(state))) { enjoyCompleted(); recordPlanGold(state, goldAfterFee); return afterAction(state); }
   if (id.startsWith('life_') && applyLifeAction(state, id, engineContext(state))) { enjoyCompleted(); recordPlanGold(state, goldAfterFee); return afterAction(state); }
   const handlers = [
-    ['upbringing_', applyUpbringingAction], ['journal_', applyQuestJournalAction], ['grow_', applyBirthAction], ['quest_', applyCampaignAction], ['explore_', applyExplorationAction],
+    ['upbringing_', applyUpbringingAction], ['journal_', applyQuestJournalAction], ['grow_', applyBirthAction], ['quest_', applyCampaignAction],
     ['calling_', applyCallingAction], ['talk_', applyDialogueAction],['confide_',applyDialogueAction],
     ['family_', applyHouseholdAction], ['school_', applyHouseholdAction], ['lore_', applyLoreAction],
     ['career_', applyCareerAction], ['lineage_', applyLineageAction], ['health_', applyHealthAction], ['travel_', applyTravelAction],
@@ -1498,12 +1493,12 @@ function performEventOption(original, id) {
     ['curse_',applyCurseChoice],
     ['nature_',applyPersonalityChoice],['hard_',applyWinterChoice],['schooling_',applySchoolingChoice],['living_',applyLivingChoice],['guild_',applyGuildChoice],['delve_',applyDelveChoice],['battlecraft_',applyBattlecraftChoice],['faith_',applyFaithChoice],['farm_',applyFarmChoice],
     ['birth_', applyBirthChoice], ['calling_', applyCallingChoice], ['fate_', applyCampaignChoice],
-    ['quest_', applyCampaignChoice], ['dungeon_', applyExplorationChoice],
+    ['quest_', applyCampaignChoice],
     ['family_', applyHouseholdChoice], ['school_', applyHouseholdChoice], ['lore_', applyLoreChoice],
     ['career_', applyCareerChoice], ['lineage_', applyLineageChoice], ['health_', applyHealthChoice], ['travel_', applyTravelChoice],
     ['society_',applySocietyChoice],['community_',applyCommunityChoice],['fellowship_',applyFellowshipChoice],['sanctuary_',applySanctuaryChoice],
     ['social_',applySocialChoice],['pastime_',applyPastimeChoice],
-    ['stories_',applyStoryChoice],['justice_',applyJusticeChoice],['adventure_',applyAdventureChoice],['debt_',applyDebtReckoningChoice],
+    ['stories_',applyStoryChoice],['justice_',applyJusticeChoice],['debt_',applyDebtReckoningChoice],
   ];
   for (const [prefix, handler] of moduleChoices) if (activeEvent.id.startsWith(prefix) && activeEvent.id !== 'family_visit') {
     const before = state.hero.gold;
@@ -1826,7 +1821,6 @@ function endLife(state, cause) {
   if (state.phase === 'retired') return;
   archiveStoryMazeAtLifeEnd(state);
   retire(state,cause);
-  state.dungeon=null;
   if(state.timeline){state.timeline.journey=null;state.timeline.yearTarget=null;}
   if(state.travel)state.travel.pending=null;
   if(state.yardTournament){const t=state.yardTournament;t.pending=null;if(t.stage!=='finished'){t.stage='finished';t.outcome='withdrawn';t.finishedDay=state.day;}}
@@ -1837,10 +1831,10 @@ function endLife(state, cause) {
   if(state.life)state.life.plan=null;
   if(state.health)state.health.recovery=null;
   if(state.stories){state.stories.project=null;state.stories.pending=null;}
-  if(state.rpg){state.rpg.project=null;state.rpg.pending=null;state.rpg.expedition=null;state.rpg.propertyBattle=null;}
+  if(state.rpg){state.rpg.project=null;state.rpg.pending=null;state.rpg.propertyBattle=null;}
   for(const key of ['society','community','fellowship','sanctuaries','social','pastimes','repertoire','justice'])if(state[key]){state[key].pending=null;if(state[key].project)state[key].project=null;if(state[key].commitment)state[key].commitment=null;}
   state.maze=null;
-  if(state.adventuring){state.adventuring.expedition=null;state.adventuring.raid=null;state.adventuring.claim=null;}
+  if(state.adventuring){state.adventuring.raid=null;state.adventuring.claim=null;}
   if(state.cartography)state.cartography.pending=null;
   if(state.justice){state.justice.prison=null;state.justice.arrest=null;}
   if(state.lineage?.adoption)state.lineage.adoption.preparation=null;
@@ -2051,9 +2045,42 @@ function enableRoleplayUpdates(state) {
 }
 
 
+/** The older expedition engines left in v0.72.4: the room engine (`dungeon`), the descent's rooms
+ * (`adventuring.expedition`) and the regional rooms of v0.27 (`rpg.expedition`). No life the main game
+ * admits can be in one; a life read in the middle of one leaves it where it stands. What it walked stays
+ * recorded; nothing more is paid, fought or rewarded, and no day passes. */
+function closeOlderWalks(state) {
+  const plainObject = v => Boolean(v) && typeof v === 'object' && !Array.isArray(v);
+  const d = state.dungeon;
+  if (plainObject(d) && typeof d.id === 'string' && plainObject(state.flags)) {
+    state.flags.dungeonRecords = { ...(plainObject(state.flags.dungeonRecords) ? state.flags.dungeonRecords : {}), [d.id]: copy({ visited: d.visited, cleared: d.cleared, facts: d.facts, complete: d.complete, ...(d.definition ? { definition: d.definition } : {}) }) };
+  }
+  if (d !== undefined) state.dungeon = null;
+  const run = state.adventuring?.expedition;
+  if (plainObject(run) && Array.isArray(state.adventuring.history)) {
+    state.adventuring.history = [...state.adventuring.history, { id: run.id, locationId: run.locationId, startDay: run.startDay, endDay: state.day, floor: run.floor, rooms: Array.isArray(run.cleared) ? run.cleared.length : 0 }].slice(-80);
+  }
+  if (plainObject(state.adventuring) && state.adventuring.expedition !== undefined) state.adventuring.expedition = null;
+  const x = state.rpg?.expedition;
+  if (plainObject(x) && Array.isArray(state.rpg.expeditions)) {
+    const kept = { ...copy(x), pendingRoom: null }, at = state.rpg.expeditions.findIndex(r => r?.id === x.id && r?.locationId === x.locationId);
+    state.rpg.expeditions = at < 0 ? [...state.rpg.expeditions, kept] : state.rpg.expeditions.map((r, i) => i === at ? kept : r);
+  }
+  if (plainObject(state.rpg)) {
+    if (state.rpg.expedition !== undefined) state.rpg.expedition = null;
+    if (['room', 'boss'].includes(state.rpg.project?.kind)) state.rpg.project = null;
+  }
+  const eventId = state.event?.id;
+  if (typeof eventId === 'string' && (eventId === 'adventure_room' || eventId.startsWith('dungeon_'))) state.event = null;
+  const c = state.battle?.context;
+  if (c && (c.kind === 'dungeon' || c.kind === 'adventure' && ['descent', 'contract'].includes(c.mode) || c.kind === 'rpg' && !c.pursuitId)) state.battle = null;
+  return state;
+}
+
 export function migrateSave(value) {
-  if (!validateSave(value)) return null;
-  const state = copy(value);
+  const read = Boolean(value) && typeof value === 'object' && !Array.isArray(value) ? closeOlderWalks(copy(value)) : value;
+  if (!validateSave(read)) return null;
+  const state = read;
   if (state.revision === 5) {enableRoleplayUpdates(state);normalizeInfantObservation(state);stampEdition(state);return validateSave(state)?state:null;}
   if (!(state.revision >= 2)) {
     state.difficulty = ['gentle', 'balanced', 'perilous'].includes(state.difficulty) ? state.difficulty : 'balanced';
@@ -2382,9 +2409,8 @@ export function resolveBattle(original, completed) {
     addJournal(state, 'The choice to survive', state.notice, 'combat');
   }
   if(pending.encounterId==='initiation'&&completed.outcome!=='victory'&&state.flags.legacyMentorTrial&&['trial','service'].includes(state.flags.legacyMentorTrial.stage)&&state.phase!=='retired')state.flags.pendingSpecialization=state.flags.legacyMentorTrial.classId;
-  if(completed.outcome==='victory'&&['dungeon','rpg','campaign','delve'].includes(pending.context?.kind))dropEquipment(state,'battle:'+pending.instanceId,Math.min(6,1+(pending.actors.filter(a=>a.side==='enemy').length||1)),engineContext(state));
+  if(completed.outcome==='victory'&&['rpg','campaign','delve'].includes(pending.context?.kind))dropEquipment(state,'battle:'+pending.instanceId,Math.min(6,1+(pending.actors.filter(a=>a.side==='enemy').length||1)),engineContext(state));
   if (pending.context?.kind === 'curse') afterCurseBattle(state,pending,completed.outcome,engineContext(state));
-  if (pending.context?.kind === 'dungeon') afterExplorationBattle(state, copy(pending.context), completed.outcome, engineContext(state));
   if (pending.context?.kind === 'campaign') afterCampaignBattle(state, copy(pending.context), completed.outcome, engineContext(state));
   if (pending.context?.kind === 'travel') afterTravelBattle(state, copy(pending.context), completed.outcome, engineContext(state,{annual:true}));
   if(pending.context?.kind==='maze')afterMazeBattle(state,pending,completed.outcome,engineContext(state,{annual:true}),completed);
@@ -2476,7 +2502,7 @@ function validBattle(battle, state) {
   if(battle.fieldVersion!==undefined){if(battle.fieldVersion!==FIELD_VERSION||!state.battlecraft||!Array.isArray(battle.artsUsed)||battle.artsUsed.length>60||!battle.artsUsed.every(id=>textField(id,80))||battle.settled!==undefined&&typeof battle.settled!=='boolean')return false;for(const actor of battle.actors){if(actor.row!==undefined&&!['front','back'].includes(actor.row))return false;if(actor.parry!==undefined&&typeof actor.parry!=='boolean')return false;if(actor.measuredBy!==undefined&&!textField(actor.measuredBy,64))return false;if(actor.arts!==undefined&&(!Array.isArray(actor.arts)||actor.arts.length>40||!actor.arts.every(id=>artById(id))))return false;if(actor.rangedMod!==undefined&&!finiteRange(actor.rangedMod,-20,20))return false;if(actor.loyalty!==undefined&&!finiteRange(actor.loyalty,0,100))return false;}}
   if (battle.context !== undefined) {
     const context = battle.context;
-    if (!plain(context) || !['dungeon', 'campaign', 'travel','adventure','curse','rpg','maze','delve','politics','tournament','initiation'].includes(context.kind) || !Object.entries(context).every(([key,v]) => textField(v, context.kind==='maze'&&context.contentVersion==='1'&&key==='runSeed'?400:160))) return false;
+    if (!plain(context) || !['campaign', 'travel','adventure','curse','rpg','maze','delve','politics','tournament','initiation'].includes(context.kind) || !Object.entries(context).every(([key,v]) => textField(v, context.kind==='maze'&&context.contentVersion==='1'&&key==='runSeed'?400:160))) return false;
     if (context.kind === 'initiation' && (battle.encounterId !== 'initiation' || !validPaladinTrialContext(state, context))) return false;
     if(context.kind==='politics'&&!validPoliticalBattle(state,context))return false;
     if(context.kind==='tournament'&&!validTournamentContext(state,context))return false;
@@ -2484,7 +2510,6 @@ function validBattle(battle, state) {
     if(context.kind==='curse'&&(context.locationId!==state.locationId||!state.hero.condition?.hunts?.some(h=>h.locationId===state.locationId&&h.status==='summoned')))return false;
     if(context.kind==='adventure'&&!validAdventureContext(state,context))return false;
     if(context.kind==='rpg'&&!validRpgBattleContext(state,context))return false;
-    if (context.kind === 'dungeon' && (!state.dungeon || context.dungeonId !== state.dungeon.id || context.roomId !== state.dungeon.pendingRoom || context.roomId !== state.dungeon.roomId || context.questId !== state.dungeon.facts?.questId)) return false;
     if (context.kind === 'campaign' && (!state.campaign?.pending || context.questId !== state.campaign.pending.questId || context.stage !== state.campaign.pending.stage)) return false;
     if (context.kind === 'travel' && (state.revision<5 || !state.timeline?.journey || state.travel?.pending?.stage!=='battle' || context.journeyId!==state.travel.pending.journeyId || context.legId!==state.travel.pending.legId)) return false;
   }
@@ -2586,7 +2611,7 @@ export function validateSave(value) {
     if (!Array.isArray(value.journal) || !value.journal.length || !value.journal.every(item => plain(item) && textField(item.id, 120) && integer(item.day) && integer(item.age, birthMode(value) ? 0 : 7, 5000) && textField(item.title, 1000) && textField(item.text, 10000) && textField(item.tag, 80) && (item.capturedReceipt===undefined||typeof item.capturedReceipt==='boolean') && (item.generation===undefined||integer(item.generation,1,5000)))) return false;
     if (value.event !== null) {
       const event = value.event;
-      const allowed = { ...EVENT_CHOICES, ...yardEventIds(), ...tournamentEventIds(), ...lifeEventIds(), ...birthEventIds(), ...callingEventIds(), ...campaignEventIds(), ...explorationEventIds(), ...dialogueEventIds(), ...householdEventIds(), ...researchEventIds(), ...originEventIds(), ...loreEventIds(), ...careerEventIds(), ...lineageEventIds(), ...healthEventIds(), ...travelEventIds(),...societyEventIds(),...communityEventIds(),...fellowshipEventIds(),...sanctuaryEventIds(),...socialEventIds(),...pastimeEventIds(),...repertoireEventIds(),...storyEventIds(),...rpgEventIds(),...personalityEventIds(),...justiceEventIds(),...adventureEventIds(),...curseEventIds(),...WINTER_EVENT.ids(), ...DEBT_RECKONING_EVENT.ids(), ...SCHOOLING_EVENTS.ids(), ...LIVING_EVENTS.ids(),...GUILD_EVENTS.ids(),...DELVE_EVENTS.ids(),...BATTLECRAFT_EVENTS.ids(),...FAITH_EVENTS.ids(),...FARM_EVENTS.ids() };
+      const allowed = { ...EVENT_CHOICES, ...yardEventIds(), ...tournamentEventIds(), ...lifeEventIds(), ...birthEventIds(), ...callingEventIds(), ...campaignEventIds(), ...dialogueEventIds(), ...householdEventIds(), ...researchEventIds(), ...originEventIds(), ...loreEventIds(), ...careerEventIds(), ...lineageEventIds(), ...healthEventIds(), ...travelEventIds(),...societyEventIds(),...communityEventIds(),...fellowshipEventIds(),...sanctuaryEventIds(),...socialEventIds(),...pastimeEventIds(),...repertoireEventIds(),...storyEventIds(),...rpgEventIds(),...personalityEventIds(),...justiceEventIds(),...curseEventIds(),...WINTER_EVENT.ids(), ...DEBT_RECKONING_EVENT.ids(), ...SCHOOLING_EVENTS.ids(), ...LIVING_EVENTS.ids(),...GUILD_EVENTS.ids(),...DELVE_EVENTS.ids(),...BATTLECRAFT_EVENTS.ids(),...FAITH_EVENTS.ids(),...FARM_EVENTS.ids() };
       for(const need of ['life_hunger','vampire_feeding'])if(value.sanctuaries&&allowed[need])allowed[need]=[...allowed[need],'agreement'];
       if (!plain(event) || !(Object.hasOwn(allowed, event.id) || event.id === 'lycan_confidant') || ![event.title, event.category, event.body].every(item => textField(item))) return false;
       if (!Array.isArray(event.choices) || !event.choices.length || event.choices.length > 8 || new Set(event.choices.map(item => item?.id)).size !== event.choices.length) return false;
@@ -2608,9 +2633,7 @@ export function validateSave(value) {
     if (value.battle !== null && value.flags.lastResolvedBattle === value.battle.instanceId) return false;
     if (value.battle !== null && (!validBattle(value.battle, value) || value.event !== null || !ageAllows(value, 16))) return false;
     if (value.revision >= 3) {
-      if (value.conversations?.pending && (value.event || value.battle || value.dungeon)) return false;
-      if (value.dungeon?.pendingRoom && (value.battle?.context?.kind !== 'dungeon' || value.battle.context.roomId !== value.dungeon.pendingRoom)) return false;
-      if (value.event?.id.startsWith('dungeon_') && value.event.id !== `dungeon_${value.dungeon?.id}_${value.dungeon?.roomId}`) return false;
+      if (value.conversations?.pending && (value.event || value.battle)) return false;
       if (value.progression?.pendingCalling !== null && value.event?.id !== 'calling_initiation') return false;
       if (hero.specialization && CLASS_CATALOG.find(c => c.id === hero.specialization)?.role !== hero.path) return false;
       if (value.life?.people.some(p => p.locationId !== undefined && !value.world.locations.some(l => l.id === p.locationId))) return false;
@@ -2657,13 +2680,13 @@ export function validateSave(value) {
       const additions=[countingTableCommitment(value),tournamentLocked(value)?value.adultTournament:null,value.researchPortfolio?.project,value.familyOrigins?.project,value.rpg?.project,value.stories?.project,value.health?.recovery,value.society?.project,value.community?.project?.commitment,value.fellowship?.project,value.sanctuaries?.commitment,value.lineage?.adoption?.preparation,value.pastimes?.project,value.repertoire?.project].filter(Boolean);
       const commitments=[...additions,value.careers?.batch,value.workshop?.project,value.timeline?.journey].filter(Boolean);
       if(additions.length&&commitments.length>1)return false;
-      if(value.careers?.batch&&(value.workshop?.project||value.timeline?.journey||value.dungeon||value.life?.plan))return false;
+      if(value.careers?.batch&&(value.workshop?.project||value.timeline?.journey||value.life?.plan))return false;
     }
     if (birthMode(value)) {
       if (value.age !== Math.floor((value.day-birthDay(value)) / 365) || value.age < 18 && value.phase !== 'childhood' && value.phase!=='retired' || value.age >= 18 && value.phase === 'childhood') return false;
       if (value.companions.some(p => !integer(p.baseAge, 0, 200) || p.age !== npcAge(value,p)) || value.life.people.some(p => p.age !== npcAge(value,p))) return false;
       if (hero.specialization === null && value.progression.learnedClassIds.length === 0 && hero.path !== 'unformed') return false;
-      if (value.age < 16 && (value.battle || value.dungeon || value.companions.some(p => p.recruited) || hero.profession !== 'Unemployed')) return false;
+      if (value.age < 16 && (value.battle || value.companions.some(p => p.recruited) || hero.profession !== 'Unemployed')) return false;
       if (value.age < 18 && (hero.specialization !== null || hero.condition !== null || value.life.partnerId || value.life.courtshipId || value.life.children.length || value.life.plan)) return false;
       if (value.event?.id.startsWith('birth_') && (value.event.id === 'birth_arrival' ? value.age !== 0 || value.day !== birthDay(value) || value.timeline.yearTarget !== null : (value.age > 18 ? value.event.id !== 'birth_adult_year' : value.event.id !== `birth_year_${value.age}`) || (value.day-birthDay(value)) % 365 !== 0 || value.timeline.yearTarget !== value.day)) return false;
     } else {

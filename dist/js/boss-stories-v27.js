@@ -63,19 +63,6 @@ export function bossTargetActions(s,target){
  if(r.bossId&&!r.resolved){const b=bs.find(b=>b.id===r.bossId),d=catalog.find(d=>d.id===r.bossId);if(!b||!d)return result;for(const [i,a]of d.noncombatApproaches.entries())result.push(offer('rpg_room_parley_'+i,a.label,`${a.result} ${a.consequence} ${a.costs.days} actual days${a.costs.gold?' · '+a.costs.gold+' gold':''}${Object.entries(a.costs.materials||{}).map(([k,n])=>' · '+n+' '+k).join('')}${a.costs.rations?' · '+a.costs.rations+' rations':''}.`,a.costs.days,a.costs.gold||0,bossChoiceReason(s,b.id,a.id,{target:modern?target:null})));}
  return result;
 }
-export function bossRoomActions(s){
- const x=s.rpg?.expedition;if(!x?.signature)return [];
- return bossTargetActions(s,{regionId:x.regionId,locationId:x.locationId,room:x.rooms.find(r=>r.id===x.roomId)});
-}
-export function applyBossTargetAction(s,id,ctx,{startProject,target}){
- const r=target.room;
- if(id.startsWith('rpg_room_parley_')){const b=s.rpg.bosses.find(b=>b.id===r.bossId),a=catalog.find(d=>d.id===b?.id)?.noncombatApproaches[Number(id.slice(16))];if(!a||bossChoiceReason(s,b.id,a.id,{target:target.mazeId?target:null}))return false;return startProject(s,'boss',b.id,a.id,a.costs.days,a.costs.gold||0,{approach:a.id},ctx);}
- const match=id.match(/^rpg_boss_(.+)_(archive|survey|contact)$/);if(!match)return false;const b=s.rpg.bosses.find(b=>b.id===match[1]);if(!b||b.leads[match[2]]!==null||!alive(b)||target.mazeId&&(b.locationId!==target.locationId||!b.people.every(p=>p.locationId===target.locationId)))return false;return startProject(s,'boss',b.id,'lead_'+match[2],match[2]==='archive'?1:2,0,{roomId:r.id},ctx);
-}
-export function applyBossAction(s,id,ctx,{startProject}){
- const x=s.rpg.expedition;
- return applyBossTargetAction(s,id,ctx,{startProject,target:{regionId:x.regionId,locationId:x.locationId,room:x.rooms.find(r=>r.id===x.roomId)}});
-}
 function uniqueProperty(s,b,kind,label){const id='property-'+b.id+'-'+kind;if(s.rpg.properties.some(p=>p.id===id))return;s.rpg.properties.push({id,kind,label,bossId:b.id,ownerId:s.dynasty?.activePersonId||'hero',locationId:s.locationId,acquiredDay:s.day,soldDay:null,returnedDay:null,lastUsedDay:null,pursuitUntil:kind==='egg'?s.day+92:null,pursuitDefeatedDay:null});}
 export function resolveBossApproach(s,p,ctx,{target=null,onResolved=null,onLead=null}={}){
  if(p.kind==='property'){const v=s.rpg.properties.find(v=>v.id===p.id);if(!v||v.soldDay!==null||v.returnedDay!==null)return;
@@ -98,7 +85,7 @@ export function resolveBossApproach(s,p,ctx,{target=null,onResolved=null,onLead=
  for(const [k,n]of Object.entries(a.costs.materials||{})){if(k==='herbs')s.flags.herbs-=n;else s.equipment.materials[k]-=n;}s.adventuring.rations-=a.costs.rations||0;
  const reward={sell_guard:60,buy_names:55,sell_echo:40,sell_cups:50,take_levy:25,claim_wood:25}[a.id]||0;s.hero.gold+=reward;
  b.resolutions.push({id:a.id,day:s.day,days:p.totalDays,gold:reward,outcome:a.result,consequence:a.consequence,participantIds:b.people.map(p=>p.id),...(target?mazeBossProvenance(target): {})});
- if(target)onResolved?.(b,a);else{const x=s.rpg.expedition,r=x?.rooms.find(r=>r.bossId===b.id);if(r)r.resolved=true;}
+ if(target)onResolved?.(b,a);
  for(const person of b.people){person.memories.push(a.result+' '+a.consequence);person.memories=person.memories.slice(-30);person.bond=Math.max(0,Math.min(100,person.bond+(coercive.has(a.id)?-12:8)));}
  if(coercive.has(a.id)){ctx.breakOath?.('You chose '+a.label.toLowerCase()+'.');if(['bind_watch','borrow_crown'].includes(a.id)&&regionAt(s)?.law.publicMagic==='forbidden')ctx.addEvidence?.(1,b.people[0].name+' witnessed prohibited public binding.');if(['smuggle_crew','sell_cups','buy_names'].includes(a.id)&&!regionAt(s)?.law.contrabandAllowed)ctx.addEvidence?.(1,b.people[0].name+' identified a prohibited property exchange.');}
  const site=s.realm.sites[b.locationId];if(!coercive.has(a.id))site.security=Math.min(100,site.security+6);

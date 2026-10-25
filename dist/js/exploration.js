@@ -50,8 +50,6 @@ const dungeonById = (id) => DUNGEONS.find((dungeon) => dungeon.id === id);
 const roomById = (dungeon, id) => dungeon?.rooms.find((entry) => entry.id === id);
 const copy = (value) => structuredClone(value);
 const readyAge = (state) => state.phase !== 'retired' && (state.timeline?.mode === 'birth' ? state.age >= 16 : state.phase === 'adult');
-const currentDefinition = (state) => state.dungeon?.definition || dungeonById(state.dungeon?.id);
-const currentRoom = (state) => roomById(currentDefinition(state), state.dungeon?.roomId);
 
 // Version one is a snapshot contract. Keep these authored definitions stable:
 // an expedition already entered must not change when later content is added.
@@ -117,7 +115,6 @@ const VARIANT_CONTENT = {
     reliquary: ['The workers’ muster', 'An iron fitting lies on a ledger of living workers. Several names have been crossed out without explanation.'],
   },
 };
-const OPTIONAL_IDS = ['witness', 'service', 'reliquary'];
 
 /** Seeded once on first entry; the resulting graph is kept in the save. */
 export function generateDungeonDefinition(seed, id, { legacyNames = false } = {}) {
@@ -150,7 +147,6 @@ export function generateDungeonDefinition(seed, id, { legacyNames = false } = {}
   return { ...definition, version: 1, seed: String(seed), layout, objective, motive, custodian, witness };
 }
 
-const modern = (state) => state.dungeon?.definition?.version === 1;
 const FORMATION_SITES = {
   guardian: ['watchtower'], knight: ['watchtower'], paladin: ['watchtower'],
   healer: ['cistern'], elementalist: ['cistern'], druid: ['root_caverns'], ranger: ['root_caverns'], berserker: ['root_caverns'],
@@ -165,10 +161,6 @@ export function rememberedSupport(state, definition) {
     (person.memories || []).some(memory => typeof memory === 'string' && /protect|consent|willing|honest|fair|help|keep.*promise|expedition:/i.test(memory))
     || state.fellowship?.companions?.[person.id]?.stage === 'completed' && Number.isSafeInteger(state.fellowship.companions[person.id].completedDay)
   ));
-}
-export function negotiationChecklist(state){
-  if(!modern(state))return [];
-  return authoredNegotiationChecklist(state,currentDefinition(state),currentRoom(state),state.dungeon);
 }
 export function authoredNegotiationChecklist(state,definition,here,active){
   const facts=active.facts;
@@ -186,12 +178,6 @@ export function authoredNegotiationChecklist(state,definition,here,active){
     {id:'judgment',label:'Judgment or trusted support',met:(state.hero.skills[definition.motive.skill]||0)>=4||Boolean(support),detail:support?`${support.name} can speak from a trusted shared memory.`:(state.hero.skills[definition.motive.skill]||0)>=4?`${definition.motive.skill} 4 is met.`:`Requires ${definition.motive.skill} 4, or an active ${definition.motive.role} companion with a trusted memory of your conduct.`},
   ];
 }
-function negotiationReason(state){return negotiationChecklist(state).filter(step=>!step.met).map(step=>step.detail).join(' ')||null;}
-function passageCue(room,definition){
-  const marks=['chalk marks','a split lintel','a narrow arch','a low arch','rust streaks','a ribbed arch','a worn carving','a crooked arch'];
-  const sound={witness:'a low voice',hazard:definition.id==='cistern'?'water underfoot':'uneven footing',dilemma:'a still alcove',treasure:'a metallic rattle',fight:'scuff marks',boss:'a deeper footfall',objective:'a steady light',safe:'a familiar draft'}[room.kind]||'a bend in the stone';
-  return marks[definition.rooms.findIndex(r=>r.id===room.id)%marks.length]+' · '+sound;
-}
 const materialCount = (state, key) => key === 'herbs' ? state.flags.herbs || 0 : state.equipment?.materials?.[key] || 0;
 const materialReason = (state, materials) => Object.entries(materials).filter(([key, count]) => materialCount(state, key) < count).map(([key, count]) => `${count} ${key}`).join(', ');
 function consumeMaterials(state, materials) {
@@ -203,7 +189,7 @@ function consumeMaterials(state, materials) {
 function rememberExpedition(state, definition, ctx, text, change = 2) {
   for (const person of (ctx.witnesses?.() || []).filter(person => person.alive !== false && person.hp > 0)) ctx.remember?.(person.id, `Expedition: ${definition.id}. ${text}`, change);
 }
-const timeCost = (id) => ['search', 'parley', 'rest', 'record_witness', 'protect_witness', 'repair_route', 'aid_only', 'preserve', 'restore', 'finish_public', 'finish_stewardship'].includes(id) || id.startsWith('route_') ? 1 : 0;
+const timeCost = (id) => ['search', 'parley', 'record_witness', 'protect_witness', 'repair_route', 'aid_only', 'preserve', 'restore', 'finish_public', 'finish_stewardship'].includes(id) ? 1 : 0;
 export const authoredActionDays = id => timeCost(id);
 
 const ACCOUNTS = {
@@ -228,9 +214,6 @@ const ACCOUNTS = {
     other: 'A workshop mark survives beneath the runes: a human hand once fitted these pieces. The mechanism obeys commands it cannot question. Its keepers could, and their choices remain written in the repairs.',
   },
 };
-function guardianAccount(state, definition, here) {
-  return authoredGuardianAccount(state,definition,here,modern(state));
-}
 export function authoredGuardianAccount(state, definition, here, enriched = true) {
   const account = ACCOUNTS[definition.id]?.[here.id] || ACCOUNTS[definition.id]?.other;
   const atmosphere = ['The reply arrives after a silence long enough to be uncomfortable.', 'Someone in the chamber listens even after the last word.', 'Your own footstep sounds different when you understand what stands in your way.'][seededRoll(state.seed, `${definition.id}:${here.id}:account`, 3)];
@@ -244,20 +227,9 @@ export function initializeExploration(state, { fresh = false } = {}) {
   if (fresh) state.flags.explorationVersion = 1;
 }
 
-function saveProgress(state) {
-  state.flags.dungeonRecords ||= {};
-  if (state.dungeon) state.flags.dungeonRecords[state.dungeon.id] = copy({ visited: state.dungeon.visited, cleared: state.dungeon.cleared, facts: state.dungeon.facts, complete: state.dungeon.complete, ...(state.dungeon.definition ? { definition: state.dungeon.definition } : {}) });
-}
 
-function clearRoom(state, id) {
-  if (!state.dungeon.cleared.includes(id)) state.dungeon.cleared.push(id);
-  saveProgress(state);
-}
 
-function operationChoices(state) {
-  return authoredRoomChoices(state,currentDefinition(state),currentRoom(state),state.dungeon,{modern:modern(state)});
-}
-export function authoredRoomChoices(state,definition,here,active,{modern:enriched=false,navigation=true}={}) {
+export function authoredRoomChoices(state,definition,here,active,{modern:enriched=false}={}) {
   if (!active || !here) return [];
   const cleared = active.cleared.includes(here.id);
   const choices = [];
@@ -307,56 +279,13 @@ export function authoredRoomChoices(state,definition,here,active,{modern:enriche
       choices.push({ id: 'finish_stewardship', label: definition.objective.work, description: `Spend one actual day and ${Object.entries(definition.objective.materials).map(([key, count]) => `${count} ${key}`).join(', ')}. ${definition.objective.result} Complete the discovery with a practical contribution.`, ...(reason ? { disabledReason: `Requires ${reason}.` } : {}) });
     }
   }
-  if (navigation && here.kind === 'safe') choices.push({ id: 'rest', label: 'Rest at the entrance', description: 'Spend one day. Restore up to 8 health and 5 magic to living party members.' });
-  if (navigation) {
-    const exits = here.exits.filter((exit) => cleared || here.kind === 'safe' || active.complete || active.visited.includes(exit));
-    if (exits.length > 1 && seededRoll(state.seed, `${active.id}:${here.id}:exits`, 2)) exits.reverse();
-    for (const exit of exits) {
-      const destination = roomById(definition, exit);
-      choices.push({ id: `route_${exit}`, label: active.visited.includes(exit)?`Go to ${destination.title}`:'Enter the unexplored passage · '+passageCue(destination,definition), description: 'Spend one day traveling within the dungeon. Visited and cleared rooms stay remembered.' });
-    }
-  }
-  if (navigation) choices.push({ id: 'leave', label: active.complete ? 'Return to the wider world' : 'Leave the dungeon safely', description: 'Keep your resources, discoveries, and cleared rooms. An unfinished expedition can be resumed.' });
   return choices;
 }
 
-function presentRoom(state, ctx) {
-  if (state.event || state.battle || ctx.pendingNeed?.()) return;
-  const here = currentRoom(state);
-  if (!here) return;
-  const definition = currentDefinition(state);
-  const flavor = ['Water and distant footsteps carry through the stone.', 'Old marks tell you someone has taken this route before.', 'The silence breaks whenever your party moves.'][seededRoll(state.seed, `${definition.id}:${here.id}:flavor`, 3)];
-  const briefing = modern(state) && here.id === 'entry' ? `\n\nExpedition concern: ${definition.objective.title}. ${definition.custodian.name}, ${definition.custodian.role}, is still guarding the last chamber. ${definition.motive.need} Optional passages can provide evidence and practical aid; the main route remains reachable.` : '';
-  const witnessAccount = modern(state) && here.id === 'witness' && state.dungeon.facts.witnessHeard ? `\n\n“I will let you record what happened here,” ${definition.witness.name} says. “Do not present me as someone who agreed to everything they did. Keep my words beside the limits I gave you.”` : '';
-  ctx.setEvent?.(`dungeon_${definition.id}_${here.id}`, here.title, `${definition.title} · exploration`, `${here.description} ${flavor}${briefing}${witnessAccount}${state.dungeon.facts[`listened_${here.id}`] ? `\n\n${guardianAccount(state, definition, here)}` : ''}${state.dungeon.cleared.includes(here.id) ? ' You have already resolved this room.' : ''}`, operationChoices(state));
-}
 
-export function enterDungeon(state, id, questId = null, ctx = {}) {
-  const base = dungeonById(id);
-  if (!base || !readyAge(state) || state.event || state.battle || state.dungeon || state.locationId !== base.locationId) return false;
-  const record = state.flags.dungeonRecords?.[id];
-  const definition = record?.definition || (!record && state.flags.explorationVersion === 1 ? generateDungeonDefinition(state.seed, id) : base);
-  if (record?.complete) {
-    if (questId && state.campaign) {
-      state.campaign.facts[`dungeon_${questId}`] = true;
-      ctx.touchCampaign?.();
-      state.notice = 'Your earlier discovery answers this expedition’s objective. No supplies or rewards are granted again.';
-      return true;
-    }
-    state.notice = 'That expedition’s discoveries are already part of your life.';
-    return false;
-  }
-  state.dungeon = { id, roomId: 'entry', visited: record ? [...record.visited] : ['entry'], cleared: record ? [...record.cleared] : [], facts: record ? copy(record.facts) : {}, pendingRoom: null, complete: false, ...(definition.version === 1 ? { definition: copy(definition) } : {}) };
-  if (questId) state.dungeon.facts.questId = String(questId);
-  saveProgress(state);
-  ctx.journal?.('Beneath the familiar world', `You entered ${definition.title}. ${definition.version === 1 ? `Your concern is “${definition.objective.title}.” ${definition.custodian.name} guards the last chamber for a reason: ${definition.motive.title.toLowerCase()}. This expedition’s routes, people and concern are now remembered.` : 'Its rooms and choices remain connected to the life above.'}`, 'exploration');
-  presentRoom(state, ctx);
-  return true;
-}
 
 export function explorationActions(state) {
   if (!readyAge(state) || state.event || state.battle) return [];
-  if (state.dungeon) return operationChoices(state).map((choice) => ({ id: `explore_${choice.id}`, label: choice.label, description: choice.description, days: timeCost(choice.id), cost: 0, group: 'Dungeon', ...(choice.disabledReason ? { disabledReason: choice.disabledReason } : {}) }));
   return DUNGEONS.filter((definition) => definition.locationId === state.locationId).map((definition) => ({ id: `explore_enter_${definition.id}`, label: `Enter ${definition.title}`, description: definition.description, days: 1, cost: 0, group: 'Adventure', ...(state.flags.dungeonRecords?.[definition.id]?.complete ? { disabledReason: 'This expedition is already complete.' } : state.hero.hp < 16 ? { disabledReason: 'Recover to at least 16 health before exploring.' } : {}) }));
 }
 
@@ -393,8 +322,8 @@ export function finishAuthoredDungeon(state,active,definition,here,ctx,method='c
   ctx.touchCampaign?.();
 }
 
-export function applyAuthoredContentChoice(state,definition,here,active,id,ctx={}, {modern:enriched=true,onClear=null,checkOffer=true,navigation=false}={}) {
-  if (checkOffer && !authoredRoomChoices(state,definition,here,active,{modern:enriched,navigation}).some(choice=>choice.id===id&&!choice.disabledReason)) return false;
+export function applyAuthoredContentChoice(state,definition,here,active,id,ctx={}, {modern:enriched=true,onClear=null,checkOffer=true}={}) {
+  if (checkOffer && !authoredRoomChoices(state,definition,here,active,{modern:enriched}).some(choice=>choice.id===id&&!choice.disabledReason)) return false;
   const clear = roomId => { if (!active.cleared.includes(roomId)) active.cleared.push(roomId); onClear?.(roomId); };
   const progressBefore = { cleared: active.cleared.includes(here.id), proof: Boolean(active.facts.variantProof), aid: Boolean(active.facts.variantAid), complete: active.complete };
   if (id === 'listen') {
@@ -469,10 +398,6 @@ export function applyAuthoredContentChoice(state,definition,here,active,id,ctx={
       ctx.journal?.('A cache recovered once', `You recovered ${loot.gold || 0} gold, ${loot.ore || 0} ore, ${loot.cloth || 0} cloth${loot.herbs ? `, and ${loot.herbs} herbs` : ''} from ${here.title}.`, 'equipment');
     }
     clear(here.id);
-  } else if (id === 'rest') {
-    for (const person of [state.hero, ...state.companions.filter((person) => person.recruited && person.active)]) {
-      if (person.hp > 0) { person.hp = Math.min(person.maxHp, person.hp + 8); person.mp = Math.min(person.maxMp, person.mp + 5); }
-    }
   } else if (id === 'finish' || id === 'finish_public' || id === 'finish_stewardship') {
     if (id === 'finish_stewardship') consumeMaterials(state, definition.objective.materials);
     finishAuthoredDungeon(state,active,definition,here,ctx,id === 'finish_public' ? 'public' : id === 'finish_stewardship' ? 'stewardship' : 'copy',enriched,onClear);
@@ -502,83 +427,10 @@ export function applyAuthoredContentChoice(state,definition,here,active,id,ctx={
   return true;
 }
 
-function performChoice(state, id, ctx, charged = false) {
-  if (!state.dungeon) return false;
-  const offered = operationChoices(state).find((choice) => choice.id === id);
-  if (!offered || offered.disabledReason) return false;
-  const active = state.dungeon;
-  const definition = currentDefinition(state);
-  const here = currentRoom(state);
-  if (!charged && timeCost(id)) {
-    const beforeDay = state.day;
-    ctx.spendDays?.(1, { outdoors: false });
-    if (state.phase === 'retired' || !state.dungeon) return true;
-    if (state.day <= beforeDay) { state.notice = 'This dungeon action waits for its real day. Resolve the calendar need, then choose it again; no room or reward was granted.'; return true; }
-  }
-  if (id === 'leave') {
-    saveProgress(state);
-    state.dungeon = null;
-    state.notice = 'You return to the wider world. Cleared rooms and claimed supplies remain remembered.';
-    return true;
-  }
-  if (id.startsWith('route_')) {
-    active.roomId = id.slice(6);
-    if (!active.visited.includes(active.roomId)) active.visited.push(active.roomId);
-    saveProgress(state);
-  } else if (id === 'fight') {
-    active.pendingRoom = here.id;
-    saveProgress(state);
-    ctx.startBattle?.(here.encounterId, { kind: 'dungeon', dungeonId: active.id, roomId: here.id, ...(active.facts.questId ? { questId: active.facts.questId } : {}) });
-    return true;
-  } else applyAuthoredContentChoice(state,definition,here,active,id,ctx,{modern:modern(state),onClear:()=>saveProgress(state),checkOffer:false,navigation:true});
-  saveProgress(state);
-  if (!state.event && !state.battle) presentRoom(state, ctx);
-  return true;
-}
 
-export function applyExplorationAction(state, id, ctx = {}) {
-  if (typeof id !== 'string' || !id.startsWith('explore_')) return false;
-  if (id.startsWith('explore_enter_')) return enterDungeon(state, id.slice(14), null, ctx);
-  return performChoice(state, id.slice(8), ctx, true);
-}
 
-export function applyExplorationChoice(state, eventId, choiceId, ctx = {}) {
-  if (!state.dungeon || eventId !== `dungeon_${state.dungeon.id}_${state.dungeon.roomId}`) return false;
-  return performChoice(state, choiceId, ctx);
-}
 
-export function afterExplorationBattle(state, context, outcome, ctx = {}) {
-  const active = state.dungeon;
-  if (context?.kind !== 'dungeon' || !active || context.dungeonId !== active.id || context.roomId !== active.pendingRoom || !['victory', 'retreat', 'defeat'].includes(outcome)) return false;
-  active.pendingRoom = null;
-  if (outcome === 'victory') {
-    clearRoom(state, context.roomId);
-    if (roomById(currentDefinition(state), context.roomId).rescue && !active.facts.prisonersFreed) {
-      active.facts.prisonersFreed = true;
-      if (state.campaign) state.campaign.facts.watchtowerPrisoners = true;
-      ctx.standing?.('villagers', 2);
-      ctx.journal?.('The cell doors opened', 'Your victory freed the detained travelers. Their families can return to the road.', 'quest');
-    }
-  }
-  saveProgress(state);
-  if (outcome === 'defeat') {
-    state.dungeon = null;
-    ctx.journal?.('Back above ground', 'Recovery brought your party out of the dungeon. The unfinished room remains unresolved; prior discoveries are kept.', 'exploration');
-  } else if (!state.event) presentRoom(state, ctx);
-  return true;
-}
 
-export function explorationEventIds() {
-  const events = {};
-  const operations = ['fight', 'listen', 'search', 'parley', 'take', 'rest', 'leave', 'finish', 'hear_witness', 'record_witness', 'protect_witness', 'repair_route', 'aid_only', 'preserve', 'restore', 'salvage', 'finish_public', 'finish_stewardship'];
-  // Every possible room uses a stable id, including optional seeded chambers.
-  // The engine can validate saved scenes without creating or rerolling a graph.
-  for (const definition of DUNGEONS) {
-    const ids = [...definition.rooms.map(here => here.id), ...OPTIONAL_IDS];
-    for (const id of ids) events[`dungeon_${definition.id}_${id}`] = [...operations, ...ids.map(exit => `route_${exit}`)];
-  }
-  return events;
-}
 
 const snapshotSignatures = new Map();
 function stableSnapshot(value) {
@@ -601,37 +453,25 @@ function validSnapshot(value, id, state) {
   return snapshotSignatures.get(key).has(stableSnapshot(value));
 }
 
-function validRecord(value, definition, active = false) {
+function validRecord(value, definition) {
   if (!value || !Array.isArray(value.visited) || !Array.isArray(value.cleared) || typeof value.complete !== 'boolean' || !value.facts || typeof value.facts !== 'object' || Array.isArray(value.facts)) return false;
   for (const list of [value.visited, value.cleared]) if (new Set(list).size !== list.length || list.length > definition.rooms.length || list.some((id) => !roomById(definition, id))) return false;
   if (value.visited[0] !== 'entry' || value.visited.some((id, index) => index > 0 && !definition.rooms.some((here) => value.visited.slice(0, index).includes(here.id) && here.exits.includes(id)))) return false;
   if (!value.cleared.every((id) => value.visited.includes(id)) || Object.keys(value.facts).length > 40 || !Object.values(value.facts).every((fact) => typeof fact === 'boolean' || typeof fact === 'string' && fact.length <= 120 || Number.isSafeInteger(fact) && fact >= 0)) return false;
-  if (active && (!roomById(definition, value.roomId) || !value.visited.includes(value.roomId) || value.pendingRoom !== null && (value.pendingRoom !== value.roomId || value.cleared.includes(value.pendingRoom)))) return false;
   if (value.complete && !definition.rooms.filter((here) => ['boss', 'objective'].includes(here.kind)).every((here) => value.cleared.includes(here.id))) return false;
   return true;
 }
 
 export function validateExploration(value, state) {
   if (state?.flags?.explorationVersion !== undefined && state.flags.explorationVersion !== 1) return false;
-  if (value !== null) {
-    const base = dungeonById(value?.id);
-    if (!base || value.definition !== undefined && !validSnapshot(value.definition, value.id, state)) return false;
-    const definition = value.definition || base;
-    if (!definition || !validRecord(value, definition, true)) return false;
-    if (state && (state.locationId !== definition.locationId || !readyAge(state))) return false;
-  }
+  // The older room engine's walk left in v0.72.4: no life holds one (migrateSave ends one at its door).
+  // What a life walked there stays as its record in flags.dungeonRecords.
+  if (value !== null) return false;
   const records = state?.flags?.dungeonRecords;
   if (records !== undefined && (!records || typeof records !== 'object' || Array.isArray(records) || Object.keys(records).length > DUNGEONS.length || Object.entries(records).some(([id, record]) => !dungeonById(id) || record?.definition !== undefined && !validSnapshot(record.definition, id, state) || !validRecord(record, record.definition || dungeonById(id))))) return false;
-  if (value?.definition && records?.[value.id]?.definition && stableSnapshot(value.definition) !== stableSnapshot(records[value.id].definition)) return false;
   return true;
 }
 
-export function dungeonView(state) {
-  const definition = currentDefinition(state);
-  if (!definition) return null;
-  const support = modern(state) ? rememberedSupport(state, definition) : null, formation = modern(state) ? formationSupport(state, definition) : null;
-  return { title: definition.title, description: definition.description, rooms: definition.rooms.filter(here=>state.dungeon.visited.includes(here.id)||currentRoom(state).exits.includes(here.id)).map((here) => ({ id: here.id, mapIndex:definition.rooms.findIndex(r=>r.id===here.id), title: state.dungeon.visited.includes(here.id)?here.title:'Unexplored passage · '+passageCue(here,definition), visited: state.dungeon.visited.includes(here.id), cleared: state.dungeon.cleared.includes(here.id), current: state.dungeon.roomId === here.id, optional: here.optional === true, exits: state.dungeon.visited.includes(here.id)?here.exits.filter(id=>state.dungeon.visited.includes(id)||here.id===state.dungeon.roomId):[] })), room: { title: currentRoom(state).title, description: currentRoom(state).description, encounterId: currentRoom(state).encounterId || null, resolved: state.dungeon.cleared.includes(currentRoom(state).id) }, complete: state.dungeon.complete, ...(modern(state) ? { variant: 1, objective: copy(definition.objective), inhabitant: copy(definition.custodian), witness: copy(definition.witness), motive: copy(definition.motive), evidence: Boolean(state.dungeon.facts.variantProof), aid: Boolean(state.dungeon.facts.variantAid), negotiation: negotiationChecklist(state), cacheIsBackground: definition.rooms.some(r=>r.kind==='treasure'&&state.dungeon.facts['claimed_'+r.id]), supportedBy: support ? { id: support.id, name: support.name } : null, supportedTechnique: formation, method: state.dungeon.facts.objectiveMethod || null } : {}) };
-}
 
 export function encounterIds() {
   return ['rpg_guardian','rpg_pursuit','vampire_hunters','wolf_hunters','feral_vampire','moon_mauler','free_beast','free_undead','free_spirit','free_construct','free_bandit','free_aberration','forest', 'ruin', 'initiation', 'road_bandits', 'road_beasts', 'cistern_sluice', 'cistern_flooded', 'cistern_keeper', 'archive_scriptoria', 'archive_vault', 'archive_warden', 'root_spoor', 'root_thorns', 'thornheart', 'tower_cliff', 'tower_cells', 'tower_captain', 'core_hall', 'core_forge', 'core_warden', 'covenant_guardian'];

@@ -3,32 +3,19 @@ import { healingPotionAmount } from './combat-rules.js';
 // This is the existing hero potion pause rule, not a new event-resolution path.
 export function fieldPotionMomentReason(state) {
   if (!state?.hero || state.phase === 'retired' || state.hero.hp <= 0) return 'There is no living character to treat.';
-  const roomPause = !state.battle && !state.conversations?.pending && (state.event?.id === 'adventure_room' || state.event?.id.startsWith('dungeon_'));
-  if ((Boolean(state.event || state.battle || state.conversations?.pending) && !roomPause) || state.cartography?.pending || state.timeline?.journey) return 'Finish the current moment first. In battle, use the party potion action.';
+  if (state.event || state.battle || state.conversations?.pending || state.cartography?.pending || state.timeline?.journey) return 'Finish the current moment first. In battle, use the party potion action.';
   return null;
 }
 
 /** Read only the actual current-room descriptor/snapshot, never a destination or fogged
  * room. Maze descriptors are supplied by the canonical resolver so future effective
  * room versions keep this rule aligned without a second geometry algorithm. */
-export function companionFieldRoomReason(state, { mazeRoom = null, legacyDungeonRooms = [] } = {}) {
+export function companionFieldRoomReason(state, { mazeRoom = null } = {}) {
   const unsafe = 'Resolve this room’s danger or retreat to a quiet room before treating a companion.';
   if (state.maze) {
     if (!mazeRoom || mazeRoom.id !== state.maze.position || !['entrance', 'empty', 'cache', 'enemy', 'trap', 'camp', 'inscription', 'objective', 'guardian', 'witness', 'dilemma'].includes(mazeRoom.kind)) return 'This room’s treatment safety is not available. Return to a known quiet room first.';
     if (state.maze.pendingRoom != null || !(state.maze.cleared || []).includes(state.maze.position) && ['enemy', 'guardian', 'trap'].includes(mazeRoom.kind)) return unsafe;
   }
-  if (state.event?.id === 'adventure_room') {
-    const run = state.adventuring?.expedition;
-    const kind = run?.layoutVersion === 1 ? run.chart?.floors?.[run.floor - 1]?.rooms?.[run.room]?.kind : run?.pendingKind;
-    if (!run || run.pendingBattle || !kind || kind !== run.pendingKind) return 'Finish the current moment before treating a companion.';
-    if (!(run.cleared || []).includes(`${run.floor}:${run.room}`) && ['battle', 'trap'].includes(kind)) return unsafe;
-  } else if (state.event?.id.startsWith('dungeon_')) {
-    const dungeon = state.dungeon, room = legacyDungeonRooms.find(r => r.id === dungeon?.roomId);
-    if (!dungeon || state.event.id !== `dungeon_${dungeon.id}_${dungeon.roomId}` || dungeon.pendingRoom != null || !room) return 'Finish the current moment before treating a companion.';
-    if (!(dungeon.cleared || []).includes(room.id) && ['fight', 'boss', 'hazard'].includes(room.kind)) return unsafe;
-  }
-  const run = state.rpg?.expedition, room = run?.rooms?.find(r => r.id === run.roomId);
-  if (run && (run.pendingRoom != null || !room || !room.resolved && ['guardian', 'hazard'].includes(room.type))) return unsafe;
   return null;
 }
 

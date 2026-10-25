@@ -36,8 +36,8 @@ export function signatureMazeAllowed(s,spec){
  if(s.mazeBook?.contentReceipts?.some(r=>r.family==='signature'&&r.sourceId===source.id)||s.rpg?.expeditions?.some(x=>x.id===source.id&&x.completed)||s.rpg?.services?.some(v=>v.source===source.id&&v.kind==='route'))return {allowed:true,priorComplete:true};
  const bosses=catalog.filter(b=>b.regionId===source.regionId).map(d=>bossFor(s,d.id)).filter(Boolean);
  if(bosses.some(b=>b.locationId!==locationId))return {allowed:false,reason:'This account is already bound to its original hearth. Its people and earlier decisions cannot be copied here.'};
- if(s.rpg?.expeditions?.some(x=>x.id===source.id&&!x.completed))return {allowed:false,reason:'Resume the original saved descent. Its people and attended accounts remain there.'};
- if(bosses.some(b=>!b.resolutions.length&&Object.values(b.leads).some(lead=>lead!==null)&&!b.mazeDiscovery))return {allowed:false,reason:'This account already has attended work in its original descent. Resume that record instead.'};
+ if(s.rpg?.expeditions?.some(x=>x.id===source.id&&!x.completed))return {allowed:false,reason:'An older descent here is recorded as it was left. Its people and attended accounts remain there.'};
+ if(bosses.some(b=>!b.resolutions.length&&Object.values(b.leads).some(lead=>lead!==null)&&!b.mazeDiscovery))return {allowed:false,reason:'This account already has attended work in an older descent, recorded as it was left.'};
  return {allowed:true};
 }
 export function initializeSignatureMaze(s,m,layout){

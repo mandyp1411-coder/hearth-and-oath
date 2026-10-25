@@ -37,7 +37,6 @@ export function mazeLayout(m){
  const layout={size:N,cells,goal,guardian};cache.set(key,layout);if(cache.size>100)cache.delete(cache.keys().next().value);return layout;
 }
 export function mazeEntrySpec(s,id,questId=null){
- if(id==='adventure_descend')return {kind:'radiant',sourceId:'uncharted',title:'The Uncharted Depths',tier:Math.min(4,1+Math.floor(s.hero.level/5)),questId:null};
  if(id.startsWith('adventure_pursue_')){const c=s.adventuring.contracts.find(c=>c.id===id.slice(17)&&c.status==='active'&&c.destinationId===s.locationId);return c?{kind:'contract',sourceId:c.id,title:c.type==='relic'?'The Sealed Chambers':c.type==='escort'?'The Lost Passage':'The Outlaw’s Hideout',tier:c.tier,questId:null}:null;}
  if(id.startsWith('rpg_enter_')){const d=RPG_DUNGEONS_V27.find(d=>d.id===id.slice(10));return d?{kind:'regional',sourceId:d.id,title:d.title,tier:d.signature?3:2,questId:null,...(d.signature?{regionId:d.regionId}:{})}:null;}
  const sourceId=id.replace(/^explore_enter_/,''),d=DUNGEONS.find(d=>d.id===sourceId&&d.locationId===s.locationId);return d?{kind:'authored',sourceId,title:d.title,tier:sourceId==='covenant_core'?4:sourceId==='watchtower'?3:2,questId}:null;
@@ -88,21 +87,19 @@ export function inheritStoryMazes(s,parent){
 }
 export function enterMaze(s,id,questId,ctx){
  const spec=mazeEntrySpec(s,id,questId);if(!spec||s.age<16||waiting(s)||s.maze||s.dungeon||s.rpg?.expedition||s.rpg?.project||s.adventuring?.expedition||s.timeline?.journey||s.cartography?.pending||s.cartography?.offsite)return false;
- initializeMaze(s);const old=spec.kind!=='radiant'&&s.mazeBook.records.findLast(r=>r.kind===spec.kind&&r.sourceId===spec.sourceId&&r.locationId===s.locationId);
+ initializeMaze(s);const old=s.mazeBook.records.findLast(r=>r.kind===spec.kind&&r.sourceId===spec.sourceId&&r.locationId===s.locationId);
  if(old?.objective||s.mazeBook.contentReceipts?.some(row=>row.sourceId===spec.sourceId&&row.family===(spec.kind==='authored'?'authored':'signature'))){if(questId){s.campaign.facts['dungeon_'+questId]=true;ctx.touchCampaign?.();}s.notice='Your earlier discovery already answers this objective. Nothing is awarded twice.';return true;}
  if(!old&&spec.kind==='regional'){const decision=signatureMazeAllowed(s,spec);if(!decision.allowed){s.notice=decision.reason;return false;}if(decision.priorComplete){s.notice='Your earlier discovery already answers this objective. Nothing is awarded twice.';return true;}}
- if(spec.kind==='radiant'&&s.adventuring.rations<1)return false;
  const entry=mazeReceiptEntrySnapshot(s,old||{visited:[0],cleared:[0],steps:0});
  if(ctx.spendDays(1,{outdoors:false})!==1||s.phase==='retired')return true;
  if(old){s.maze={...copy(old),position:0,previous:0,pendingRoom:null,questId:questId||old.questId,status:'inside'};delete s.maze.endedDay;}
  else{const run=s.mazeBook.nextRun++,seed=`${s.seed}:maze:${s.dynasty?.generation||1}:${spec.kind}:${spec.sourceId}:${s.locationId}:${run}`;s.maze={version:1,id:'maze-'+run,generation:s.dynasty?.generation||1,seed,...spec,locationId:s.locationId,position:0,previous:0,visited:[0],cleared:[0],collected:[],steps:0,objective:false,pendingRoom:null,proofBattleId:null,proofCaptured:false,startedDay:s.day,status:'inside'};}
- if(!old&&['radiant','contract'].includes(spec.kind))Object.assign(s.maze,newMazeDimensions(s.maze));
+ if(!old&&spec.kind==='contract')Object.assign(s.maze,newMazeDimensions(s.maze));
  s.maze.guardianRoom=mazeLayout(s.maze).guardian;
  if(!old&&spec.kind==='authored')initializeAuthoredMaze(s,s.maze,mazeLayout(s.maze));
  if(!old&&spec.kind==='regional'&&spec.regionId)initializeSignatureMaze(s,s.maze,mazeLayout(s.maze));
  if(old?.version===2&&questId)s.maze.contentFacts.questId=questId;
- if(spec.kind==='radiant')s.adventuring.rations--;
- openMazeEntryVisit(s,s.maze,entry,spec.kind==='radiant'?1:0);
+ openMazeEntryVisit(s,s.maze,entry,0);
  mazeJournal(s,s.maze,ctx,'Below the Surface',`You entered ${spec.title}. The passages will stay as you find them. The stair at the entrance leads out.`,'exploration');s.notice='A stair rises behind you. Choose a neighbouring room on the map.';return true;
 }
 export function mazeRoomText(m,state=null){
