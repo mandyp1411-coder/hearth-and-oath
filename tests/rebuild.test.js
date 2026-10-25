@@ -175,47 +175,6 @@ function prepared(seed = 'covenant-journey') {
   return saveable(state);
 }
 
-const dungeonPaths = {
-  cistern: ['route_sluice', 'fight', 'route_cache', 'take', 'route_keeper', 'fight', 'route_source', 'finish', 'leave'],
-  buried_archive: ['route_scriptoria', 'parley', 'route_vault', 'take', 'route_archivist', 'fight', 'route_seal', 'finish', 'leave'],
-  root_caverns: ['route_spoor', 'parley', 'route_refuge', 'take', 'route_thornheart', 'fight', 'route_spring', 'finish', 'leave'],
-  watchtower: ['route_cells', 'parley', 'route_cache', 'take', 'route_captain', 'fight', 'route_signal', 'finish', 'leave'],
-  covenant_core: ['route_hall', 'fight', 'route_library', 'take', 'route_warden', 'fight', 'route_anchor', 'finish', 'leave'],
-};
-
-// The older room engine is reached now only by a dungeon already begun in it (v0.72.3); these tests
-// document it by standing in a life without the delve until the engine itself leaves main.
-function roomEngine(state) { state = structuredClone(state); delete state.delves; return state; }
-
-function completeDungeon(state, id) {
-  assert.equal(state.dungeon?.id, id);
-  const battles = [];
-  for (const choice of dungeonPaths[id]) {
-    let selected = choice;
-    if (choice === 'parley' && state.dungeon?.definition?.version === 1) {
-      // Modern guards need an answer grounded in actual conduct. This player
-      // listens first, then negotiates only if the offered requirements are
-      // earned; otherwise the prepared party takes the real combat route.
-      if (state.event?.choices.some(option => option.id === 'listen')) state = choose(state, 'listen');
-      const offered = state.event?.choices.find(option => option.id === 'parley');
-      if (!offered || offered.disabledReason) selected = 'fight';
-    }
-    state = choose(state, selected);
-    saveable(state);
-    if (state.battle) {
-      battles.push(state.battle.encounterId);
-      ({ state } = win(state));
-    }
-  }
-  assert.equal(state.dungeon, null);
-  assert.equal(state.flags.dungeonRecords[id].complete, true);
-  return { state, battles };
-}
-
-// The campaign's dungeons are delves for every life (v0.72.3). This player walks one the way the
-// playtest Player does: take what a room gives, open every door but the lair's first, camp when hurt,
-// fight what comes, claim the objective, then go down while there are floors and climb out. Unlike the
-// Player, this one never leaves a lair alone: the campaign is walked through its actual bosses.
 // What a life meets between the campaign's steps: care for a wound first, give back what was
 // brought up, and let the field and the world take their course.
 function incidental(state) {
@@ -263,7 +222,6 @@ function campaignUntil(state, stop = 'complete', policy = {}) {
     for (let n = 0; n < 10 && (state.event?.id.startsWith('farm_') || state.event?.id.startsWith('health_')); n += 1) state = choose(state, incidental(state));
     assert.equal(state.event, null);
     assert.equal(state.battle, null);
-    assert.equal(state.dungeon, null);
     const stage = state.campaign.stage;
     const quest = campaignView(state).quests.find(item => item.id === stage);
     assert.equal(quest.status, 'active');
@@ -273,10 +231,6 @@ function campaignUntil(state, stop = 'complete', policy = {}) {
     state = act(state, `quest_begin_${stage}`);
     if (state.delve) {
       const expedition = completeDelve(state);
-      state = expedition.state;
-      battles.push(...expedition.battles);
-    } else if (state.dungeon) {
-      const expedition = completeDungeon(state, state.dungeon.id);
       state = expedition.state;
       battles.push(...expedition.battles);
     } else {
@@ -575,76 +529,6 @@ test('a destructive ending leaves visitable ruins, displaced people, and genuine
   saveable(state);
 });
 
-test('dungeon retreat preserves its unfinished room and caches and discoveries pay out once', () => {
-  let state = roomEngine(move(prepared('one-cache-one-discovery'), 'marsh'));
-  state = act(state, 'explore_enter_cistern');
-  state = choose(state, 'route_sluice');
-  state = choose(state, 'fight');
-  assert.equal(state.battle.context.kind, 'dungeon');
-  assert.equal(state.battle.context.roomId, 'sluice');
-  saveable(state);
-  const retreat = takeBattleAction(state.battle, 'retreat');
-  const goldBefore = state.hero.gold;
-  state = transition(state, value => engine.resolveBattle(value, retreat));
-  assert.equal(state.hero.gold, goldBefore);
-  assert.equal(state.dungeon.roomId, 'sluice');
-  assert.equal(state.dungeon.cleared.includes('sluice'), false);
-  assert.ok(state.event.choices.some(choice => choice.id === 'fight'));
-  assert.equal(state.campaign.completed.includes('well'), false);
-  state = choose(state, 'fight');
-  ({ state } = win(state));
-  assert.ok(state.dungeon.cleared.includes('sluice'));
-  state = choose(state, 'route_cache');
-  const cacheBefore = structuredClone({ gold: state.hero.gold, materials: state.equipment.materials });
-  state = choose(state, 'take');
-  const loot = DUNGEONS.find(dungeon => dungeon.id === 'cistern').rooms.find(room => room.id === 'cache').loot;
-  assert.equal(state.hero.gold, cacheBefore.gold + loot.gold);
-  assert.equal(state.equipment.materials.ore, cacheBefore.materials.ore + loot.ore);
-  assert.equal(state.equipment.materials.cloth, cacheBefore.materials.cloth + loot.cloth);
-  assert.equal(state.event.choices.some(choice => choice.id === 'take'), false);
-  const paid = structuredClone({ hero: state.hero, equipment: state.equipment, day: state.day });
-  const repeated = transition(state, value => engine.chooseEventOption(value, 'take'));
-  assert.deepEqual({ hero: repeated.hero, equipment: repeated.equipment, day: repeated.day }, paid);
-  state = choose(state, 'leave');
-  state = act(state, 'explore_enter_cistern');
-  state = choose(state, 'route_sluice');
-  assert.equal(state.event.choices.some(choice => choice.id === 'fight'), false, 'a cleared room remains cleared after leaving');
-  state = choose(state, 'route_cache');
-  assert.equal(state.event.choices.some(choice => choice.id === 'take'), false, 'a claimed cache remains empty after re-entry');
-  state = choose(state, 'route_keeper');
-  state = choose(state, 'fight');
-  ({ state } = win(state));
-  state = choose(state, 'route_source');
-  state = choose(state, 'finish');
-  state = choose(state, 'leave');
-  assert.equal(state.flags.dungeonRecords.cistern.complete, true);
-  const discoveryResources = structuredClone(state.hero);
-  state = act(state, 'quest_begin_well');
-  assert.equal(state.dungeon, null);
-  assert.equal(state.campaign.stage, 'patients');
-  assert.equal(state.campaign.facts.dungeon_well, true);
-  assert.deepEqual({gold:state.hero.gold,exp:state.hero.exp,level:state.hero.level,potions:state.hero.potions,attributes:state.hero.attributes,skills:state.hero.skills},{gold:discoveryResources.gold,exp:discoveryResources.exp,level:discoveryResources.level,potions:discoveryResources.potions,attributes:discoveryResources.attributes,skills:discoveryResources.skills}, 'earlier exploration satisfies the quest without paying its battle or cache rewards again');
-  saveable(state);
-});
-
-test('a dungeon battle result cannot redirect its immutable context or pay rewards twice', () => {
-  let pending = roomEngine(move(prepared('battle-context-integrity'), 'marsh'));
-  pending = act(pending, 'explore_enter_cistern');
-  pending = choose(pending, 'route_sluice');
-  pending = choose(pending, 'fight');
-  const result = win(pending);
-  const forged = structuredClone(result.completed);
-  forged.context.roomId = 'keeper';
-  const refused = transition(pending, value => engine.resolveBattle(value, forged));
-  assert.deepEqual(refused.hero, pending.hero, 'an altered context cannot receive baseline victory rewards');
-  assert.deepEqual(refused.battle, pending.battle);
-  assert.deepEqual(refused.dungeon, pending.dungeon);
-  const repeated = transition(result.state, value => engine.resolveBattle(value, result.completed));
-  assert.deepEqual(repeated.hero, result.state.hero);
-  assert.deepEqual(repeated.dungeon, result.state.dungeon);
-  assert.deepEqual(repeated.campaign, result.state.campaign);
-});
-
 test('a named local conversation keeps private transformation knowledge with only the chosen participant',()=>{
  let state=growTo(engine.createBirthGame({name:'Private Selene',seed:'one-person-confidence'}),18,['curiosity']).state;
  state=move(state,'city');state=choose(act(state,'vampire_invitation'),'accept');const person=getContacts(state).find(p=>p.id==='fellow');state=move(state,person.locationId);
@@ -661,14 +545,16 @@ test('a real dungeon remedy supports curing vampirism without erasing earned ide
   state = choose(state, 'accept');
   assert.equal(state.hero.maxMp, originalMaxMp + 6);
   state = act(state, 'night_travel');
-  state = roomEngine(move(state, 'forest'));
+  state = move(state, 'forest');
   state = act(state, 'explore_enter_root_caverns');
+  assert.ok(state.delve, 'the Moonroot Caverns are a delve for every life (v0.72.3)');
   const herbsBefore = state.flags.herbs || 0;
-  const discovery = completeDungeon(state, 'root_caverns');
+  const discovery = completeDelve(state);
   state = discovery.state;
   assert.ok(discovery.battles.includes('thornheart'));
-  assert.equal(state.flags.herbs, herbsBefore + 5, 'the cache grants two herbs and the spring three, once each');
+  assert.equal(state.flags.herbs, herbsBefore + 3, 'the spring gives three bundles of moonroot, once');
   state = move(state, 'brook');
+  state.hero.gold = Math.max(state.hero.gold, 40); // the delve's torches and days took the purse; the cure's fee is found as controlled data
   const skills = structuredClone(state.hero.skills);
   const earned = structuredClone(state.progression.learnedClassIds);
   const gold = state.hero.gold;
@@ -686,9 +572,8 @@ test('a real dungeon remedy supports curing vampirism without erasing earned ide
   assert.deepEqual(repeated.hero, state.hero);
   assert.equal(repeated.flags.herbs, state.flags.herbs);
   state = move(state, 'forest');
-  assert.ok(engine.getActions(state).find(action => action.id === 'explore_enter_root_caverns').disabledReason);
   const repeatedSpring = transition(state, value => engine.chooseAction(value, 'explore_enter_root_caverns'));
-  assert.equal(repeatedSpring.flags.herbs, state.flags.herbs);
+  assert.equal(repeatedSpring.flags.herbs, state.flags.herbs, 'going back to the spring takes nothing at the door');
   saveable(state);
 });
 

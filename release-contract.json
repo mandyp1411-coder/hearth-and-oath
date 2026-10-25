@@ -39,7 +39,6 @@
     "tests/curses-v25.test.js": {},
     "tests/destination-travel-v34.test.js": {},
     "tests/dialogue-ui-v22.test.js": {},
-    "tests/dungeon-focus.test.js": {},
     "tests/dungeon-variants.test.js": {},
     "tests/dynasty.test.js": {},
     "tests/earned-balance-gate.test.js": {},

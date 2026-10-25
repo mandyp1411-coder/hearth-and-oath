@@ -2,14 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as E from '../dist/js/engine.js';
 import {createLifeAtAge} from '../dist/js/new-life.js';
-import {DUNGEONS} from '../dist/js/exploration.js';
 import {syncCartography,hexAtlas} from '../dist/js/cartography.js';
 import {rememberedContacts} from '../dist/js/conversations.js';
 import {bondCategory,BOND_CATEGORIES} from '../dist/js/people-records.js';
 import {inventoryEntries,inventoryPage} from '../dist/js/inventory-ui.js';
 import {newTradeDraft,quoteTrade} from '../dist/js/trading.js';
 import {settlementWalkPath} from '../dist/js/exploration-ui.js';
-import {dungeonPresentation} from '../dist/js/dungeon-crawler-ui.js';
 import {isSettlement} from '../dist/js/world.js';
 import {settlementServices} from '../dist/js/world-services.js';
 import {educationTeacher} from '../dist/js/household.js';
@@ -69,6 +67,5 @@ test('location capitalization is displayed without changing its saved name or an
 });
 // Keep the pre-maze dungeon subsystem as an explicit compatibility contract.
 // Current 121-room UI is covered by maze-resource-rules.test.js, not these saved-mode controls.
-for(const kind of ['old','regional','radiant'])test(`compatible ${kind} dungeon mode retains physical doorways and its optional discovered map`,async t=>{
- let s=provisioned();delete s.mazeBook;delete s.maze;delete s.delves;if(kind==='old'){s.locationId=DUNGEONS[0].locationId;syncCartography(s);s=E.chooseAction(s,'explore_enter_'+DUNGEONS[0].id);}else if(kind==='regional'){const entry=E.getActions(s).find(a=>a.id.startsWith('rpg_enter_')&&!a.disabledReason);assert.ok(entry);s=E.chooseAction(s,entry.id);}else s=E.chooseAction(s,'adventure_descend');assert.ok(E.validateSave(s));const ui=await resume(t,s),v=dungeonPresentation(s);assert.ok(ui.root.querySelector('.dungeon-room-stage'));assert.ok(ui.root.querySelector('.dungeon-perspective'));assert.ok(ui.root.querySelector('.dungeon-pocket-map'));assert.ok(!ui.root.querySelector('.dungeon-pocket-map').open);const before=ui.current(),slots=ui.lives();assert.equal(ui.root.querySelector('.dungeon-heading h1').textContent,v.room);const offer=kind==='regional'?E.getActions(s).find(a=>a.id.startsWith('rpg_move_')&&!a.disabledReason):s.event.choices.find(c=>c.id.startsWith('route_')&&!c.disabledReason);assert.ok(offer);const id=kind==='regional'?offer.id.slice(9):kind==='radiant'?'radiant_'+offer.id.slice(6):offer.id.slice(6);const door=ui.root.querySelectorAll('.dungeon-door').find(n=>n.dataset.id===id);assert.ok(door);await ui.key('Enter',{target:door});same(ui,before,slots);assert.equal(ui.document.activeElement.id,'spatial-selection-title');assert.ok(control(ui,'spatial-move',(kind==='regional'?'rpg:':'dungeon:')+id));await ui.click('spatial-move',(kind==='regional'?'rpg:':'dungeon:')+id);const expected=kind==='regional'?E.chooseAction(before,offer.id):E.chooseEventOption(before,offer.id);assert.equal(JSON.stringify(ui.current()),JSON.stringify(expected));assert.ok(E.validateSave(ui.current()));
-});
+// The older dungeon modes (the room engine, the v0.27 regional rooms, the radiant descent) left in v0.72.4.
+
