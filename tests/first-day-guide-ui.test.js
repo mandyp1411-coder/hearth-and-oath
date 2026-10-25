@@ -106,6 +106,17 @@ test('a real maze entrance focuses the actual room heading without taking a step
   await ui.click('footing-step', first.key); assert.equal(ui.document.activeElement, ui.root.querySelector('.maze-current h2')); assert.equal(ui.document.activeElement.isConnected, true); assert.deepEqual(ui.current(), before);
 });
 
+test('a real delve entrance is the descent moment and focuses its heading without a step (v0.72.4)', async t => {
+  let s = fixture();
+  for (const room of settlementWalkPath(s, 'market')) s = E.chooseAction(s, 'atlas_room_' + room);
+  s = E.chooseAction(s, 'realm_ration');
+  for (let n = 0; s.event && n < 8; n++) s = E.chooseEventOption(s, s.event.choices.find(c => !c.disabledReason).id);
+  // The board's descent is a delve (v0.72.3); the guide's descent moment, once the older walks', covers it.
+  assert.ok(E.getActions(s).some(a => a.id === 'adventure_descend' && !a.disabledReason)); s = E.chooseAction(s, 'adventure_descend'); assert.ok(s.delve); assert.equal(s.event, null); valid(s);
+  const first = view(s).steps[0], ui = await open(t, s), before = ui.current(); assert.equal(first.key, 'descent');
+  await ui.click('footing-step', first.key); assert.equal(ui.document.activeElement, ui.root.querySelector('.delve-heading h1')); assert.equal(ui.document.activeElement.isConnected, true); assert.deepEqual(ui.current(), before);
+});
+
 test('an interrupted actual workshop keeps its project and focuses its existing continuation heading', async t => {
   let s = fixture(legacy.pendingProject);
   for (let n = 0; s.event && n < 8; n++) s = E.chooseEventOption(s, s.event.choices.find(c => !c.disabledReason).id);
