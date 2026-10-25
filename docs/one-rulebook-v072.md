@@ -271,6 +271,48 @@ tests start their wars through a court (`startRegionalWar`).
 Still to go: the older room engine and the radiant maze, which no new entry
 reaches now, and the old pages; the pre-edition migrations.
 
+## v0.72.4: the older walks end
+
+The expedition engines no admitted life could still begin are deleted: the
+room engine (`state.dungeon`: `enterDungeon`, its rooms, scenes and
+`dungeon` battles), the board's descent through rooms (`adventuring.expedition`
+and the `adventure_room` scene, with radiant-descent.js), the radiant maze's
+start, the v0.27 regional rooms (`rpg.expedition` and the boss rooms), and the
+contract fought as one battle. Their pages go with them (dungeon-crawler-ui.js,
+radiant-ui.js, spatial-controls.js, dungeon-directions.js, the descent and
+dungeon graphs in depth-ui-v27.js and exploration-ui.js, and the styles only
+those pages used), as do two stale browser scripts that walked the room
+engine and were run by nothing.
+
+Every life admitted since the maze arrived (v0.31) was born with a maze book,
+so only a life begun under the old rules can have been saved in one of these
+walks. Reading such a life ends the walk where it stands (`closeOlderWalks`,
+engine.js, applied in `migrateSave` before validation): the dungeon's rooms go
+to `flags.dungeonRecords`, the descent to a row of `adventuring.history`, the
+regional descent to `rpg.expeditions` with no pending room, and a room's scene
+or fight ends with it. Nothing is paid back and nothing found is invented. The
+three fields stay in the save's shape and the validators require them null;
+the records, including radiant maze receipts in genuine new-rule histories,
+stay valid. Migration step 73 names the change.
+
+What the walks' guards did now belongs to the maze and the delve: the dungeon's
+music, town contacts and replies that wait, the scene's way back, the place
+card's "return from the dungeon first", and the first day's guide. The board's
+stair and the campaign doors are offered only to a life with the delve (every
+read life has it from step 72). The exploration module keeps the campaign
+places' data, their doors and the validator for their kept records.
+
+Tests follow: tests and goldens of the deleted engines leave (authored-content
+parity, dungeon-focus, boss-story legacy parity); `tests/older-walks-v0724.test.js`
+reads the three genuine mid-walk captures (legacy-v3's battle, legacy-v4's
+dungeon, the v0.27 descent) and the release saves with `assertOlderWalkClosed`;
+the life-tools offline checker camps in a contract's maze; an older contract's
+single-battle attempt is held as data where the archive receipt needs one.
+
+Still to go: the old academy's `study`/`take_exam`, still offered and still
+feeding wages through `flags.certified` (a design decision), and the
+pre-edition migrations.
+
 ## Order of the eventual cutover
 
 1. Preserve occupied old slots, backups and their complete exports before
