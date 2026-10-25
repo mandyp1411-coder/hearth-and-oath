@@ -136,7 +136,7 @@ export function audioSceneFor(state,screen='game') {
   if(state.cartography?.interior?.roomId==='watch')return 'court';
   if(state.hero?.condition?.type==='vampire'&&state.hero.condition.stage==='changed')return 'vampire';
   if(state.hero?.condition?.form==='feral'||state.hero?.condition?.type==='lycanthrope'&&state.hero.condition.form!=='human'&&state.hero.condition.curseVersion===1)return state.hero.condition.type==='lycanthrope'?'werewolf':'curse';
-  if(state.dungeon||state.rpg?.expedition||state.adventuring?.expedition)return 'dungeon';
+  if(state.delve||state.maze)return 'dungeon';
   if(state.timeline?.journey||state.cartography?.pending)return 'travel';
   const regionId=state.realm?.sites?.[state.locationId]?.regionId,region=state.realm?.regions?.find(r=>r.id===regionId);
   if(state.cartography?.interior?.roomId==='shrine')return Object.hasOwn(scenes,'faith_'+region?.faithId)?'faith_'+region.faithId:'shrine';

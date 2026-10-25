@@ -19,7 +19,7 @@ const MENTAL = {
   depression: { name: 'Depressive symptoms', symptoms: 'Persistent low mood, diminished interest, and tiredness.', description: 'Trusted support and continuing care can ease symptoms over lived weeks. One pleasant conversation does not promise a cure.' },
   anxiety: { name: 'Anxious symptoms', symptoms: 'Persistent worry, tension, and difficulty settling.', description: 'A predictable routine, breathing space, and willing support can ease symptoms. These feelings do not imply danger to anyone.' },
 };
-const ready = state => !!state.health && state.phase !== 'retired' && !state.event && !state.battle && !state.conversations?.pending && !state.dungeon;
+const ready = state => !!state.health && state.phase !== 'retired' && !state.event && !state.battle && !state.conversations?.pending;
 const conditionById = (state, id) => [...state.health.physical, ...state.health.mental].find(condition => condition.id === id);
 // Who pays the healer for a child depends on the house: nobody for the bound
 // and the common (no healer comes), the household for trade and above.
@@ -79,7 +79,7 @@ export function initializeHealth(state, { migration = false, reset = false } = {
   void migration;
 }
 
-const recoveryReady = s => !!s.health && s.age >= 16 && s.phase !== 'retired' && !s.event && !s.battle && !s.conversations?.pending && !s.dungeon && !s.timeline?.journey && !s.workshop?.project && !s.careers?.batch && !s.life?.plan;
+const recoveryReady = s => !!s.health && s.age >= 16 && s.phase !== 'retired' && !s.event && !s.battle && !s.conversations?.pending && !s.timeline?.journey && !s.workshop?.project && !s.careers?.batch && !s.life?.plan;
 const symptomTerms = 'Attended plan days support both physical and emotional symptom care. Physical symptoms are reviewed every 14 lived days. Emotional recovery also needs 21 days since onset (35 for depressive symptoms), joy at least 40 and stress at most 65. Chronic conditions are managed, not erased; completing the plan does not guarantee that symptoms have ended.';
 const recoveryBenefits = kind => `Each seven attended days earn ${kind === 'guided' ? 16 : 12} health, ${kind === 'guided' ? 22 : 18} bodily wellbeing, 10 joy and 16 less stress, within their limits. ${kind === 'guided' ? 'Each attended week also eases physical severity by one, down to severity 1. ' : ''}These gains are separate from symptom reviews.`;
 export function recoveryActions(s) {
@@ -246,7 +246,7 @@ const BREAKS = [
 export function breakEventIds() { return { health_break: BREAKS.map(b => b.id) }; }
 function flushBreak(state, ctx) {
   const b = state.health.breakPending;
-  if (!b || state.event || state.battle || state.conversations?.pending || state.dungeon || ctx.pendingNeed?.()) return false;
+  if (!b || state.event || state.battle || state.conversations?.pending || ctx.pendingNeed?.()) return false;
   const cause = state.householdBudget?.debt > 0 ? 'The debt, the lender, the thin winters.' : (state.health.physical.length ? 'The pain that does not stop.' : 'Everything, all at once, for too long.');
   ctx.setEvent?.('health_break', 'Something gives', 'A breaking point', `${cause} You have carried it as far as it goes. Tonight it stops, one way or another. What do you reach for?`, BREAKS.map(b => ({ id: b.id, label: b.label, description: b.text })));
   return !!state.event;
@@ -271,7 +271,7 @@ export function flushHealthEvent(state, ctx = {}) {
   if (flushBreak(state, ctx)) return true;
   queueConcern(state);
   const pending = state.health.pending;
-  if (!pending || state.event || state.battle || state.conversations?.pending || state.dungeon || ctx.pendingNeed?.()) return false;
+  if (!pending || state.event || state.battle || state.conversations?.pending || ctx.pendingNeed?.()) return false;
   const condition = conditionById(state, pending.conditionId);
   if (!condition) { state.health.pending = null; return false; }
   // One health moment a season. While a season is being lived, a slight

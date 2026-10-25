@@ -10,7 +10,7 @@ import {makeTournamentOffer,tournamentOwner,tournamentLocked,tournamentScore,tou
 export {tournamentLocked};
 const room=s=>s.cartography?.interior?.siteId===s.locationId?s.cartography.interior.roomId:'gate';
 const site=(s,id=s.locationId)=>s.world.locations.find(p=>p.id===id);
-const occupied=s=>s.familyOrigins?.project||countingTableCommitment(s)||s.researchPortfolio?.project||s.repertoire?.project||s.timeline?.journey||s.timeline?.yearTarget!=null||s.careers?.batch||s.workshop?.project||s.health?.recovery||s.stories?.project||s.life?.plan||s.society?.project||s.community?.project?.commitment||s.fellowship?.project||s.sanctuaries?.commitment||s.lineage?.adoption?.preparation||s.pastimes?.project||s.conversations?.project||s.rpg?.project||s.rpg?.expedition||s.adventuring?.expedition||['preparing','bout'].includes(s.yardTournament?.stage);
+const occupied=s=>s.familyOrigins?.project||countingTableCommitment(s)||s.researchPortfolio?.project||s.repertoire?.project||s.timeline?.journey||s.timeline?.yearTarget!=null||s.careers?.batch||s.workshop?.project||s.health?.recovery||s.stories?.project||s.life?.plan||s.society?.project||s.community?.project?.commitment||s.fellowship?.project||s.sanctuaries?.commitment||s.lineage?.adoption?.preparation||s.pastimes?.project||s.conversations?.project||s.rpg?.project||['preparing','bout'].includes(s.yardTournament?.stage);
 const row=(id,label,description,days=0,disabledReason=null)=>({id:'tournament_'+id,label,description,days,cost:0,group:'Training',...(disabledReason?{disabledReason}:{})});
 const named=(s,p)=>projectNpcPerson(s,p);
 function personReason(s,p){
@@ -26,7 +26,7 @@ export function tournamentEntryReason(s,{ignoreCommitment=false}={}){
  if(s.revision<5||s.age<18||s.phase!=='adult'||s.hero.hp<=0)return 'The local challenge is for living adults of eighteen or older.';
  if(s.event||s.battle||s.conversations?.pending)return 'Finish the waiting moment first.';
  if(s.justice?.prison||s.justice?.arrest)return 'The challenge cannot be entered or resumed in custody.';
- if(s.cartography?.pending||s.cartography?.offsite||s.timeline?.journey||s.dungeon||s.maze||!isSettlement(s.world,s.locationId))return 'Return to the actual settlement before entering.';
+ if(s.cartography?.pending||s.cartography?.offsite||s.timeline?.journey||s.maze||!isSettlement(s.world,s.locationId))return 'Return to the actual settlement before entering.';
  if(occupied(s)&&!ignoreCommitment)return 'Finish the current commitment before entering or resuming the challenge.';
  const p=site(s);if(!p||['destroyed','evacuated'].includes(p.status)||p.servicesAvailable===false||heldSettlement(s,s.locationId))return 'The settlement is not offering this public event.';
  if((s.legal?.incidents||[]).some(x=>x.locationId===s.locationId&&x.evidence>=3))return 'Settle the outstanding local warrant before attending this Watchhouse event.';
@@ -146,7 +146,7 @@ export function closeTournamentForLife(s){const t=s.adultTournament;if(t&&t.stag
 export function reconcileTournament(s){const t=s.adultTournament;if(!t||t.stage==='finished'||t.stage==='offered'||t.stage==='paused'||s.battle?.context?.kind==='tournament')return;if(s.phase==='retired')closeTournamentForLife(s);else if(s.justice?.prison||s.justice?.arrest||s.locationId!==t.locationId||occupied(s))t.stage='paused';}
 export function tournamentRecognitionEligible(s,p){
  const t=s.adultTournament,m=t?.recognition;
- return !!(t?.stage==='finished'&&t.endReason!=='life_closed'&&m&&m.personId===p.id&&m.consumedDay===null&&t.ownerId===tournamentOwner(s)&&s.day>t.finishedDay&&s.age>=18&&s.phase!=='retired'&&p.available!==false&&p.alive!==false&&p.source?.alive!==false&&!personReason(s,p)&&p.locationId===s.locationId&&(p.roomId||'gate')===room(s)&&!s.cartography?.pending&&!s.cartography?.offsite&&!s.timeline?.journey&&!s.dungeon&&!s.maze&&!s.justice?.prison&&!s.justice?.arrest&&!s.rpg?.expedition&&!s.adventuring?.expedition&&!heldSettlement(s,s.locationId)&&site(s)?.servicesAvailable!==false&&!['destroyed','evacuated'].includes(site(s)?.status));
+ return !!(t?.stage==='finished'&&t.endReason!=='life_closed'&&m&&m.personId===p.id&&m.consumedDay===null&&t.ownerId===tournamentOwner(s)&&s.day>t.finishedDay&&s.age>=18&&s.phase!=='retired'&&p.available!==false&&p.alive!==false&&p.source?.alive!==false&&!personReason(s,p)&&p.locationId===s.locationId&&(p.roomId||'gate')===room(s)&&!s.cartography?.pending&&!s.cartography?.offsite&&!s.timeline?.journey&&!s.maze&&!s.justice?.prison&&!s.justice?.arrest&&!heldSettlement(s,s.locationId)&&site(s)?.servicesAvailable!==false&&!['destroyed','evacuated'].includes(site(s)?.status));
 }
 export function tournamentRecognition(s,p,{historical=false}={}){
  if(!s.adultTournament?.recognition||s.adultTournament.recognition.personId!==p.id||!historical&&!tournamentRecognitionEligible(s,p))return null;

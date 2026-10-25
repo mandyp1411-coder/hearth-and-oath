@@ -7,7 +7,7 @@ export function yardConversationEligible(s,p){
  return !!(t?.stage==='finished'&&t.paidDays===1&&t.finishedDay<=s.day&&[t.mentor.id,t.opponent.id].includes(p.id)&&
   (p.bond??40)>=15&&p.available!==false&&p.alive!==false&&p.source?.alive!==false&&p.locationId===t.locationId&&s.locationId===t.locationId&&
   (p.roomId||'gate')===(s.cartography?.interior?.roomId||'gate')&&!s.cartography?.offsite&&!s.cartography?.pending&&
-  !s.timeline?.journey&&!s.dungeon&&!s.maze&&!s.justice?.prison&&!s.adventuring?.expedition&&!s.rpg?.expedition&&
+  !s.timeline?.journey&&!s.maze&&!s.justice?.prison&&
   site&&!['destroyed','evacuated'].includes(site.status)&&site.servicesAvailable!==false&&!(t.discussedIds||[]).includes(p.id));
 }
 const instructor={

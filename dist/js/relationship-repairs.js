@@ -6,7 +6,7 @@ const destination=(s,a)=>isSettlement(s.world,a.locationId)&&!['destroyed','evac
 const offer=(id,label,description,reason,preview={})=>({id,label,description,days:0,cost:0,group:'Relationships',...preview,...(reason?{disabledReason:reason}:{})});
 const note=(s,ctx,title,text)=>{s.notice=text;(ctx.journalLiteral||ctx.journal)?.(title,text,'relationships');};
 export function relationshipActions(s){
- if(!s.conversations||s.age<18||s.phase!=='adult'||s.event||s.battle||s.conversations.pending||s.dungeon||s.timeline?.journey||s.cartography?.offsite||s.cartography?.pending||s.justice?.prison||s.adventuring?.expedition)return [];
+ if(!s.conversations||s.age<18||s.phase!=='adult'||s.event||s.battle||s.conversations.pending||s.timeline?.journey||s.cartography?.offsite||s.cartography?.pending||s.justice?.prison)return [];
  const p=s.conversations.project;if(p)return [offer('conversations_continue',`Continue ${p.title.toLowerCase()}`,`${p.remainingDays} attended days remain. The ${p.cost} gold fee is paid only once.`,null,{durationDays:p.remainingDays,quotedCost:p.paid?0:p.cost}),offer('conversations_cancel','Withdraw from the remedy','Keep the attended days and paid fee spent. The account remains unresolved.')];
  return people(s).filter(p=>p.alive!==false&&!['dead','departed'].includes(s.rpg?.companionStages?.[p.id]?.status)).flatMap(p=>{
   const a=personalAccounts(s,p.id)[0];if(!a)return [];const t=repairTerms(a),where=destination(s,a),place=site(s,where)?.name||'the recorded place';

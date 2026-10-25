@@ -25,7 +25,7 @@ function writeNote(s,r,ctx,title,text){
 }
 export function flushPersonalAllegation(s,ctx){
   if(typeof ctx?.addEvidence!=='function'||typeof ctx?.setEvent!=='function')return false;
-  if(!s.stories?.allegations?.length||s.event||s.battle||s.conversations?.pending||s.dungeon||s.justice?.prison||s.timeline?.journey||s.workshop?.project||s.careers?.batch||s.life?.plan||s.stories.project||s.stories.pending||s.sanctuaries?.commitment||s.phase!=='adult'||s.age<18||!isSettlement(s.world,s.locationId))return false;
+  if(!s.stories?.allegations?.length||s.event||s.battle||s.conversations?.pending||s.justice?.prison||s.timeline?.journey||s.workshop?.project||s.careers?.batch||s.life?.plan||s.stories.project||s.stories.pending||s.sanctuaries?.commitment||s.phase!=='adult'||s.age<18||!isSettlement(s.world,s.locationId))return false;
   const r=s.stories.allegations.find(r=>r.status==='waiting'&&r.ownerId===owner(s)&&r.locationId===s.locationId&&s.day>=r.readyDay&&(()=>{const p=participant(s,r.witnessId);return p&&p.name===r.witnessName&&p.alive!==false&&p.locationId===r.locationId;})());
   if(!r)return false;
   const old=incident(s,r.locationId);r.priorDescription=old?.description||null;r.priorEvidence=old?.evidence||0;

@@ -226,7 +226,7 @@ export function applyAnnualFocus(s,days,ctx={}) {
   }
   void ctx;
 }
-const ready=s=>!!s.householdBudget&&s.age>=18&&s.phase!=='retired'&&!s.event&&!s.battle&&!s.conversations?.pending&&!s.dungeon&&!s.timeline?.journey&&!s.careers?.batch&&!s.workshop?.project&&!s.life?.plan;
+const ready=s=>!!s.householdBudget&&s.age>=18&&s.phase!=='retired'&&!s.event&&!s.battle&&!s.conversations?.pending&&!s.timeline?.journey&&!s.careers?.batch&&!s.workshop?.project&&!s.life?.plan;
 export function householdBudgetActions(s) {
   if(!ready(s))return [];
   const b=s.householdBudget,owed=b.debt||0;

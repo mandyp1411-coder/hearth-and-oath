@@ -56,7 +56,6 @@ import { installMapCamera } from './map-camera.js';
 import { currentShopSession } from './shop-ui.js';
 import { tradeInventory, shopAccessReason, newTradeDraft, quoteTrade } from './trading.js';
 import { completeTrade } from './engine.js';
-import { renderDungeonCrawler } from './dungeon-crawler-ui.js';
 import { formatPlaceMarkup, properPlaceName } from './presentation-names.js';
 import { inventoryEntries } from './inventory-ui.js';
 import { WORKSPACE_SECTIONS, workspaceSection, selectSection, renderWorkspaceNavigation } from './interface-workspaces.js';
@@ -69,8 +68,6 @@ import { personalServicesPanel } from './personal-services.js';
 import { SLOT_NAMES, EQUIPMENT_SLOTS } from './gear-loot.js';
 import { ECONOMY_GOALS, renderEconomyPlan } from './economy-planning.js';
 import { renderRoadPlanPanel, renderRoadJourney } from './travel-ui.js';
-import { renderRadiantPanel } from './radiant-ui.js';
-import { radiantView } from './radiant-descent.js';
 import { BUILD_GOALS, equipmentComparator } from './gear-comparison.js';
 import { renderEquipmentComparison } from './equipment-comparison-ui.js';
 import { gearPreset, gearPresetFingerprint } from './gear-organizer.js';
@@ -82,7 +79,7 @@ import { renderQuestJournal } from './quest-journal.js';
 import { trackedQuest, questReturnForecast, retirementQuestReview } from './quest-records.js';
 import { upbringingPanel } from './upbringing.js';
 import { spatialMoveOffer, renderAreaScene } from './area-scenes.js';
-import { depthPanel, depthDungeonPanel } from './depth-ui-v27.js';
+import { depthPanel } from './depth-ui-v27.js';
 import { healthChoiceReason, healthView } from './health.js';
 import { storyChoiceReason } from './life-stories.js';
 import { lifeChoiceReason } from './life.js';
@@ -125,7 +122,6 @@ import { selectCharacterPortrait, declareCharacterHeritage, portraitSelectionRea
 import { merchantPanel, adventurePage, realmPage } from './rpg-ui.js';
 import { renderAvatar, describeAppearance } from './avatar.js';
 import { campaignView } from './campaign.js';
-import { dungeonView } from './exploration.js';
 import { getContacts, rememberedContacts } from './conversations.js';
 import { classView } from './classes.js';
 import { travelPreview, BIRTHPLACES, worldCalendarContext } from './world.js';
@@ -181,7 +177,7 @@ let journalCategory='all';
 let journalPages={},personalNotesScope='current',journalScope=null,pendingPersonalNote=null;
 const personalNoteDrafts=createPersonalNoteDrafts(),noteReturnPositions=new Map();
 let herbalCareReview=null,professionReview=null;
-let selectedRoom=null, selectedDungeonRoom=null, spatialClickTimer=null, peopleScope='family', peopleQuery='', peoplePage=0, questCategory='main';
+let selectedRoom=null, spatialClickTimer=null, peopleScope='family', peopleQuery='', peoplePage=0, questCategory='main';
 let mazeMapSession=null;
 let spatialMode='country', spatialPane='map', peoplePane='conversations', packPane='equipment', activitiesPane='daily';
 let packGoal='none', workspaceSections={},nearbyPage=0,nearbyQuery='';
@@ -373,7 +369,7 @@ async function handleIronmanControl(op,id){
  }
 }
 
-function uiHelpers(){return {e,title,button,paragraphs,meter,actionCards,chapter,date,historyList,materialNeeds,livingCosts,section:workspaceSection(tab,workspaceSections[tab]),nearbyPage,nearbyQuery,selectedDungeonRoom,shopSession,craftSession,serviceSession,serviceTopic,mapScale,chartSheet,chartGrid,encounter:()=>eventScene()};}
+function uiHelpers(){return {e,title,button,paragraphs,meter,actionCards,chapter,date,historyList,materialNeeds,livingCosts,section:workspaceSection(tab,workspaceSections[tab]),nearbyPage,nearbyQuery,shopSession,craftSession,serviceSession,serviceTopic,mapScale,chartSheet,chartGrid,encounter:()=>eventScene()};}
 const firstDayGuideReaders={actions:getActions,unlocks:getAgeUnlocks,services:settlementServices,walkPath:settlementWalkPath,offers:serviceMeetingOffers,commitment:getLifeCommitment,ageControl:ageControlState};
 function firstDayGuideMarkup(){
  if(farmerDayVisible(game))return '';
@@ -418,8 +414,8 @@ function zoomChart(id,anchor){
   rememberWorkspace();
 }
 function mapView(){if(modal==='map')return '<h1>Explore</h1><p>The chart is open.</p>';return renderExplorationWorkspace(game,{selectedKey:selectedHex,selectedPlace:selectedLocation},uiHelpers());}
-function currentDungeonView(){if(game.delve)return renderDelve(game,uiHelpers());if(game.maze){mazeMapSession=currentMazeMapSession(game,mazeMapSession);return renderMaze(game,uiHelpers(),mazeMapSession);}return renderDungeonCrawler(game,uiHelpers(),{encounter:game.event?eventScene():actionsForUI(game).some(a=>a.id.startsWith('rpg_room_')||a.id.startsWith('rpg_boss_'))?'':actionCards(actionsForUI(game).filter(a=>a.id.startsWith('explore_')&&!a.id.startsWith('explore_route_')||['adventure_continue','adventure_withdraw'].includes(a.id))),selectedId:selectedDungeonRoom});}
-function placeView(){if(game.battle)return battleView();if(game.delve||game.maze||game.dungeon||game.rpg?.expedition||game.adventuring?.expedition)return currentDungeonView();if(game.justice?.prison)return realmPage(game,actionsForUI(game),{...uiHelpers(),section:'law'});craftSession=currentCraftSession(game,craftSession);if(craftSession?.mode==='craft')craftSession.quote=craftQuote(game,actionsForUI(game),craftSession);shopSession=currentShopSession(game,shopSession);if(shopSession?.mode==='trade')shopSession.quote=quoteTrade(game,shopSession.draft);return renderSettlementList(game,{selectedContact},uiHelpers());}
+function currentDungeonView(){if(game.delve)return renderDelve(game,uiHelpers());if(game.maze){mazeMapSession=currentMazeMapSession(game,mazeMapSession);return renderMaze(game,uiHelpers(),mazeMapSession);}return '';}
+function placeView(){if(game.battle)return battleView();if(game.delve||game.maze)return currentDungeonView();if(game.justice?.prison)return realmPage(game,actionsForUI(game),{...uiHelpers(),section:'law'});craftSession=currentCraftSession(game,craftSession);if(craftSession?.mode==='craft')craftSession.quote=craftQuote(game,actionsForUI(game),craftSession);shopSession=currentShopSession(game,shopSession);if(shopSession?.mode==='trade')shopSession.quote=quoteTrade(game,shopSession.draft);return renderSettlementList(game,{selectedContact},uiHelpers());}
 function ongoingActivityPanel(){
  const c=getLifeCommitment(game),batch=game.careers?.batch,project=game.workshop?.project;
  if(!c&&!batch&&!project)return '';
@@ -536,22 +532,22 @@ function adoptPosition(next,message,{persist=true,afterAdopt,afterPersist}={}) {
   sceneReturn=null;sceneFocus=null;sceneActionRevision++;
   const focused=document.activeElement?.dataset?.op?{op:document.activeElement.dataset.op,id:document.activeElement.dataset.id}:null;
   if(pendingPersonalNote&&next!==game){pendingPersonalNote=null;if(modal==='personal-note')modal=null;}
-  const previous=game;if(!previous||previous.seed!==next.seed||previous.dynasty?.generation!==next.dynasty?.generation){shopSession=null;craftSession=null;mazeMapSession=null;mapCamera.forget();} selectedRoom=null;selectedDungeonRoom=null; movement=previous?getMapMovement(previous,next):null; game=next; mazeMapSession=currentMazeMapSession(game,mazeMapSession);screen='game';
-  if(!previous?.dungeon&&!previous?.maze&&!previous?.delve&&(game.dungeon||game.maze||game.delve)){spatialMode='dungeon';spatialPane='actions';}
-  else if((previous?.dungeon||previous?.maze||previous?.delve)&&!game.dungeon&&!game.maze&&!game.delve)spatialMode='country';
+  const previous=game;if(!previous||previous.seed!==next.seed||previous.dynasty?.generation!==next.dynasty?.generation){shopSession=null;craftSession=null;mazeMapSession=null;mapCamera.forget();} selectedRoom=null; movement=previous?getMapMovement(previous,next):null; game=next; mazeMapSession=currentMazeMapSession(game,mazeMapSession);screen='game';
+  if(!previous?.maze&&!previous?.delve&&(game.maze||game.delve)){spatialMode='dungeon';spatialPane='actions';}
+  else if((previous?.maze||previous?.delve)&&!game.maze&&!game.delve)spatialMode='country';
   if(!previous?.battle||!next.battle){selectedTarget=null;selectedAllyTarget=null;}
   else {if(!next.battle.actors.some(a=>a.id===selectedTarget&&a.side==='enemy'&&a.hp>0))selectedTarget=null;if(!next.battle.actors.some(a=>a.id===selectedAllyTarget&&a.side==='party'&&a.hp>0))selectedAllyTarget=null;}
   if(previous&&previous.dynasty?.generation!==game.dynasty?.generation){workspaceSections={};nearbyPage=0;nearbyQuery='';peopleScope='family';peopleQuery='';peoplePage=0;questInvitations='preview';questArchiveQuery='';questCategory='main';selectedHex=null;workspaceReturn=null;spatialMode='country';spatialPane='map';peoplePane='conversations';packPane='equipment';packGoal='none';gearFilter='all';inventoryQuery='';inventorySort='type';inventoryCategory='all';inventoryItem=null;craftFinish='plain';economyGoal='road';tab='life';selectedContact=null;selectedLocation=null;feedPosition=0;feedCount=0;disclosureStates.clear();conversationPositions.clear();circlePosition=0;}
   if(previous&&previous.locationId!==game.locationId){serviceSession=null;nearbyPage=0;nearbyQuery='';selectedContact=null;shopSession=null;}
   if(previous&&JSON.stringify(previous.cartography?.interior)!==JSON.stringify(game.cartography?.interior)&&game.cartography?.interior)spatialPane='actions';
-  const hasDescent=game.delve||game.maze||game.dungeon||game.rpg?.expedition||game.adventuring?.expedition;
+  const hasDescent=game.delve||game.maze;
   const changedMoment=!previous||JSON.stringify(previous.event)!==JSON.stringify(game.event)||Boolean(previous.battle)!==Boolean(game.battle)||previous.battle?.encounterId!==game.battle?.encounterId||previous.battle?.outcome!==game.battle?.outcome;
   const changedConversation=!previous||JSON.stringify(previous.conversations?.pending)!==JSON.stringify(game.conversations?.pending);
   const interrupted=game.event||game.battle||hasDescent||game.conversations?.pending;
   if((game.event||game.battle||hasDescent)&&tab==='map'&&previous)workspaceReturn='map';
   if(((game.event||game.battle)&&changedMoment)||(hasDescent&&(['life','place','map'].includes(tab)||!previous)))tab='life';
   else if(game.conversations?.pending&&changedConversation){tab=nearbyContacts(game).some(p=>p.id===game.conversations.pending.personId)?'place':'life';workspaceReturn=null;}
-  else if(!interrupted&&previous&&(previous.event||previous.battle||previous.maze||previous.dungeon||previous.rpg?.expedition||previous.adventuring?.expedition)&&workspaceReturn==='map'){tab='map';workspaceReturn=null;}
+  else if(!interrupted&&previous&&(previous.event||previous.battle||previous.maze)&&workspaceReturn==='map'){tab='map';workspaceReturn=null;}
   if(!previous&&!interrupted)workspaceReturn=null;
   const sameLife=previous&&previous.seed===game.seed&&(previous.timeline?.birthDay||0)===(game.timeline?.birthDay||0)&&(previous.dynasty?.generation||1)===(game.dynasty?.generation||1);
   if(!sameLife){firstDayGuideReopened=false;firstDayGuideSource=null;firstDayGuideCached=null;selectedGearPreset=null;gearPresetReview=null;if(previous)inventoryFavoritesOnly=false;serviceTopic=null;notificationToasts=[];selectedNotice=null;clearTimeout(notificationTimer);}
@@ -628,8 +624,7 @@ function ageControlState() {
   else if(game.conversations?.pending)reason='A reply is waiting. Return to the conversation, or open Life → Today.';
   else if(game.hero.condition?.type==='vampire'&&game.hero.condition.hunger>=75)return {reason:'',continuing:!!game.timeline?.yearTarget,needsBlood:true};
   else if(game.justice?.prison)reason='Continue or review your sentence in Life → Today.';
-  else if(game.adventuring?.expedition)reason='Continue or withdraw from your descent in Life → Today.';
-  else if(game.maze||game.delve||game.dungeon)reason='Leave or finish the expedition first.';
+  else if(game.maze||game.delve)reason='Leave or finish the expedition first.';
   else if(game.cartography?.pending)reason='Continue your journey or turn back in Explore.';
   else if(game.workshop?.project)reason='Continue or abandon your workshop project in Life → Today.';
   else if(game.careers?.batch)reason='Continue or end your current work from Activities.';
@@ -868,23 +863,15 @@ function eventScene() {
   if(event.id.startsWith('farm_'))return renderFarmerScene(event,uiHelpers(),{state:game,showNumbers:displaySettings.showNumbers});
   const customer=societyCustomerContext(game,event);
   const preparationNote=event.id==='quest_prepare'&&event.choices.some(c=>c.id==='refuge'&&/^Build /.test(c.label))?'<p class="small-copy" data-preparation-pledge>These preparation choices record pledges from willing hosts and crews using existing rooms, supplies and capacity. The refuge agreement sets aside that support for the transition.</p>':'';
-  const route=game.dungeon?dungeonView(game):null;
-  const risk=route?.room?.encounterId&&!route.room.resolved?encounterOutlook(game,route.room.encounterId):null;
-  const threat=risk?`<section class="combat-outlook" data-encounter-outlook><strong>${e(risk.summary)}</strong><p class="small-copy">${e(risk.caveat)} The peaceful-route checklist shows what alternatives are available; you can also leave and prepare.</p></section>`:'';
-  const checklist=route?.negotiation?.length?`<section class="panel" data-negotiation-checklist><h3>Peaceful route</h3>${route.negotiation.map(step=>`<p><strong>${e(step.label)} · ${step.met?'Met':'Missing'}</strong><br><span class="small-copy">${e(step.detail)}</span></p>`).join('')}${route.cacheIsBackground?'<p class="small-copy">The recovered cache supplies and background records are kept separately from examined negotiation evidence.</p>':''}</section>`:'';
   const choiceReason=c=>originChoiceReason(game,event.id,c.id)||lifeChoiceReason(game,event.id,c.id)||societyCustomerChoiceReason(game,event.id,c.id)||(event.id==='stories_chapter'?storyChoiceReason(game,c.id):healthChoiceReason(game,event.id,c.id)||c.disabledReason);
   const renderedChoices=event.choices.map(c=>{const quote=researchChoiceQuote(game,event,c.id)||societyCustomerChoiceQuote(game,event,c.id);return quote?{...c,...quote}:c;});
-  return `<article class="panel story-scene"><div class="scene-category"><span class="eyebrow">${e(event.category||'A MOMENT THAT MATTERS')}</span><span class="badge">Age ${game.age}</span></div><h2>${e(event.title)}</h2>${roadPerson?`<div class="scene-person">${renderAvatar(roadPerson,{size:'small',age:roadPerson.age})}<span><strong>${e(roadPerson.name)}</strong><small>Age ${roadPerson.age}</small></span></div>`:''}<div class="story-body">${compactStory(event.body)}${['retirement','homecoming_aftermath'].includes(event.id)&&!event.body.includes('Your quest record:')?`<section class="panel" data-retirement-review>${paragraphs(retirementQuestReview(game))}</section>`:''}</div>${customer?`<p class="small-copy" data-society-customer-context>Request from <strong>${e(customer.name)}</strong> at ${e(customer.locationName)}. The choices below quote the current reservation requirements.</p>`:''}${preparationNote}${threat}${checklist}<div class="choice-grid">${renderedChoices.filter(c=>!c.id.startsWith('route_')||!(game.dungeon||game.adventuring?.expedition)).map((c,i)=>`<button class="choice-card" data-op="choice" data-id="${e(c.id)}"${choiceReason(c)?' disabled':''}><span class="choice-number">${i+1}</span><span><strong class="choice-label">${e(c.label)}</strong><span class="choice-description">${e(c.description)}</span>${c.detail&&displaySettings.showNumbers?`<small class="action-detail">${e(c.detail)}</small>`:''}${event.id==='stories_chapter'||event.id.startsWith('origin_')?livingCosts(c.days):''}${choiceReason(c)?`<small class="disabled-reason">${e(choiceReason(c))}</small>`:''}${c.nature?`<small class="nature-impact">Only because you are ${e(personalityTrait(c.nature)?.name?.toLowerCase()||c.nature)}.</small>`:''}${personalityImpactText(game,{kind:'choice',eventId:event.id,id:c.id,intentTags:c.intentTags})?`<small class="nature-impact">${e(personalityImpactText(game,{kind:'choice',eventId:event.id,id:c.id,intentTags:c.intentTags}))}</small>`:''}</span><span class="choice-arrow">→</span></button>`).join('')}</div></article>`;
+  return `<article class="panel story-scene"><div class="scene-category"><span class="eyebrow">${e(event.category||'A MOMENT THAT MATTERS')}</span><span class="badge">Age ${game.age}</span></div><h2>${e(event.title)}</h2>${roadPerson?`<div class="scene-person">${renderAvatar(roadPerson,{size:'small',age:roadPerson.age})}<span><strong>${e(roadPerson.name)}</strong><small>Age ${roadPerson.age}</small></span></div>`:''}<div class="story-body">${compactStory(event.body)}${['retirement','homecoming_aftermath'].includes(event.id)&&!event.body.includes('Your quest record:')?`<section class="panel" data-retirement-review>${paragraphs(retirementQuestReview(game))}</section>`:''}</div>${customer?`<p class="small-copy" data-society-customer-context>Request from <strong>${e(customer.name)}</strong> at ${e(customer.locationName)}. The choices below quote the current reservation requirements.</p>`:''}${preparationNote}<div class="choice-grid">${renderedChoices.map((c,i)=>`<button class="choice-card" data-op="choice" data-id="${e(c.id)}"${choiceReason(c)?' disabled':''}><span class="choice-number">${i+1}</span><span><strong class="choice-label">${e(c.label)}</strong><span class="choice-description">${e(c.description)}</span>${c.detail&&displaySettings.showNumbers?`<small class="action-detail">${e(c.detail)}</small>`:''}${event.id==='stories_chapter'||event.id.startsWith('origin_')?livingCosts(c.days):''}${choiceReason(c)?`<small class="disabled-reason">${e(choiceReason(c))}</small>`:''}${c.nature?`<small class="nature-impact">Only because you are ${e(personalityTrait(c.nature)?.name?.toLowerCase()||c.nature)}.</small>`:''}${personalityImpactText(game,{kind:'choice',eventId:event.id,id:c.id,intentTags:c.intentTags})?`<small class="nature-impact">${e(personalityImpactText(game,{kind:'choice',eventId:event.id,id:c.id,intentTags:c.intentTags}))}</small>`:''}</span><span class="choice-arrow">→</span></button>`).join('')}</div></article>`;
 }
 function lifeMap() {
  const local=nearbyContacts(game),place=location(),active=trackedQuest(game);
  return `<aside class="life-surroundings" aria-label="Your surroundings">${!game.cartography?.offsite?renderAreaScene(game,uiHelpers(),{site:place}):''}<span class="eyebrow">WHERE YOU ARE</span><h2>${e(game.cartography?.offsite?'The open country':place?.name)}</h2><p>${e(game.cartography?.offsite?'Your last hearth is behind you. Cross the country one neighboring path at a time.':(game.realm?.politics?.holds.some(h=>h.siteId===game.locationId&&h.status==='held')?currentPlaceSummary(game):place?.description)||'')}</p>${button('Explore Your Location','place-open','','secondary')}${local.length?`<section class="people-at-place"><h3>People in this settlement</h3>${local.slice(0,4).map(p=>`<button type="button" class="nearby-person" data-op="spatial-contact" data-id="${e(p.id)}">${renderAvatar(p,{size:'small',age:p.age})}<span>${e(p.name)}<small>${e(roleTitle(p.role))}</small></span><span aria-hidden="true">›</span></button>`).join('')}${local.length>4?button('See Everyone Here','place-open','','ghost small'):''}</section>`:''}${active?`<section class="current-lead"><h3>${e(active.title)}</h3><p>${e(active.objective)}</p>${button('Review the undertaking','tab','quests','ghost small')}</section>`:''}</aside>`;
 }
 
-function dungeonScene(overview=false) {
-  const d=dungeonView(game);if(!d)return '';
-  return `<section class="panel dungeon-panel"><div class="eyebrow">AN EXPEDITION, ROOM BY ROOM</div><h2>${e(d.title)}</h2><p>${e(d.description)}</p>${d.objective?`<section class="expedition-purpose"><span class="eyebrow">WHAT THIS PLACE REMEMBERS</span><h3>${e(d.objective.title)}</h3><p>${e(d.objective.description)}</p><div class="badge-row"><span class="badge">${d.evidence?'Account preserved':'An account to investigate'}</span><span class="badge">${d.aid?'Practical aid completed':'Practical aid remains possible'}</span>${d.supportedBy?`<span class="badge">${e(d.supportedBy.name)} can help</span>`:''}${d.supportedTechnique?`<span class="badge">Your earned formation can help</span>`:''}</div></section>`:''}<div class="dungeon-room-grid">${d.rooms.map(r=>`<div class="dungeon-room ${r.current?'current':''} ${r.cleared?'cleared':''} ${r.visited?'visited':''}"><span>${r.cleared?'✓':r.current?'♟':'◇'}</span><strong>${e(r.title)}</strong><small>${r.current?'You are here':r.cleared?'Cleared':r.visited?'Visited':'Unexplored'}</small></div>`).join('')}</div>${overview?'':`<div class="room-story"><h3>${e(d.room?.title||'The entrance')}</h3>${paragraphs(d.room?.description||'')}</div>${actionCards(actionsForUI(game).filter(a=>a.id.startsWith('explore_')))}`}</section>`;
-}
 
 function chapter(titleText,description,eyebrow='YOUR STORY') {
   return `<header class="view-heading"><div class="eyebrow">${e(eyebrow)}</div><h1>${e(titleText)}</h1>${description?`<p>${e(description)}</p>`:''}</header>`;
@@ -929,13 +916,12 @@ function worldPanel(){
 }
 function lifeView() {
   if(game.battle)return battleView();
-  if(game.delve||game.maze||game.dungeon||game.rpg?.expedition||game.adventuring?.expedition)return currentDungeonView();
+  if(game.delve||game.maze)return currentDungeonView();
   if(!game.event&&game.phase!=='retired'&&game.justice?.prison)return realmPage(game,actionsForUI(game),uiHelpers());
-  if(!game.event&&game.phase!=='retired'&&game.adventuring?.expedition)return adventurePage(game,actionsForUI(game),{...uiHelpers(),section:'delves'});
   if(game.phase==='retired')return `${chapter('The final leaf','Your choices have become a story.','YOUR EPILOGUE')}<section class="panel chronicle">${paragraphs(game.chronicle)}${button('Continue the family story','tab','legacy','primary')}${button('Read Journal','tab','journal','secondary')}${button('Begin another life','new','','primary')}</section>${renderLatestExpeditionReceipt(game,uiHelpers())}`;
   const c=campaignView(game), pending=game.conversations?.pending;
   const roadActions=actionsForUI(game).filter(a=>!game.timeline?.journey&&a.id==='grow_continue_journey'||a.id.startsWith('travel_')&&(!game.timeline?.journey||a.id!=='travel_continue_response')||['atlas_continue','atlas_cancel'].includes(a.id)||game.cartography?.pending&&a.id==='feed_vampire');
-  const current=game.event?`${game.dungeon?dungeonScene(true):''}${eventScene()}`:game.dungeon?dungeonScene():pending?renderConversationPanel(game,pending.personId,uiHelpers()):'';
+  const current=game.event?eventScene():pending?renderConversationPanel(game,pending.personId,uiHelpers()):'';
   const calm=!current&&!game.workshop?.project&&!game.careers?.batch&&!getLifeCommitment(game)&&!roadActions.length?`<header class="daily-record"><span class="eyebrow">TODAY</span><h2>${e(date())}</h2><p>${e(game.cartography?.offsite?'On the Road':location()?.name)}${game.hero.profession!=='Unemployed'?' · '+e(roleTitle(game.hero.profession)):''}</p></header>`:'';
   const ui=uiHelpers(),road=roadActions.length?`<section class="panel journey-panel"><h2>Your journey continues</h2>${actionCards(roadActions)}</section>`:'';
   const suspendedCard=game.adultTournament?.stage==='paused'&&!current?renderTournamentCard(game,ui,actionsForUI(game),{potionReason:consumableReason(game,'potions')}):'';
@@ -1343,16 +1329,15 @@ function currentMomentBanner() {
   const pending=game.event?{text:`“${game.event.title}” is waiting for your decision.`,view:'life'}:
     game.battle?{text:'An encounter is still unfolding.',view:'life'}:
     game.conversations?.pending?{text:getContacts(game).some(person=>person.id===game.conversations.pending.personId)?`${getContacts(game).find(person=>person.id===game.conversations.pending.personId).name} is waiting for your reply.`:'An unfinished earlier exchange remains to close; its exact person is unavailable.',view:nearbyContacts(game).some(p=>p.id===game.conversations.pending.personId)?'place':'life'}:
-    game.delve||game.maze||game.dungeon||game.rpg?.expedition?{text:'Your expedition is still underway.',view:'life'}:
+    game.delve||game.maze?{text:'Your expedition is still underway.',view:'life'}:
     game.justice?.prison?{text:'Your sentence is still being served.',view:'life'}:
-    game.adventuring?.expedition?{text:'Your descent is still underway.',view:'life'}:
     game.workshop?.project?{text:'Your workshop project is still underway.',view:'life'}:
     game.careers?.batch?{text:'Your working commitment is paused until you continue it.',view:'life'}:
     getLifeCommitment(game)?{text:`${getLifeCommitment(game).title} is still underway.`,view:'life'}:
     game.cartography?.pending?{text:'Your journey is paused along the trail.',view:'map'}:
     game.timeline?.journey?{text:'You are partway through a journey.',view:'map'}:
     game.life?.plan?{text:'Your saved year is waiting to continue.',view:'life'}:null;
-  if((tab==='place'||tab==='life')&&(game.delve||game.maze||game.dungeon||game.rpg?.expedition||game.adventuring?.expedition))return '';
+  if((tab==='place'||tab==='life')&&(game.delve||game.maze))return '';
   if(!pending||tab===pending.view&&(pending.view!=='life'||workspaceSection('life',workspaceSections.life)==='present')&&(!game.conversations?.pending||selectedContact===game.conversations.pending.personId))return '';
   if(game.conversations?.pending)return `<div class="notice view-attention" role="status">${e(pending.text)} ${button('Return to the conversation','show-contact',game.conversations.pending.personId,'ghost small')}</div>`;
   return `<div class="notice view-attention" role="status">${e(pending.text)} ${button('Return to the moment',pending.view==='life'?'workspace-open':'tab',pending.view==='life'?'life:present':pending.view,'ghost small')}</div>`;
@@ -1414,7 +1399,7 @@ function render() {
   preserveViewPosition();
   const oldFeed=root.querySelector('.life-feed-list');if(oldFeed)feedPosition=oldFeed.scrollTop;
   const entryCount=currentJournal().length, changedFeed=entryCount!==feedCount;
-  const views={adventure:()=>game.rpg?.expedition?depthDungeonPanel(game,uiHelpers()):adventurePage(game,actionsForUI(game),uiHelpers())+(uiHelpers().section==='delves'?depthPanel(game,uiHelpers(),'adventure'):''),realm:()=>uiHelpers().section==='factions'?depthPanel(game,uiHelpers(),'factions'):realmPage(game,actionsForUI(game),uiHelpers())+(uiHelpers().section==='law'?sanctuaryPanel(game,uiHelpers(),'law'):''),life:lifeView,activities:activitiesView,household:householdPage,workshop:workshopPage,lore:lorePage,career:careerViewPage,health:healthViewPage,legacy:legacyViewPage,character:characterView,party:partyView,relationships:relationshipsView,quests:questsView,inventory:inventoryView,map:mapView,place:placeView,journal:journalView};
+  const views={adventure:()=>adventurePage(game,actionsForUI(game),uiHelpers())+(uiHelpers().section==='delves'?depthPanel(game,uiHelpers(),'adventure'):''),realm:()=>uiHelpers().section==='factions'?depthPanel(game,uiHelpers(),'factions'):realmPage(game,actionsForUI(game),uiHelpers())+(uiHelpers().section==='law'?sanctuaryPanel(game,uiHelpers(),'law'):''),life:lifeView,activities:activitiesView,household:householdPage,workshop:workshopPage,lore:lorePage,career:careerViewPage,health:healthViewPage,legacy:legacyViewPage,character:characterView,party:partyView,relationships:relationshipsView,quests:questsView,inventory:inventoryView,map:mapView,place:placeView,journal:journalView};
   if(tab==='quests'){tab='journal';workspaceSections.journal='active';}
   if(['career','health','adventure','realm','household','workshop','lore'].includes(tab)){tab=tab==='lore'?'journal':'place';}
   const viewName=tab==='career'&&game?.age<16?'School':tab==='place'?'Your Location':navigationLabel(tab,navigationGroups.flatMap(([,rows])=>rows).find(([id])=>id===tab)?.[1]||'Life');
@@ -1559,14 +1544,12 @@ function inspectSpatialTarget(kind,id,{keyboard=false}={}){
   if(!game||modal&&modal!=='map')return;
   if(kind==='hex'){if(!hexAtlas(game).byKey[id])return;selectedHex=id;selectedLocation=null;spatialMode='country';}
   else if(kind==='room'){if(!cityRooms(game).some(r=>r.id===id))return;selectedRoom=id;spatialMode='settlement';}
-  else if(kind==='rpg'){const x=game.rpg?.expedition,r=x?.rooms.find(r=>r.id===id),current=x?.rooms.find(r=>r.id===x.roomId);if(!r||!r.visited&&!current?.neighbors.includes(id))return;selectedDungeonRoom=id;spatialMode='dungeon';}
-  else if(game.adventuring?.expedition?.layoutVersion===1){if(!radiantView(game)?.rooms.some(r=>'radiant_'+r.id===id))return;selectedDungeonRoom=id;spatialMode='dungeon';}
-  else {if(!dungeonView(game)?.rooms.some(r=>r.id===id))return;selectedDungeonRoom=id;spatialMode='dungeon';}
+  else return;
   tab=kind==='hex'?'map':kind==='room'?'place':'life';workspaceReturn=kind==='hex'?'map':null;
   spatialPane='actions';render();rememberWorkspace();
   if(modal==='map'){focusControl('hex-select',id);announceView((root.querySelector('[data-op="hex-select"][aria-pressed="true"]')?.getAttribute('aria-label')||'Map point')+'. Selected. Close the map to review travel.');return;}
   if(keyboard)requestAnimationFrame(()=>root.querySelector('#spatial-selection-title')?.focus({preventScroll:true}));
-  else focusControl(kind==='hex'?'hex-select':kind==='room'?'room-select':'dungeon-select',id,'#spatial-selection-title');
+  else focusControl(kind==='hex'?'hex-select':'room-select',id,'#spatial-selection-title');
   announceView((root.querySelector('#spatial-selection-title')?.textContent||'Map point')+'. Inspected. Choose a separate Confirm command to move.');
 }
 function moveSpatialTarget(kind,id){
@@ -1577,7 +1560,7 @@ function moveSpatialTarget(kind,id){
   unlockAudio();update(offer.op==='choice'?chooseEventOption(game,offer.id):chooseAction(game,offer.id),undefined,{afterAdopt:()=>{if(modal==='map'){modal=null;focusReturn=null;}workspaceReturn='map';spatialMode=kind==='hex'?'country':kind==='room'?'settlement':'dungeon';if(!game.event&&!game.battle&&!game.conversations?.pending)tab='map';render();focusControl(null,null,['.story-scene h2','#spatial-selection-title','.map-inspector h2','.settlement-map h2','.depth-dungeon-actions h2','.workspace-body']);}});
 }
 cancelInventoryDrag=installInventoryDrag(root,{getState:()=>ironmanFenced()?null:game,onEquip:id=>{if(!ironmanFenced())update(equipGear(game,id));},announce:message=>toast(message)});
-root.addEventListener('dblclick',event=>{if(event.target.isConnected===false||ironmanFenced()||practiceController.current())return;if(mapCamera.isDragClick(event)){event.preventDefault();return;}const t=event.target.closest('[data-op]');if(t?.dataset.op==='destination-select'){event.preventDefault();return;}if(!t||t.disabled||!['hex-select','room-select','dungeon-select'].includes(t.dataset.op))return;event.preventDefault();clearTimeout(spatialClickTimer);const kind=t.dataset.op==='hex-select'?'hex':t.dataset.op==='room-select'?'room':game?.rpg?.expedition?'rpg':'dungeon';moveSpatialTarget(kind,t.dataset.id);});
+root.addEventListener('dblclick',event=>{if(event.target.isConnected===false||ironmanFenced()||practiceController.current())return;if(mapCamera.isDragClick(event)){event.preventDefault();return;}const t=event.target.closest('[data-op]');if(t?.dataset.op==='destination-select'){event.preventDefault();return;}if(!t||t.disabled||!['hex-select','room-select'].includes(t.dataset.op))return;event.preventDefault();clearTimeout(spatialClickTimer);const kind=t.dataset.op==='hex-select'?'hex':'room';moveSpatialTarget(kind,t.dataset.id);});
 root.addEventListener('keydown',event=>{
   if(event.repeat&&['Enter',' '].includes(event.key)&&event.target.closest?.('[data-op="herbal-care-confirm"],#player-note,.runestone-game,#character-form .begin-button,[data-op="profession-confirm"],[data-op="gallery-select"],[data-op="destination-select"]')){event.preventDefault();return;}
   if(event.target.isConnected===false||ironmanFenced()||practiceController.current())return;
@@ -1593,7 +1576,7 @@ root.addEventListener('keydown',event=>{
    const c=l.cells[m.position],to=(c.y+dy)*l.size+c.x+dx,a=actionsForUI(game).find(a=>a.id==='maze_step_'+to&&!a.disabledReason);
    if(a)update(chooseAction(game,a.id),undefined,{afterAdopt:()=>focusControl(null,null,'.maze-grid')});return;
   }
-const t=event.target?.closest?.('[data-op]');if(!t||t.disabled||!['Enter',' '].includes(event.key)||!['hex-select','room-select','dungeon-select'].includes(t.dataset.op))return;event.preventDefault();if(event.repeat||event.ctrlKey||event.metaKey||event.altKey)return;clearTimeout(spatialClickTimer);const kind=t.dataset.op==='hex-select'?'hex':t.dataset.op==='room-select'?'room':game?.rpg?.expedition?'rpg':'dungeon';inspectSpatialTarget(kind,t.dataset.id,{keyboard:true});});
+const t=event.target?.closest?.('[data-op]');if(!t||t.disabled||!['Enter',' '].includes(event.key)||!['hex-select','room-select'].includes(t.dataset.op))return;event.preventDefault();if(event.repeat||event.ctrlKey||event.metaKey||event.altKey)return;clearTimeout(spatialClickTimer);const kind=t.dataset.op==='hex-select'?'hex':'room';inspectSpatialTarget(kind,t.dataset.id,{keyboard:true});});
 root.addEventListener('input',event=>{if(event.target.isConnected===false||ironmanFenced()||practiceController.current())return;if(event.target.id==='note-text'){personalNoteDrafts.write(personalNoteScope(),event.target.value,{start:event.target.selectionStart,end:event.target.selectionEnd,direction:event.target.selectionDirection});return;}if(event.target.id==='start-age-number'){const raw=event.target.value,n=Number(raw);if(raw.trim()===''||!Number.isFinite(n)){event.target.setAttribute('aria-invalid','true');const status=root.querySelector('#age-validation');const oldest=Number(event.target.getAttribute('max'))||80;if(status)status.textContent=`Enter a whole age from 0 to ${oldest}. Your draft age is unchanged.`;return;}const oldest=Number(event.target.getAttribute('max'))||80,age=Math.max(0,Math.min(oldest,Math.round(n)));const slider=root.querySelector('#start-age');if(slider)slider.value=String(age);previewAvatar(event.target.closest('form'));const field=root.querySelector('#start-age-number');field?.focus({preventScroll:true});if(age!==n){const status=root.querySelector('#age-validation');if(status)status.textContent='Age adjusted to '+age+'. Choose a whole age from 0 to 80.';}return;}if(event.target.id==='reading-size'){displaySettings=saveDisplay({...displaySettings,scale:event.target.value},storage);applyDisplay(displaySettings);event.target.previousElementSibling.querySelector('strong').textContent=Math.round(displaySettings.scale*100)+'%';return;}if(event.target.id==='music-volume'){const a=setMusicVolume(event.target.value);const label=root.querySelector('#music-volume-label');if(label)label.textContent=`${Math.round(a.musicVolume*100)}%`;return;}if(event.target.id==='ui-sound-volume'){const a=setSoundVolume(event.target.value);const label=root.querySelector('#ui-sound-volume-label');if(label)label.textContent=`${Math.round(a.volume*100)}%`;return;}const form=event.target.closest('form');if(form?.id==='travel-plan-form'){form.dataset.dirty='true';for(const departure of root.querySelectorAll('[data-op="travel"]'))departure.disabled=true;const draft=form.querySelector('[data-road-draft]');if(draft)draft.hidden=false;return;}if(form&&form.id==='character-form')previewAvatar(form);});
 root.addEventListener('focusin',event=>{if(event.target.isConnected===false||ironmanFenced()||practiceController.current())return;if(screen==='game'&&tab==='place'&&!modal){const focus=sceneFocusTarget(event.target);if(focus)sceneFocus=focus;}});
 root.addEventListener('submit',async event=>{
@@ -1701,8 +1684,8 @@ root.addEventListener('click',async event=>{
    }
    return;
   }
-  if(!['destination-select','hex-select','room-select','dungeon-select'].includes(op))clearTimeout(spatialClickTimer);
-  if(['hex-select','room-select','dungeon-select'].includes(op)){clearTimeout(spatialClickTimer);const kind=op==='hex-select'?'hex':op==='room-select'?'room':game?.rpg?.expedition?'rpg':'dungeon';spatialClickTimer=setTimeout(()=>inspectSpatialTarget(kind,id),520);return;}
+  if(!['destination-select','hex-select','room-select'].includes(op))clearTimeout(spatialClickTimer);
+  if(['hex-select','room-select'].includes(op)){clearTimeout(spatialClickTimer);const kind=op==='hex-select'?'hex':'room';spatialClickTimer=setTimeout(()=>inspectSpatialTarget(kind,id),520);return;}
   unlockAudio();
   if(op==='journal-page'){
     if(!game||modal||tab!=='journal')return;

@@ -8,7 +8,7 @@ export function ownedHomeHere(s){
 }
 export function homeRestReason(s,{visiting=false}={}){
  if(!ownedHomeHere(s))return 'You need an owned home in this settlement.';
- if(s.hero.hp<=0||s.phase==='retired'||s.event||s.battle||s.conversations?.pending||s.cartography?.pending||s.timeline?.journey||s.maze||s.dungeon||s.rpg?.expedition||s.adventuring?.expedition||s.justice?.prison)return 'Finish the current moment first.';
+ if(s.hero.hp<=0||s.phase==='retired'||s.event||s.battle||s.conversations?.pending||s.cartography?.pending||s.timeline?.journey||s.maze||s.justice?.prison)return 'Finish the current moment first.';
  if(s.life?.plan||s.travel?.pending||s.careers?.batch||s.workshop?.project||s.health?.recovery||s.stories?.project||s.rpg?.project||s.conversations?.project||s.society?.project||s.community?.project?.commitment||s.fellowship?.project||s.sanctuaries?.commitment||s.lineage?.adoption?.preparation||s.pastimes?.project)return 'Finish your current commitment first.';
  if(!visiting&&(s.cartography?.interior?.siteId!==s.locationId||s.cartography.interior.roomId!=='homes'))return 'Go to your home in the Homes area first.';
  return null;

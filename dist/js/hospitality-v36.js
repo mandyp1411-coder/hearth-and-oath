@@ -22,7 +22,7 @@ export function innMerchant(s){
 }
 export function innReason(s){
  if(!innkeeper(s)?.here||s.cartography?.offsite)return 'Visit the innkeeper inside the local Tavern.';
- if(s.hero.hp<=0||s.phase==='retired'||s.event||s.battle||s.conversations?.pending||s.cartography?.pending||s.timeline?.journey||s.maze||s.dungeon||s.justice?.prison)return 'Finish the current moment first.';
+ if(s.hero.hp<=0||s.phase==='retired'||s.event||s.battle||s.conversations?.pending||s.cartography?.pending||s.timeline?.journey||s.maze||s.justice?.prison)return 'Finish the current moment first.';
  if(s.life?.plan||s.travel?.pending||s.careers?.batch||s.workshop?.project||s.health?.recovery||s.stories?.project||s.rpg?.project||s.conversations?.project||s.society?.project||s.community?.project?.commitment||s.fellowship?.project||s.sanctuaries?.commitment||s.lineage?.adoption?.preparation||s.pastimes?.project||s.repertoire?.project)return 'Finish your current commitment first.';
  return null;
 }

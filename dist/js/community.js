@@ -40,7 +40,7 @@ export const COMMUNITY_CATALOG = [
     scopes: [['open', 'Keep the names beside an open refuge', 'A funded refuge provides household safety and up to 15 gold of annual basic food support. The destroyed place and the people who died remain part of history.'], ['practice', 'Let surviving households govern the refuge', 'The same actual refuge and food support remain; survivors’ decisions, rather than your surname, guide its remembered charter.']] },
 ];
 const catalog = id => COMMUNITY_CATALOG.find(row => row.id === id);
-const ready = s => !!s.community && s.phase !== 'retired' && s.age >= 18 && !s.event && !s.battle && !s.conversations?.pending && !s.dungeon && !s.timeline?.journey && !s.workshop?.project && !s.careers?.batch && !s.life?.plan;
+const ready = s => !!s.community && s.phase !== 'retired' && s.age >= 18 && !s.event && !s.battle && !s.conversations?.pending && !s.timeline?.journey && !s.workshop?.project && !s.careers?.batch && !s.life?.plan;
 
 export function communityOperation(s,w){
   const site=place(s,w.locationId),siteOpen=usable(s,w.locationId);
@@ -278,7 +278,7 @@ export function onCommunityTime(s, { oldDay, newDay }, ctx = {}) {
 }
 
 export function flushCommunityEvent(s, ctx = {}) {
-  if (!s.community || s.phase === 'retired' || s.event || s.battle || s.conversations?.pending || s.dungeon || s.community.project?.commitment) return false;
+  if (!s.community || s.phase === 'retired' || s.event || s.battle || s.conversations?.pending || s.community.project?.commitment) return false;
   if (!s.community.pending) s.community.pending = s.community.queue.shift() || null;
   const pending = s.community.pending; if (!pending) return false;
   if (pending.eventId === 'community_charter') {

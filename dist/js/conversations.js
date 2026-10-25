@@ -459,7 +459,7 @@ export function dialogueActions(state) {
     const pending = state.conversations.pending;
     const scene = pending ? null : selectScene(state,p);
     const reason = pending && pending.personId!==p.id ? 'Finish your current conversation first.' : !pending && !scene ? (state.narrativeEdition===30?'You have caught up for today. Come back another day.':'You have shared this year’s ordinary conversation. Return after a new birthday or an important change.') : null;
-    const remote=state.worldServicesVersion===1&&(p.locationId!==state.locationId||p.roomId&&p.roomId!==(state.cartography?.interior?.roomId||'gate')||state.cartography?.offsite||state.cartography?.pending||state.dungeon||state.maze||state.timeline?.journey);
+    const remote=state.worldServicesVersion===1&&(p.locationId!==state.locationId||p.roomId&&p.roomId!==(state.cartography?.interior?.roomId||'gate')||state.cartography?.offsite||state.cartography?.pending||state.maze||state.timeline?.journey);
     if(remote)return [];
     const normal={id:`talk_${p.id}`,label:pending?.personId===p.id?`Continue with ${p.name}`:`Speak with ${p.name}`,description:p.locationId===state.locationId?'Sit together and exchange a few words. Your reply will matter to this person.':'Send a letter or meet when your paths cross. This is a fantasy correspondence, with no automatic sharing of confidences.',days:0,cost:0,group:'Conversations',...(reason?{disabledReason:reason}:{})};
     const quest=state.narrativeEdition!==30&&!pending&&state.stories&&state.age>=18?selectScene(state,p,{mode:'quest'}):null;
@@ -471,20 +471,20 @@ export function dialogueActions(state) {
 
 export function applyDialogueAction(state,id,ctx={}) {
   if(observationalInfancy(state))return false;
-  if(typeof id==='string'&&id.startsWith('confide_')){const p=contact(state,id.slice(8));if(!p||p.locationId!==state.locationId||p.roomId&&p.roomId!==(state.cartography?.interior?.roomId||'gate')||state.cartography?.offsite||state.cartography?.pending||state.timeline?.journey||state.dungeon||state.maze||state.event||state.battle||state.conversations.pending||state.age<16||p.age<16||!state.hero.condition)return true;const type=state.hero.condition.type;addMessage(state,p,'hero',`I need to tell you something. I have become a ${type==='vampire'?'vampire':'werewolf'}.`);addMessage(state,p,p.id,'Thank you for telling me. What help would you like?');applyEffect(state,p,{text:'I trusted you with this.',effect:{condition:true,bond:2,memory:'You trusted me with your condition.'}},ctx);const m=state.conversations.meetings ||= {},old=m[p.id];if(old||Object.keys(m).length<512)m[p.id]={locationId:state.locationId,firstDay:old?.firstDay??state.day,lastDay:state.day};state.notice=`You tell ${p.name} about your condition.`;return true;}
+  if(typeof id==='string'&&id.startsWith('confide_')){const p=contact(state,id.slice(8));if(!p||p.locationId!==state.locationId||p.roomId&&p.roomId!==(state.cartography?.interior?.roomId||'gate')||state.cartography?.offsite||state.cartography?.pending||state.timeline?.journey||state.maze||state.event||state.battle||state.conversations.pending||state.age<16||p.age<16||!state.hero.condition)return true;const type=state.hero.condition.type;addMessage(state,p,'hero',`I need to tell you something. I have become a ${type==='vampire'?'vampire':'werewolf'}.`);addMessage(state,p,p.id,'Thank you for telling me. What help would you like?');applyEffect(state,p,{text:'I trusted you with this.',effect:{condition:true,bond:2,memory:'You trusted me with your condition.'}},ctx);const m=state.conversations.meetings ||= {},old=m[p.id];if(old||Object.keys(m).length<512)m[p.id]={locationId:state.locationId,firstDay:old?.firstDay??state.day,lastDay:state.day};state.notice=`You tell ${p.name} about your condition.`;return true;}
   if (typeof id!=='string' || !id.startsWith('talk_')) return false;
   const levyAction=/^talk_levy_(household|return)_([a-z][a-z0-9_-]{0,79})$/.exec(id),levy=levyAction&&!allContacts(state).some(p=>p.id===id.slice(5))?levyAction:null;
   const mode=id.startsWith('talk_quest_')?'quest':'personal';
   const p = contact(state,levy?levy[2]:id.slice(mode==='quest'?11:5));
   if (!p) return false;
-  if(state.worldServicesVersion===1&&(p.locationId!==state.locationId||state.cartography?.offsite||state.cartography?.pending||state.dungeon||state.maze||p.roomId&&p.roomId!==(state.cartography?.interior?.roomId||'gate')||state.timeline?.journey))return true;
+  if(state.worldServicesVersion===1&&(p.locationId!==state.locationId||state.cartography?.offsite||state.cartography?.pending||state.maze||p.roomId&&p.roomId!==(state.cartography?.interior?.roomId||'gate')||state.timeline?.journey))return true;
   if (!state.conversations || state.event || state.battle || state.phase==='retired' || state.conversations.project) return true;
   if (state.conversations.pending) { if (state.conversations.pending.personId===p.id) markRead(state,p); return true; }
   if(!state.conversations.threads[p.id]&&Object.keys(state.conversations.threads).length>=512){state.notice='Your relationship book is full.';return true;}
   markRead(state,p);
   const scene = levy?levyScene(state,p,levy[1]):selectScene(state,p,{mode});
   if (!scene) {state.notice=`You and ${p.name} have already spoken about this year’s ordinary worries. New birthdays and important changes bring new things to discuss.`;return true;}
-  if(p.locationId===state.locationId&&!state.cartography?.offsite&&!state.cartography?.pending&&!state.timeline?.journey&&!state.dungeon&&!state.adventuring?.expedition&&!state.rpg?.expedition&&!state.justice?.prison){
+  if(p.locationId===state.locationId&&!state.cartography?.offsite&&!state.cartography?.pending&&!state.timeline?.journey&&!state.justice?.prison){
     const meetings=state.conversations.meetings ||= {},old=meetings[p.id];
     if(old||Object.keys(meetings).length<512)meetings[p.id]={locationId:state.locationId,firstDay:old?.firstDay??state.day,lastDay:state.day};
   }

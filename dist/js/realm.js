@@ -121,7 +121,7 @@ export function onRealmTime(s,oldDay,newDay,ctx){
   }
 }
 export function realmActions(s){
-  if(!s.realm||age(s)<16||s.event||s.battle||s.phase==='retired'||s.dungeon||s.adventuring?.expedition||s.justice?.prison)return [];
+  if(!s.realm||age(s)<16||s.event||s.battle||s.phase==='retired'||s.justice?.prison)return [];
   const site=local(s),region=regionAt(s);if(!site||!region)return [];
   const result=[],afford=n=>s.hero.gold<n?`Requires ${n} gold.`:null;
   if(livingMarket(s)&&site.merchant){

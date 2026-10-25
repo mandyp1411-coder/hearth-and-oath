@@ -37,7 +37,7 @@ const house = id => { const f = faithOf(id); return f ? `the house of ${f.name.r
 const clamp = (n, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, n));
 const cap = t => t ? t[0].toUpperCase() + t.slice(1) : t;
 const note = (ctx, title, text, tag = 'faith') => (ctx?.journalLiteral || ctx?.journal)?.(title, text, tag);
-const waiting = s => s.event || s.battle || s.conversations?.pending || s.dungeon || s.maze || s.delve || s.timeline?.journey || s.timeline?.yearTarget || s.careers?.batch || s.cartography?.offsite;
+const waiting = s => s.event || s.battle || s.conversations?.pending || s.maze || s.delve || s.timeline?.journey || s.timeline?.yearTarget || s.careers?.batch || s.cartography?.offsite;
 const regionOf = (s, siteId) => s.realm?.sites?.[siteId]?.regionId || null;
 const regionName = id => REGION_TEMPLATES.find(r => r.id === id)?.name || id;
 const homeOf = s => s.life?.home?.locationId || s.hero.birthplaceId || 'home';

@@ -36,7 +36,7 @@ const TRAITS = ['care', 'curiosity', 'courage'];
 const clamp = n => Math.max(0, Math.min(100, n));
 const clone = value => structuredClone(value);
 const opt = (id, label, description) => ({ id, label, description });
-const blocked = s => Boolean(s.event || s.battle || s.conversations?.pending || s.dungeon || s.timeline?.journey || s.workshop?.project || s.careers?.batch);
+const blocked = s => Boolean(s.event || s.battle || s.conversations?.pending || s.timeline?.journey || s.workshop?.project || s.careers?.batch);
 const living = p => p && p.alive !== false;
 const ageOf = (s, p) => p.bornDay === null ? null : Math.max(0, Math.floor(((p.alive === false && Number.isSafeInteger(p.deathDay) ? p.deathDay : s.day) - p.bornDay) / YEAR));
 const heroBirth = s => Number.isSafeInteger(s.timeline?.birthDay) ? s.timeline.birthDay : s.timeline?.mode === 'birth' ? 0 : -18 * YEAR;

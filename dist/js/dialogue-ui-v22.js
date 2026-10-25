@@ -13,7 +13,7 @@ import { hexAtlas } from './cartography.js';
 // in the tavern or inventing a new encounter when the room is opened.
 function physicallyAtSettlement(state) {
   if (!state?.hero || !state.world || state.phase === 'retired' || state.phase === 'dead' || state.hero.alive === false) return false;
-  if (state.cartography?.offsite || state.cartography?.pending || state.timeline?.journey || state.dungeon || state.adventuring?.expedition || state.rpg?.expedition || state.justice?.prison) return false;
+  if (state.cartography?.offsite || state.cartography?.pending || state.timeline?.journey || state.justice?.prison) return false;
   if (!isSettlement(state.world, state.locationId) || state.realm?.sites?.[state.locationId]?.phase === 'ruin') return false;
   if (state.cartography?.position && hexAtlas(state).byKey[state.cartography.position]?.siteId !== state.locationId) return false;
   return true;
@@ -36,7 +36,7 @@ export function nearbyContacts(state) {
 
 function replyBlockReason(state) {
   if (state.phase === 'retired' || state.phase === 'dead' || state.hero?.alive === false) return 'This life has ended. Earlier correspondence remains in your records.';
-  if (state.event || state.battle || state.dungeon) return 'Finish the current situation before replying.';
+  if (state.event || state.battle) return 'Finish the current situation before replying.';
   if (state.cartography?.offsite || state.cartography?.pending) return 'Return to a named place before opening correspondence.';
   return '';
 }
@@ -45,7 +45,7 @@ function unavailableConversation(state) {
   const reason = replyBlockReason(state);
   if (reason) return reason;
   if (state.timeline?.journey) return 'Finish your current journey before starting correspondence.';
-  if (state.justice?.prison || state.adventuring?.expedition || state.careers?.batch || state.workshop?.project) return 'Continue or finish your current commitment before starting another conversation.';
+  if (state.justice?.prison || state.careers?.batch || state.workshop?.project) return 'Continue or finish your current commitment before starting another conversation.';
   return 'No new conversation is available in this moment. Earlier messages remain here.';
 }
 

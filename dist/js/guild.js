@@ -51,7 +51,7 @@ const cap = t => t ? t[0].toUpperCase() + t.slice(1) : t;
 const craftOf = s => PROFESSION_CRAFT[s.hero.profession] || null;
 const ledger = (s, craft) => s.careers?.records?.[CRAFT_PROFESSION[craft]] || null;
 const mastery = (s, craft) => ledger(s, craft)?.mastery || 0;
-const waiting = s => s.event || s.battle || s.conversations?.pending || s.dungeon || s.maze || s.timeline?.journey || s.timeline?.yearTarget || s.careers?.batch || s.cartography?.offsite;
+const waiting = s => s.event || s.battle || s.conversations?.pending || s.maze || s.timeline?.journey || s.timeline?.yearTarget || s.careers?.batch || s.cartography?.offsite;
 const peopleOf = s => (s.life?.people || []).filter(p => p.alive !== false);
 const bond = (s, id, n) => { const p = peopleOf(s).find(p => p.id === id); if (p) p.bond = clamp((p.bond || 0) + n); };
 const addTie = (s, tie) => addStationTie(s, tie);

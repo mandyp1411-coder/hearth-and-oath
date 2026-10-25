@@ -30,7 +30,7 @@ export function imprison(s,ctx){
 }
 export function flushJustice(s,ctx){
   if(s.cartography?.offsite||s.cartography?.pending)return;
-  if(!s.justice||s.justice.prison||s.justice.arrest||s.age<18||s.event||s.battle||s.phase==='retired'||s.dungeon||s.adventuring?.expedition||s.timeline?.journey)return;
+  if(!s.justice||s.justice.prison||s.justice.arrest||s.age<18||s.event||s.battle||s.phase==='retired'||s.timeline?.journey)return;
   const i=incident(s),region=regionAt(s);if(!i||i.evidence<3||!region||s.justice.lastCheckDay===s.day)return;
   const window=localLawWindow(s);if(window.hold)return;
   s.justice.lastCheckDay=s.day;

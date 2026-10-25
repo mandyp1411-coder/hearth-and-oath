@@ -32,7 +32,7 @@ const householdHelpReason = s => {
   const p=caregiver(s);
   if(p?.alive!==false&&p)return familyVisitReason(s,p);
   // Earlier lives without a living caregiver can still turn to local neighbors.
-  if(!isSettlement(s.world,s.locationId)||s.cartography?.offsite||s.cartography?.pending||s.timeline?.journey||s.dungeon||s.maze)return 'Visit a settlement to ask local neighbors for help.';
+  if(!isSettlement(s.world,s.locationId)||s.cartography?.offsite||s.cartography?.pending||s.timeline?.journey||s.maze)return 'Visit a settlement to ask local neighbors for help.';
   if(s.worldServicesVersion===1&&(s.cartography?.interior?.siteId!==s.locationId||s.cartography?.interior?.roomId!=='homes'))return 'Visit the Homes area to ask local neighbors for help.';
   return null;
 };
@@ -234,7 +234,7 @@ export function educationTransferPreview(s,route) {
 }
 
 export function householdActions(s) {
-  if (observationalInfancy(s)||!s.family || !s.education || s.event || s.battle || s.conversations?.pending || s.dungeon) return [];
+  if (observationalInfancy(s)||!s.family || !s.education || s.event || s.battle || s.conversations?.pending) return [];
   const age = yearAge(s), e = s.education, f = s.family, actions = [];
   for (const p of peopleAtHome(s)) actions.push(action(s, `family_time_${p.id}`, age < 3 ? `Make room for care with ${p.name}` : independentHousehold(s)?`Visit ${p.name} at their home`:`Spend time with ${p.name}`, `${p.familyRole === 'sibling' ? 'Listen, play, or solve a small problem with your sibling.' : 'Share time with the person who actually cares for you.'} Gain 7 bond and 3 support; restore 3 happiness. Three meaningful visits per person each year.`, 1, 0, (f.interactionUses[p.id] || 0) >= 3 ? 'You have made three focused visits this year; ordinary conversation is still available.' : familyVisitReason(s,p)));
   if(age>=6)actions.push(action(s, 'family_support', 'Ask for the support you actually need', 'Have a specific discussion with your caregiver. Once per year, raise household support by 10 and reduce stress by 6. No unrecorded parent appears and no money is created.', 2, 0, f.interactionUses.support ? 'This year’s support conversation is already remembered.' : householdHelpReason(s)));

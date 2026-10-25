@@ -380,7 +380,7 @@ const activity = (s, id, label, description, minAge, days, skill, uses = 2) => {
     ...(count >= uses ? { disabledReason: `You have already made time for this ${uses === 1 ? 'once' : 'twice'} this year. Age up opens a new year.` } : {}), skill };
 };
 export function getAgeActivities(s) {
-  if (!s?.timeline || s.timeline.mode !== 'birth' || observationalInfancy(s) || s.phase === 'retired' || s.event || s.battle || s.conversations?.pending || s.maze || s.dungeon || s.timeline.journey) return [];
+  if (!s?.timeline || s.timeline.mode !== 'birth' || observationalInfancy(s) || s.phase === 'retired' || s.event || s.battle || s.conversations?.pending || s.maze || s.timeline.journey) return [];
   const rows = [
     activity(s, 'grow_family', s.age < 3 ? 'Make room for care' : 'Make time for family', s.age < 3 ? 'Your guardians spend time with you. Build security and a remembered household bond.' : 'Spend a quiet day with family. Gain persuasion and ease stress; family remembers the time.', 0, 1, 'persuasion'),
     {...activity(s,'grow_nursery','Share stories and counting','A willing adult nearby shares a story, counting game or picture book. Gain scholarship through two real days together. Two sessions before age six can support the learning focus; this is not formal school attendance.',3,2,'scholarship'),maxAge:5},
@@ -547,7 +547,7 @@ export function applyBirthChoice(s, eventId, pick, ctx) {
   ctx.onBirthday?.();
   return true;
 }
-function pending(s) { return Boolean(s.event || s.battle || s.conversations?.pending || s.maze || s.dungeon || s.timeline.journey || s.workshop?.project || s.careers?.batch); }
+function pending(s) { return Boolean(s.event || s.battle || s.conversations?.pending || s.maze || s.timeline.journey || s.workshop?.project || s.careers?.batch); }
 export function startAgeYear(s, ctx) {
   if (s.phase === 'retired' || pending(s) || s.life?.plan) { s.notice = s.careers?.batch ? 'Finish or abandon your committed work before aging up.' : s.workshop?.project ? 'Finish or cancel your committed workshop project before aging up.' : 'Finish the waiting decision, conversation, expedition, journey, or saved annual plan before aging up.'; return false; }
   if (s.timeline.yearTarget === null) {

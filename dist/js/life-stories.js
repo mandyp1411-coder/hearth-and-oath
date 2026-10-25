@@ -66,7 +66,7 @@ const startingActor=(s,d)=>{
   const chosen=person(s,d.actor(s));
   return chosen&&chosen.alive!==false?chosen:[...(s.life?.people||[]),...(s.companions||[]),...(s.society?.people||[])].find(p=>p.alive!==false);
 };
-const ready=s=>s.stories&&s.age>=18&&s.phase==='adult'&&!s.event&&!s.battle&&!s.conversations?.pending&&!s.dungeon&&!s.timeline?.journey&&!s.workshop?.project&&!s.careers?.batch&&!s.life?.plan;
+const ready=s=>s.stories&&s.age>=18&&s.phase==='adult'&&!s.event&&!s.battle&&!s.conversations?.pending&&!s.timeline?.journey&&!s.workshop?.project&&!s.careers?.batch&&!s.life?.plan;
 export function initializeLifeStories(s){if(!s.stories)s.stories={version:1,introducedDay:s.day,arcs:[],project:null,pending:null,history:[],reputation:{care:0,enterprise:0,coercion:0}};}
 const duration=pick=>({care:6,enterprise:4,coercion:3,leave:0}[pick]);
 const learnedWork=s=>{const past=Object.entries(s.careers?.records||{}).filter(([name,r])=>name!=='Unemployed'&&r.workedDays>0).sort((a,b)=>b[1].workedDays-a[1].workedDays)[0];if(past)return `earlier work as ${/^[aeiou]/i.test(past[0])?'an':'a'} ${past[0].toLowerCase()}`;const skill=Object.entries(s.hero.skills).sort((a,b)=>b[1]-a[1])[0];return skill?.[1]>0?`${skill[0]} practice`:'ordinary household experience';};

@@ -308,8 +308,7 @@ export function validateResearchPortfolio(value, s, options = {}) {
   }
   if (value.project !== null) {
     const p = value.project, run = active[0];
-    if (s.phase === 'retired' || s.life?.plan || s.timeline?.journey || s.dungeon || s.maze || s.adventuring?.expedition
-      || s.rpg?.expedition || s.justice?.prison || s.conversations?.pending) return false;
+    if (s.phase === 'retired' || s.life?.plan || s.timeline?.journey || s.maze || s.justice?.prison || s.conversations?.pending) return false;
     if (!run || value.pending !== null || !keys(p, [...stepKeys, 'runId', 'totalDays', 'completedDays', 'remainingDays', 'terms']) || p.runId !== run.id
       || !int(p.totalDays, 1, 1) || !int(p.completedDays, 0, p.totalDays) || p.remainingDays !== p.totalDays - p.completedDays
       || p.completedDay !== null || p.days !== p.totalDays || run.steps.some(step => step.id === p.id)

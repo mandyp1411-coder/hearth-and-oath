@@ -11,7 +11,7 @@ export function wildernessProfile(s,cell){
  return {risk,danger,kinds,terrain,region:region?.name||'this country'};
 }
 export function queueWildernessEncounter(s,cell,ctx={}){
- if(s.age<14||!s.cartography||s.phase==='retired'||s.event||s.battle||s.conversations?.pending||s.maze||s.dungeon)return false;
+ if(s.age<14||!s.cartography||s.phase==='retired'||s.event||s.battle||s.conversations?.pending||s.maze)return false;
  const w=s.cartography.wilderness||={version:1,last:null,pending:null},key=cell.key;
  if(w.last?.key===key&&w.last.day===s.day)return false;
  w.last={key,day:s.day};const profile=wildernessProfile(s,cell);

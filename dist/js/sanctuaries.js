@@ -9,7 +9,7 @@ import { regionAt } from './realm.js';
 const clamp = n => Math.max(0, Math.min(100, n));
 const copy = value => structuredClone(value);
 const choice = (id, label, description) => ({ id, label, description });
-const waiting = s => Boolean(s.event || s.battle || s.conversations?.pending || s.dungeon || s.phase === 'retired');
+const waiting = s => Boolean(s.event || s.battle || s.conversations?.pending || s.phase === 'retired');
 const busy = s => Boolean(s.timeline?.journey || s.workshop?.project || s.careers?.batch || s.life?.plan);
 const place = (s, id = s.locationId) => s.world?.locations?.find(p => p.id === id);
 const incident = (s, id) => s.legal?.incidents?.find(i => i.locationId === id);

@@ -16,8 +16,7 @@ const waiting = s => s.event || s.battle || s.conversations?.pending;
 const otherWork = s => localTournamentLocked(s)||s.researchPortfolio?.project||s.repertoire?.project||s.rpg?.project || s.conversations?.project || s.familyOrigins?.project || s.workshop?.project || s.careers?.batch || s.life?.plan
   || s.stories?.project || s.health?.recovery || s.society?.project || s.community?.project?.commitment || s.fellowship?.project
   || s.sanctuaries?.commitment || s.lineage?.adoption?.preparation || s.pastimes?.project;
-const ready = s => s.justice && s.phase === 'adult' && s.age >= 18 && !waiting(s) && !s.justice.prison && !s.dungeon && !s.maze
-  && !s.rpg?.expedition && !s.adventuring?.expedition && !s.timeline?.journey && !s.cartography?.pending && !s.cartography?.offsite && !otherWork(s);
+const ready = s => s.justice && s.phase === 'adult' && s.age >= 18 && !waiting(s) && !s.justice.prison && !s.maze && !s.timeline?.journey && !s.cartography?.pending && !s.cartography?.offsite && !otherWork(s);
 const action = (id, title, description, days = 0, reason = null) => ({ id, label: title, description, days, cost: 0, group: 'Planned criminal job', ...(reason ? { disabledReason: reason } : {}) });
 const note = (s, ctx, title, text) => { s.notice = text; (ctx.journalLiteral || ctx.journal)?.(title, text, 'crime', { narrativeEdition: 30 }); };
 const rowsAt = (s, locationId = s.locationId) => settlementServices(s, { siteId: locationId });

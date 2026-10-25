@@ -60,7 +60,7 @@ function capitalsBlock(all,ui,s){
 export function renderActivities(s,ui,{pane='daily',ongoing=''}={}){
  const {e,button,chapter}=ui;if(!ACTIVITY_TABS.some(t=>t[0]===pane))pane='daily';const all=getActions(s),services=settlementServices(s);
  const tabs=`<nav class="activity-tabs" aria-label="Activities">${ACTIVITY_TABS.map(([id,label])=>button(label,'activities-pane',id,'ghost small',false,pane===id)).join('')}</nav>`;
- const blocked=Boolean(s.event||s.battle||s.conversations?.pending||s.timeline?.journey||s.cartography?.pending||s.cartography?.offsite||s.dungeon||s.maze);
+ const blocked=Boolean(s.event||s.battle||s.conversations?.pending||s.timeline?.journey||s.cartography?.pending||s.cartography?.offsite||s.maze);
  const nearby=kind=>{
   const matches=r=>r.kind===kind&&(kind!=='school'||r.subjectId===(s.education?.route||'community'));
   const local=services.filter(matches);if(local.length&&!s.cartography?.offsite)return {rows:local,local:true};

@@ -198,7 +198,7 @@ function entry(s,id) {
 }
 
 export function loreActions(s) {
-  if (!s.lore || s.lore.pending || !canRead(s) || s.event || s.battle || s.conversations?.pending || s.dungeon && !s.dungeon.complete) return [];
+  if (!s.lore || s.lore.pending || !canRead(s) || s.event || s.battle || s.conversations?.pending) return [];
   const site = place(s,s.locationId);
   if (!site) return [];
   const closed = ['destroyed','evacuated'].includes(site.status);

@@ -37,7 +37,7 @@ const person = (s, r) => !r ? null : r.source === 'keeper' ? s.realm?.sites?.[r.
   ? s.life?.people?.find(p => p.id === r.id)
   : [...(s.society?.people || []), ...(s.society?.archive || [])].find(p => p.id === r.id);
 const alive = (s, r) => !!person(s, r) && person(s, r).alive !== false;
-const free = s => !s.event && !s.battle && !s.conversations?.pending && !s.timeline?.journey && !s.justice?.prison && !s.delve && !s.maze && !s.dungeon && !s.adventuring?.expedition && !s.rpg?.expedition && !s.careers?.batch;
+const free = s => !s.event && !s.battle && !s.conversations?.pending && !s.timeline?.journey && !s.justice?.prison && !s.delve && !s.maze && !s.careers?.batch;
 const actorRef = p => p ? { source: p.source, id: p.id, name: p.name } : null;
 const chapterAt = s => s.age < 20 ? 1 : Math.floor(s.age / 10);
 const owed = f => f.due.amount + f.due.arrears;

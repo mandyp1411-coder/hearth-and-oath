@@ -45,7 +45,7 @@ export function progressTravelStep(s,holder,ctx){
 }
 export function campingReason(s){
  if(!s.trail||s.phase==='retired'||s.event||s.battle||s.conversations?.pending||s.justice?.prison)return 'Resolve the current moment before making camp.';
- if(s.maze||s.dungeon||s.rpg?.expedition||s.adventuring?.expedition)return 'Find a safe room before resting in a dungeon.';
+ if(s.maze)return 'Find a safe room before resting in a dungeon.';
  if(s.workshop?.project||s.careers?.batch||s.health?.recovery||s.stories?.project||s.conversations?.project||s.pastimes?.project||s.sanctuaries?.commitment||s.life?.plan)return 'Finish or pause your current commitment before camping.';
  if(!s.timeline?.journey&&!s.cartography?.offsite&&!s.cartography?.pending&&isSettlement(s.world,s.locationId))return 'Rest at home or visit the inn while you are in a settlement.';
  return null;

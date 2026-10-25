@@ -22,6 +22,5 @@ export function validateReleaseFields(s){
   if(s.lineage?.heirAccounts!==undefined&&(!Array.isArray(s.lineage.heirAccounts)||s.lineage.heirAccounts.length>8||!s.lineage.heirAccounts.every(a=>obj(a)&&text(a.id,80)&&text(a.storyId,80)&&text(a.personName,100)&&int(a.sourceGeneration,1,200)&&text(a.excerpt,2000)&&(a.readDay===null||int(a.readDay,0,s.day)))))return false;
   const u=s.hero.upbringing;if(u!==undefined&&(!obj(u)||!person(u.sourcePersonId)||!int(u.bornDay,-10000000,s.day)||!obj(u.traits)||!Object.values(u.traits).every(v=>int(v,0,10000))||!obj(u.skills)||!Object.values(u.skills).every(v=>int(v,0,10000))||!Array.isArray(u.history)||u.history.length>60||!u.history.every(v=>obj(v)&&int(v.day,0,s.day)&&text(v.text,2000))))return false;
   if(s.battle?.tacticsVersion!==undefined&&(s.battle.tacticsVersion!==25||typeof s.battle.coverUsed!=='boolean'||typeof s.battle.formationEarned!=='boolean'))return false;
-  const local=s.adventuring?.expedition?.localStory;if(local!==undefined&&(!obj(local)||local.version!==25||!['missing_register','sealed_hearth','false_tithe'].includes(local.id)||!['rumor','clue','relic','sourceName'].every(k=>text(local[k],1000))||typeof local.clueFound!=='boolean'||typeof local.relicClaimed!=='boolean'))return false;
   return true;
 }

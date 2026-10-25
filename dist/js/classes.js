@@ -75,7 +75,7 @@ export function capturePendingMentor(state){
 }
 
 const prerequisites = (state, item) => Object.entries(item.skills).map(([skill, required]) => ({ skill, required, current: state.hero?.skills?.[skill] || 0, met: (state.hero?.skills?.[skill] || 0) >= required }));
-const barrier = state => Boolean(state.flags?.legacyMentorTrial&&!['recognized','withdrawn'].includes(state.flags.legacyMentorTrial.stage)||state.event || state.battle || state.conversations?.pending || state.dungeon?.pendingRoom || state.phase === 'retired');
+const barrier = state => Boolean(state.flags?.legacyMentorTrial&&!['recognized','withdrawn'].includes(state.flags.legacyMentorTrial.stage)||state.event || state.battle || state.conversations?.pending || state.phase === 'retired');
 const reasonFor = (state, item, { requireMentor = true } = {}) => {
   if ((state.age || 0) < item.minAge) return `An adult initiation requires age ${item.minAge}.`;
   if (barrier(state)) return 'Finish the current moment before beginning an initiation.';

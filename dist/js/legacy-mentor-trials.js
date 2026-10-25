@@ -10,7 +10,7 @@ const record=s=>s.flags?.legacyMentorTrial;
 export const activeLegacyMentorTrial=s=>!!record(s)&&!['recognized','withdrawn'].includes(record(s).stage);
 const present=(s,m)=>{const site=s.world.locations.find(p=>p.id===m?.locationId);return !!m&&m.available!==false&&m.locationId===s.locationId&&!!site&&!['destroyed','evacuated'].includes(site.status)&&site.servicesAvailable!==false&&!s.realm?.politics?.holds?.some(h=>h.siteId===site.id&&h.status==='held');};
 const available=(s,r)=>{const m=mentor(s,r.classId);return m?.id===r.supervisor.id&&present(s,m);};
-const blocked=s=>s.event||s.battle||s.phase==='retired'||s.conversations?.pending||s.dungeon||s.maze||s.timeline?.journey||s.cartography?.pending||s.cartography?.offsite||s.justice?.prison||s.workshop?.project||s.careers?.batch||s.life?.plan;
+const blocked=s=>s.event||s.battle||s.phase==='retired'||s.conversations?.pending||s.maze||s.timeline?.journey||s.cartography?.pending||s.cartography?.offsite||s.justice?.prison||s.workshop?.project||s.careers?.batch||s.life?.plan;
 const journal=(s,ctx,title,text)=>{s.notice=text;(ctx.journalLiteral||ctx.journal)?.(title,text,'calling');};
 export function legacyCallingOffers(s){
  if(s.revision<5||s.timeline?.mode==='birth'||s.hero.specialization||s.age<18||blocked(s))return [];

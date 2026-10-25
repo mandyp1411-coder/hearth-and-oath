@@ -529,50 +529,7 @@ export function groundedDialogue(state,who,{topic,relationship,scene}={}) {
   ]};
 }
 
-const DUNGEON_ROOMS = {
-  entry:['The Entrance','You have reached the entrance. Check the passages before choosing a way forward.'],
-  sluice:['The Sluice Gate','Creatures shelter beside the old water gate. You will need to deal with them before you pass.'],
-  flooded:['The Flooded Passage','Water covers the floor and hides sharp scrap. A careful inspection may find a safer path.'],
-  cache:['The Supply Room','There are supplies left in this room. Inspect them before deciding what to take.'],
-  keeper:['The Keeper’s Chamber','The keeper is blocking the passage ahead. Be ready to fight or use another offered way through.'],
-  source:['The Contaminated Spring','The old magical channel empties into the water here. You can investigate the source before returning to the people above.'],
-  scriptoria:['The Copying Room','A magical defender stands among the copying desks. It can see you approaching.'],
-  trap:['The Trapped Stair','Protective magic crosses the stairs. Study the pattern before stepping through.'],
-  vault:['The Storage Vault','A coffer and old books remain in the vault. Decide what you can safely recover.'],
-  archivist:['The Archive Guardian','The guardian is still protecting the collection. Choose how to get past it.'],
-  seal:['The Original Warding Instructions','You have reached the original instructions for the warding mechanism. Read them before deciding what to do next.'],
-  spoor:['The Animals’ Den','The tunnel opens into a den. The animals are watching you from the far side.'],
-  thorns:['The Thorn Passage','Thorns cross the passage from wall to wall. Look for a way through before pushing into them.'],
-  refuge:['The Ranger’s Shelter','The alcove is dry. There are remains of a traveler’s supplies and space to take stock.'],
-  thornheart:['The Root Guardian','A large rooted creature blocks the approach to the spring. Watch how it moves before committing to an attack.'],
-  spring:['The Forest Spring','You have reached the spring. Check what you can gather and what you need to do before leaving.'],
-  cliff:['The Cliff Patrol','A patrol holds the narrow path. Their ranged fighter is positioned behind a defender.'],
-  cells:['The Holding Cells','A jailer stands between you and the cells. Travelers are locked inside.'],
-  captain:['The Captain’s Platform','The captain and guards have taken position on the platform. You can see the fight ahead.'],
-  signal:['The Warning Brazier','The warning post is within reach. Inspect it and finish the work you came to do.'],
-  hall:['The Inner Hall','Armored defenders guard the direct route. A spellcaster supports them from farther back.'],
-  forge:['The Damaged Forge','Broken machinery and unstable magic fill the forge. Look for a way to stop the danger before crossing.'],
-  library:['The Warding Library','Books about the mechanism and emergency supplies remain here. Check the room before approaching the guardian.'],
-  warden:['The Final Guardian','The guardian stands between you and the warding mechanism. Prepare for the encounter before you move forward.'],
-  anchor:['The Warding Mechanism','You have reached the mechanism. Your discoveries and earlier decisions determine what you can do here.'],
-  witness:['A Person in the Dungeon','Someone is still living here. You can approach them and hear what they need before deciding how to proceed.'],
-  service:['The Maintenance Passage','This route was built to keep the place working. Check the supports and the work still needed before using it.'],
-  reliquary:['The Side Chamber','Belongings have been left in this chamber. Inspect them before choosing what to preserve or take.'],
-};
-const DUNGEON_LABELS={fight:'Prepare to fight',listen:'Listen carefully',search:'Search the room',parley:'Try to negotiate passage',take:'Take the available supplies',rest:'Rest here',leave:'Leave the dungeon',finish:'Finish the objective',hear_witness:'Ask the person what happened',record_witness:'Write down what they tell you',protect_witness:'Help protect the person here',repair_route:'Repair the passage',aid_only:'Help without taking control',preserve:'Preserve what you found',restore:'Restore what was damaged',salvage:'Take the salvage',finish_public:'Share the discovery publicly',finish_stewardship:'Arrange care for this place',sneak:'Try to slip past',open:'Open the container',disarm:'Try to disarm the trap',rush:'Force your way through',offering:'Leave an offering',trade:'Offer a trade',talk:'Speak with them',descend:'Take the stairs down',return:'Return to the entrance',withdraw:'Withdraw from the descent',study:'Study what you found',repair:'Repair the crossing',record:'Write down the discovery',camp:'Make camp',ascend:'Take the stairs up'};
 
-function dungeonEvent(s,e) {
-  const id=s.dungeon?.roomId||e.id.replace(/^dungeon_[a-z_]+_/,'');
-  const definition=s.dungeon?.definition,room=definition?.rooms?.find(r=>r.id===id);
-  const row=DUNGEON_ROOMS[id]||DUNGEON_ROOMS[room?.kind]||null;
-  let body=row?.[1];
-  if(!body){const offered=new Set((e.choices||[]).map(c=>c.id));body=offered.has('fight')?'There is danger in the room ahead. Inspect the choices before committing your party to a fight.':offered.has('disarm')?'Something in the passage may be trapped. You can inspect it or choose another offered way through.':offered.has('descend')?'The stairs continue below you. Decide whether to press deeper or return with what you have.':'You have stopped in a dungeon room. Look over the available passages and actions before moving on.';}
-  const labels={...DUNGEON_LABELS};
-  for(const c of e.choices||[]){
-    if(c.id.startsWith('route_')){const target=definition?.rooms?.find(r=>r.id===c.id.slice(6));if(target)labels[c.id]=`Go to ${DUNGEON_ROOMS[target.id]?.[0]||titleCase(target.kind||'the next room')}`;}
-  }
-  return sceneRow(row?.[0]||'Inside the Dungeon',body,labels);
-}
 
 function storyEvent(s,e) {
   const arc=s.stories?.arcs?.find(a=>a.id===s.stories?.pending?.arcId)||s.stories?.arcs?.find(a=>a.status==='active');
@@ -639,7 +596,6 @@ export function groundedEvent(state,event) {
     row=ROAD[id.slice(7)]||row;
     extra={from:place(s,leg?.from),to:place(s,leg?.to||journey?.destinationId),traveler:clean(pending?.person?.name)||'A traveler'};
   }else if(/^birth_|^childhood_/.test(id)&&!row)row=childhoodEvent(s,e);
-  else if(/^dungeon_/.test(id)||id==='adventure_room')row=dungeonEvent(s,e);
   else if(id==='stories_chapter')row=storyEvent(s,e);
   else if(/^rpg_/.test(id))row=rpgEvent(s,e);
   else if(/^quest_/.test(id)&&!row)row=CAMPAIGN[id.slice(6)];

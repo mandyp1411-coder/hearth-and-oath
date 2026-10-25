@@ -19,7 +19,7 @@ export function curseLawAt(s,id=s.locationId){
 const clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n));
 const alive=s=>s.phase!=='retired';
 const site=s=>s.realm?.sites[s.locationId];
-const atSettlement=s=>!s.cartography?.offsite&&!s.dungeon&&!s.adventuring?.expedition&&!s.timeline?.journey&&['city','village','town','citadel','harbor','sanctuary','camp'].includes(s.world?.locations.find(p=>p.id===s.locationId)?.type);
+const atSettlement=s=>!s.cartography?.offsite&&!s.timeline?.journey&&['city','village','town','citadel','harbor','sanctuary','camp'].includes(s.world?.locations.find(p=>p.id===s.locationId)?.type);
 export const bloodLineage=c=>BLOOD_LINEAGES.find(l=>l.id===c?.bloodline)||BLOOD_LINEAGES[0];
 export const bloodHungerRate=c=>c?.curseVersion===1?bloodLineage(c).rate:2;
 export function initializeCurse(s){

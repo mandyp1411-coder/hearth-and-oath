@@ -18,7 +18,7 @@ export const LEISURE_OPTIONS=Object.freeze([
  {id:'boardgames',label:'Play Board Games at the Tavern',where:'tavern',cost:2,joy:7,relief:10,focus:0,title:'An Evening of Board Games',text:'You spend the evening at a games table. The stakes are small and the game is its own reward.'}
 ]);
 const leisureKeys=['walk','read','drink','circle',...LEISURE_OPTIONS.map(o=>o.id)];
-const blocked=s=>!s.socialLife||s.phase==='retired'||s.event||s.battle||s.conversations?.pending||s.cartography?.offsite||s.cartography?.pending||s.timeline?.journey||s.justice?.prison||s.maze||s.dungeon||s.rpg?.expedition||s.adventuring?.expedition||s.careers?.batch||s.workshop?.project||s.health?.recovery||s.stories?.project||s.pastimes?.pending||s.social?.pending;
+const blocked=s=>!s.socialLife||s.phase==='retired'||s.event||s.battle||s.conversations?.pending||s.cartography?.offsite||s.cartography?.pending||s.timeline?.journey||s.justice?.prison||s.maze||s.careers?.batch||s.workshop?.project||s.health?.recovery||s.stories?.project||s.pastimes?.pending||s.social?.pending;
 const clamp=n=>Math.max(0,Math.min(100,n));
 const room=s=>s.cartography?.interior?.roomId||'gate';
 const mood=(s,joy,stress)=>{s.life.happiness=clamp(s.life.happiness+joy);s.life.stress=clamp(s.life.stress+stress);};

@@ -7,10 +7,10 @@ export function areaScene(state,{dungeon=null,room=null,site=null}={}) {
   const wild=/forest|wood|wild/.test(terrain)?0:/coast|marsh|shore/.test(terrain)?1:/mountain|highland/.test(terrain)?2:null;
   const extra={workyard:0,hall:1,wayhouse:2,court:1,stronghold:1};
   const collection=!dungeon&&Object.hasOwn(extra,room?.id)?'c':!dungeon&&(Object.hasOwn(interior,room?.id)||wild!==null)?'b':'a';
-  const cell=collection==='c'?extra[room.id]:collection==='b'?(interior[room?.id]??wild):dungeon?(/cistern/.test(state.maze?.sourceId||state.dungeon?.id||state.rpg?.expedition?.id||state.adventuring?.expedition?.theme||'')?3:/watchtower|citadel/.test(state.maze?.sourceId||state.dungeon?.id||state.rpg?.expedition?.id||state.adventuring?.expedition?.theme||'')?5:4):room?.id==='archive'?2:site?.type==='city'||site?.id==='city'?1:0;
+  const cell=collection==='c'?extra[room.id]:collection==='b'?(interior[room?.id]??wild):dungeon?(/cistern/.test(state.maze?.sourceId||'')?3:/watchtower|citadel/.test(state.maze?.sourceId||'')?5:4):room?.id==='archive'?2:site?.type==='city'||site?.id==='city'?1:0;
   const moods=['The lanterns burn low.','Rain settles on old stone.','A draft carries the smell of smoke.','The last light gathers at the windows.'];
   const present={workyard:site?.status==='scarred'?'Scaffolds keep the damaged lane in use.':'Tools wait beside the worn benches.',hall:'Low voices carry from the long tables.',wayhouse:room?.operating?'Warm light spills from the doorway.':'The common room is quiet, and its hearth is cold.'};
-  return {cell,collection,mood:present[room?.id]||moods[seededRoll(state.seed,`area-mood:${site?.id}:${room?.id||state.dungeon?.roomId||'outside'}`,moods.length)]};
+  return {cell,collection,mood:present[room?.id]||moods[seededRoll(state.seed,`area-mood:${site?.id}:${room?.id||'outside'}`,moods.length)]};
 }
 export function renderAreaScene(state,ui,options={}) {
   const {cell,mood,collection}=areaScene(state,options),site=options.site||state.world.locations.find(p=>p.id===state.locationId),title=options.dungeon?.room?.title||options.room?.name||site?.name||'The country';
@@ -35,14 +35,6 @@ export function spatialMoveOffer(s,kind,id,actions) {
   }
   if(kind==='room') {
     const a=actions.find(a=>a.id==='atlas_room_'+id);
-    return a&&!a.disabledReason?{op:'activity',id:a.id}:null;
-  }
-  if(kind==='rpg'){const a=actions.find(a=>a.id==='rpg_move_'+id);return a&&!a.disabledReason?{op:'activity',id:a.id}:null;}
-  if(kind==='dungeon') {
-    if(s.adventuring?.expedition?.layoutVersion===1&&/^radiant_[0-5]$/.test(id)){const c=s.event?.id==='adventure_room'&&s.event.choices.find(c=>c.id==='route_'+id.slice(8));return c&&!c.disabledReason?{op:'choice',id:c.id}:null;}
-    const c=s.event?.choices.find(c=>c.id==='route_'+id);
-    if(c&&!c.disabledReason)return {op:'choice',id:c.id};
-    const a=actions.find(a=>a.id==='explore_route_'+id);
     return a&&!a.disabledReason?{op:'activity',id:a.id}:null;
   }
   return null;

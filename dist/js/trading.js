@@ -23,7 +23,7 @@ export function shopAccessReason(s,vendor='market'){
  if(vendor!=='inn'&&(s.cartography?.offsite||s.cartography?.interior?.siteId!==s.locationId||s.cartography?.interior?.roomId!=='market'))return 'Approach the shop in the local market first.';
  if(s.careers?.batch||s.conversations?.project||s.rpg?.project||s.stories?.project||s.health?.recovery||s.society?.project||s.community?.project?.commitment||s.fellowship?.project||s.sanctuaries?.commitment||s.lineage?.adoption?.preparation||s.pastimes?.project||s.repertoire?.project)return 'Finish your current commitment before trading.';
  if(s.age<16)return 'You can trade independently from age sixteen.';
- if(s.phase==='retired'||s.event||s.battle||s.conversations?.pending||s.dungeon||s.rpg?.expedition||s.adventuring?.expedition||s.justice?.prison||s.cartography?.pending||s.timeline?.journey)return 'Resolve your current moment before trading.';
+ if(s.phase==='retired'||s.event||s.battle||s.conversations?.pending||s.justice?.prison||s.cartography?.pending||s.timeline?.journey)return 'Resolve your current moment before trading.';
  return null;
 }
 export function tradeInventory(s,vendor='market'){

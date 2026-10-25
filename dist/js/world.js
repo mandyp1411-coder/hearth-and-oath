@@ -460,7 +460,7 @@ export function travelPreview(state, id) {
   else if (!route.length) disabledReason = 'No open road reaches this destination.';
   else if (modern && state.age < 14) disabledReason = 'Independent regional travel begins at age fourteen.';
   else if (!modern && state.phase !== 'adult') disabledReason = 'Travel becomes available in adulthood.';
-  else if (state.event || state.battle || state.conversations?.pending || state.dungeon && !state.dungeon.complete) disabledReason = 'Resolve your current moment before setting out.';
+  else if (state.event || state.battle || state.conversations?.pending) disabledReason = 'Resolve your current moment before setting out.';
   else if (state.timeline?.journey) disabledReason = 'Continue or resolve your existing road journey before setting out again.';
   else if (state.workshop?.project) disabledReason = 'Finish or cancel your committed project before traveling.';
   const description = `${days} ${days === 1 ? 'day' : 'days'} on the road${route.length > 2 ? `, through ${route.length - 2} waypoints` : ''}. ${status === 'destroyed' ? 'The settlement has been destroyed. Its ruins remain reachable; services have ceased.' : status === 'evacuated' ? 'The settlement has been evacuated. Services are unavailable.' : status === 'scarred' ? 'The settlement bears lasting damage.' : destination.safety <= 2 ? 'Prepare for an unsettled route.' : 'Follow the marked roads.'}`;

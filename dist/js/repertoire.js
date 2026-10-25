@@ -41,8 +41,7 @@ const availablePerson = (s,p) => {
     !s.life?.people?.some(row => row.id === p.id && row.alive === false) &&
     (!record || record.retiredDay === null && record.retireDay > s.day);
 };
-const otherCommitment = s => localWorkLocked(s) || s.researchPortfolio?.project || s.familyOrigins?.project || s.life?.plan || s.timeline?.journey || s.cartography?.pending || s.cartography?.offsite || s.justice?.prison || s.maze || s.dungeon ||
-  s.adventuring?.expedition || s.rpg?.expedition || s.careers?.batch || s.workshop?.project || s.health?.recovery || s.stories?.project || s.rpg?.project ||
+const otherCommitment = s => localWorkLocked(s) || s.researchPortfolio?.project || s.familyOrigins?.project || s.life?.plan || s.timeline?.journey || s.cartography?.pending || s.cartography?.offsite || s.justice?.prison || s.maze || s.careers?.batch || s.workshop?.project || s.health?.recovery || s.stories?.project || s.rpg?.project ||
   s.conversations?.project || s.society?.project || s.community?.project?.commitment || s.fellowship?.project || s.sanctuaries?.commitment || s.lineage?.adoption?.preparation;
 export function repertoireReason(s,{allowProject=false}={}) {
   if (s.age < 18 || s.phase !== 'adult') return 'Original recitals open in adult life.';

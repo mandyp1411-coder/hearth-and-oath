@@ -11,7 +11,7 @@ export function returnLifeContext(state, readCommitment = () => null) {
     return state.event.title ? `${label}: ${state.event.title}` : label;
   }
   if (state.conversations?.pending) return 'Reply waiting';
-  if (state.maze || state.dungeon || state.rpg?.expedition || state.adventuring?.expedition) return 'Descent underway';
+  if (state.maze) return 'Descent underway';
   if (state.justice?.prison) return 'Sentence unfinished';
   if (state.timeline?.journey || state.cartography?.pending || state.cartography?.route || state.cartography?.offsite) return 'On the road';
   if (state.workshop?.project) return state.workshop.project.title ? `Project paused: ${state.workshop.project.title}` : 'Workshop project paused';

@@ -30,7 +30,7 @@ function householdWords(s, choice) {
 }
 
 export function farmerDayVisible(s) {
-  return Boolean(s?.farm && s.age >= Math.max(16, s.farm.openingAge || 16) && !s.battle && !s.delve && !s.maze && !s.dungeon && !s.rpg?.expedition && !s.adventuring?.expedition);
+  return Boolean(s?.farm && s.age >= Math.max(16, s.farm.openingAge || 16) && !s.battle && !s.delve && !s.maze);
 }
 
 /** Costs and serious risks belong inside the choice, including without numbers. */

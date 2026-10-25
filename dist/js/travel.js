@@ -40,7 +40,7 @@ export function initializeTravel(state, { migration = false, reset = false } = {
   void migration;
 }
 export function setTravelPlan(state, values) {
-  if (!state.travel || waiting(state) || state.timeline?.journey || state.dungeon || state.workshop?.project || state.careers?.batch || state.life?.plan) return false;
+  if (!state.travel || waiting(state) || state.timeline?.journey || state.workshop?.project || state.careers?.batch || state.life?.plan) return false;
   state.travel.plan = normalizeTravelPlan(values);
   if(values?.routePreference!==undefined)state.travel.routePreference=roadPreference(values.routePreference);
   state.notice = 'Your road plan is ready to review. Time and supplies are committed only when you depart.';
@@ -152,7 +152,7 @@ export function onTravelLeg(state, { actualDays = 0, legIndex = state.timeline?.
 
 export function flushTravelEvent(state, ctx = {}) {
   const pending = state.travel?.pending;
-  if (!pending || pending.stage === 'battle' || waiting(state) || state.dungeon || ctx.pendingNeed?.()) return false;
+  if (!pending || pending.stage === 'battle' || waiting(state) || ctx.pendingNeed?.()) return false;
   const data = scene(state, pending);
   ctx.setEvent?.(data.id, data.title, 'On the road', data.body, data.choices);
   return !!state.event;

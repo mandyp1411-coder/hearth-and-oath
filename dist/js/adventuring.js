@@ -9,7 +9,7 @@ import { isCanonicalAppearance } from './avatar.js';
 const action=(id,label,description,days=0,cost=0,group='Adventuring',reason)=>({id,label,description,days,cost,group,...(reason?{disabledReason:reason}:{})});
 const log=(s,ctx,title,text)=>{s.notice=text;(ctx.journalLiteral||ctx.journal)?.(title,text,'adventure');};
 const active=s=>s.adventuring.contracts.filter(c=>['active','ready'].includes(c.status));
-const safe=s=>s.age>=16&&s.phase!=='retired'&&!s.event&&!s.battle&&!s.dungeon&&!s.justice?.prison;
+const safe=s=>s.age>=16&&s.phase!=='retired'&&!s.event&&!s.battle&&!s.justice?.prison;
 const replace=(text,c,s)=>text.replaceAll('{place}',s.world.locations.find(p=>p.id===c.destinationId)?.name||'the road').replaceAll('{giver}',c.giver.name).replaceAll('{target}',c.targetName);
 const closed=c=>['done','abandoned'].includes(c.status);
 function contractRecord(s,c){const flavor=CONTRACT_FLAVOR.find(f=>f.id===c.flavorId);return {id:c.id,title:flavor.title,objective:replace(flavor.brief,c,s),client:c.giver.name,boardId:c.boardId,boardName:s.world.locations.find(p=>p.id===c.boardId).name,destinationId:c.destinationId,destinationName:s.world.locations.find(p=>p.id===c.destinationId).name,result:c.status==='done'?'completed':'abandoned',acceptedDay:c.acceptedDay,closedDay:c.closedDay??null,recordedDay:s.day,reward:c.status==='done'?(c.paidGold??c.reward+(c.proof?.captured?15:0)):0,proof:c.proof?structuredClone(c.proof):null,attempts:structuredClone(c.attempts||[])};}

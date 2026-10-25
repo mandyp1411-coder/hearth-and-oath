@@ -9,7 +9,7 @@ export function researchConversationEligible(s, person) {
   return !!person && !!record && record.snapshot?.id === person.id && record.snapshot?.name === person.name
     && record.retiredDay === null && person.available !== false && person.alive !== false && person.source?.alive !== false && !person.retired
     && !(s.life?.people || []).some(known => known.id === person.id && known.alive === false)
-    && s.age >= 16 && s.phase !== 'retired' && !s.event && !s.battle && !s.dungeon && !s.maze && !s.justice?.prison
+    && s.age >= 16 && s.phase !== 'retired' && !s.event && !s.battle && !s.maze && !s.justice?.prison
     && !s.timeline?.journey && !s.cartography?.offsite && !s.cartography?.pending
     && !!ref && person.locationId === ref.locationId && s.locationId === ref.locationId
     && ref.roomId === (s.cartography?.interior?.roomId || 'gate') && (!person.roomId || person.roomId === ref.roomId)

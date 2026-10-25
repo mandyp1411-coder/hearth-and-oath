@@ -1,7 +1,7 @@
 import { isSettlement } from './world.js';
 import { bloodMealRelief, bloodHungerRate } from './curses.js';
 
-export function feedingAtHearth(s){return !s.cartography?.offsite&&!s.cartography?.pending&&!s.timeline?.journey&&!s.dungeon&&!s.adventuring?.expedition&&!s.justice?.prison&&isSettlement(s.world,s.locationId);}
+export function feedingAtHearth(s){return !s.cartography?.offsite&&!s.cartography?.pending&&!s.timeline?.journey&&!s.justice?.prison&&isSettlement(s.world,s.locationId);}
 const mealFor = (eventId,id) => id==='animal'?{version:13,source:'animal',baseAmount:45}:id==='donor'?{version:13,source:'donor',baseAmount:60}:id==='predation'?{version:13,source:'predation',baseAmount:70}:id==='jailer'&&eventId==='life_hunger'?{version:13,source:'animal',baseAmount:30}:null;
 export function validateFeedingTerms(event){
   return !event?.choices?.some(c=>{

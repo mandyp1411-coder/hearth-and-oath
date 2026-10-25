@@ -16,7 +16,7 @@ const materialsOf = recipe => Object.fromEntries(Object.entries(recipe || {}).fi
 const materialText = materials => Object.entries(materials).filter(([,n])=>Number.isFinite(n)&&n>0).map(([id, n]) => `${n} ${id}`).join(', ') || 'no materials';
 const location = (state, id = state.locationId) => state.world?.locations?.find(place => place.id === id);
 const usable = place => !!place && !['destroyed', 'evacuated'].includes(place.status) && place.servicesAvailable !== false;
-const ready = state => !!state.workshop && !!state.equipment && state.phase !== 'retired' && (state.timeline?.mode === 'birth' ? state.age >= 16 : state.phase === 'adult') && !state.event && !state.battle && !state.conversations?.pending && !state.dungeon && !state.timeline?.journey && !state.careers?.batch && !state.life?.plan && !state.community?.project?.commitment;
+const ready = state => !!state.workshop && !!state.equipment && state.phase !== 'retired' && (state.timeline?.mode === 'birth' ? state.age >= 16 : state.phase === 'adult') && !state.event && !state.battle && !state.conversations?.pending && !state.timeline?.journey && !state.careers?.batch && !state.life?.plan && !state.community?.project?.commitment;
 const itemById = id => GEAR_CATALOG.find(item => item.id === id);
 const structureAt = (state, type, id = state.locationId) => state.workshop?.structures.find(structure => structure.type === type && structure.locationId === id);
 const sound = (state, type, id = state.locationId) => {

@@ -20,7 +20,7 @@ export function familyVisitReason(s,p) {
  if(!p||p.alive===false)return 'This person remains in your family memories.';
  const id=familyResidence(s,p),site=s.world?.locations.find(l=>l.id===id);
  if(site&&(['destroyed','evacuated'].includes(site.status)||site.servicesAvailable===false))return 'Their recorded home is unavailable. Their family record is preserved.';
- if(id!==s.locationId||s.cartography?.offsite||s.cartography?.pending||s.timeline?.journey||s.dungeon||s.maze)return `Visit ${p.name} at their home in ${site?.name||id}.`;
+ if(id!==s.locationId||s.cartography?.offsite||s.cartography?.pending||s.timeline?.journey||s.maze)return `Visit ${p.name} at their home in ${site?.name||id}.`;
  if(s.worldServicesVersion===1&&(s.cartography?.interior?.siteId!==id||s.cartography.interior.roomId!=='homes'))return 'Visit their home in the Homes area first.';
  return null;
 }

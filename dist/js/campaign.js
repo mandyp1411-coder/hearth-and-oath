@@ -225,11 +225,11 @@ function action(s, id, label, description, locationId, days = 2) {
 }
 
 export function campaignActions(s) {
-  if (!s.campaign || s.event || s.battle || s.dungeon && !s.dungeon.complete || ageOf(s) < 16) return [];
+  if (!s.campaign || s.event || s.battle || ageOf(s) < 16) return [];
   const c = s.campaign, q = current(s);
   if (c.facts.declined && !c.ending && !Object.values(s.questLog?.entries||{}).some(e=>e.status==='active')) return [{ id: 'quest_resume', label: 'Return to the covenant investigation', description: 'Pick up the inquiry where you left it. Fate does not require a particular profession.', days: 0, cost: 0, group: 'The Ashfall Covenant' }];
   const result = [];
-  if (c.pending?.dungeonId && !s.dungeon) {
+  if (c.pending?.dungeonId) {
     const pendingQuest = QUESTS.find(q => q.id === c.pending.questId) || SIDES.find(q => `side_${q.id}` === c.pending.questId);
     if (pendingQuest) result.push(action(s, 'quest_resume_expedition', `Resume ${pendingQuest.title}`, 'Return with the same quest, cleared rooms, and already claimed supplies. Leaving or losing a fight does not complete an expedition.', pendingQuest.locationId, 0));
     return result;
@@ -270,7 +270,7 @@ function openQuest(s, q, ctx, side = false) {
 export function applyCampaignAction(s, id, ctx) {
   if (!id.startsWith('quest_') || ageOf(s) < 16) return false;
   initializeCampaign(s);
-  if (id === 'quest_resume_expedition' && s.campaign.pending?.dungeonId && !s.dungeon) {
+  if (id === 'quest_resume_expedition' && s.campaign.pending?.dungeonId) {
     ctx.startDungeon(s.campaign.pending.dungeonId, s.campaign.pending.questId);
     return true;
   }

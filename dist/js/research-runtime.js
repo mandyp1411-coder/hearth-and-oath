@@ -16,8 +16,8 @@ const acquired = (run, id) => !!evidenceFor(run, researchSourceEvidenceId(id));
 const closed = (s, id) => { const site = s.world.locations.find(place => place.id === id); return !site || ['destroyed', 'evacuated'].includes(site.status) || site.servicesAvailable === false || s.realm?.politics?.holds.some(hold => hold.siteId === id && hold.status === 'held'); };
 const genuineHome = s => !!cityRooms(s).find(row => row.id === 'homes' && row.private === false);
 const atHome = (s, run = null) => (!run || s.locationId === run.locationId) && room(s) === 'homes' && genuineHome(s);
-const otherWork = s => localWorkLocked(s) || s.repertoire?.project || s.adventuring?.expedition || s.rpg?.expedition || s.rpg?.project || s.stories?.project || s.familyOrigins?.project || s.health?.recovery || s.society?.project || s.community?.project?.commitment || s.fellowship?.project || s.sanctuaries?.commitment || s.lineage?.adoption?.preparation || s.pastimes?.project || s.conversations?.project || s.workshop?.project || s.careers?.batch || s.life?.plan;
-const ready = s => s.age >= 16 && s.phase !== 'retired' && !s.event && !s.battle && !s.conversations?.pending && !s.dungeon && !s.maze
+const otherWork = s => localWorkLocked(s) || s.repertoire?.project || s.rpg?.project || s.stories?.project || s.familyOrigins?.project || s.health?.recovery || s.society?.project || s.community?.project?.commitment || s.fellowship?.project || s.sanctuaries?.commitment || s.lineage?.adoption?.preparation || s.pastimes?.project || s.conversations?.project || s.workshop?.project || s.careers?.batch || s.life?.plan;
+const ready = s => s.age >= 16 && s.phase !== 'retired' && !s.event && !s.battle && !s.conversations?.pending && !s.maze
   && !s.timeline?.journey && !s.cartography?.pending && !s.cartography?.offsite && !s.justice?.prison && !otherWork(s);
 const services = (s, locationId = s.locationId) => settlementServices(s, { siteId: locationId });
 const live = (s, ref) => !!ref && !closed(s, ref.locationId) && researchActorAvailable(s, ref, services(s, ref.locationId));

@@ -121,7 +121,7 @@ const action = (id, label, description, days, cost, group, disabledReason) => ({
 });
 
 export function gearActions(state) {
-  if (state.phase === 'retired' || (state.timeline?.mode === 'birth' ? state.age < 16 : state.phase !== 'adult') || state.event || state.battle || state.dungeon || !state.equipment) return [];
+  if (state.phase === 'retired' || (state.timeline?.mode === 'birth' ? state.age < 16 : state.phase !== 'adult') || state.event || state.battle || !state.equipment) return [];
   const actions = [];
   if (settlement(state)) {
     if ((state.revision || 0) < 5) actions.push(action('gear_gather_cloth', 'Help the cloth cooperative', 'Spend a day sorting fibers and mending garments. Keep 2 cloth scraps for your own craft work.', 1, 0, 'Crafting'));

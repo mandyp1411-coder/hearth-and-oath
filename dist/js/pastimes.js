@@ -60,7 +60,7 @@ const nearby=s=>(s.life?.people||[]).filter(p=>p.alive!==false&&(!p.locationId||
 const caregiver=s=>nearby(s).find(p=>['parent','guardian'].includes(p.familyRole))||nearby(s).find(p=>p.role==='relative');
 const peer=s=>nearby(s).find(p=>!p.familyRole&&p.role!=='relative'&&Math.abs((p.age??s.age)-s.age)<=5)||nearby(s).find(p=>p.familyRole==='sibling');
 const companion=s=>peer(s)||nearby(s).find(p=>!p.familyRole&&p.role!=='relative')||caregiver(s);
-const blocked=s=>s.phase==='retired'||s.event||s.battle||s.dungeon||s.conversations?.pending||s.timeline?.journey||s.workshop?.project||s.careers?.batch||s.life?.plan;
+const blocked=s=>s.phase==='retired'||s.event||s.battle||s.conversations?.pending||s.timeline?.journey||s.workshop?.project||s.careers?.batch||s.life?.plan;
 const note=(s,ctx,title,body)=>{s.notice=body;s.pastimes.history.push({day:s.day,age:s.age,title,text:body});s.pastimes.history=s.pastimes.history.slice(-100);(ctx.journalLiteral||ctx.journal)?.(title,body,'life');};
 const fact=(s,f)=>{if(!s.pastimes.facts.includes(f))s.pastimes.facts.push(f);s.pastimes.facts=s.pastimes.facts.slice(-200);};
 const wellbeing=(s,h=0,stress=0)=>{if(s.life){s.life.happiness=clamp(s.life.happiness+h);s.life.stress=clamp(s.life.stress+stress);}};

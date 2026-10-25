@@ -4,7 +4,7 @@ const supported=/^(health_(rest|routine|support)|leisure_(walk|read|sketch)|life
 const waiting=s=>Boolean(s.event||s.battle||s.conversations?.pending||s.phase==='retired');
 const symptoms=s=>JSON.stringify([s.health?.physical,s.health?.mental,s.hero.condition]);
 export function routineOffers(s,actions){
- if(s.age<3||waiting(s)||s.life?.plan||s.workshop?.project||s.careers?.batch||s.timeline?.journey||s.cartography?.pending||s.cartography?.offsite||s.maze||s.dungeon)return [];
+ if(s.age<3||waiting(s)||s.life?.plan||s.workshop?.project||s.careers?.batch||s.timeline?.journey||s.cartography?.pending||s.cartography?.offsite||s.maze)return [];
  return actions.filter(a=>supported.test(a.id)&&a.days>=1&&a.days<=3&&!a.disabledReason).map(a=>({...a,cycles:Math.floor(7/a.days),maxDays:Math.floor(7/a.days)*a.days}));
 }
 export function routineReview(s,id,cycles,readers){

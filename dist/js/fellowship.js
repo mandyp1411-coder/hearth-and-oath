@@ -37,7 +37,7 @@ const supervisionNeeded=(s,id)=>{const r=s.fellowship.formations[id],m=mentor(s,
 const supervisionReason=(s,id)=>{const r=s.fellowship.formations[id],m=mentor(s,id);return m.available===false?`${m.name} cannot currently supervise; their earlier record is preserved.`:`Explicitly agree the supervision handover from ${supervisor(r).name} to ${m.name} before continuing.`;};
 function handoverAction(s,id){const m=mentor(s,id),r=s.fellowship.formations[id];return {...action(s,`fellowship_handover_${id}`,`Ask ${m.name} to take over formation supervision`,`${r.mentorName} remains the original mentor. Preserve all ${r.workDays} completed days, choices, deadline and witness permissions; no fee or reward is added and no private relationship transfers.`,m.locationId),...(m.available===false?{disabledReason:'The current mentor cannot take part.'}:{})};}
 
-const blocked = s => s.phase==='retired' || s.event || s.battle || s.dungeon || s.conversations?.pending || s.timeline?.journey || s.workshop?.project || s.careers?.batch || s.life?.plan;
+const blocked = s => s.phase==='retired' || s.event || s.battle || s.conversations?.pending || s.timeline?.journey || s.workshop?.project || s.careers?.batch || s.life?.plan;
 const eligibleAge = s => (s.age || 0)>=18 && s.phase!=='retired';
 const addFact = (s,fact) => { if(!s.fellowship.facts.includes(fact))s.fellowship.facts.push(fact); };
 const notice = (s,ctx,title,body) => {s.notice=body;ctx.journal?.(title,body,'relationship');};
@@ -229,7 +229,7 @@ function companionScene(s,id,node) {
  return {title:`${p.name}: the promise has a boundary`,body:`Six real days of work are in the record.${context}\n\n${id==='kest'?'The reliable evidence supports a private invitation or a careful pause. It cannot require someone to return.':id==='orrin'?'The clinic can keep caring for people without making its whole future depend on one exhausted person.':'The people protected by an agreement must be able to say what safety means to them.'} Spend two further days carrying out an agreed answer.`,choices:decisions[id].map(([key,label,description])=>choice(key,label,description+' The completed request and its boundary stay in your companion’s memories.'))};
 }
 export function flushFellowshipEvent(s,ctx={}) {
- if(!s.fellowship || s.phase==='retired' || s.event || s.battle || s.conversations?.pending || s.dungeon || ctx.pendingNeed?.())return false;
+ if(!s.fellowship || s.phase==='retired' || s.event || s.battle || s.conversations?.pending || ctx.pendingNeed?.())return false;
  const f=s.fellowship;
  if(!f.pending && !f.project) {
   const formation=Object.entries(f.formations).find(([id,r])=>['decision','review'].includes(r.stage)&&!supervisionNeeded(s,id)&&s.locationId===mentor(s,id).locationId);

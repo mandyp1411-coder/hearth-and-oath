@@ -37,7 +37,7 @@ export function firstDayGuideView(state, readers) {
   if (state.battle) current = moment('battle', 'Attend to the encounter', 'The encounter is still unfolding. Its existing commands remain in control.', 'battle');
   else if (state.event) current = moment('event:' + state.event.id, 'Begin with this moment', state.age<3?`“${state.event.title}” is a moment in your early life. Continue watching to see what your caregivers do.`:`“${state.event.title}” is waiting for your decision. Choose from its existing replies.`, 'event');
   else if (state.conversations?.pending) current = moment('reply:' + state.conversations.pending.personId, 'A reply is waiting', 'Return to the current conversation and choose what you want to say.', 'reply');
-  else if (state.maze || state.dungeon || state.rpg?.expedition || state.adventuring?.expedition) current = moment('descent', 'Your current undertaking', 'Review the descent already underway before choosing another activity.', 'descent');
+  else if (state.maze) current = moment('descent', 'Your current undertaking', 'Review the descent already underway before choosing another activity.', 'descent');
   else if (state.cartography?.pending || state.cartography?.offsite || state.timeline?.journey) current = { ...moment('journey', 'Your journey continues', 'Review your actual route and its existing continuation, rest or return choices.'), op: 'tab', id: 'map' };
   else {
     const commitment = readers.commitment(state);

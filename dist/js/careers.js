@@ -37,7 +37,7 @@ const settlement=s=>isSettlement(s.world,s.locationId);
 const current=s=>getProfession(s.hero?.profession) || PROFESSION_CATALOG[0];
 const ledger=(s,name=s.hero.profession)=>s.careers?.records?.[getProfession(name)?.name];
 const adult=s=>(s.age || 0)>=16 && s.phase!=='retired' && s.hero?.alive!==false;
-const waiting=s=>s.event || s.battle || s.conversations?.pending || s.dungeon || s.timeline?.journey || s.timeline?.yearTarget || s.workshop?.project || s.life?.plan || s.society?.project;
+const waiting=s=>s.event || s.battle || s.conversations?.pending || s.timeline?.journey || s.timeline?.yearTarget || s.workshop?.project || s.life?.plan || s.society?.project;
 const ready=s=>s.careers && adult(s) && !waiting(s);
 const materialText=m=>Object.entries(m).filter(([,n])=>n>0).map(([id,n])=>`${n} ${id}`).join(', ') || 'no personal materials';
 const missing=(s,m)=>Object.entries(m).some(([id,n])=>(s.equipment?.materials?.[id] || 0)<n);

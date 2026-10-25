@@ -17,10 +17,10 @@ function startRecord(s,firstDay) {
 }
 function encounter(s,kind,week,checkDay) {
   const known=s.nightEncounters.invitations.find(r=>r.kind===kind);
-  return {version:13,kind,week,checkDay,noticedDay:s.day,locationId:s.locationId,hex:s.cartography?.position||null,context:s.dungeon?'depths':'night-road',...(invitationKinds.includes(kind)?{personName:known?.personName||generatePersonName(s.seed,`night-person:${generation(s)}:${kind}:${week}`)}:{})};
+  return {version:13,kind,week,checkDay,noticedDay:s.day,locationId:s.locationId,hex:s.cartography?.position||null,context:'night-road',...(invitationKinds.includes(kind)?{personName:known?.personName||generatePersonName(s.seed,`night-person:${generation(s)}:${kind}:${week}`)}:{})};
 }
 export function queueNightDiscovery(s,oldDay,context={}) {
-  if(s.age<18||s.hero.condition||s.phase==='retired'||!integer(oldDay)||s.day<=oldDay||s.justice?.prison||!(context.outdoors&&context.night||s.dungeon))return;
+  if(s.age<18||s.hero.condition||s.phase==='retired'||!integer(oldDay)||s.day<=oldDay||s.justice?.prison||!(context.outdoors&&context.night))return;
   const adultDay=s.timeline?.mode==='birth'?(s.timeline.birthDay||0)+18*365:0;
   const first=Math.max(oldDay+1,adultDay,(s.nightEncounters?.policy===13?s.nightEncounters.throughDay:oldDay)+1);
   if(first>s.day)return;
@@ -62,7 +62,7 @@ function searchReason(s,r) {
   return '';
 }
 export function nightDiscoveryActions(s) {
-  if(s.age<18||s.hero.condition||s.phase==='retired'||s.event||s.battle||s.conversations?.pending||s.dungeon||s.timeline?.journey||s.justice?.prison||s.adventuring?.expedition||s.rpg?.expedition||committed(s))return [];
+  if(s.age<18||s.hero.condition||s.phase==='retired'||s.event||s.battle||s.conversations?.pending||s.timeline?.journey||s.justice?.prison||committed(s))return [];
   return (s.nightEncounters?.invitations||[]).filter(r=>r.status==='deferred').map(r=>({id:`curse_revisit_${r.kind}`,label:`Look for ${r.personName} after dusk`,description:'Spend one actual night at the remembered place. A known invitation gives a 25% chance of finding this traveler; searches must be seven days apart. They may be absent. Finding them only reopens a conversation, with no accepted task or transformation.',days:0,durationDays:1,cost:0,group:'Remembered meetings',...(searchReason(s,r)?{disabledReason:searchReason(s,r)}:{})}));
 }
 export function applyNightDiscoveryAction(s,id,ctx={}) {

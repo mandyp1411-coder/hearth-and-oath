@@ -7,7 +7,7 @@ const MAX_NODES=96, MAX_EDGES=128, MAX_QUEUE=6;
 const clamp=n=>Math.max(0,Math.min(100,n));
 const home=s=>s.hero.birthplaceId || (s.hero.origin==='city'?'city':'home');
 const owner=s=>`birth-${s.timeline?.birthDay ?? -6570}`;
-const blocked=s=>s.event || s.battle || s.conversations?.pending || s.dungeon || s.timeline?.journey || s.workshop?.project || s.life?.plan || s.careers?.batch;
+const blocked=s=>s.event || s.battle || s.conversations?.pending || s.timeline?.journey || s.workshop?.project || s.life?.plan || s.careers?.batch;
 const active=s=>!!s.social && s.age>=3 && s.hero.alive!==false && s.phase!=='retired' && !blocked(s);
 const node=(s,id)=>s.social?.nodes.find(p=>p.id===id);
 const edge=(s,id)=>s.social?.edges.find(e=>e.id===id);

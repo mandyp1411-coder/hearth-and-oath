@@ -24,7 +24,7 @@ const SKILLS={Blacksmith:'survival',Farmer:'survival',Alchemist:'arcana',Innkeep
 const clamp=n=>Math.max(0,Math.min(100,n));
 const place=(s,id=s.locationId)=>s.world?.locations?.find(p=>p.id===id);
 const owner=s=>`birth-${s.timeline?.birthDay ?? -6570}`;
-const blocked=s=>s.event || s.battle || s.conversations?.pending || s.dungeon || s.timeline?.journey || s.workshop?.project || s.life?.plan || s.careers?.batch;
+const blocked=s=>s.event || s.battle || s.conversations?.pending || s.timeline?.journey || s.workshop?.project || s.life?.plan || s.careers?.batch;
 const peerStage=age=>[18,30,45,65].filter(year=>age>=year).length;
 const ready=s=>s.society && s.age>=16 && s.phase!=='retired' && s.hero.alive!==false && !blocked(s);
 const person=(s,id)=>[...(s.society?.people || []),...(s.society?.archive || [])].find(p=>p.id===id);
@@ -261,7 +261,7 @@ export function applySocietyAction(s,id,ctx={}) {
 }
 export function societyEventIds() {return {society_customer:['repair','teach','decline','prepare'],society_staff:['credit','hours','boundary','launch','stay','release','prepare'],society_launch:['independent','partner','study'],society_neighbor:['welcome','work','private']};}
 export function flushSocietyEvent(s,ctx={}) {
-  const soc=s.society;if(!soc || soc.pending || soc.project || s.event || s.battle || s.conversations?.pending || s.phase==='retired' || s.dungeon || s.timeline?.journey || s.careers?.batch || s.workshop?.project || s.life?.plan || s.community?.project?.commitment || s.fellowship?.project || s.sanctuaries?.commitment)return false;
+  const soc=s.society;if(!soc || soc.pending || soc.project || s.event || s.battle || s.conversations?.pending || s.phase==='retired' || s.timeline?.journey || s.careers?.batch || s.workshop?.project || s.life?.plan || s.community?.project?.commitment || s.fellowship?.project || s.sanctuaries?.commitment)return false;
   if(!soc.queued)soc.queued=soc.deferred.shift() || null;
   let q=soc.queued,p=person(s,q?.personId);
   while(q && (!p || !p.alive || q.eventId==='society_staff' && q.stage!==p.stage)){soc.queued=soc.deferred.shift() || null;q=soc.queued;p=person(s,q?.personId);}

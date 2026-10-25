@@ -7,7 +7,7 @@ const locate=(s,id)=>s.world.locations.find(p=>p.id===id);
 const openSite=(s,id)=>{const p=locate(s,id);return p&&!['destroyed','evacuated'].includes(p.status)&&p.servicesAvailable!==false;};
 const contact=(s,id)=>s.rpg.contacts.find(p=>p.id===id&&p.alive!==false);
 const busy=s=>s.timeline?.journey||s.timeline?.yearTarget!=null||s.careers?.batch||s.workshop?.project||s.health?.recovery||s.stories?.project||s.life?.plan||s.society?.project||s.community?.project?.commitment||s.fellowship?.project||s.sanctuaries?.commitment||s.lineage?.adoption?.preparation||s.pastimes?.project||s.conversations?.project;
-const eligible=s=>!busy(s)&&s?.rpg&&s.age>=18&&s.phase==='adult'&&!s.event&&!s.battle&&!s.conversations?.pending&&!s.cartography?.pending&&!s.cartography?.offsite&&!s.dungeon&&!s.justice?.prison&&!s.rpg.project&&!s.rpg.expedition;
+const eligible=s=>!busy(s)&&s?.rpg&&s.age>=18&&s.phase==='adult'&&!s.event&&!s.battle&&!s.conversations?.pending&&!s.cartography?.pending&&!s.cartography?.offsite&&!s.justice?.prison&&!s.rpg.project;
 const routeLabels={scholar:'Compare the papers at your own table',bard:'Earn a place at the levy supper',criminal:'Find the service entrance after closing'};
 const outcomes={
  scholar:{correct:'The charter exempts seed grain. The new demand charges it twice. The clerk signs your comparison beside the matching receipt numbers.',wrong:'You compare the grand total, but it includes unrelated wool duties. The clerk explains the mismatch and returns the papers; this is not proof of a forged levy.'},

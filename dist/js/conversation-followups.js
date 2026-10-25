@@ -66,7 +66,7 @@ function sourceFor(s,p,key){return (s.conversations?.followUps||[]).find(r=>r.pe
 export function followUpAvailable(s,p){
  const site=s.world?.locations?.find(l=>l.id===s.locationId);
  return !!(s.age>=16&&p.age>=16&&p.available!==false&&p.alive!==false&&p.source?.alive!==false&&p.bond>=15&&!/enem/i.test(p.role||'')&&!personalReadiness(s,p.id)&&
-  p.locationId===s.locationId&&(!p.roomId||p.roomId===(s.cartography?.interior?.roomId||'gate'))&&!s.cartography?.offsite&&!s.cartography?.pending&&!s.timeline?.journey&&!s.dungeon&&!s.maze&&!s.battle&&!s.justice?.prison&&!s.adventuring?.expedition&&!s.rpg?.expedition&&
+  p.locationId===s.locationId&&(!p.roomId||p.roomId===(s.cartography?.interior?.roomId||'gate'))&&!s.cartography?.offsite&&!s.cartography?.pending&&!s.timeline?.journey&&!s.maze&&!s.battle&&!s.justice?.prison&&
   site&&!['destroyed','evacuated'].includes(site.status)&&site.servicesAvailable!==false);
 }
 export function conversationFollowUp(s,p,topic){

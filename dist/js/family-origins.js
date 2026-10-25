@@ -20,7 +20,7 @@ const room=s=>s.cartography?.interior?.siteId===s.locationId?s.cartography.inter
 const guardian=s=>{const candidates=(s.life?.people||[]).filter(p=>(['guardian','parent'].includes(p.familyRole)||p.id==='kin'&&p.role==='relative')&&s.family?.members.some(m=>m.personId===p.id));return candidates.find(p=>p.alive!==false&&s.family.members.some(m=>m.personId===p.id&&m.availability==='present'))||candidates.find(p=>p.id==='kin')||candidates[0]||null;};
 const absent=s=>(s.family?.members||[]).some(m=>m.biological&&m.relationship==='birth parent'&&m.availability!=='present');
 const otherWork=s=>s.rpg?.project||s.stories?.project||s.health?.recovery||s.society?.project||s.community?.project?.commitment||s.fellowship?.project||s.sanctuaries?.commitment||s.lineage?.adoption?.preparation||s.pastimes?.project||s.conversations?.project;
-const ready=s=>s.familyOrigins&&s.age>=12&&s.phase!=='retired'&&!s.event&&!s.battle&&!s.conversations?.pending&&!s.dungeon&&!s.maze&&!s.timeline?.journey&&!s.cartography?.pending&&!s.cartography?.offsite&&!s.justice?.prison&&!s.workshop?.project&&!s.careers?.batch&&!s.life?.plan&&!otherWork(s);
+const ready=s=>s.familyOrigins&&s.age>=12&&s.phase!=='retired'&&!s.event&&!s.battle&&!s.conversations?.pending&&!s.maze&&!s.timeline?.journey&&!s.cartography?.pending&&!s.cartography?.offsite&&!s.justice?.prison&&!s.workshop?.project&&!s.careers?.batch&&!s.life?.plan&&!otherWork(s);
 const eligible=s=>!!s.family&&(s.flags.familyOriginInterest===true||absent(s));
 export function initializeFamilyOrigins(s){if(!s.familyOrigins&&s.family)s.familyOrigins={version:1,introducedDay:s.day,invitation:'offered',run:null,pending:null,project:null};}
 function sourceAnchor(s){

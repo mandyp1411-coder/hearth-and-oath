@@ -111,7 +111,7 @@ export function onRegionalTime(s,oldDay,newDay,ctx={}){
 function quest(s,id){return politics(s).quests.find(q=>q.id===id&&q.ownerId===owner(s));}
 const action=(id,label,description,days=0,reason='')=>({id,label,description,days,cost:0,group:'Local Affairs',...(reason?{disabledReason:reason}:{})});
 export function regionalActions(s){
- const p=politics(s);if(!p||s.phase==='retired'||s.event||s.battle||s.dungeon||s.maze||s.adventuring?.expedition||s.justice?.prison||s.cartography?.offsite||s.cartography?.pending||s.timeline?.journey)return [];
+ const p=politics(s);if(!p||s.phase==='retired'||s.event||s.battle||s.maze||s.justice?.prison||s.cartography?.offsite||s.cartography?.pending||s.timeline?.journey)return [];
  const rid=s.realm.sites[s.locationId]?.regionId,result=[],culture=regionalCulture(rid),year=Math.floor(s.day/365);
  if(culture&&Math.abs(s.day%365-culture.festivalDay)<=7&&!heldSettlement(s)&&!(p.festivals||[]).some(f=>f.regionId===rid&&f.year===year&&f.ownerId===owner(s)))result.push(action('polity_festival','Join '+culture.festival,culture.tradition+' Spend a day with the community.',1));
  if(isSettlement(s.world,s.locationId))result.push(action('polity_custom','Ask About Local Life',`Hear about local customs, the primary faith and who governs ${regionName(rid)}.`));
