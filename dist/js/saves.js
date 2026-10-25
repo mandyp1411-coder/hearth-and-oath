@@ -1,8 +1,18 @@
 import { isIronman, validateIronman, validateCasualtyFloor, ironmanHeroDeath, ironmanCombatStopped, sameBattleMortalityPolicy } from './ironman.js';
 import { IRONMAN_RECORD_PREFIX, IRONMAN_ENDED_PREFIX, validIronmanRunId, ironmanRecordKey, ironmanEndedKey, decodeIronmanRecord,
   decodeIronmanEnded, ironmanRecordToken, rawIronmanBase, sharedIronmanClaim, sharedIronmanCopies, emptyIronmanToken, reattachIronmanToken } from './ironman-storage.js';
+import { createPositionAdmission } from './position-admission.js';
 
 const SLOT_KEY = 'hearth-and-oath:slots:v1';
+/** A stored life this build cannot decode is still someone's life: kept as it
+ * was written, occupying its slot, never offered as empty and never dropped
+ * by a later save. Only a plain object that names a person is kept; anything
+ * else is not a life and is read as nothing, as before. */
+const keepable = value => Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+  && Boolean(value.hero) && typeof value.hero === 'object' && typeof value.hero.name === 'string' && value.hero.name.trim().length > 0;
+/** The envelope a commit writes: a kept life goes back exactly as it was read. */
+const storedSlot = ({ kept, ...slot }) => kept ? { ...slot, state: kept } : slot;
+const storedBackups = backups => Object.fromEntries(Object.entries(backups).map(([id, { kept, ...backup }]) => [id, kept ? { ...backup, state: kept } : backup]));
 export const LEGACY_SAVE_KEY = 'hearth-and-oath:life:v1';
 export const SAVE_SLOT_COUNT = 3;
 const SAVE_LOCK = 'hearth-and-oath:save:v1';
@@ -58,8 +68,11 @@ export function createSaveCoordinator(locks = globalThis.window?.navigator?.lock
   return coordinate;
 }
 
-/** Keep full simulation snapshots, including an unfinished turn, in separate lives. */
-export function createSaveStore(storage, validate = value => value, options = {}) {
+/** Keep full simulation snapshots, including an unfinished turn, in separate lives.
+ * Decoding retained data is separate from admitting an incoming write. A life
+ * refused by acceptPosition must still occupy its slot and remain exportable. */
+export function createSaveStore(storage, decodeStoredLife = value => value, options = {}) {
+  const acceptsIncomingPosition = createPositionAdmission(options.acceptPosition);
   const coordinate = options.coordinate === undefined ? createSaveCoordinator() : options.coordinate;
   const exclusive = coordinators.get(coordinate);
   const crypto = options.crypto === undefined ? globalThis.crypto : options.crypto;
@@ -87,15 +100,18 @@ export function createSaveStore(storage, validate = value => value, options = {}
         compatible = true;
         slots = slots.map(slot => {
           const candidate = raw.slots.find(value => value?.id === slot.id);
-          const state = candidate?.state && !isIronman(candidate.state) ? validate(candidate.state) : null;
-          return { ...slot, state, updatedAt: state && typeof candidate.updatedAt === 'string' ? candidate.updatedAt : null,
-            ...(typeof candidate?.revision === 'string' ? { revision: candidate.revision } : {}) };
+          const state = candidate?.state && !isIronman(candidate.state) ? decodeStoredLife(candidate.state) : null;
+          const kept = !state && candidate?.state && !isIronman(candidate.state) && keepable(candidate.state) ? copy(candidate.state) : null;
+          return { ...slot, state, updatedAt: (state || kept) && typeof candidate.updatedAt === 'string' ? candidate.updatedAt : null,
+            ...(kept ? { kept } : {}), ...(typeof candidate?.revision === 'string' ? { revision: candidate.revision } : {}) };
         });
         activeSlot = Number.isInteger(raw.activeSlot) && raw.activeSlot >= 0 && raw.activeSlot < SAVE_SLOT_COUNT ? raw.activeSlot : 0;
-        if (!slots.some(slot => slot.state) && raw.slots.some(slot => slot?.state != null)) compatible = false;
+        if (!slots.some(slot => slot.state || slot.kept) && raw.slots.some(slot => slot?.state != null)) compatible = false;
         for (const slot of slots) {
-          const previous = raw.backups?.[slot.id], state = previous?.state && !isIronman(previous.state) ? validate(previous.state) : null;
-          if (state) backups[slot.id] = { state, updatedAt: typeof previous.updatedAt === 'string' ? previous.updatedAt : null };
+          const previous = raw.backups?.[slot.id], state = previous?.state && !isIronman(previous.state) ? decodeStoredLife(previous.state) : null;
+          const updatedAt = typeof previous?.updatedAt === 'string' ? previous.updatedAt : null;
+          if (state) backups[slot.id] = { state, updatedAt };
+          else if (previous?.state && !isIronman(previous.state) && keepable(previous.state)) backups[slot.id] = { state: null, kept: copy(previous.state), updatedAt };
         }
       }
     } catch { readable = false; }
@@ -104,7 +120,7 @@ export function createSaveStore(storage, validate = value => value, options = {}
     if (!compatible) {
       try {
         if (legacyText == null) legacyText = storage?.getItem(LEGACY_SAVE_KEY) ?? null;
-        const legacy = JSON.parse(legacyText || 'null'), state = legacy && !isIronman(legacy) ? validate(legacy) : null;
+        const legacy = JSON.parse(legacyText || 'null'), state = legacy && !isIronman(legacy) ? decodeStoredLife(legacy) : null;
         if (state) { slots[0] = { id: 0, state, updatedAt: null }; activeSlot = 0; }
       } catch { readable = false; }
     }
@@ -164,7 +180,8 @@ export function createSaveStore(storage, validate = value => value, options = {}
   function checkTarget(value, id, token = slotToken(observed, id)) {
     if (token === slotToken(value, id) && conflict?.id !== id) return true;
     if (!unsaved.has(id)) unsaved.set(id, { slot: copy(slots[id]), baseline: copy(observed.slots[id]), backup: copy(observed.backups[id] || null) });
-    conflict = { id, reason: !value.slots[id].state ? 'deleted' : 'changed', name: value.slots[id].state?.hero?.name || null };
+    const occupant = value.slots[id].state || value.slots[id].kept;
+    conflict = { id, reason: !occupant ? 'deleted' : 'changed', name: occupant?.hero?.name || null };
     available = value.readable;
     return false;
   }
@@ -175,10 +192,11 @@ export function createSaveStore(storage, validate = value => value, options = {}
       previousMirror = storage.getItem(LEGACY_SAVE_KEY);
       // The envelope is authoritative and commits last. A mirror/quota failure
       // cannot partially replace a life or erase its recovery backup.
-      storage.setItem(LEGACY_SAVE_KEY, JSON.stringify(value.slots[value.activeSlot].state));
-      const text = JSON.stringify({ version: 1, activeSlot: value.activeSlot, slots: value.slots, backups: value.backups });
+      const active = value.slots[value.activeSlot], mirror = JSON.stringify(active.state ?? active.kept ?? null);
+      storage.setItem(LEGACY_SAVE_KEY, mirror);
+      const text = JSON.stringify({ version: 1, activeSlot: value.activeSlot, slots: value.slots.map(storedSlot), backups: storedBackups(value.backups) });
       storage.setItem(SLOT_KEY, text);
-      value = { ...value, rawText: text, legacyText: JSON.stringify(value.slots[value.activeSlot].state), readable: true, compatible: true };
+      value = { ...value, rawText: text, legacyText: mirror, readable: true, compatible: true };
       adopt(value, id);
       rememberSnapshot(value);
       return true;
@@ -204,7 +222,7 @@ export function createSaveStore(storage, validate = value => value, options = {}
     try {
       const raw = storage.getItem(SLOT_KEY), legacy = storage.getItem(LEGACY_SAVE_KEY);
       if (sharedIronmanClaim(raw, legacy)) return { ok: false, reason: 'unsupported-shared-mortality' };
-      return rawIronmanBase(raw, legacy, id, validate);
+      return rawIronmanBase(raw, legacy, id, decodeStoredLife);
     }
     catch { return { ok: false, reason: 'unreadable-underlying' }; }
   }
@@ -247,7 +265,7 @@ export function createSaveStore(storage, validate = value => value, options = {}
         const marker = markerFor(runId);
         if (!marker.ok) return { ok: false, reason: 'unreadable-ended-marker' };
         if (marker.marker) { ended.set(runId, marker.marker); continue; }
-        const raw = storage.getItem(key), record = raw === null ? null : decodeIronmanRecord(raw, runId, validate);
+        const raw = storage.getItem(key), record = raw === null ? null : decodeIronmanRecord(raw, runId, decodeStoredLife);
         if (!record) return { ok: false, reason: 'unreadable-run-record' };
         records.set(runId, record);
       }
@@ -308,7 +326,7 @@ export function createSaveStore(storage, validate = value => value, options = {}
       casualties: copy(state?.ironman.casualties ?? prior.casualties), attachment: copy(attachment) };
   }
   function persistRecord(record) {
-    if (!decodeIronmanRecord(record, record.runId, validate)) return failure('invalid-run-record');
+    if (!decodeIronmanRecord(record, record.runId, decodeStoredLife)) return failure('invalid-run-record');
     const key = ironmanRecordKey(record.runId), bytes = JSON.stringify(record);
     try {
       storage.setItem(key, bytes);
@@ -331,7 +349,7 @@ export function createSaveStore(storage, validate = value => value, options = {}
   const inputRunId = input => typeof input === 'string' ? input : isIronman(input) ? input.ironman?.runId : null;
   function validatedPosition(input, terminal = false) {
     try {
-      const state = validate(copy(input));
+      const state = decodeStoredLife(copy(input));
       return state && isIronman(state) && validateIronman(state) && same(state, input)
         && (terminal || !ironmanCombatStopped(state.battle)) ? state : null;
     } catch { return null; }
@@ -353,7 +371,16 @@ export function createSaveStore(storage, validate = value => value, options = {}
       return { status, runId: record.runId, slot, token, value };
     } catch { return failure('consumer-failed'); }
   }
-  function inspect(input, { intent, slot, token, consume } = {}) {
+  function acceptsPlayPosition(state, acceptForPlay) {
+    if (acceptForPlay === undefined) return true;
+    try {
+      const admits = createPositionAdmission(acceptForPlay);
+      // A null create inspection reviews only the empty target. It cannot
+      // write or open a life; the actual candidate is checked at commit.
+      return state === null || admits(state);
+    } catch { return false; }
+  }
+  function inspect(input, { intent, slot, token, consume, acceptForPlay } = {}) {
     const id = idFor(slot), runId = inputRunId(input);
     if (!['create', 'import', 'reattach', 'resume', 'export'].includes(intent)
         || runId !== null && !validIronmanRunId(runId)) return failure('invalid-inspection');
@@ -364,13 +391,16 @@ export function createSaveStore(storage, validate = value => value, options = {}
     let record = runId ? found.records.get(runId) : null;
     if (record && !record.state) return failure('deleted-position');
     if (intent === 'create' || intent === 'import') {
-      if (input !== null && (!validatedPosition(input) || !runId)) return failure('invalid-position');
+      const state = input === null ? null : validatedPosition(input);
+      if (input !== null && (!state || !runId)) return failure('invalid-position');
+      if (!acceptsPlayPosition(state, acceptForPlay)) return failure('position-not-admitted');
       if (record) return intent === 'import' ? { status: 'known-head', runId, token: ironmanRecordToken(record) } : failure('known-run');
       if (id === null) return failure('invalid-slot');
       const target = emptyTarget(id, found); if (target.status !== 'review') return target;
       return { status: 'review', slot: id, ...(runId ? { runId } : {}), token: emptyIronmanToken(id, target.base.token) };
     }
     if (!record) return failure('missing-run-head');
+    if (intent !== 'export' && !acceptsPlayPosition(record.state, acceptForPlay)) return failure('position-not-admitted');
     let owner = ownership(record, found);
     if (owner.status === 'blocked') return failure(owner.reason);
     if (owner.status === 'conflict') return failure('conflicting-claims');
@@ -409,12 +439,14 @@ export function createSaveStore(storage, validate = value => value, options = {}
     }
     return result;
   }
-  function commitRun(slot, input, { intent, token, consume } = {}) {
+  function commitRun(slot, input, { intent, token, consume, acceptForPlay } = {}) {
     const id = idFor(slot), state = validatedPosition(input), runId = inputRunId(input);
     if (id === null || !state || !['create', 'import', 'continue'].includes(intent)) return failure('invalid-position');
+    if (!acceptsIncomingPosition(state)) return failure('position-not-admitted');
     const found = discover(); if (!found.ok) return failure(found.reason);
     const marker = markerFor(runId); if (!marker.ok) return failure('unreadable-ended-marker');
     if (marker.marker) return { status: 'ended', runId };
+    if (!acceptsPlayPosition(state, acceptForPlay)) return failure('position-not-admitted');
     const prior = found.records.get(runId);
     if (intent === 'continue') {
       if (!prior?.state) return failure(prior ? 'deleted-position' : 'missing-run-head');
@@ -441,7 +473,7 @@ export function createSaveStore(storage, validate = value => value, options = {}
     if (!next) return failure('secure-randomness-unavailable');
     const saved = persistRecord(next); return saved.status === 'confirmed' ? committedHead(next, id, consume) : saved;
   }
-  function reattach(runId, slot, { reviewed = false, token } = {}) {
+  function reattach(runId, slot, { reviewed = false, token, acceptForPlay } = {}) {
     const id = idFor(slot);
     if (!reviewed || !validIronmanRunId(runId) || id === null) return failure('review-required');
     const found = discover(); if (!found.ok) return failure(found.reason);
@@ -449,6 +481,7 @@ export function createSaveStore(storage, validate = value => value, options = {}
     if (marker.marker) return { status: 'ended', runId };
     const prior = found.records.get(runId);
     if (!prior?.state) return failure(prior ? 'deleted-position' : 'missing-run-head');
+    if (!acceptsPlayPosition(prior.state, acceptForPlay)) return failure('position-not-admitted');
     const owner = ownership(prior, found);
     if (owner.status === 'blocked') return failure(owner.reason);
     if (owner.status === 'conflict') return failure('conflicting-claims');
@@ -557,17 +590,21 @@ export function createSaveStore(storage, validate = value => value, options = {}
       const head = displayHead(index), position = state === undefined ? head?.state || slots[index].state : state;
       const dirty = head ? !same(position, head.state) : state === undefined && !unsaved.has(index) ? false : changed(index, position), reason = conflict?.id === index ? conflict.reason : null;
       const timestamp = head?.updatedAt || observed.slots[index].updatedAt;
-      return { id: index, hasState: Boolean(position), hasChanges: dirty, available,
-        status: reason ? (dirty ? 'conflict' : 'stale') : dirty ? (unsaved.has(index) || !available ? 'unsaved' : 'pending') : position ? 'saved' : 'empty',
+      const kept = !position && Boolean(slots[index].kept);
+      return { id: index, hasState: Boolean(position), hasChanges: dirty, available, kept,
+        status: reason ? (dirty ? 'conflict' : 'stale') : dirty ? (unsaved.has(index) || !available ? 'unsaved' : 'pending') : position || kept ? 'saved' : 'empty',
         lastSavedAt: typeof timestamp === 'string' && Number.isFinite(Date.parse(timestamp)) ? timestamp : null,
-        hasDurableState: Boolean(head || observed.accessible && observed.slots[index].state), conflict: reason };
+        hasDurableState: Boolean(head || observed.accessible && (observed.slots[index].state || observed.slots[index].kept)), conflict: reason };
     },
     checkForConflict(id) { const index = idFor(id), value = latest(); return index != null && value ? !checkTarget(value, index) : false; },
     read: id => copy(displayHead(Number(id))?.state || slots.find(slot => slot.id === Number(id))?.state || null),
-    empty: () => displaySlots().find(slot => !slot.state)?.id ?? null,
+    empty: () => displaySlots().find(slot => !slot.state && !slot.kept)?.id ?? null,
+    /** A life kept in a slot because this build cannot decode it: a copy of it exactly as stored, for its export. */
+    kept: id => copy(slots.find(slot => slot.id === Number(id))?.kept || null),
+    keptBackup: id => copy(backups[Number(id)]?.kept || null),
     backup: id => copy(backups[Number(id)]?.state || null),
     reviewToken(id) { const index = idFor(id), head = index === null ? null : displayHead(index); return index == null ? null : head ? ironmanRecordToken(head) : slotToken(local(), index); },
-    deletionToken(id) { return this.read(id) ? this.reviewToken(id) : null; },
+    deletionToken(id) { return this.read(id) || this.kept(id) ? this.reviewToken(id) : null; },
     /** Explicit reload only: never discard an unsaved session on a storage event. */
     reload() {
       validatedSnapshot = null;
@@ -578,7 +615,7 @@ export function createSaveStore(storage, validate = value => value, options = {}
     remove(id, { reviewed = false, token } = {}) {
       const index = idFor(id);
       if (index !== null && protectedTarget(index)) return false;
-      if (!reviewed || index == null || !slots[index].state || token !== this.deletionToken(index)) return false;
+      if (!reviewed || index == null || !(slots[index].state || slots[index].kept) || token !== this.deletionToken(index)) return false;
       validatedSnapshot = null;
       const value = latest();
       if (!value) return false;
@@ -589,18 +626,20 @@ export function createSaveStore(storage, validate = value => value, options = {}
       }
       value.slots[index] = { id: index, state: null, updatedAt: null, revision: revision() };
       delete value.backups[index];
-      if (value.activeSlot === index) value.activeSlot = value.slots.filter(s => s.state).sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''))[0]?.id ?? 0;
+      if (value.activeSlot === index) value.activeSlot = value.slots.filter(s => s.state || s.kept).sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''))[0]?.id ?? 0;
       return commit(value, index);
     },
     replace(id, state, { reviewed = false, token } = {}) {
       if (isIronman(state)) return false;
-      const valid = validate(state), index = idFor(id);
+      const valid = decodeStoredLife(state), index = idFor(id);
+      if (valid && index !== null && !acceptsIncomingPosition(valid)) return false;
       if (index !== null && protectedTarget(index)) return false;
-      if (!valid || index == null || (slots[index].state && !reviewed)) return false;
+      if (!valid || index == null || ((slots[index].state || slots[index].kept) && !reviewed)) return false;
       validatedSnapshot = null;
       const value = latest();
       if (!value || !checkTarget(value, index, token)) return false;
       if (value.slots[index].state) value.backups[index] = { state: copy(value.slots[index].state), updatedAt: value.slots[index].updatedAt };
+      else if (value.slots[index].kept) value.backups[index] = { state: null, kept: copy(value.slots[index].kept), updatedAt: value.slots[index].updatedAt };
       value.activeSlot = index;
       value.slots[index] = { id: index, state: copy(valid), updatedAt: new Date().toISOString(), revision: revision() };
       return commit(value, index);
@@ -608,9 +647,13 @@ export function createSaveStore(storage, validate = value => value, options = {}
     select(id) { const index = idFor(id); if (index == null) return false; activeSlot = index; return true; },
     write(id, state) {
       if (isIronman(state)) return false;
-      const valid = validate(state), index = idFor(id);
+      const valid = decodeStoredLife(state), index = idFor(id);
+      if (valid && index !== null && !acceptsIncomingPosition(valid)) return false;
       if (index !== null && protectedTarget(index)) return false;
       if (!valid || index == null) return false;
+      // The live position belongs to a slot it was loaded from or reviewed into;
+      // it never writes over a life kept here undecoded.
+      if (slots[index].kept) return false;
       this.invalidateHealth(index);
       const value = latest(), prior = observed.slots[index];
       // Keep the attempted position exportable on quota failure or conflict;

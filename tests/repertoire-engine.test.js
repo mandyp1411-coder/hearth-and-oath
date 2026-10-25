@@ -8,6 +8,9 @@ import { settlementServices,serviceWalkPath } from '../dist/js/world-services.js
 import { startRepertoireRehearsal } from '../dist/js/repertoire.js';
 import { repertoireJournalRows } from '../dist/js/repertoire-gameplay.js';
 import { mountApp } from './helpers/ui-surface.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 
 // This suite is prepared for the engine/semantic lane, not part of the fast leaf
 // check. Initial branch placement is a controlled fixture projection, not a
@@ -88,7 +91,7 @@ test('existing authored pastime performance still captures and resolves its orig
   const before=s.day,skill=s.hero.skills.persuasion;s=valid(E.chooseEventOption(s,'finish'));assert.equal(s.day,before+2);assert.equal(s.hero.skills.persuasion,skill+1);assert.equal(s.repertoire,undefined);roundtrip(s);
 });
 test('actual app handlers expose the separate inn book, original performance and explicit remembered-piece choice',async t=>{
-  const ui=await mountApp(t,{states:[inn(fresh())]});await ui.click('title-continue');await ui.click('place-open');let host=settlementServices(ui.current()).find(r=>r.kind==='inn'&&r.here);await ui.click('service-open',host.id);
+  const ui=await mountApp(t, {rulebooks:'both', states:[inn(fresh())]});await ui.click('title-continue');await ui.click('place-open');let host=settlementServices(ui.current()).find(r=>r.kind==='inn'&&r.here);await ui.click('service-open',host.id);
   assert.ok(ui.root.querySelector('[data-op="service-topic"][data-id="repertoire"]'));assert.ok(ui.root.querySelector('[data-op="spatial-contact"][data-id="'+host.personId+'"]'));
   await ui.click('service-topic','repertoire');assert.ok(ui.root.querySelector('.repertoire-book'));await ui.click('activity','repertoire_create_open-chair');const id=pieceId(ui.current());await ui.click('activity','repertoire_accept');await ui.click('activity',`repertoire_rehearse_${id}_solo`);await ui.click('activity',`repertoire_perform_${id}_solo_once`);roundtrip(ui.current());
   await ui.click('activity',`repertoire_rehearse_${id}_solo`);assert.ok(ui.root.querySelector('[data-op="activity"][data-id="repertoire_recall_'+host.personId+'"]'));await ui.click('activity','repertoire_recall_'+host.personId);const pending=structuredClone(ui.current().event);await ui.click('title-menu');await ui.click('title-continue');assert.deepEqual(ui.current().event,pending);await ui.click('choice','leave');assert.equal(ui.current().repertoire.recall.choiceId,'leave');roundtrip(ui.current());

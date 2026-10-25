@@ -5,6 +5,9 @@ import { createSaveStore } from '../dist/js/saves.js';
 import { createBirthGame, chooseEventOption, migrateSave } from '../dist/js/engine.js';
 import { setImmediate as settle } from 'node:timers/promises';
 import { mountApp } from './helpers/ui-surface.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 const key='hearth-and-oath:slots:v1';
 let original;
 function fixture(){original ||= decisionLife();return structuredClone(original);}
@@ -17,7 +20,7 @@ function captureExports(t, surface) {
 }
 
 test('a conflicting autosave offers export and explicit reload while Escape preserves the unsaved session', async t=>{
-  const before=fixture(),neighbor=renamed('Alder'),ui=await mountApp(t,{states:[before,neighbor]});await ui.click('title-continue');
+  const before=fixture(),neighbor=renamed('Alder'),ui=await mountApp(t, {rulebooks:'both', states:[before,neighbor]});await ui.click('title-continue');
   assert.ok(before.event.choices.length>1);
   const remote=chooseEventOption(before,before.event.choices[0].id),local=chooseEventOption(before,before.event.choices[1].id);
   assert.ok(createSaveStore(ui.storage,migrateSave).write(0,remote));const durable=ui.storage.getItem(key),exports=captureExports(t,ui);
@@ -33,7 +36,7 @@ test('a conflicting autosave offers export and explicit reload while Escape pres
 });
 
 test('a life deleted elsewhere stays deleted after a stale turn, cancellation, and explicit saved-list reload',async t=>{
-  const before=fixture(),neighbor=renamed('Survivor'),ui=await mountApp(t,{states:[before,neighbor]});await ui.click('title-continue');
+  const before=fixture(),neighbor=renamed('Survivor'),ui=await mountApp(t, {rulebooks:'both', states:[before,neighbor]});await ui.click('title-continue');
   const other=createSaveStore(ui.storage,migrateSave);assert.ok(other.remove(0,{reviewed:true,token:other.deletionToken(0)}));const durable=ui.storage.getItem(key);
   await ui.click('choice',before.event.choices[0].id);assert.ok(ui.root.querySelector('[data-save-conflict-dialog]'));assert.match(ui.root.innerHTML,/slot was deleted/);
   await ui.key('Escape');assert.equal(ui.lives()[0],null);assert.equal(ui.storage.getItem(key),durable);
@@ -43,7 +46,7 @@ test('a life deleted elsewhere stays deleted after a stale turn, cancellation, a
 });
 
 test('a reviewed import cannot replace a life created in the reviewed empty slot by another tab',async t=>{
-  const before=fixture(),incoming=renamed('Imported'),remote=renamed('Created Elsewhere'),ui=await mountApp(t,{states:[before]});
+  const before=fixture(),incoming=renamed('Imported'),remote=renamed('Created Elsewhere'),ui=await mountApp(t, {rulebooks:'both', states:[before]});
   await ui.click('title-load');await ui.import(JSON.stringify(incoming));assert.ok(ui.root.querySelector('[data-op="confirm-import"]'));
   assert.ok(createSaveStore(ui.storage,migrateSave).write(1,remote));const durable=ui.storage.getItem(key);
   await ui.click('confirm-import');assert.ok(ui.root.querySelector('[data-save-conflict-dialog]'));assert.match(ui.root.innerHTML,/import was not applied/);
@@ -52,7 +55,7 @@ test('a reviewed import cannot replace a life created in the reviewed empty slot
 });
 
 test('creating a life in a slot claimed elsewhere protects both the durable life and the exportable new session',async t=>{
-  const before=fixture(),remote=renamed('Claimed Elsewhere'),ui=await mountApp(t,{states:[before]});
+  const before=fixture(),remote=renamed('Claimed Elsewhere'),ui=await mountApp(t, {rulebooks:'both', states:[before]});
   await ui.click('title-new');await ui.click('slot-new','1');ui.set('startAge','0');ui.set('name','Unsaved Newborn');await ui.fire('input',ui.root.querySelector('[name="name"]'));
   assert.ok(createSaveStore(ui.storage,migrateSave).write(1,remote));const durable=ui.storage.getItem(key),exports=captureExports(t,ui);
   await ui.click('creator-step','2');assert.ok(ui.root.querySelector('[data-creator-review]'));await ui.submit();assert.ok(ui.root.querySelector('[data-save-conflict-dialog]'));assert.equal(ui.storage.getItem(key),durable);
@@ -61,7 +64,7 @@ test('creating a life in a slot claimed elsewhere protects both the durable life
 });
 
 test('quota-held session survives title navigation without an implicit reload and unsupported locking has clear guidance',async t=>{
-  const before=fixture(),ui=await mountApp(t,{states:[before]});await ui.click('title-continue');const write=ui.storage.setItem;
+  const before=fixture(),ui=await mountApp(t, {rulebooks:'both', states:[before]});await ui.click('title-continue');const write=ui.storage.setItem;
   ui.storage.setItem=(key,value)=>{if(key.startsWith('hearth-and-oath:slots:')||key==='hearth-and-oath:life:v1')throw Error('Quota');write(key,value);};
   const expected=chooseEventOption(before,before.event.choices[0].id),exports=captureExports(t,ui);
   await ui.click('choice',before.event.choices[0].id);assert.match(ui.root.innerHTML,/Browser storage is unavailable/);
@@ -73,7 +76,7 @@ function heldLocks(){
   let blocked=false,pending=Promise.resolve();const gates=[];
   return {hold(){blocked=true;},release(){blocked=false;for(const resolve of gates.splice(0))resolve();},request(name,options,operation){const result=pending.then(async()=>{if(blocked)await new Promise(resolve=>gates.push(resolve));return operation();});pending=result.catch(()=>{});return result;}};
 }
-async function mountLocked(t,options){const locks=heldLocks(),mounting=mountApp(t,options);window.navigator={locks};return {ui:await mounting,locks};}
+async function mountLocked(t,options){const locks=heldLocks(),mounting=mountApp(t, {rulebooks:'both', ...options});window.navigator={locks};return {ui:await mounting,locks};}
 
 test('a queued normal Continue never clears a conflict discovered by an earlier pending autosave',async t=>{
   const before=fixture(),{ui,locks}=await mountLocked(t,{states:[before]});await ui.click('title-continue');await settle();
@@ -111,7 +114,7 @@ test('Keep this session open cancels an explicit conflict reload that is still w
 });
 
 test('title-screen import commits only the reviewed slot and a later reviewed replacement retains its backup',async t=>{
-  const before=fixture(),incoming=renamed('Title Import'),replacement=renamed('Title Replacement'),ui=await mountApp(t,{states:[before]});
+  const before=fixture(),incoming=renamed('Title Import'),replacement=renamed('Title Replacement'),ui=await mountApp(t, {rulebooks:'both', states:[before]});
   await ui.click('title-load');await ui.import(JSON.stringify(incoming));await ui.click('confirm-import');
   assert.ok(ui.root.querySelector('.game-frame'));assert.deepEqual(ui.current(),incoming);assert.deepEqual(ui.lives()[0],before);
   await ui.import(JSON.stringify(replacement));await ui.fire('change',ui.root.querySelector('[name="import-slot"][value="1"]'));await ui.click('confirm-import');
@@ -120,7 +123,7 @@ test('title-screen import commits only the reviewed slot and a later reviewed re
 });
 
 test('malformed-envelope legacy recovery remains playable and retains the exact pending decision',async t=>{
-  const before=fixture(),ui=await mountApp(t,{storageEntries:[[key,'{bad json'],['hearth-and-oath:life:v1',JSON.stringify(before)]]});
+  const before=fixture(),ui=await mountApp(t, {rulebooks:'both', storageEntries:[[key,'{bad json'],['hearth-and-oath:life:v1',JSON.stringify(before)]]});
   assert.equal(ui.storage.getItem(key),'{bad json','opening the game does not rewrite recovery data');
   await ui.click('title-continue');assert.ok(ui.root.querySelector('.game-frame'));assert.deepEqual(ui.current(),before);assert.deepEqual(ui.lives()[0].event,before.event);
 });

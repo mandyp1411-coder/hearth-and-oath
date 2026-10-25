@@ -8,6 +8,9 @@ import { mazeMapIdentity } from '../dist/js/maze-map-memory.js';
 import { currentMazeMapSession, mazeMapView } from '../dist/js/maze-map-ui.js';
 import { syncCartography } from '../dist/js/cartography.js';
 import { mountApp } from './helpers/ui-surface.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 
 // Controlled visited positions test interface/validation contracts. They are not
 // earned route or difficulty evidence. Actual edits and walks use public APIs.
@@ -97,7 +100,7 @@ test('pure view/session keep inherited recorded knowledge and reset controls on 
 });
 
 test('actual default map hides every unknown wall/content while retaining known current door',async t=>{
- const s=fresh(),l=mazeLayout(s.maze),ui=await mountApp(t,{states:[s]});await ui.click('title-continue');
+ const s=fresh(),l=mazeLayout(s.maze),ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');
  assert.equal(ui.root.querySelector('.maze-grid').dataset.mazeMode,'walk');const cells=ui.root.querySelectorAll('.maze-cell');assert.equal(cells.length,l.cells.length);
  for(const c of l.cells){const tile=cells[c.id];if(c.id===0)continue;
   assert.doesNotMatch(tile.class,/wall-|route-room|inspected|cache|enemy|guardian|trap|objective/);
@@ -111,7 +114,7 @@ test('actual default map hides every unknown wall/content while retaining known 
 });
 
 test('actual Inspect selection, arrows, double-click and Cancel never move or spend',async t=>{
- const s=fresh(),path=recordedPath(s),ui=await mountApp(t,{states:[s]});await ui.click('title-continue');await ui.click('maze-map-mode','inspect');
+ const s=fresh(),path=recordedPath(s),ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');await ui.click('maze-map-mode','inspect');
  assert.deepEqual(ui.current(),s);assert.equal(ui.document.activeElement.dataset.id,'inspect');
  assert.equal(ui.root.querySelectorAll('.maze-cell[data-op="activity"]').length,0);
  const selected=ui.root.querySelector('[data-op="maze-map-select"][data-id="0"]');selected.focus();await ui.key(arrow(0,path[1]));
@@ -123,7 +126,7 @@ test('actual Inspect selection, arrows, double-click and Cancel never move or sp
 });
 
 test('actual save/escape/focus, marked picker, route/clear and explicit Walk remain separate',async t=>{
- const s=fresh(),path=recordedPath(s),ui=await mountApp(t,{states:[s],width:390,height:844});
+ const s=fresh(),path=recordedPath(s),ui=await mountApp(t, {rulebooks:'both', states:[s],width:390,height:844});
  await ui.click('title-continue');await ui.click('maze-map-mode','inspect');await ui.click('maze-map-select',String(path[2]));
  const note='<img src=x onerror="run()"> & \'quoted\'';await submitReminder(ui,{mark:'cache',note});
  const saved=ui.current();roundtrip(saved);assert.deepEqual(clean(saved),clean(s));assert.equal(saved.maze.mapMemory.entries[0].note,note);
@@ -139,7 +142,7 @@ test('actual save/escape/focus, marked picker, route/clear and explicit Walk rem
 });
 
 test('actual stale detached form and repeated read-only controls cannot write or walk',async t=>{
- const s=fresh(),ui=await mountApp(t,{states:[s]});await ui.click('title-continue');await ui.click('maze-map-mode','inspect');
+ const s=fresh(),ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');await ui.click('maze-map-mode','inspect');
  const stale=ui.root.querySelector('#maze-map-reminder');stale.controls.find(row=>row.name==='note').value='stale';
  await ui.click('maze-map-cancel');assert.equal(stale.isConnected,false);await ui.fire('submit',stale);assert.deepEqual(ui.current(),s);
  await ui.click('maze-map-mode','walk');await ui.click('maze-map-mode','inspect');await ui.click('maze-map-select','0');await ui.click('maze-map-select','0');

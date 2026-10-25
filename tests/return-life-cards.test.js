@@ -87,9 +87,11 @@ test('shell keeps direct existing JSON export and native sibling controls withou
   assert.equal((slots.match(/saveStore\.list\(/g) || []).length, 1, 'reuse the pre-existing single private slot-list copy');
   assert.match(row, /<\/button>\$\{isIronman\(state\)\?/);
   assert.match(row, /:state\?`<div class="slot-row-actions"><button class="button secondary small slot-export" type="button" data-op="export-session"/);
-  assert.match(row, /!creating&&!state\|\|creating&&isIronman\(state\)/);
+  // v0.72: a life the rulebook refuses is kept, not loaded, so its button is disabled too.
+  assert.match(row, /!creating&&\(!state\|\|refused\)\|\|creating&&isIronman\(state\)/);
   assert.match(row, /exportButton:false,unknownTimeLabel:'Save time unavailable'/);
-  assert.match(app, /if\(op==='export-session'\)\{exportState\(Number\(id\)===activeSlot&&game\?game:saveStore\.read\(Number\(id\)\)\);return;\}/);
+  // v0.72: the slot is passed so a kept Ironman run can export its head without being opened.
+  assert.match(app, /if\(op==='export-session'\)\{exportState\(Number\(id\)===activeSlot&&game\?game:saveStore\.read\(Number\(id\)\),\{slot:Number\(id\)\}\);return;\}/);
   assert.doesNotMatch(row + adapter, /structuredClone|JSON\.(?:parse|stringify)|Date\.now|saveStore\.(?:write|replace|remove|reload|select)\(/);
   assert.doesNotMatch(row + adapter, /lastPlayedAt|cloud sync|cloud-sync/i);
 });

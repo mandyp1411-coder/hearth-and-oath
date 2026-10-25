@@ -5,6 +5,9 @@ import { gunzipSync } from 'node:zlib';
 import { setImmediate as settle } from 'node:timers/promises';
 import { migrateSave, validateSave } from '../dist/js/engine.js';
 import { mountApp } from './helpers/ui-surface.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 
 // Actual app/module/engine integration in the semantic fake DOM. This is not
 // browser layout, native download behavior, compiled HTML or screen-reader QA.
@@ -54,7 +57,7 @@ test('actual drawer progress/cancel/retry survives reopening and another active 
   installLocation(t);
   const initial = fixture('base'), neighbor = fixture('offsite');
   assert.notDeepEqual(initial, neighbor, 'distinct captured positions distinguish the active slot without renaming anyone');
-  const ui = await mountApp(t, { states: [initial, neighbor] });
+  const ui = await mountApp(t, {rulebooks:'both',  states: [initial, neighbor] });
   await ui.click('title-continue'); await settle();
   const before = saves(ui), lives = structuredClone(ui.lives()), downloads = captureDownloads(t, ui);
   const bytes = new TextEncoder().encode('<!doctype html><title>世界 🗡️</title>');
@@ -101,7 +104,7 @@ test('actual drawer progress/cancel/retry survives reopening and another active 
 
 test('actual app cancels an unknown-size manifest and retries a failed request without partial files or save changes', async t => {
   installLocation(t);
-  const ui = await mountApp(t, { states: [fixture()] }); await ui.click('title-continue'); await settle();
+  const ui = await mountApp(t, {rulebooks:'both',  states: [fixture()] }); await ui.click('title-continue'); await settle();
   const before = saves(ui), downloads = captureDownloads(t, ui), oldManifest = deferred(), bytes = new TextEncoder().encode('<!doctype html>complete'); let manifests = 0, parts = 0;
   t.mock.method(globalThis, 'fetch', async url => {
     if (url.endsWith('manifest.json')) { manifests++; return manifests === 1 ? oldManifest.promise : manifests === 2 ? { ok: false } : { ok: true, json: async () => ({ bytes: bytes.length, parts: [{ file: 'game-01.part', bytes: bytes.length }] }) }; }

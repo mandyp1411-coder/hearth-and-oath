@@ -7,6 +7,9 @@ import { mazeLayout } from '../dist/js/maze-v31.js';
 import { expeditionVisitTotals } from '../dist/js/maze-receipts.js';
 import { discardGear } from '../dist/js/gear.js';
 import { mountApp } from './helpers/ui-surface.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 
 // Controlled rooms, real entry/cache/return handlers. This is semantic handler
 // coverage, not a browser/layout or earned maze route/difficulty test.
@@ -21,7 +24,7 @@ function returnedGear(){
 }
 
 test('receipt comparison opens the exact owned item after stale inventory filters without gameplay mutation',async t=>{
- const {s,id}=returnedGear(),ui=await mountApp(t,{states:[s],width:390,height:844});await ui.click('title-continue');const before=ui.current();
+ const {s,id}=returnedGear(),ui=await mountApp(t, {rulebooks:'both', states:[s],width:390,height:844});await ui.click('title-continue');const before=ui.current();
  await ui.click('tab','inventory');await ui.click('inventory-favorites');assert.equal(ui.root.querySelector('[data-op="inventory-favorites"]').getAttribute('aria-pressed'),'true');await ui.click('inventory-category','supplies');
  ui.root.querySelector('#inventory-query').value='no-such-item';ui.root.querySelector('#inventory-slot').value='feet';await ui.fire('submit',ui.root.querySelector('#inventory-search'));
  await ui.click('tab','life');const receiptId=s.mazeBook.expeditionReceipts.at(-1).id;ui.root.querySelector(`[data-disclosure="latest-expedition-receipt:${receiptId}"]`).open=true;ui.root.querySelector(`[data-disclosure="receipt-spoils:${receiptId}"]`).open=true;const control=ui.root.querySelector(`[data-op="receipt-gear"][data-id="${id}"]`);assert.ok(control);control.focus();await ui.key('Enter',{target:control});
@@ -31,7 +34,7 @@ test('receipt comparison opens the exact owned item after stale inventory filter
 });
 
 test('historical sold or unavailable gear remains named without a dead comparison action',async t=>{
- const {s,id}=returnedGear();discardGear(s,id);assert.ok(E.validateSave(s));const ui=await mountApp(t,{states:[s]});await ui.click('title-continue');const before=ui.current();
+ const {s,id}=returnedGear();discardGear(s,id);assert.ok(E.validateSave(s));const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');const before=ui.current();
  await ui.click('tab','journal');await ui.click('workspace-section','journal:archive');assert.ok(ui.root.querySelector('.expedition-receipts'));assert.equal(ui.root.querySelector(`[data-op="receipt-gear"][data-id="${id}"]`),null);
  assert.match(ui.root.querySelector('.expedition-receipts').textContent,/No longer carried/);assert.deepEqual(ui.current(),before);
 });

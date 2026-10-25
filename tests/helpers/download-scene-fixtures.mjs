@@ -8,6 +8,9 @@ import { settlementWalkPath } from '../../dist/js/exploration-ui.js';
 import { personalNoteRows } from '../../dist/js/personal-notes.js';
 import { mountApp } from './ui-surface.mjs';
 
+// v0.72: these scenes play on an old-rules capture, so the app is mounted with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases them onto
+// new-rules lives or moves them to the archive as the old rules' code leaves main.
 // Canonical historical captures, not newly simulated or action-earned lives.
 // Explicit equipment/note inputs are controlled QA data. Keep every captured
 // identity, date and resource intact; walk only the real provider's room path.
@@ -43,7 +46,7 @@ export function sceneFixture({ kind = 'work', notes = 1, archived = false, unequ
 }
 
 export async function openLife(t, state = sceneFixture(), options = {}) {
-  const ui = await mountApp(t, { states: [state], ...options });
+  const ui = await mountApp(t, { states: [state], rulebooks: 'both', ...options });
   await ui.click('title-continue'); await settle(); return ui;
 }
 export async function openScene(ui, kind = 'work', topic = kind === 'work' ? 'commissions' : null) {

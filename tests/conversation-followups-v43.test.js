@@ -9,6 +9,9 @@ import {conversationFollowUp,followUpAvailable} from '../dist/js/conversation-fo
 import {settlementServices} from '../dist/js/world-services.js';
 import {settlementWalkPath} from '../dist/js/exploration-ui.js';
 import {mountApp} from './helpers/ui-surface.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 const base=E.migrateSave(JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url)))).states.base);
 const titles={repair:'A Stubborn Repair',soup:'A Cold Bowl of Soup',boots:'Wet Boots',page:'A Page That Finally Makes Sense'};
 const nextTitles={repair:'The Repair You Asked About',soup:'More Than a Bowl of Soup',boots:'The Person Inside the Boots',page:'The Step the Writer Skipped'};
@@ -103,5 +106,5 @@ test('malformed receipts and follow-up snapshots are rejected while old saves re
  const waiting=followup().s;for(const edit of [q=>q.conversations.pending.snapshot.followUp.personId='elsewhere',q=>q.conversations.pending.snapshot.followUp.sourceId='letter-1',q=>q.conversations.pending.snapshot.choices[0].effect.agency='withdrawn']){const q=structuredClone(waiting);edit(q);assert.equal(E.validateSave(q),false);}
 });
 test('actual shell submits contextual responses once and keeps another occupied slot unchanged',async t=>{
- const {s,id}=followup(),other=source('soup').s;const ui=await mountApp(t,{states:[s,other],width:390,height:844});await ui.click('title-continue');await ui.click('tab','map');await ui.click('place-open');const waiting=structuredClone(ui.current().conversations.pending);assert.match(ui.root.innerHTML,/The Repair You Asked About|You asked what was wrong/);await ui.click('tab','character');assert.deepEqual(ui.current().conversations.pending,waiting);await ui.click('tab','map');await ui.click('place-open');const stale=ui.root.querySelector('[data-op="reply"][data-id="share"]');assert.ok(stale);await ui.click('reply','share');assert.equal(ui.current().conversations.followUps[0].choiceId,'share');assert.deepEqual(ui.lives()[1],other);const after=ui.current();await ui.fire('click',stale);assert.deepEqual(ui.current(),after);assert.ok(E.validateSave(ui.current()));
+ const {s,id}=followup(),other=source('soup').s;const ui=await mountApp(t, {rulebooks:'both', states:[s,other],width:390,height:844});await ui.click('title-continue');await ui.click('tab','map');await ui.click('place-open');const waiting=structuredClone(ui.current().conversations.pending);assert.match(ui.root.innerHTML,/The Repair You Asked About|You asked what was wrong/);await ui.click('tab','character');assert.deepEqual(ui.current().conversations.pending,waiting);await ui.click('tab','map');await ui.click('place-open');const stale=ui.root.querySelector('[data-op="reply"][data-id="share"]');assert.ok(stale);await ui.click('reply','share');assert.equal(ui.current().conversations.followUps[0].choiceId,'share');assert.deepEqual(ui.lives()[1],other);const after=ui.current();await ui.fire('click',stale);assert.deepEqual(ui.current(),after);assert.ok(E.validateSave(ui.current()));
 });

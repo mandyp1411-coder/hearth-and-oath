@@ -16,6 +16,9 @@ import { seededRoll } from '../dist/js/world.js';
 import { renderActivities } from '../dist/js/activities-v31.js';
 import { gearSaleValue } from '../dist/js/economy-values.js';
 import { mountApp } from './helpers/ui-surface.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 
 const saved=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url)))).states.base;
 const base=E.migrateSave(saved);
@@ -128,7 +131,7 @@ test('questionable but old-schema-valid legacy metadata stays loot instead of in
 });
 
 test('production handlers take an actual stall weapon through Crime, Inventory equip and a single fence sale',async t=>{
-  const s=walk(structuredClone(base)),surface=await mountApp(t,{states:[s]});await surface.click('title-continue');await surface.click('tab','activities');await surface.click('activities-pane','crime');assert.ok(surface.root.querySelector('[data-disclosure="crime:property"]'));
+  const s=walk(structuredClone(base)),surface=await mountApp(t, {rulebooks:'both', states:[s]});await surface.click('title-continue');await surface.click('tab','activities');await surface.click('activities-pane','crime');assert.ok(surface.root.querySelector('[data-disclosure="crime:property"]'));
   await surface.click('activity','justice_steal');for(const id of ['cooperate','pay','account'])await surface.click('choice',id);await surface.click('tab','activities');await surface.click('activities-pane','crime');await surface.click('activity','justice_steal');const i=piece(valid(surface.current()));assert.ok(i);assert.equal(surface.current().day,8034);
   await surface.click('tab','inventory');await surface.click('inventory-item','gear:'+i.id);await surface.click('equip',i.id);assert.equal(surface.current().equipment.equipped.weapon,i.id);assert.deepEqual(gearBonuses(surface.current()),i.bonuses);await surface.click('equip','unequip_weapon');const gold=surface.current().hero.gold;await surface.click('activity','realm_sellgear_'+i.id);const after=valid(surface.current());assert.equal(after.hero.gold,gold+Math.floor(i.provenance.value*.55));assert.equal(piece(after),undefined);assert.equal(inventoryEntries(after).some(r=>r.item?.id===i.id),false);roundtrip(after);
 });

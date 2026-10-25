@@ -1,3 +1,6 @@
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 // Production delegated handlers on a synthetic DOM; not real browser/layout QA.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -6,7 +9,7 @@ import { mountApp } from './helpers/ui-surface.mjs';
 const crime = async surface => { await surface.click('tab', 'activities'); await surface.click('activities-pane', 'crime'); };
 
 test('production UI: finite Crime proposal, separate chances, empty interim bag, real Inventory valuable and one existing fence sale', async t => {
-  const s = fixtureFor('stealth', 'success', { unwitnessed: true }), surface = await mountApp(t, { states: [s] });
+  const s = fixtureFor('stealth', 'success', { unwitnessed: true }), surface = await mountApp(t, {rulebooks:'both',  states: [s] });
   await surface.click('title-continue'); await crime(surface); assert.ok(surface.root.querySelector('[data-disclosure="crime:counting-table"]'));
   await surface.click('activity', 'justice_job_open'); assert.equal(surface.current().event.title, 'The Counting-Table Silver');
   assert.match(surface.root.innerHTML, /Approach \d+%; departure \d+%/); await surface.click('choice', 'accept_stealth');

@@ -10,13 +10,16 @@ import {newTradeDraft,quoteTrade,tradeInventory,applyTrade,shopAccessReason} fro
 import {innkeeper,innLedger,INN_GOODS} from '../dist/js/hospitality-v36.js';
 import {inventoryEntries} from '../dist/js/inventory-ui.js';
 import {mountApp} from './helpers/ui-surface.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 const fixture=JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/v30-explore-travel.json.gz',import.meta.url))));
 const fresh=()=>E.migrateSave(fixture.states.base);
 const valid=s=>{assert.ok(E.validateSave(s),s.notice);return s;};
 function at(s,id='home',room='gate'){s.locationId=id;s.cartography.offsite=false;s.cartography.interior=null;syncCartography(s);for(const r of settlementWalkPath(s,room)||[])s=valid(E.chooseAction(s,'atlas_room_'+r));return valid(s);}
 function tavern(){let s=at(fresh(),'home','tavern');s.hero.gold=1000;return s;}
 const draft=(s,buy=[],sell=[])=>({...newTradeDraft(s,'inn'),buy:buy.map(([id,quantity=1])=>({id,quantity})),sell:sell.map(([id,quantity=1])=>({id,quantity}))});
-async function open(t,s=fresh()){const ui=await mountApp(t,{states:[s]});await ui.click('title-continue');return ui;}
+async function open(t,s=fresh()){const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');return ui;}
 const stable=s=>({day:s.day,gold:s.hero.gold,hp:s.hero.hp,mp:s.hero.mp,locationId:s.locationId,cartography:s.cartography,hospitality:s.hospitality});
 
 test('the inline chart keeps its definite panning viewport without native scrollbars',()=>{

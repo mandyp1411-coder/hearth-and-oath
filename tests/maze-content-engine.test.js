@@ -14,6 +14,9 @@ import { createSuccessor,validateLineage } from '../dist/js/lineage.js';
 import { inheritRpg,validateRpg } from '../dist/js/rpg-depth-v27.js';
 import { inheritStoryMazes,validateMazes } from '../dist/js/maze-v31.js';
 import { mountApp } from './helpers/ui-surface.mjs';
+// v0.72: this file's scenarios play on old-rules saves, so it mounts the app with the
+// pre-v0.72 entry policy (rulebooks: 'both'). v0.72.1+ rebases it onto new-rules lives
+// or moves it to the archive as the old rules' code leaves main.
 
 // Existing real v0.27 save avoids generating a new life for every test. Source
 // room positions/resources are controlled fixtures, not earned maze routes or
@@ -73,7 +76,7 @@ test('delegated maze controls keep fog and resume a saved content attendance tar
   let s=site(fresh(),'marsh');s=act(s,'explore_enter_cistern');const optional=s.maze.content.definition.rooms.find(row=>row.optional&&row.id==='service');
   assert.ok(optional,'fixture seed includes service');s=room(s,'service');
   assert.equal(applyMazeAction(s,'maze_authored_repair_route',{spendDays:()=>0}),true);assert.ok(E.validateSave(s));roundtrip(s);
-  const ui=await mountApp(t,{states:[s]});await ui.click('title-continue');assert.equal(ui.root.querySelectorAll('.maze-cell').length,121);
+  const ui=await mountApp(t, {rulebooks:'both', states:[s]});await ui.click('title-continue');assert.equal(ui.root.querySelectorAll('.maze-cell').length,121);
   assert.ok(ui.root.querySelectorAll('.maze-cell.fog').every(node=>!node.textContent.trim()));assert.ok(ui.root.querySelector('[data-id="maze_work_continue"]'));
   await ui.click('activity','maze_work_continue');assert.equal(ui.current().rpg.project,null);assert.equal(ui.current().maze.contentFacts.variantAid,true);assert.ok(E.validateSave(ui.current()));
 });

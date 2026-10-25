@@ -48,8 +48,8 @@ test('an old save migrated today is labelled Old rules, keeps its rules, and rea
   }
 });
 
-test('real saves from v0.60, v0.62, v0.66 and v0.69 load, are labelled by their markers, and play a season', () => {
-  const expect = { '0600': OLD, '0620': NEW, '0660': NEW, '0690': NEW };
+test('real saves from v0.60, v0.61, v0.62, v0.66 and v0.69 load, keep their rule markers, and continue through public commands', () => {
+  const expect = { '0600': OLD, '0610': NEW, '0620': NEW, '0660': NEW, '0690': NEW };
   for (const [v, rules] of Object.entries(expect)) {
     const fixture = release(v);
     assert.equal(fixture.source.version.replace(/\./g, ''), v);
@@ -61,6 +61,15 @@ test('real saves from v0.60, v0.62, v0.66 and v0.69 load, are labelled by their 
       assert.equal(s.edition.began, null, 'a life begun before v0.70 is never given a date after the fact');
       assert.equal(s.edition.step, EDITION_STEP);
       assert.equal(rulesLabel(s), rules === OLD ? 'Old rules' : 'New rules, begun before v0.70');
+      if (v === '0610') {
+        // Genuine pre-station births: zero debt is a defined ledger and
+        // therefore new rules. No modern fixture has had a marker removed.
+        assert.equal(raw.hero.station, undefined, `${name}: the release predates stations`);
+        assert.equal(raw.householdBudget.debt, 0, `${name}: the actual release wrote a zero-debt ledger`);
+        assert.equal(s.hero.station, undefined, `${name}: migration invents no station`);
+        assert.equal(s.householdBudget.debt, raw.householdBudget.debt);
+        assert.equal(archiveAccepts(s), false, `${name}: a debt-only life belongs in main`);
+      }
       if (name !== 'eighteen') continue;
       let t = s; for (let n = 0; n < 6 && t.phase !== 'retired'; n++) { t = t.event ? engine.chooseEventOption(t, pick(t)) : engine.liveSeason ? engine.liveSeason(t) : engine.ageUp(t); }
       t = settle(t);
@@ -104,7 +113,7 @@ test('an heir begins under the rules its own budget and station say, dated to th
 
 test('the fixtures of real saves are what the generator says they are', () => {
   const files = readdirSync(new URL('./fixtures/saves/', import.meta.url)).filter(f => f.endsWith('.json.gz')).sort();
-  assert.deepEqual(files, ['v0600.json.gz', 'v0620.json.gz', 'v0660.json.gz', 'v0690.json.gz']);
+  assert.deepEqual(files, ['v0600.json.gz', 'v0610.json.gz', 'v0620.json.gz', 'v0660.json.gz', 'v0690.json.gz']);
   for (const f of files) {
     const fixture = JSON.parse(gunzipSync(readFileSync(new URL('./fixtures/saves/' + f, import.meta.url))));
     assert.equal(fixture.source.madeBy, 'scripts/fixtures/generate-release-saves.mjs');

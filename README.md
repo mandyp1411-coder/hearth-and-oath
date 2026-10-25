@@ -1,5 +1,34 @@
 # Hearth & Oath
 
+Version 0.72.0 is One rulebook: the main game plays the new rules only.
+Lives written under the old rules have their home in the
+[Old Rules archive](https://hearth-and-oath-old-rules.nilled463.chatgpt.site/),
+the v0.69 game at its own address with its own storage. The owner took this
+cutover before the farmer playtest; that gate still holds for every new kind
+of life.
+
+- **One rulebook here.** A life plays in main when it carries a rolled station
+  or a debt ledger, the markers the rules themselves check (so the v0.61 lives
+  with a ledger and no station play on). A claimed stamp alone admits nothing.
+- **An old life meets its door.** Already in a slot, it is shown and kept,
+  never opened: the slot says Kept for the archive, the title continues a life
+  that plays here or shows the kept one, and Export for the archive sends the
+  whole life, named for its rules. Arriving by file, it meets the archive's
+  door instead of a slot. A kept Ironman run exports its head without being
+  opened. Nothing is deleted; a kept life leaves its slot only by the
+  player's reviewed delete or replacement.
+- **A life this build cannot read is kept.** A save the game cannot decode
+  (from a later build, or an old one once the old rules' code is gone) stays
+  in its slot exactly as written, is written back unchanged by every other
+  save, and can be exported whole. Before, it read as an empty slot and the
+  next save dropped it.
+- **What stays for now.** The old rules' code is still in the engine; v0.72.1
+  onward removes it subsystem by subsystem, starting with making old Ironman
+  runs safe to keep. Save defaults are unchanged: migration step 71.
+
+Verification is in [the v0.72.0 record](docs/measures/one-rulebook-v072-verification.md).
+The preparation that led here is in [the plan](docs/one-rulebook-v072.md).
+
 Version 0.71.2 is The old lives have a home. Merged in
 [PR #18](https://github.com/mandyp1411-coder/hearth-and-oath/pull/18). Old Rules saves now have a
 [public archive](https://hearth-and-oath-old-rules.nilled463.chatgpt.site/),

@@ -67,6 +67,7 @@ test('new malformed or invalid external contents cannot be blessed by a prior ca
   const {storage,store}=setup();const prior=JSON.parse(storage.getItem(KEY));
   if(kind==='malformed')storage.setItem(KEY,'{broken');else{prior.slots[0].state.step='invalid';storage.setItem(KEY,JSON.stringify(prior));}
   const durable=storage.getItem(KEY);assert.equal(store.write(0,life('Oak',1)),false);assert.equal(storage.getItem(KEY),durable);assert.deepEqual(store.read(0),life('Oak',1));
-  if(kind==='malformed')assert.equal(store.available(),false);else assert.equal(store.conflict().reason,'deleted');
+  // A life this tab cannot decode is still someone's life (saves.js keeps it): the slot changed, it was not deleted.
+  if(kind==='malformed')assert.equal(store.available(),false);else{assert.equal(store.conflict().reason,'changed');assert.equal(store.conflict().name,prior.slots[0].state.hero.name);}
  }
 });
