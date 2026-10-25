@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { contractDescent } from './helpers/one-rulebook.mjs';
 import assert from 'node:assert/strict';
 import * as E from '../dist/js/engine.js';
 import { createLifeAtAge } from '../dist/js/new-life.js';
@@ -86,11 +87,13 @@ test('service replacements keep the earlier person in the relationship book acro
  assert.equal(JSON.stringify(s),original,'the detached diagnostic never mutates the original life or its shared sidecar');
 });
 
-test('a potion can be used between dungeon encounters without resolving or rerolling the room',()=>{
- let s=fresh();s.hero.gold=1000;s=walk(s,'market');s=E.chooseAction(s,'realm_ration');delete s.mazeBook;delete s.maze;delete s.delves;s=E.chooseAction(s,'adventure_descend');assert.ok(s.adventuring.expedition);assert.equal(s.event.id,'adventure_room');s.hero.hp-=15;s.hero.potions=1;const event=structuredClone(s.event),run=structuredClone(s.adventuring.expedition),day=s.day;const next=E.useConsumable(s,'potions');assert.equal(next.hero.hp,s.hero.hp+15);assert.equal(next.hero.potions,0);assert.equal(next.day,day);assert.deepEqual(next.event,event);assert.deepEqual(next.adventuring.expedition,run);assert.ok(E.validateSave(next));
+// v0.72.4: the older descent's room pause left with it; a maze is where a potion is drunk between rooms now.
+function inMaze(){let s=fresh();s.hero.gold=1000;s=walk(s,'market');s=E.chooseAction(s,'realm_ration');s=E.chooseAction(s,contractDescent(s));for(let n=0;s.event&&n<20;n++)s=E.chooseEventOption(s,(s.event.choices.find(c=>['continue','care','keep','later','leave'].includes(c.id)&&!c.disabledReason)||s.event.choices.find(c=>!c.disabledReason)).id);assert.ok(s.maze);return s;}
+test('a potion can be used between maze rooms without resolving or rerolling the room',()=>{
+ let s=inMaze();s.hero.hp-=15;s.hero.potions=1;const maze=structuredClone(s.maze),day=s.day;const next=E.useConsumable(s,'potions');assert.equal(next.hero.hp,s.hero.hp+15);assert.equal(next.hero.potions,0);assert.equal(next.day,day);assert.equal(next.event,null);const room=m=>({...m,expeditionVisit:undefined});assert.deepEqual(room(next.maze),room(maze),'the room is neither resolved nor rerolled');assert.equal(next.maze.expeditionVisit.used.potions,maze.expeditionVisit.used.potions+1,'the expedition’s account counts the draught');assert.ok(E.validateSave(next));
 });
-test('using a potion in Inventory keeps the inventory and its scroll while a dungeon room waits',async t=>{
- let s=fresh();s.hero.gold=1000;s=walk(s,'market');s=E.chooseAction(s,'realm_ration');delete s.mazeBook;delete s.maze;delete s.delves;s=E.chooseAction(s,'adventure_descend');assert.equal(s.event.id,'adventure_room');s.hero.hp-=15;s.hero.potions=2;const ui=await resume(t,s);await ui.click('tab','inventory');await ui.click('inventory-item','supply:potions');ui.root.querySelector('.game-content').scrollTop=333;const event=structuredClone(ui.current().event);await ui.click('use-consumable','potions');assert.ok(ui.root.querySelector('.inventory-workspace'));assert.equal(ui.root.querySelector('.game-content').scrollTop,333);assert.deepEqual(ui.current().event,event);assert.equal(ui.current().hero.potions,1);assert.ok(E.validateSave(ui.current()));
+test('using a potion in Inventory keeps the inventory and its scroll while a maze room waits',async t=>{
+ let s=inMaze();s.hero.hp-=15;s.hero.potions=2;const ui=await resume(t,s);await ui.click('tab','inventory');await ui.click('inventory-item','supply:potions');ui.root.querySelector('.game-content').scrollTop=333;const maze=structuredClone(ui.current().maze);await ui.click('use-consumable','potions');assert.ok(ui.root.querySelector('.inventory-workspace'));assert.equal(ui.root.querySelector('.game-content').scrollTop,333);assert.equal(ui.current().maze.position,maze.position);assert.deepEqual(ui.current().maze.cleared,maze.cleared);assert.equal(ui.current().hero.potions,1);assert.ok(E.validateSave(ui.current()));
 });
 test('writing a personal Note keeps the Notes screen and actual scroll pane in place',async t=>{
  const ui=await resume(t);await ui.click('tab','journal');await ui.click('workspace-section','journal:notes');ui.root.querySelector('.game-content').scrollTop=247;const form=ui.root.querySelector('#player-note');form.querySelector('textarea').value='Look for the doctor at the Shrine. <script>no</script>';await ui.fire('submit',form);assert.ok(ui.current().playerNotes.at(-1).text.includes('<script>'));assert.equal(ui.root.querySelector('.workspace-page').dataset.workspaceSection,'notes');assert.equal(ui.root.querySelector('.game-content').scrollTop,247);assert.ok(ui.root.innerHTML.includes('&lt;script&gt;no&lt;/script&gt;'));assert.ok(E.validateSave(ui.current()));
