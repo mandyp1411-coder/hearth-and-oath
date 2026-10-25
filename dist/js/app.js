@@ -781,7 +781,6 @@ function offerCombatRisk(id) {
   if(isMazeEntry(game,id))return null;
   let encounterId={forest_expedition:'forest',ruin_expedition:'ruin'}[id],context=null;
   if(id.startsWith('adventure_roam_')){encounterId='free_'+id.slice(15);context={kind:'adventure',mode:'roam',token:`roam-${game.flags.battlesStarted||0}`,locationId:game.locationId};}
-  if(id.startsWith('adventure_pursue_')){const c=game.adventuring?.contracts.find(c=>c.id===id.slice(17));if(c){encounterId='free_'+c.targetType;context={kind:'adventure',mode:'contract',token:c.id,locationId:game.locationId};}}
   return encounterId?encounterOutlook(game,encounterId,context):null;
 }
 function offerCombatNote(id) { const risk=offerCombatRisk(id);return risk?`<small class="combat-offer" data-combat-offer>${e(risk.summary)} You can prepare or choose other work.</small>`:''; }
