@@ -188,3 +188,10 @@ test('an admitted Ironman run still asks to be resumed before export', async t =
   assert.equal(slot.querySelector('.save-slot').disabled, false);
   assert.ok([...slot.querySelectorAll('.slot-row-actions [data-op="slot-load"]')].some(control => /Resume to export/.test(control.textContent)), 'the export path for a run that plays here is unchanged');
 });
+
+test('the tactics rehearsal, a fictional party with no station, still opens: it never passes the entry door', async t => {
+  const ui = await mountApp(t, {states: [migrateSave(newer.eighteen)]});
+  await ui.click('practice-open', 'protect_ally');
+  assert.ok(ui.root.querySelector('[data-op="battle-action"], [data-op="practice-action"], .practice-modal, [data-practice]'), 'the rehearsal fight is on screen');
+  assert.doesNotMatch(ui.toast?.textContent || '', /cannot be opened here/);
+});
