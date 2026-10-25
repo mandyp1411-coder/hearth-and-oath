@@ -149,11 +149,13 @@ test('deeper floors: the way down wants rope or skin, the next floor is harder, 
   const heir = born('dv-8-heir'); heir.day = roped.day; inheritDelves(roped, heir); assert.deepEqual(Object.keys(heir.delves.places), Object.keys(roped.delves.places)); assert.equal(validateDelve(heir), true);
 });
 
-test('legacy: a life without places keeps its mazes, and a save that never had them still loads', () => {
+test('a save that never had the places still loads and is given them when read; no older descent begins', () => {
   let s = ready('dv-9'); if (!s) return; delete s.delves;
   assert.equal(engine.validateSave(s), true);
-  const d = engine.getActions(s).find(a => a.id === 'adventure_descend'); assert.ok(d); assert.doesNotMatch(d.label, /history/);
-  const next = engine.chooseAction(s, 'adventure_descend'); assert.ok(next.maze); assert.equal(next.delve, undefined);
+  assert.ok(!engine.getActions(s).some(a => a.id === 'adventure_descend'), 'no stair without the delve: the radiant maze left in v0.72.4');
+  const refused = engine.chooseAction(s, 'adventure_descend'); assert.ok(!refused.maze); assert.equal(refused.delve, undefined); assert.equal(refused.day, s.day);
+  const read = engine.migrateSave(s); assert.deepEqual(read.delves, { version: 1, places: {}, descents: 0 }, 'step 72: the places begin when read');
+  const d = engine.getActions(read).find(a => a.id === 'adventure_descend'); assert.ok(d); assert.match(d.label, /history/);
 });
 
 test('the page: the premise over the door, the room, what you noticed, the pack and the doors', async t => {

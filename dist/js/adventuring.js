@@ -62,7 +62,8 @@ export function adventureActions(s){
     if(c.status==='active'&&s.locationId===c.destinationId){const route=peacefulRoute(s,c);if(route)result.push(action('adventure_resolve_'+c.id,`${route.label}: ${f.title}`,`${route.days-(c.fieldDays||0)} days of attended field work. ${Object.entries(route.needed).map(([k,n])=>k+' '+n).join(' · ')} required. Earn proof and return for payment without a fight.`,0,0,'Contracts',route.reason?'Requires '+route.reason:null));}
     result.push(action('adventure_abandon_'+c.id,`Abandon: ${f.title}`,'Close this undertaking without claiming its reward.',0,0,'Contracts'));
   }
-  result.push(action('adventure_descend','Go down into a place with a history','A barrow, a root-hollow, a fallen tower or a cave under this town, with a reason to be feared. One day and a ration to go down; six gold at the door for torches, rope, oil and chalk, if you have it. Light burns, noise wakes the halls, and what lives at the bottom is not scaled to you.',1,0,'Wizardry',d.rations<1?'Buy expedition rations at a settlement shop.':s.hero.hp<16?'Recover to at least 16 health.':null));
+  // The board's descent opens the delve (delve.js); a life without the delve has no stair here (v0.72.4).
+  if(s.delves)result.push(action('adventure_descend','Go down into a place with a history','A barrow, a root-hollow, a fallen tower or a cave under this town, with a reason to be feared. One day and a ration to go down; six gold at the door for torches, rope, oil and chalk, if you have it. Light burns, noise wakes the halls, and what lives at the bottom is not scaled to you.',1,0,'Wizardry',d.rations<1?'Buy expedition rations at a settlement shop.':s.hero.hp<16?'Recover to at least 16 health.':null));
   return result;
 }
 export function applyAdventureAction(s,id,ctx){

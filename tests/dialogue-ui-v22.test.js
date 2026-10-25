@@ -64,8 +64,7 @@ test('a trail, paused crossing, road journey or expedition never teleports town 
     value => { value.cartography.offsite = true; },
     value => { value.cartography.pending = { from: value.cartography.position, to: 'next', progress: 1 }; },
     value => { value.timeline.journey = { id: 'actual-road', progress: 1 }; },
-    value => { value.dungeon = { id: 'ruin', roomId: 'entry' }; },
-    value => { value.adventuring.expedition = { id: 'descent', floor: 1 }; },
+    value => { value.maze = { kind: 'contract', position: 0 }; }, // the older walks left in v0.72.4; a maze still holds you
     value => { value.cartography.position = hexAtlas(value).cells.find(cell => cell.siteId && cell.siteId !== value.locationId).key; },
   ];
   for (const change of blocked) {
@@ -235,7 +234,7 @@ test('pending replies blocked by a spatial or story state stay visible but canno
     value => { value.cartography.pending = { from: value.cartography.position, to: 'next' }; },
     value => { value.event = { id: 'existing-scene' }; },
     value => { value.battle = { instanceId: 'existing-battle' }; },
-    value => { value.dungeon = { id: 'ruin', roomId: 'entry' }; },
+    value => { value.maze = { kind: 'contract', position: 0 }; },
     value => { value.phase = 'retired'; },
   ]) {
     const current = structuredClone(state);

@@ -13,7 +13,8 @@ import { hexAtlas } from './cartography.js';
 // in the tavern or inventing a new encounter when the room is opened.
 function physicallyAtSettlement(state) {
   if (!state?.hero || !state.world || state.phase === 'retired' || state.phase === 'dead' || state.hero.alive === false) return false;
-  if (state.cartography?.offsite || state.cartography?.pending || state.timeline?.journey || state.justice?.prison) return false;
+  // Below ground in a maze or a delve you are not in the settlement's streets (v0.72.4: these replace the older walks here).
+  if (state.cartography?.offsite || state.cartography?.pending || state.timeline?.journey || state.maze || state.delve || state.justice?.prison) return false;
   if (!isSettlement(state.world, state.locationId) || state.realm?.sites?.[state.locationId]?.phase === 'ruin') return false;
   if (state.cartography?.position && hexAtlas(state).byKey[state.cartography.position]?.siteId !== state.locationId) return false;
   return true;
@@ -36,7 +37,7 @@ export function nearbyContacts(state) {
 
 function replyBlockReason(state) {
   if (state.phase === 'retired' || state.phase === 'dead' || state.hero?.alive === false) return 'This life has ended. Earlier correspondence remains in your records.';
-  if (state.event || state.battle) return 'Finish the current situation before replying.';
+  if (state.event || state.battle || state.maze || state.delve) return 'Finish the current situation before replying.';
   if (state.cartography?.offsite || state.cartography?.pending) return 'Return to a named place before opening correspondence.';
   return '';
 }
